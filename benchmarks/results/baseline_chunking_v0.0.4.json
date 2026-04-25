@@ -1,0 +1,23 @@
+[
+  {
+    "mode": "sentence",
+    "best_seconds": 0.0616,
+    "docs_per_sec": 812.3,
+    "chars_per_sec": 3618191.0,
+    "avg_chunks_per_doc": 3.0
+  },
+  {
+    "mode": "paragraph",
+    "best_seconds": 0.0637,
+    "docs_per_sec": 785.4,
+    "chars_per_sec": 3498242.0,
+    "avg_chunks_per_doc": 8.0
+  },
+  {
+    "mode": "character",
+    "best_seconds": 0.0789,
+    "docs_per_sec": 633.5,
+    "chars_per_sec": 2821592.0,
+    "avg_chunks_per_doc": 3.0
+  }
+]
