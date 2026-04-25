@@ -1,0 +1,12 @@
+{
+  "n_docs": 1000,
+  "bm25_build_ms": 68.0,
+  "bm25_query_p50_ms": 0.372,
+  "bm25_query_p95_ms": 1.07,
+  "bm25_qps": 2692.0,
+  "dense_query_p50_ms": 8.981,
+  "dense_query_p95_ms": 13.028,
+  "dense_qps": 111.0,
+  "rrf_fusion_p50_ms": 0.038,
+  "rrf_fusion_qps": 25997.0
+}

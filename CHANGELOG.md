@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.5] — 2026-04-25
+
+### Added
+- **`nom.retrieve`** — in-process retrieval primitives. Pure-Python +
+  numpy. Three building blocks composable via the `Retriever` Protocol:
+    - `BM25Retriever` — Okapi BM25 over `nom.text.word_tokenize`
+      (compound-aware). Standard k1=1.5, b=0.75 defaults.
+    - `DenseRetriever` — cosine over a precomputed embeddings matrix
+      (assumes L2-normalized rows, what `VietnameseEmbedder` produces).
+    - `hybrid_score` — RRF (default, parameter-free) or weighted-sum
+      score fusion across multiple retrievers.
+  Includes `Hit` dataclass (frozen, slots=True) carrying idx + score +
+  optional text payload.
+
+### Engineering
+- 30 new tests (197 total passing).
+- OSS prior art cited in module docstring: rank-bm25 (Apache 2.0,
+  reimplemented for VN tokenization), bm25s (MIT, algorithmic shape),
+  Cormack et al. SIGIR 2009 (RRF), faiss (rejected at this tier per
+  audit policy — bundled binaries).
+- Baseline `benchmarks/results/baseline_retrieve_v0.0.5.json` measured
+  on 1,000 synthetic VN docs:
+
+    | metric             | value      |
+    |--------------------|------------|
+    | BM25 build         | 68.0 ms    |
+    | BM25 query p50     | 0.372 ms   |
+    | BM25 throughput    | 2,692 qps  |
+    | Dense query p50    | 8.981 ms   |
+    | Dense throughput   | 111 qps    |
+    | RRF fusion p50     | 0.038 ms   |
+
+  Dense at 9 ms/query is slower than the matmul math alone suggests —
+  candidate for v0.0.6 profiling (numpy overhead, allocator, top-k path).
+
 ## [0.0.4] — 2026-04-25
 
 ### Added
