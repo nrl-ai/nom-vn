@@ -5,6 +5,62 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7] — 2026-04-25
+
+### Added — `nom.rag` (the easy-to-use front door)
+
+The 3-line happy path is now real::
+
+    from nom.rag import RAG
+    from nom.llm import Ollama
+
+    rag = RAG.from_documents(
+        ["contract.pdf", "Plain text chunk", "letter.pdf"],
+        llm=Ollama(model="qwen3:8b"),
+    )
+    answer = rag.ask("Bao nhiêu hợp đồng có phạt vi phạm trên 10%?")
+    print(answer.text)         # the LLM's response
+    print(answer.citations)    # [(doc_idx, chunk_idx, score, text), ...]
+
+`RAG` composes the v0.0.x building blocks: `nom.doc.Pipeline`
+(parse + normalize) → `nom.chunking.smart_chunk` → `nom.embeddings`
+→ `nom.retrieve` (BM25 + Dense + RRF fusion) → `nom.llm` with a
+grounding prompt that demands inline citations.
+
+What's intentional:
+
+- **Sensible defaults**: `embedder` defaults to `VietnameseEmbedder`,
+  `top_k=5`, `n_retrieve=20`, `chunk_max_tokens=512`, `overlap=64`.
+  Power users override per call.
+- **Honest about state**: `from_documents` parses, chunks, embeds,
+  and indexes upfront. Cost is documented in the docstring.
+- **Protocol seams**: every collaborator (LLM, Embedder) is a
+  Protocol — swap defaults without forking the package.
+- **Mixed sources**: paths, raw bytes, and plain Python strings are
+  all accepted. Strings short enough to look like paths are tried as
+  files; otherwise treated as text.
+- **Frozen Citation + Answer dataclasses** for deterministic, slot-
+  efficient result objects.
+
+Tests: 14 new (211 total passing), all using a `_FakeLLM` + `_FakeEmbedder`
+test double so no model downloads or LLM calls happen in CI.
+
+## [0.0.6] — 2026-04-25
+
+### Performance
+- **`DenseRetriever` retune** — single-query p50 dropped from 8.98 ms
+  to 0.034 ms (~264×) on the 1k × 768-dim baseline. Hot-path changes:
+    1. Coerce embeddings to float32 + C-contiguous at construction so
+       the matmul never pays the ``astype`` dance per call.
+    2. Use ``argpartition(scores, -k)[-k:]`` to find the k largest
+       directly, avoiding the negation copy of the full N-element score
+       array.
+    3. Special-case ``top_k == 1`` to ``argmax`` (skip argsort).
+    4. Localize attribute lookups outside the result-building loop and
+       split the docs/no-docs branches.
+- New baseline: ``benchmarks/results/baseline_retrieve_v0.0.6.json``.
+- The v0.0.5 baseline stays in tree as a regression-tracking artifact.
+
 ## [0.0.5] — 2026-04-25
 
 ### Added

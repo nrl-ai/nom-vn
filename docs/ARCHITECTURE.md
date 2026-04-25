@@ -208,28 +208,115 @@ print(answer.citations)    # [(doc_id, page, chunk_idx), ...]
 
 Composes the lower-level submodules; doesn't add new external concepts. A user who wants a different chunker or a different reranker swaps it in via the Protocol.
 
-### `nom.chat` — Optional deployable chat app (planned v0.2)
+### `nom.chat` — Deployable chat app (planned v0.2)
 
-```python
-from nom.chat import build_app
+The final headline product: a self-contained web app for Vietnamese
+document Q&A. Ships **inside the Python package** so users get the full
+experience with ``pip install`` + one CLI command.
 
-app = build_app(
-    rag_session=session,
-    db_url="postgresql://...",
-    auth_provider="basic",       # or "oidc" / custom
-)
-# app is a FastAPI instance — `uvicorn nom.chat:app` or mount it in your stack
+```bash
+pip install "nom-vn[chat]"
+nom serve                    # starts FastAPI + ships pre-built UI
+# → opens http://localhost:8080
 ```
 
-What `nom.chat` adds:
-- **HTTP API** (FastAPI) with auth and tenant isolation
-- **Browser UI** (HTMX-first; minimal JS)
-- **User/tenant model** with org-scoped doc visibility
-- **Audit log** of every query + retrieved chunks
-- **Admin views**: ingestion status, latency dashboards
-- **Helm chart** + **Docker compose** for self-host
+```python
+# Or mount in an existing app
+from nom.chat import build_app
+app = build_app(...)         # returns a FastAPI instance
+```
 
-`nom.chat` is a Python module that returns a FastAPI app — users mount it however they want. It still ships in the same `nom-vn` package, behind `[chat]` extras.
+#### User-facing concepts
+
+- **Space** — a folder of documents the user is asking about. Owns its
+  own embeddings index. Examples: "2025 Contracts", "HR Policies",
+  "Q3 Reports". Users create / rename / delete spaces.
+- **Materials** — documents uploaded to a space. PDF / image / text.
+  Run through the v0.0.x toolkit on upload: extract → chunk → embed →
+  index.
+- **Ask** — natural-language Q&A over a space. Answer + cited source
+  chunks (page, location). Streamed.
+- **History** — past questions per space, persistent.
+
+#### Frontend — ShadCN UI
+
+- **Stack**: React 19 + TypeScript + Vite for build · Tailwind CSS ·
+  ShadCN/ui (Radix UI primitives + idiomatic component recipes).
+- **Why ShadCN**: copy-in component library, no runtime dependency on
+  a UI framework, accessible defaults, MIT-licensed, easy to brand.
+- **Design language**: simple, signature, user-friendly. Specifically:
+    - **Simple**: every screen has one primary action (create space /
+      upload material / ask question). No navigation tree deeper than
+      two levels.
+    - **Signature**: a recognizable visual identity — restrained
+      palette (one accent color), one display typeface for headings,
+      consistent spacing, the Nôm character mark in the chrome. The
+      same restraint as `nrl.ai` so the brand carries.
+    - **User-friendly**: keyboard-driven primary flows, fast
+      streaming responses, citations always visible (not hidden behind
+      tooltips), graceful empty states with clear next-action prompts.
+- **Build artifact**: ``nom/chat/ui/dist/`` (committed pre-built
+  assets) so `pip install` ships the UI; users don't need Node.
+
+#### Backend — FastAPI
+
+- Routes for: ``/api/spaces`` (CRUD), ``/api/spaces/{id}/materials``
+  (upload, list, delete), ``/api/spaces/{id}/ask`` (streaming Q&A
+  with cited chunks), ``/api/spaces/{id}/history``.
+- Auth: simple username/password by default (single-user laptop
+  deployment); pluggable to OIDC for org deployments.
+- Storage: SQLite by default (zero-config, file-based); optional
+  Postgres for multi-user.
+- Vector index: ``nom.index.ChromaIndex`` per space (file-backed,
+  embedded, no server).
+
+#### CLI surface
+
+```bash
+nom serve                           # start the web app
+nom serve --host 0.0.0.0 --port 8080
+nom space create "Contracts 2025"   # CLI alternatives to the UI
+nom space upload <id> ./contract.pdf
+nom space ask <id> "Bao nhiêu hợp đồng có phạt vi phạm trên 10%?"
+```
+
+#### Architecture sketch
+
+```
+                  ┌────────────────────────────────────────┐
+                  │  Browser  (ShadCN UI / React + Tailwind)│
+                  └──────────────────┬─────────────────────┘
+                                     │ HTTPS (REST + SSE for streaming)
+                  ┌──────────────────▼─────────────────────┐
+                  │  FastAPI (nom.chat.server)             │
+                  │  /api/spaces · /materials · /ask       │
+                  └────┬─────────────────────────────┬─────┘
+                       │ uses                        │ uses
+              ┌────────▼──────────┐        ┌─────────▼────────────┐
+              │  nom.rag          │        │  Auth / Sessions     │
+              │  IngestPipeline   │        │  (passlib + JWT)     │
+              │  RAGSession       │        └─────────┬────────────┘
+              └────────┬──────────┘                  │
+                       │                             │
+                       ▼                             ▼
+             ┌─────────────────────┐  ┌──────────────────────────┐
+             │ nom.text/doc/llm    │  │ SQLite (default) or      │
+             │ /embeddings/        │  │ Postgres                 │
+             │ chunking/retrieve/  │  │ (users, spaces, history) │
+             │ index               │  └──────────────────────────┘
+             └─────────────────────┘
+```
+
+#### What ``nom.chat`` adds on top of ``nom.rag``
+
+- HTTP API + streaming SSE
+- Browser UI (built React assets in-tree)
+- Space + material + history models (SQLite/Postgres)
+- Auth + session management
+- ``nom serve`` CLI entry point
+- ``Dockerfile`` + ``docker-compose.yml`` for self-host
+
+All shipped in the same ``nom-vn`` package, behind ``[chat]`` extras.
 
 ---
 
@@ -485,12 +572,13 @@ Where we are now: `nom-vn` v0.0.3 — `text` + `doc` + `llm` shipped at `github.
 
 The next four releases stay in this same repo:
 
-| Version | Adds |
-|---|---|
-| **v0.0.4** | `nom.embeddings.VietnameseEmbedder` + `nom.chunking.smart_chunk` |
-| **v0.0.5** | `nom.retrieve` (BM25 + Dense + hybrid) with measured retrieval bench on a 100-doc VN corpus |
-| **v0.1** | `nom.index` (Chroma adapter default; Qdrant + pgvector follow) + `nom.rag` (IngestPipeline + RAGSession) |
-| **v0.2** | `nom.chat` — FastAPI + HTMX deployable app |
+| Version | Adds | Status |
+|---|---|---|
+| v0.0.4 | `nom.embeddings.VietnameseEmbedder` + `nom.chunking.smart_chunk` | shipped |
+| v0.0.5 | `nom.retrieve` (BM25 + Dense + hybrid) | shipped |
+| **v0.0.6** | **DenseRetriever retune** — 9 ms → 0.034 ms p50 (~264×) | shipped |
+| v0.1 | `nom.index` (Chroma adapter default; Qdrant + pgvector follow) + `nom.rag` (IngestPipeline + RAGSession) | next |
+| **v0.2** | **`nom.chat` — FastAPI server + ShadCN UI shipped pre-built. ``nom serve`` CLI launches the full app. Spaces / materials / Q&A flows.** | follow |
 
 Every release ships with corresponding benchmark numbers (per principle 12), CHANGELOG entry, and an audit note for any new dep (per principle 11).
 

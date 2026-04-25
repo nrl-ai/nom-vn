@@ -44,8 +44,11 @@ class Embedder(Protocol):
     reduces to a dot product (what every retrieve/rerank codepath assumes).
     """
 
-    name: str
-    dim: int
+    @property
+    def name(self) -> str: ...
+
+    @property
+    def dim(self) -> int: ...
 
     def embed(self, text: str) -> NDArray[np.floating[Any]]: ...
 
