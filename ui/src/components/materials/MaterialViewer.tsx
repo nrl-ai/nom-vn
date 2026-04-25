@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, Loader2, AlertCircle, FileText, Eye } from "lucide-react";
 import {
   Dialog,
@@ -25,6 +25,13 @@ type Tab = "original" | "extracted";
 export function MaterialViewer({ spaceId, material, onClose }: Props) {
   const [tab, setTab] = useState<Tab>("original");
   const open = !!spaceId && !!material;
+  // Reset to Original whenever a new material is opened — without this,
+  // tab state persists across modal close/open and the user briefly sees
+  // the previous material's selected tab before it's overwritten by
+  // their click. Reads as a flicker on second-open.
+  useEffect(() => {
+    if (material) setTab("original");
+  }, [material?.id]);
   const meta = material ? getFileTypeMeta(material.name) : null;
   const rawUrl = open ? api.materialRawUrl(spaceId!, material!.id) : "";
   // Office formats need pages for the Original-tab structured view too,
@@ -40,7 +47,7 @@ export function MaterialViewer({ spaceId, material, onClose }: Props) {
         if (!o) onClose();
       }}
     >
-      <DialogContent className="flex max-h-[90vh] !w-[92vw] !max-w-4xl flex-col p-0">
+      <DialogContent className="flex h-[85vh] max-h-[90vh] !w-[92vw] !max-w-5xl flex-col p-0">
         {material && meta && (
           <>
             <DialogHeader className="border-b border-line-soft px-5 pb-3 pt-4">

@@ -280,12 +280,14 @@ class TestOCRStage:
         assert ctx.pages_text == ["Hợp đồng số HD-001"]
         assert ctx.needs_ocr == []
 
-    def test_pdf_with_scanned_pages_raises(self) -> None:
-        # PDF-with-scanned-pages OCR is a v0.1.1 feature.
+    def test_pdf_with_scanned_pages_requires_bytes(self) -> None:
+        # Scanned-PDF OCR landed in v0.2.3 — rasterizes flagged pages
+        # and OCRs them. If ctx.metadata["bytes"] is missing (Parse never
+        # ran or context was hand-built), we raise a clear RuntimeError.
         ctx = Context(source="x.pdf")
         ctx.fmt = "pdf"
         ctx.needs_ocr = [0, 2]  # pages 0 and 2 needed OCR per Parse
-        with pytest.raises(NotImplementedError, match=r"v0\.1\.1"):
+        with pytest.raises(RuntimeError, match=r"no PDF bytes"):
             OCR().run(ctx)
 
     def test_install_hint_when_pytesseract_missing(self, monkeypatch: pytest.MonkeyPatch) -> None:

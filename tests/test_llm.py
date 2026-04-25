@@ -97,22 +97,215 @@ class TestOllamaAdapter:
         assert "llama3.1:8b" in repr(llm)
 
 
-class TestStubProviders:
-    """OpenAI and Anthropic still raise NotImplementedError until v0.1.1."""
+class TestOpenAIAdapter:
+    """OpenAI adapter — mocked HTTP, no live calls. Covers default OpenAI
+    + OpenAI-compatible endpoints (Azure / DeepSeek / OpenRouter / etc.)
+    via ``base_url``. Live integration is exercised manually in
+    ``benchmarks/`` against actual OPENAI_API_KEY.
+    """
 
-    def test_openai_stub_raises(self) -> None:
-        llm = OpenAI(model="gpt-4o")
-        with pytest.raises(NotImplementedError, match=r"v0\.1\.1"):
+    def _patch(self, content: str) -> MagicMock:
+        """Build a fake httpx that returns one canned chat completion."""
+        fake_response = MagicMock()
+        fake_response.json.return_value = {
+            "choices": [{"message": {"role": "assistant", "content": content}}]
+        }
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        return fake_httpx
+
+    def test_construct_default_model(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+        llm = OpenAI()
+        assert llm.model == "gpt-4o-mini"
+        assert llm.base_url == "https://api.openai.com/v1"
+        assert llm.name == "openai"
+
+    def test_construct_requires_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        with pytest.raises(RuntimeError, match=r"no API key"):
+            OpenAI()
+
+    def test_construct_accepts_explicit_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+        llm = OpenAI(api_key="sk-explicit")
+        assert llm._api_key == "sk-explicit"
+
+    def test_complete_returns_choice_content(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-test")
+        llm = OpenAI()
+        llm._httpx = self._patch("Hello")  # type: ignore[assignment]
+        assert llm.complete("Hi") == "Hello"
+
+    def test_authorization_header_set(self) -> None:
+        llm = OpenAI(api_key="sk-abc")
+        fake = self._patch("x")
+        llm._httpx = fake  # type: ignore[assignment]
+        llm.complete("Hi")
+        headers = fake.post.call_args.kwargs["headers"]
+        assert headers["Authorization"] == "Bearer sk-abc"
+        assert headers["Content-Type"] == "application/json"
+
+    def test_schema_uses_response_format_strict(self) -> None:
+        llm = OpenAI(api_key="sk-abc")
+        fake = self._patch('{"so": "HD-001"}')
+        llm._httpx = fake  # type: ignore[assignment]
+        schema = {"type": "object", "properties": {"so": {"type": "string"}}}
+        llm.complete("Extract:", schema=schema)
+        body = fake.post.call_args.kwargs["json"]
+        assert body["response_format"]["type"] == "json_schema"
+        assert body["response_format"]["json_schema"]["strict"] is True
+        assert body["response_format"]["json_schema"]["schema"] == schema
+
+    def test_compatible_endpoint_via_base_url(self) -> None:
+        """Same adapter, different provider — DeepSeek via ``base_url=``."""
+        llm = OpenAI(
+            model="deepseek-chat",
+            api_key="sk-deepseek",
+            base_url="https://api.deepseek.com/v1",
+        )
+        fake = self._patch("vâng")
+        llm._httpx = fake  # type: ignore[assignment]
+        llm.complete("Xin chào")
+        url = fake.post.call_args.args[0]
+        assert url == "https://api.deepseek.com/v1/chat/completions"
+        body = fake.post.call_args.kwargs["json"]
+        assert body["model"] == "deepseek-chat"
+
+    def test_organization_header(self) -> None:
+        llm = OpenAI(api_key="sk-abc", organization="org-test")
+        fake = self._patch("x")
+        llm._httpx = fake  # type: ignore[assignment]
+        llm.complete("Hi")
+        assert fake.post.call_args.kwargs["headers"]["OpenAI-Organization"] == "org-test"
+
+    def test_unexpected_response_shape_raises(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        llm = OpenAI(api_key="sk-abc")
+        fake_response = MagicMock()
+        fake_response.json.return_value = {"choices": []}
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        llm._httpx = fake_httpx  # type: ignore[assignment]
+        with pytest.raises(RuntimeError, match=r"Unexpected"):
             llm.complete("Hi")
 
-    def test_anthropic_stub_raises(self) -> None:
-        llm = Anthropic(model="claude-sonnet")
-        with pytest.raises(NotImplementedError, match=r"v0\.1\.1"):
+
+class TestAnthropicAdapter:
+    """Anthropic adapter — mocked HTTP, no live calls."""
+
+    def _patch_text(self, text: str) -> MagicMock:
+        fake_response = MagicMock()
+        fake_response.json.return_value = {
+            "content": [{"type": "text", "text": text}],
+            "stop_reason": "end_turn",
+        }
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        return fake_httpx
+
+    def _patch_tool_use(self, tool_input: dict[str, Any]) -> MagicMock:
+        fake_response = MagicMock()
+        fake_response.json.return_value = {
+            "content": [{"type": "tool_use", "name": "nom_extract", "input": tool_input}],
+            "stop_reason": "tool_use",
+        }
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        return fake_httpx
+
+    def test_construct_default_model(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-test")
+        llm = Anthropic()
+        assert llm.model.startswith("claude-haiku-4-5")
+        assert llm.base_url == "https://api.anthropic.com"
+        assert llm.name == "anthropic"
+
+    def test_construct_requires_api_key(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+        with pytest.raises(RuntimeError, match=r"no API key"):
+            Anthropic()
+
+    def test_complete_returns_text(self) -> None:
+        llm = Anthropic(api_key="sk-ant-abc")
+        llm._httpx = self._patch_text("Xin chào")  # type: ignore[assignment]
+        assert llm.complete("Hi") == "Xin chào"
+
+    def test_request_headers(self) -> None:
+        llm = Anthropic(api_key="sk-ant-abc")
+        fake = self._patch_text("x")
+        llm._httpx = fake  # type: ignore[assignment]
+        llm.complete("Hi")
+        headers = fake.post.call_args.kwargs["headers"]
+        assert headers["x-api-key"] == "sk-ant-abc"
+        assert headers["anthropic-version"] == "2023-06-01"
+        url = fake.post.call_args.args[0]
+        assert url == "https://api.anthropic.com/v1/messages"
+
+    def test_schema_uses_tool_use_pattern(self) -> None:
+        llm = Anthropic(api_key="sk-ant-abc")
+        fake = self._patch_tool_use({"so": "HD-001"})
+        llm._httpx = fake  # type: ignore[assignment]
+        schema = {"type": "object", "properties": {"so": {"type": "string"}}}
+        result = llm.complete("Extract:", schema=schema)
+
+        # Returned string is the tool input as JSON
+        import json as _json
+
+        assert _json.loads(result) == {"so": "HD-001"}
+
+        # Request body has tools + forced tool_choice
+        body = fake.post.call_args.kwargs["json"]
+        assert body["tools"][0]["name"] == "nom_extract"
+        assert body["tools"][0]["input_schema"] == schema
+        assert body["tool_choice"] == {"type": "tool", "name": "nom_extract"}
+
+    def test_text_concatenated_when_multiple_blocks(self) -> None:
+        fake_response = MagicMock()
+        fake_response.json.return_value = {
+            "content": [
+                {"type": "text", "text": "Xin "},
+                {"type": "text", "text": "chào"},
+            ],
+            "stop_reason": "end_turn",
+        }
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        llm = Anthropic(api_key="sk-ant-abc")
+        llm._httpx = fake_httpx  # type: ignore[assignment]
+        assert llm.complete("Hi") == "Xin chào"
+
+    def test_no_text_block_raises(self) -> None:
+        fake_response = MagicMock()
+        fake_response.json.return_value = {
+            "content": [],
+            "stop_reason": "max_tokens",
+        }
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        llm = Anthropic(api_key="sk-ant-abc")
+        llm._httpx = fake_httpx  # type: ignore[assignment]
+        with pytest.raises(RuntimeError, match=r"no text content"):
             llm.complete("Hi")
 
-    def test_stubs_have_names(self) -> None:
-        assert OpenAI().name == "openai"
-        assert Anthropic().name == "anthropic"
+
+class TestProtocolConformance:
+    """All three real adapters satisfy the LLM Protocol."""
+
+    def test_all_adapters_implement_protocol(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        from nom.llm import LLM
+
+        monkeypatch.setenv("OPENAI_API_KEY", "x")
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "x")
+        for llm in (Ollama(), OpenAI(), Anthropic()):
+            assert isinstance(llm, LLM)
+            assert isinstance(llm.name, str)
+            assert callable(llm.complete)
 
 
 class _FakeLLM:

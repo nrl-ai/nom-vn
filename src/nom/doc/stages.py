@@ -587,15 +587,29 @@ class OCR:
             ctx.text = text
             ctx.needs_ocr = []
         elif ctx.needs_ocr:
-            # PDF with scanned pages — v0.1.1 will render the page to image
-            # via pdfplumber.page.to_image() and OCR each. For v0.0.3 we
-            # emit a clear error so users know what to do.
-            raise NotImplementedError(
-                "OCR for PDF-with-scanned-pages ships in v0.1.1. "
-                "For now, convert your scanned PDF to images first "
-                "(e.g. with pdftoppm) and pass each image separately. "
-                f"Pages needing OCR: {ctx.needs_ocr}"
-            )
+            # PDF pages with no text layer — rasterize each flagged page via
+            # pdfplumber and OCR the rendered image. 200 DPI is the standard
+            # speed/accuracy compromise for Tesseract (300 DPI is its docs'
+            # ideal, but 200 keeps a 5-page demo under a second).
+            data = ctx.metadata.get("bytes")
+            if data is None:
+                raise RuntimeError("OCR: no PDF bytes available on context.")
+            import io
+
+            import pdfplumber
+
+            pages = list(ctx.pages_text)
+            with pdfplumber.open(io.BytesIO(data)) as pdf:
+                for page_idx in ctx.needs_ocr:
+                    page_img = pdf.pages[page_idx].to_image(resolution=200).original
+                    if page_img.mode not in ("RGB", "L"):
+                        page_img = page_img.convert("RGB")
+                    pages[page_idx] = pytesseract.image_to_string(
+                        page_img, lang=self.lang, config=self.config
+                    ).strip()
+            ctx.pages_text = pages
+            ctx.text = "\n\n".join(pages)
+            ctx.needs_ocr = []
 
         return ctx
 

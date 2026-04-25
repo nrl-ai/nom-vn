@@ -63,6 +63,16 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(4px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        // dialog-in is opacity-only: Radix DialogContent uses its own
+        // -translate-x-1/2 -translate-y-1/2 to center, and a transform-
+        // animating keyframe would override that mid-animation, causing
+        // the visible "jump" when the animation finishes. Keep this
+        // separate from fade-in so non-Radix call sites still get the
+        // subtle 4px slide.
+        "dialog-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
         "pulse-dot": {
           "0%, 80%, 100%": { opacity: "0.2" },
           "40%": { opacity: "1" },
@@ -70,6 +80,7 @@ const config: Config = {
       },
       animation: {
         "fade-in": "fade-in 220ms ease-out",
+        "dialog-in": "dialog-in 160ms ease-out",
         "pulse-dot": "pulse-dot 1.4s ease-in-out infinite",
       },
     },

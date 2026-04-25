@@ -1,31 +1,38 @@
-"""LLM adapter base + provider stubs.
+"""LLM adapter Protocol — the single contract every backend implements.
 
-The :class:`LLM` Protocol defines the minimal interface. Real adapters
-live in their own modules:
+Real adapters live in their own modules so importing :mod:`nom.llm`
+stays cheap (no httpx import until you instantiate one):
 
-- :mod:`nom.llm.ollama` — local Ollama server (httpx, real)
-- ``nom.llm.openai`` — OpenAI cloud (planned for v0.1.1)
-- ``nom.llm.anthropic`` — Anthropic cloud (planned for v0.1.1)
+- :mod:`nom.llm.ollama` — local Ollama server
+- :mod:`nom.llm.openai` — OpenAI cloud + any OpenAI-compatible
+  endpoint (Azure, DeepSeek, OpenRouter, LiteLLM, vLLM, Together,
+  Groq, …) via ``base_url=``
+- :mod:`nom.llm.anthropic` — Anthropic Claude
 
-Cloud adapters are stubs in this file until their full implementations
-land. Code calling ``Ollama(...).complete(...)`` works today.
+The :class:`LLM` Protocol is intentionally minimal — a stateless
+``complete(prompt, schema?) -> str``. That floor is what
+:mod:`nom.doc.Extract` and :class:`nom.rag.RAG` depend on. Adapters
+may add capability methods later (streaming, vision, tool-use loops)
+but ``complete`` stays the contract.
 """
 
 from __future__ import annotations
 
-from typing import Any, Protocol
+from typing import Any, Protocol, runtime_checkable
 
-__all__ = ["LLM", "Anthropic", "OpenAI"]
+__all__ = ["LLM"]
 
 
+@runtime_checkable
 class LLM(Protocol):
     """Adapter protocol for any LLM backend.
 
-    Minimal contract: a stateless ``complete`` method that takes a prompt
-    and an optional JSON schema and returns the model's text response.
+    Minimal contract: a stateless ``complete`` method that takes a
+    prompt (and an optional JSON schema for structured output) and
+    returns the model's text response.
 
-    Adapters may add capability methods later (streaming, vision, tool use)
-    but ``complete`` is the floor — Extract only calls this one.
+    The ``name`` attribute is a short identifier used in logs and
+    health checks (``"ollama"``, ``"openai"``, ``"anthropic"``).
     """
 
     name: str
@@ -37,40 +44,13 @@ class LLM(Protocol):
         schema: dict[str, Any] | None = None,
         max_tokens: int = 2048,
     ) -> str:
-        """Send a prompt, return the model's text response."""
+        """Send a prompt, return the model's text response.
+
+        When ``schema`` is provided, the returned string MUST be a
+        JSON document that matches the schema. How each adapter
+        achieves this differs (OpenAI uses ``response_format``
+        json_schema strict mode; Anthropic uses tool-use; Ollama uses
+        ``format`` json-schema constraint), but the caller sees the
+        same output shape.
+        """
         ...
-
-
-class _CloudStub:
-    """Placeholder for cloud adapters until real impls land in v0.1.1."""
-
-    name = "stub"
-
-    def __init__(self, **kwargs: Any) -> None:
-        self.config = kwargs
-
-    def complete(
-        self,
-        prompt: str,
-        *,
-        schema: dict[str, Any] | None = None,
-        max_tokens: int = 2048,
-    ) -> str:
-        cls = type(self).__name__
-        raise NotImplementedError(
-            f"nom.llm.{cls} ships in v0.1.1 (planned). "
-            f"For local inference today, use nom.llm.Ollama. "
-            f"Track release: https://github.com/nrl-ai/nom-vn"
-        )
-
-
-class OpenAI(_CloudStub):
-    """OpenAI cloud adapter (gpt-4o, gpt-4-turbo, etc.). Planned v0.1.1."""
-
-    name = "openai"
-
-
-class Anthropic(_CloudStub):
-    """Anthropic cloud adapter (claude-sonnet, claude-opus, etc.). Planned v0.1.1."""
-
-    name = "anthropic"

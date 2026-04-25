@@ -5,6 +5,94 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.3] — 2026-04-25
+
+### Cloud LLM adapters — OpenAI + Anthropic now real
+
+`nom.llm.OpenAI` and `nom.llm.Anthropic` previously raised
+`NotImplementedError`. Both now ship as full adapters implementing
+the same `LLM` Protocol as `Ollama`, so existing call sites
+(`nom.doc.Extract`, `nom.rag.RAG`, `nom.chat`) work with cloud
+models by constructor swap alone.
+
+- **`nom.llm.OpenAI`** (~155 LOC) — chat completions over httpx.
+  `response_format=json_schema` strict mode for structured output.
+  Critically: `base_url=` makes the same adapter work for any
+  OpenAI-compatible endpoint (Azure / DeepSeek / OpenRouter /
+  LiteLLM / vLLM / Together / Groq / etc.). Default model:
+  `gpt-4o-mini`.
+- **`nom.llm.Anthropic`** (~165 LOC) — Messages API over httpx.
+  Tool-use pattern with forced `tool_choice` for structured
+  output (Anthropic's recommended path for guaranteed-shape JSON).
+  Default model: `claude-haiku-4-5-20251001`.
+- API keys read from `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` env
+  vars by default; `api_key=` constructor kwarg overrides.
+- 27 new tests in `tests/test_llm.py` covering both adapters
+  (mocked HTTP — no live calls in CI).
+- `scripts/smoke_cloud_llms.py` for live verification — reads
+  `.env`, sends one VN prompt through each configured provider.
+- `.env.example` template; `.env` gitignored.
+
+### Documentation — using nom-vn inside agent frameworks
+
+New `docs/integrations/` directory with concrete wrappers showing
+nom-vn as a library inside other agentic frameworks (we don't take
+any framework as a hard dep — see `docs/integrations/README.md`
+for the rationale):
+
+- `docs/integrations/adk.md` — Google ADK (`nom.rag.RAG` as a
+  `FunctionTool`, `nom.llm` as an `LlmAgent` model)
+- `docs/integrations/langchain.md` — LangChain (`nom.rag` as
+  `BaseRetriever`, `nom.llm` as `BaseChatModel`)
+- `docs/integrations/pydantic_ai.md` — Pydantic AI (`@agent.tool`)
+
+### Scanned-PDF OCR — was NotImplementedError
+
+`OCR` stage previously raised `NotImplementedError` for PDFs whose
+pages had no text layer ("convert to images first"). Now it
+rasterizes each flagged page via `pdfplumber.page.to_image()` at
+200 DPI and OCRs the rendered image. Scanned-PDF Q&A end-to-end
+works in `nom serve` (verified on a 3-page synthetic VN business
+report — `~3.5s/page` on CPU with `tesseract-ocr-vie`).
+
+### UI — viewer fixes (Material modal)
+
+- **PDF viewer collapsed**: `DialogContent` had `max-h-[90vh]` but
+  no `h-[…]`, so nested `flex-1`/`h-full` children collapsed and
+  the iframe rendered at ~190 px tall. Added explicit `h-[85vh]`,
+  cascades to PDF / image / DOCX / XLSX / PPTX viewers and the
+  Extracted-text scroll area.
+- **Modal flicker on open**: `animate-fade-in` keyframe set
+  `transform: translateY(4px) → translateY(0)`, which overrode
+  Radix Dialog's `-translate-x-1/2 -translate-y-1/2` centering
+  transform during the 220 ms animation — visibly the dialog
+  jumped to its centered position when the animation ended. Added
+  a separate `animate-dialog-in` (opacity-only) keyframe just for
+  Radix Dialog content/overlay.
+- **Tab persistence across materials**: tab state (`original` /
+  `extracted`) persisted between modal close/open cycles, so
+  opening a new material briefly showed the previous tab before
+  the user's click registered. Added `useEffect` to reset to
+  `original` on `material.id` change.
+- Wider modal: `max-w-4xl` → `max-w-5xl` (more room for DOCX
+  paragraphs and PPTX slides).
+
+### Fixes
+
+- **`nom.__version__`** was `"0.2.1"` while `pyproject.toml`
+  shipped `"0.2.2"`. Now both `0.2.3`. Upstream consumers that
+  read `nom.__version__` will see the correct value.
+- `tests/__init__.py` added so `from tests._fakes import ...` works
+  on a fresh clone (previously relied on `sys.path` quirks).
+- Repo references swept: `nrl-ai/nom` → `nrl-ai/nom-vn` across
+  README, docs, and source comments to match the renamed GitHub
+  repository.
+
+### Removed
+
+- `nom.llm._CloudStub` (placeholder for OpenAI / Anthropic). Real
+  adapters now live in `nom.llm.openai` and `nom.llm.anthropic`.
+
 ## [0.2.2] — 2026-04-25
 
 ### Architecture — Protocol seams promoted
