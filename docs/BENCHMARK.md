@@ -238,7 +238,7 @@ Curated, versioned system prompts for VN business documents. **No benchmarks yet
 
 | Domain | Why prioritized | Test set source |
 |---|---|---|
-| **Hợp đồng** (contracts) | Top use-case from ProtonX waitlist signal | NRL-curated contract corpus |
+| **Hợp đồng** (contracts) | Highest-frequency VN business doc | NRL-curated contract corpus |
 | **Công văn** (official docs) | Government/SMB workflow staple | VLSP corpora (where licenses allow) |
 | **Đơn từ** (applications/petitions) | High volume, low-quality OCR input | Synthetic + community submissions |
 | **Email công sở** (business email) | Tone-aware drafting (kính gửi vs cho) | Internal eval set |

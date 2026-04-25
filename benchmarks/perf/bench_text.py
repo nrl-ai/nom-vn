@@ -20,7 +20,7 @@ from nom.text import (
 # Realistic corpus: contract-style Vietnamese (multiple registers).
 _CORPUS = [
     "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại văn phòng công ty.",
-    "Bên A: Công ty Cổ phần ProtonX, mã số thuế 0123456789, địa chỉ Hà Nội.",
+    "Bên A: Công ty Cổ phần Hồng Hà, mã số thuế 0123456789, địa chỉ Hà Nội.",
     "Bên B: Bà Nguyễn Thị Hương, sinh năm 1990, CMND số 012345678901.",
     "Tổng giá trị hợp đồng: 1.500.000.000 đồng (một tỷ năm trăm triệu đồng chẵn).",
     "Điều 1. Đối tượng hợp đồng: triển khai hệ thống Chatbot tiếng Việt.",

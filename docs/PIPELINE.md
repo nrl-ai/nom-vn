@@ -140,7 +140,7 @@ result = extract(
 # {
 #   'so_hop_dong': 'HĐ-2025-002',
 #   'ngay_ky': date(2025, 3, 14),
-#   'ben_a': Party(name='Công ty Cổ phần ProtonX', tax_id='0123456789', ...),
+#   'ben_a': Party(name='Công ty Cổ phần Hồng Hà', tax_id='0123456789', ...),
 #   'ben_b': Party(name='Bà Nguyễn Thị Hương', ...),
 #   'tong_gia_tri': 1_500_000_000,
 # }

@@ -4,7 +4,8 @@ Deeper documentation for **nom-vn**. The repo-root files (`README.md`, `CHANGELO
 
 ## Index
 
-- **[PIPELINE.md](PIPELINE.md)** — the v0.1 doc-extraction pipeline end-to-end. Per-stage picks, citations, the planned API surface.
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** — the single-library design, submodule layout, and component picks (lightweight, fast, accurate, local, replaceable per-axis).
+- **[PIPELINE.md](PIPELINE.md)** — the doc-extraction pipeline end-to-end. Per-stage picks, citations, the planned API surface.
 - **[BENCHMARK.md](BENCHMARK.md)** — measured numbers per module + research-backed component selection. Reproducibility contract.
 
 ## Where things go

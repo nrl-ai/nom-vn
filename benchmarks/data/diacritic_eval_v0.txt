@@ -12,7 +12,7 @@
 
 # === register: contracts / business ===
 Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.
-Bên A: Công ty Cổ phần ProtonX, mã số thuế 0123456789.
+Bên A: Công ty Cổ phần Hồng Hà, mã số thuế 0123456789.
 Bên B: Bà Nguyễn Thị Hương, sinh năm 1990, địa chỉ tại Hà Nội.
 Tổng giá trị hợp đồng là một tỷ năm trăm triệu đồng chẵn.
 Thời hạn thực hiện sáu tháng kể từ ngày ký kết hợp đồng.

@@ -97,7 +97,7 @@ class TestParty:
 
     def test_full(self) -> None:
         p = Party(
-            name="Công ty Cổ phần ProtonX",
+            name="Công ty Cổ phần Hồng Hà",
             tax_id="0123456789",
             address="Hà Nội",
             representative="Nguyễn Văn A",
@@ -152,14 +152,14 @@ class TestSchemaResolver:
                 "so_hop_dong": "HD-2025-002",
                 "ngay_ky": "ngày 14 tháng 3 năm 2025",
                 "tong_gia_tri": "1.500.000.000",
-                "ben_a": {"name": "ProtonX", "tax_id": "0123456789"},
+                "ben_a": {"name": "Hồng Hà", "tax_id": "0123456789"},
                 "ben_b": {"name": "Bà Nguyễn"},
             }
         )
         assert out["so_hop_dong"] == "HD-2025-002"
         assert out["ngay_ky"] == date(2025, 3, 14)
         assert out["tong_gia_tri"] == 1_500_000_000
-        assert out["ben_a"]["name"] == "ProtonX"
+        assert out["ben_a"]["name"] == "Hồng Hà"
         assert out["ben_b"]["tax_id"] is None
 
     def test_unknown_shorthand_raises(self) -> None:
