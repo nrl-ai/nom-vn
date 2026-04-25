@@ -9,6 +9,21 @@ All six default stages are real as of v0.0.3:
   - Extract (LLM via nom.llm + Pydantic schema with retries)
   - Validate (nom.doc.schemas SchemaResolver, Pydantic v2)
 
+OSS prior art studied while designing this module:
+
+- **LangChain ``DocumentLoader`` family** — same Load/Parse split we use
+  here. We adopt the per-source-format dispatch but keep our Stage
+  Protocol orthogonal to LangChain's runnable abstraction.
+- **LlamaIndex ``IngestionPipeline``** — composable transformations on
+  a Document. Our ``Pipeline`` mirrors that shape (stages thread a
+  ``Context`` rather than transforming a single object).
+- **Unstructured.io** — ``partition_pdf`` / ``partition_image`` for
+  format-aware extraction. Our magic-byte detection is influenced by
+  Unstructured's auto-detection logic but uses pure stdlib.
+- **Instructor** — the retry-with-error-feedback pattern in the Extract
+  stage is lifted from this library, reimplemented in ~30 LOC so we
+  don't add the dep.
+
 See ``docs/PIPELINE.md`` for the per-stage component picks and rationale.
 """
 

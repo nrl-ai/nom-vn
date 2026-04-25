@@ -1,0 +1,7 @@
+{
+  "parse_vn_date_per_sec": 659280.0,
+  "parse_amount_vnd_per_sec": 1338982.0,
+  "schema_validate_per_sec": 140351.0,
+  "n_dates": 1000,
+  "n_amounts": 1000
+}
