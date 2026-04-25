@@ -9,14 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added (toward v0.1)
 - **Real `Load` stage** (pure stdlib) — magic-byte format detection across PDF
-  / PNG / JPEG / GIF / TIFF / BMP / WebP, extension fallback, byte caching on
-  context for downstream stages.
-- **Real `Parse` stage** — PDF text extraction via `pdfplumber` (MIT default,
-  permissive license) with `pymupdf` (AGPL, faster) as opt-in alternative.
-  Text inputs decode UTF-8; image inputs flag `needs_ocr` for the OCR stage.
-- **15 new tests** for Load + Parse covering magic-byte detection, path /
-  bytes / nonexistent-path paths, install-hint errors, and the Load → Parse
-  composition for text inputs. Total tests: 68.
+  / PNG / JPEG / GIF / TIFF / BMP / WebP, extension fallback, byte caching.
+- **Real `Parse` stage** — PDF text extraction via `pdfplumber` (MIT default)
+  with `pymupdf` (AGPL) as opt-in alternative.
+- **Real `Normalize` stage** — wires `nom.text` (NFC + VN-aware text cleanup),
+  with opt-in diacritic restoration.
+- **Real `Validate` stage** — Pydantic v2 schema validation with VN coercions
+  (date, amount_vnd, party).
+- **Real `Ollama` LLM adapter** — direct httpx call to Ollama's
+  `/api/chat` endpoint with native structured-output support
+  (`format=schema`). No `ollama-python` dep — keeps the surface auditable.
+- **Real `Extract` stage** — schema-driven LLM extraction with auto-retry on
+  invalid JSON. Implements the `instructor` retry-with-error-feedback pattern
+  in ~30 LOC, no extra dep. Strips markdown fences if the model emits them.
+- **End-to-end pipeline** works for text input today: Load → Parse →
+  Normalize → Extract (with a real or fake LLM) → Validate produces a typed
+  dict matching the user's schema. OCR is the only remaining placeholder
+  (only required for image inputs).
+- **62 new tests across stages + schemas + LLM** — total 131 passing
+  (was 68). Mocked httpx for Ollama, FakeLLM test double for Extract.
+
+### Dep changes
+- `pydantic>=2.5` is now a hard dep (was optional `[doc]`). Required by
+  `nom.doc.schemas`. Apache-licensed core (Rust) — small, audited, fast.
+- `httpx>=0.27` and `pdfplumber>=0.11` added to `[dev]` so tests exercise
+  the real Ollama and Parse paths. End users still install via `[llm]`
+  / `[doc]` extras as before.
 
 ### Planned for v0.0.3
 - **Study underthesea to build a better tokenizer in-tree.** underthesea

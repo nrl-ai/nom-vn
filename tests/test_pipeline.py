@@ -13,7 +13,6 @@ import pytest
 from nom.doc import (
     OCR,
     Context,
-    Extract,
     Load,
     Normalize,
     Parse,
@@ -230,16 +229,14 @@ class TestValidateStage:
 
 
 class TestPlaceholderStages:
-    """OCR / Extract still raise NotImplementedError."""
+    """OCR is the last placeholder — Extract is real now (see test_llm.py)."""
 
-    def test_each_stage_has_name(self) -> None:
+    def test_ocr_has_name(self) -> None:
         assert OCR().name == "OCR"
-        assert Extract(llm=None).name == "Extract"
 
-    def test_placeholders_raise_in_v0(self) -> None:
-        for stage in [OCR(), Extract(llm=None)]:
-            with pytest.raises(NotImplementedError, match=r"v0\.1"):
-                stage.run(Context(source="x.pdf"))
+    def test_ocr_still_raises(self) -> None:
+        with pytest.raises(NotImplementedError, match=r"v0\.1"):
+            OCR().run(Context(source="x.pdf"))
 
 
 class TestPipeline:
@@ -259,9 +256,11 @@ class TestPipeline:
         names = [s.name for s in pipe.stages]
         assert names == ["Load", "Parse", "OCR", "Normalize", "Extract", "Validate"]
 
-    def test_default_pipeline_runs_through_load_then_fails_at_ocr(self) -> None:
-        # Load + Parse + Normalize work; OCR is still a placeholder.
-        # The default pipeline invokes OCR unconditionally, so it raises.
+    def test_default_pipeline_fails_at_ocr_placeholder(self) -> None:
+        # Load + Parse + Normalize work; Extract + Validate work given a
+        # real LLM. OCR is the last unimplemented stage and the default
+        # pipeline invokes it unconditionally — so default_pipeline still
+        # raises until v0.1.
         pipe = default_pipeline()
         with pytest.raises(NotImplementedError, match=r"v0\.1"):
             pipe.run(b"hello text")

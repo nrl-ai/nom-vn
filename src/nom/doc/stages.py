@@ -9,6 +9,7 @@ See ``docs/PIPELINE.md`` for the picks each real stage will use.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -316,17 +317,133 @@ class Normalize:
         return ctx
 
 
-class Extract(_PlaceholderStage):
-    """Schema-driven LLM extraction (default backend: Instructor + Pydantic).
+class Extract:
+    """Schema-driven LLM extraction with auto-retry on validation failure.
+
+    v0.0.3 real implementation: builds a JSON schema from ``ctx.schema``,
+    prompts the LLM with the parsed text + the schema, parses the JSON
+    response, and retries with error feedback if the model produces
+    invalid output. This is the same pattern as the ``instructor`` library
+    (~30 LOC, no extra dep).
+
+    Reads:
+        - ``ctx.text`` — cleaned text from Normalize
+        - ``ctx.schema`` — user-provided schema dict
+    Writes:
+        - ``ctx.output`` — raw dict from the LLM (Validate stage will
+          coerce it through Pydantic).
 
     Args:
         llm: an ``LLM`` adapter from ``nom.llm`` (Ollama / OpenAI / Anthropic).
-            Required — Nôm doesn't bundle a model.
+            Must have a ``.complete(prompt, schema=..., max_tokens=...)``
+            method.
+        max_retries: how many times to retry with error feedback when the
+            LLM produces invalid JSON. Default 3.
+        max_tokens: hint forwarded to the LLM. Default 2048.
     """
 
-    def __init__(self, llm: Any) -> None:
-        super().__init__("Extract")
+    name = "Extract"
+
+    def __init__(
+        self,
+        llm: Any,
+        *,
+        max_retries: int = 3,
+        max_tokens: int = 2048,
+    ) -> None:
+        if llm is None:
+            raise ValueError(
+                "Extract requires an LLM adapter. "
+                "Use nom.llm.Ollama() for local inference, "
+                "or implement the LLM protocol yourself."
+            )
+        if max_retries < 1:
+            raise ValueError("max_retries must be >= 1")
         self.llm = llm
+        self.max_retries = max_retries
+        self.max_tokens = max_tokens
+
+    def run(self, ctx: Context) -> Context:
+        if not ctx.schema:
+            raise RuntimeError(
+                "Extract requires ctx.schema to be set. "
+                "Provide one when calling Pipeline.run(...)."
+            )
+        if not ctx.text:
+            raise RuntimeError("Extract requires ctx.text — did Parse and Normalize run?")
+
+        from nom.doc.schemas import SchemaResolver
+
+        resolver = SchemaResolver(ctx.schema)
+        json_schema = resolver.json_schema()
+
+        prompt = self._build_prompt(ctx.text, json_schema)
+        last_error: str | None = None
+
+        for attempt in range(1, self.max_retries + 1):
+            response = self.llm.complete(
+                prompt,
+                schema=json_schema,
+                max_tokens=self.max_tokens,
+            )
+            try:
+                parsed = self._parse_json(response)
+                ctx.output = parsed
+                ctx.metadata["extract_attempts"] = attempt
+                return ctx
+            except (json.JSONDecodeError, ValueError) as exc:
+                last_error = str(exc)
+                # On retry, append error feedback so the model self-corrects.
+                # This is the "instructor pattern" — see python.useinstructor.com.
+                prompt = (
+                    f"{prompt}\n\n"
+                    f"=== Previous attempt produced invalid output ===\n"
+                    f"Output snippet: {response[:200]}\n"
+                    f"Error: {last_error}\n"
+                    f"Please respond with ONLY a valid JSON object that "
+                    f"strictly matches the schema. No prose, no markdown fences."
+                )
+
+        raise RuntimeError(
+            f"Extract failed after {self.max_retries} attempts. " f"Last error: {last_error}"
+        )
+
+    @staticmethod
+    def _build_prompt(text: str, json_schema: dict[str, Any]) -> str:
+        schema_str = json.dumps(json_schema, ensure_ascii=False, indent=2)
+        return (
+            "You are a Vietnamese document-extraction assistant. Extract the "
+            "fields described by the JSON schema below from the document "
+            "text. Respond with ONLY a valid JSON object — no prose, no "
+            "markdown fences, no explanations.\n\n"
+            "Vietnamese conventions to preserve:\n"
+            "- Dates: 'ngày 14 tháng 3 năm 2025' or '14/3/2025' formats are OK.\n"
+            "- Amounts: VND amounts use '.' as thousands separator (e.g., "
+            "'1.500.000.000').\n"
+            "- Diacritics: keep tone marks exactly as in the source.\n\n"
+            f"=== Schema ===\n{schema_str}\n\n"
+            f"=== Document ===\n{text}\n\n"
+            "=== Response (JSON only) ==="
+        )
+
+    @staticmethod
+    def _parse_json(response: str) -> dict[str, Any]:
+        """Parse the LLM's JSON response, tolerant of markdown fences."""
+        s = response.strip()
+        # Strip ```json ... ``` and ``` ... ``` markdown fences if the model
+        # ignored our instructions.
+        if s.startswith("```"):
+            # Drop the first fence line and the closing fence.
+            lines = s.split("\n")
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            s = "\n".join(lines)
+        result = json.loads(s)
+        if not isinstance(result, dict):
+            raise ValueError(f"Expected JSON object, got {type(result).__name__}")
+        return result
 
 
 class Validate:
