@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.0.1"
+version = "0.0.2"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -29,11 +29,23 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-# v0.0.2 — ML-backed diacritic restoration (replaces the rule table).
-# We pin the chosen backend here once we've measured candidates.
+# Stronger Vietnamese tokenization via underthesea (Apache 2.0).
+#
+# Security audit (2026-04-25): underthesea ships CRFsuite native binary
+# models (`lCRF...` magic header) — deterministic deserialization, not
+# Python pickle. License is Apache 2.0, compatible with our redistribution.
+# We attribute upstream in the NOTICE file. The pure-Python `nom.text`
+# default path stays dep-free; this extra is opt-in for users who want
+# the higher accuracy (~80% per public benchmarks).
+#
+# We rejected PyVi (MIT) on two counts: (1) bundled .pkl files = arbitrary
+# code execution risk on load; (2) runtime KeyError on common input.
+nlp = [
+  "underthesea>=9.0",
+]
+# Diacritic ML backend — deferred to v0.0.3.
 diacritics = [
-  # Decided in v0.0.2 — currently evaluating PyVi vs. DistilBERT-Viet vs.
-  # restore_vietnamese_diacritics. See docs/BENCHMARK.md for the shortlist.
+  # See docs/BENCHMARK.md for the shortlist.
 ]
 doc = [
   "pytesseract>=0.3.10",
@@ -116,5 +128,5 @@ files = ["src/nom"]
 exclude = ["tests/", "benchmarks/", "scripts/"]
 
 [[tool.mypy.overrides]]
-module = ["pytesseract.*", "pdfplumber.*", "fitz.*"]
+module = ["pytesseract.*", "pdfplumber.*", "fitz.*", "underthesea.*"]
 ignore_missing_imports = true
