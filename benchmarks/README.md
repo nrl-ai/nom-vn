@@ -19,6 +19,8 @@ pip install -e ".[dev]"
 
 python benchmarks/perf/bench_text.py
 python benchmarks/accuracy/bench_diacritics.py
+python benchmarks/accuracy/bench_ocr.py        # v0.1+ smoke test today
+python benchmarks/accuracy/bench_pipeline.py   # v0.1+ smoke test today
 python benchmarks/models/bench_extraction.py   # v0.1+ smoke test today
 ```
 
