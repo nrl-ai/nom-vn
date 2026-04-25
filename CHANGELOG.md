@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (toward v0.1)
+- **Real `Load` stage** (pure stdlib) — magic-byte format detection across PDF
+  / PNG / JPEG / GIF / TIFF / BMP / WebP, extension fallback, byte caching on
+  context for downstream stages.
+- **Real `Parse` stage** — PDF text extraction via `pdfplumber` (MIT default,
+  permissive license) with `pymupdf` (AGPL, faster) as opt-in alternative.
+  Text inputs decode UTF-8; image inputs flag `needs_ocr` for the OCR stage.
+- **15 new tests** for Load + Parse covering magic-byte detection, path /
+  bytes / nonexistent-path paths, install-hint errors, and the Load → Parse
+  composition for text inputs. Total tests: 68.
+
 ### Planned for v0.0.3
 - **Study underthesea to build a better tokenizer in-tree.** underthesea
   (Apache 2.0) is the de-facto VN tokenizer and we reach ~78% boundary
