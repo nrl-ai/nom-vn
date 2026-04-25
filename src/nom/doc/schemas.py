@@ -282,7 +282,7 @@ class SchemaResolver:
         if isinstance(spec, str):
             if spec not in _SHORTHAND_TYPES:
                 raise ValueError(
-                    f"Unknown schema shorthand: {spec!r}. " f"Known: {sorted(_SHORTHAND_TYPES)}"
+                    f"Unknown schema shorthand: {spec!r}. Known: {sorted(_SHORTHAND_TYPES)}"
                 )
             return _SHORTHAND_TYPES[spec]
         # Allow direct type references (str, int, float, datetime.date,

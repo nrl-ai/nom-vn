@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.0.7"
+version = "0.2.2"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -60,12 +60,40 @@ nlp = [
 ]
 # Diacritic ML backend — deferred to v0.0.3.
 diacritics = [
-  # See docs/BENCHMARK.md for the shortlist.
+  # See docs/benchmark.md for the shortlist.
+]
+# The deployable web app (FastAPI + minimal HTML UI in v0.2.0; React +
+# ShadCN dist shipped pre-built in v0.2.1).
+#
+# `nom serve` is meant to be one-command-from-fresh: the user expects
+# upload → ask to work without surprise import errors. So this extra
+# bundles the runtime stack (LLM client, embedder, doc parsers) too.
+chat = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "python-multipart>=0.0.9",  # for file uploads via UploadFile
+  "httpx>=0.27",  # Ollama HTTP client (also pulled by [llm])
+  "sentence-transformers>=3.0",  # default VN embedder (also pulled by [embeddings])
+  "numpy>=1.26",
+  # `nom serve` is meant to be one-command-from-fresh: every supported
+  # upload format must parse out of the box. Pull the full Office +
+  # OCR + PDF stack into [chat] so users don't have to remember [doc].
+  "pdfplumber>=0.11",
+  "pytesseract>=0.3.10",
+  "pillow>=10",
+  "python-docx>=1.1",
+  "openpyxl>=3.1",
+  "python-pptx>=1.0",
 ]
 doc = [
-  "pytesseract>=0.3.10",
-  "pdfplumber>=0.11",
-  "pillow>=10",
+  # Core parser surface for nom.doc.Pipeline. All MIT/Apache 2.0,
+  # safetensors/zip+xml/png — no pickled assets (CLAUDE.md principle 11).
+  "pytesseract>=0.3.10",     # OCR via Tesseract
+  "pdfplumber>=0.11",        # PDF text extraction (MIT)
+  "pillow>=10",              # image I/O
+  "python-docx>=1.1",        # .docx parser (MIT, pure Python over zip+xml)
+  "openpyxl>=3.1",           # .xlsx parser (MIT, pure Python)
+  "python-pptx>=1.0",        # .pptx parser (MIT, pure Python)
   # pydantic is a hard dep now (above) — listed here too for explicitness
   # if a user installs only [doc] expecting full doc-extraction.
   "pydantic>=2.5",
@@ -73,8 +101,17 @@ doc = [
 llm = [
   "httpx>=0.27",
 ]
+otel = [
+  # OpenTelemetry — optional. Activates when OTEL_* env vars are set.
+  # Speaks the OpenInference semantic conventions so traces flow to
+  # Phoenix / Langfuse / Arize / Datadog / any OTel collector unchanged.
+  "opentelemetry-api>=1.28",
+  "opentelemetry-sdk>=1.28",
+  "opentelemetry-exporter-otlp>=1.28",
+  "opentelemetry-instrumentation-fastapi>=0.49b0",
+]
 all = [
-  "nom-vn[diacritics,doc,embeddings,llm]",
+  "nom-vn[chat,diacritics,doc,embeddings,llm,otel]",
 ]
 dev = [
   "pytest>=8",
@@ -90,7 +127,16 @@ dev = [
   "pdfplumber>=0.11",
   "pytesseract>=0.3.10",
   "pillow>=10",
+  "python-docx>=1.1",
+  "openpyxl>=3.1",
+  "python-pptx>=1.0",
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "python-multipart>=0.0.9",
 ]
+
+[project.scripts]
+nom = "nom.chat.cli:main"
 
 [project.urls]
 Homepage = "https://nrl.ai/nom"
@@ -100,6 +146,27 @@ Issues = "https://github.com/nrl-ai/nom/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/nom"]
+# When the React bundle has been pre-built and copied to
+# src/nom/chat/ui_dist/, include it in the wheel so `pip install nom-vn`
+# ships the UI. The build script `scripts/build_ui.sh` does the copy.
+# If ui_dist is absent, the wheel falls back to the embedded HTML at
+# runtime — no error.
+artifacts = ["src/nom/chat/ui_dist/**"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/",
+  "tests/",
+  "benchmarks/",
+  "ui/",
+  "docs/",
+  "README.md",
+  "README.vi.md",
+  "CHANGELOG.md",
+  "CONTRIBUTING.md",
+  "LICENSE",
+  "pyproject.toml",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -159,5 +226,9 @@ module = [
   "fitz.*",
   "underthesea.*",
   "sentence_transformers.*",
+  "openpyxl.*",
+  "docx.*",
+  "pptx.*",
+  "opentelemetry.*",
 ]
 ignore_missing_imports = true

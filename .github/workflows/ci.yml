@@ -85,3 +85,45 @@ jobs:
 
       - name: Accuracy benchmark (smoke)
         run: python benchmarks/accuracy/bench_diacritics.py
+
+  ui-build:
+    name: ui · pnpm build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: pnpm install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript check (no emit)
+        run: pnpm lint
+
+      - name: Vite build
+        run: pnpm build
+
+      - name: Verify dist output
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+          ls -la dist/
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-dist
+          path: ui/dist/
+          retention-days: 7

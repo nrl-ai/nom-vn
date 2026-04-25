@@ -22,7 +22,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass, field
 from math import log
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -67,7 +67,7 @@ class BM25Retriever:
     b: float = 0.75
     name: str = field(default="bm25", init=False)
     _doc_counters: list[Counter[str]] = field(default_factory=list, init=False, repr=False)
-    _doc_lengths: NDArray[np.floating] = field(
+    _doc_lengths: NDArray[np.floating[Any]] = field(
         default_factory=lambda: np.zeros(0, dtype="float32"),
         init=False,
         repr=False,
@@ -140,7 +140,7 @@ class BM25Retriever:
     # Query
     # ------------------------------------------------------------------
 
-    def score(self, query: str) -> NDArray[np.floating]:
+    def score(self, query: str) -> NDArray[np.floating[Any]]:
         """Return BM25 scores for every document in the corpus.
 
         Useful when you need full score arrays (e.g. for hybrid fusion

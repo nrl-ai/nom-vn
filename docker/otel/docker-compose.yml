@@ -1,0 +1,37 @@
+# Local OpenTelemetry stack for testing nom.chat.observability instrumentation.
+#
+# Usage:
+#   cd docker/otel && docker compose up -d
+#   # In another terminal:
+#   export OTEL_SERVICE_NAME=nom-chat
+#   export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+#   export OTEL_TRACES_EXPORTER=otlp
+#   pip install -e ".[chat,otel]"
+#   nom serve --in-memory
+#   # Hit the API a few times, then open http://localhost:16686 (Jaeger UI),
+#   # pick service "nom-chat", search traces.
+#
+# All-in-one Jaeger image runs a self-contained OTLP receiver + storage +
+# query service in one container — perfect for laptop dev. Production would
+# run an OpenTelemetry Collector + a real backend (Tempo, Honeycomb,
+# Datadog, …); the only thing that changes is OTEL_EXPORTER_OTLP_ENDPOINT.
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    container_name: nom-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      # Limit retention so a forgotten container doesn't fill /tmp.
+      - SPAN_STORAGE_TYPE=memory
+      - MEMORY_MAX_TRACES=10000
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O- http://localhost:16686/ > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5

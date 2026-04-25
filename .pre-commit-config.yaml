@@ -15,7 +15,10 @@ repos:
       - id: check-toml
       - id: check-json
       - id: check-added-large-files
-        args: ["--maxkb=512"]
+        # Allow committed VN benchmark corpora up to ~2 MB.
+        # benchmarks/data/wiki_vi/articles.jsonl is the largest (~1.5 MB).
+        # Anything bigger should live outside the repo.
+        args: ["--maxkb=2048"]
       - id: check-merge-conflict
       - id: check-case-conflict
       - id: detect-private-key
@@ -37,6 +40,8 @@ repos:
         files: ^src/
         additional_dependencies:
           - "pydantic>=2.5"
+          - "fastapi>=0.115"
+          - "numpy>=1.26"
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
@@ -60,3 +65,42 @@ repos:
       - id: markdownlint
         args: ["--config", ".markdownlint.json"]
         exclude: ^(CHANGELOG|README\.vi)\.md$
+
+  # Codify docs/architecture.md anti-pattern rule #2: no `*Manager` class
+  # names. Verba's five Managers are the cautionary tale (see
+  # docs/oss_landscape_2026q2.md). If a class genuinely needs to "manage"
+  # something, name it for what it owns.
+  - repo: local
+    hooks:
+      - id: ban-manager-class-names
+        name: ban *Manager class names
+        entry: scripts/ban_manager_classes.sh
+        language: script
+        pass_filenames: false
+        files: ^(src|tests)/.*\.py$
+
+  # Frontend (ui/) — prettier formatting + eslint linting + tsc typecheck.
+  # These run only when files under ui/ change. Devs need pnpm installed
+  # (one-time: `cd ui && pnpm install`).
+  - repo: local
+    hooks:
+      - id: ui-prettier
+        name: ui · prettier --check
+        language: system
+        files: ^ui/(src/.*\.(ts|tsx|css)|.*\.(ts|json|md))$
+        pass_filenames: false
+        entry: bash -c 'cd ui && pnpm exec prettier --check "src/**/*.{ts,tsx,css}" "*.{ts,json,md}"'
+
+      - id: ui-eslint
+        name: ui · eslint
+        language: system
+        files: ^ui/.*\.(ts|tsx)$
+        pass_filenames: false
+        entry: bash -c 'cd ui && pnpm exec eslint .'
+
+      - id: ui-typecheck
+        name: ui · tsc --noEmit
+        language: system
+        files: ^ui/.*\.(ts|tsx|json)$
+        pass_filenames: false
+        entry: bash -c 'cd ui && pnpm exec tsc -b --noEmit'

@@ -1,0 +1,104 @@
+{
+  "name": "vn_legal_tiny",
+  "license": "fixture content paraphrased and condensed from public-domain Vietnamese legal text (Luật Doanh nghiệp 2020, Bộ luật Dân sự 2015, Luật Lao động 2019, Luật Đất đai 2024). Not a verbatim source — for benchmark harness validation only. For production benchmarking use Zalo Legal Text Retrieval (https://challenge.zalo.ai/portal/legal-text-retrieval).",
+  "corpus": [
+    {
+      "id": "LDN2020-Đ4",
+      "text": "Doanh nghiệp là tổ chức có tên riêng, có tài sản, có trụ sở giao dịch, được thành lập hoặc đăng ký thành lập theo quy định của pháp luật nhằm mục đích kinh doanh. Doanh nghiệp bao gồm công ty trách nhiệm hữu hạn, công ty cổ phần, công ty hợp danh và doanh nghiệp tư nhân."
+    },
+    {
+      "id": "LDN2020-Đ74",
+      "text": "Công ty trách nhiệm hữu hạn một thành viên là doanh nghiệp do một tổ chức hoặc một cá nhân làm chủ sở hữu. Chủ sở hữu công ty chịu trách nhiệm về các khoản nợ và nghĩa vụ tài sản khác của công ty trong phạm vi số vốn điều lệ của công ty."
+    },
+    {
+      "id": "LDN2020-Đ111",
+      "text": "Công ty cổ phần là doanh nghiệp trong đó vốn điều lệ được chia thành nhiều phần bằng nhau gọi là cổ phần. Cổ đông có thể là tổ chức, cá nhân; số lượng cổ đông tối thiểu là 03 và không hạn chế số lượng tối đa."
+    },
+    {
+      "id": "LDN2020-Đ75",
+      "text": "Vốn điều lệ của công ty trách nhiệm hữu hạn một thành viên khi đăng ký thành lập doanh nghiệp là tổng giá trị tài sản do chủ sở hữu cam kết góp và ghi trong Điều lệ công ty. Chủ sở hữu phải góp đủ vốn trong thời hạn 90 ngày kể từ ngày được cấp Giấy chứng nhận đăng ký doanh nghiệp."
+    },
+    {
+      "id": "BLDS2015-Đ385",
+      "text": "Hợp đồng là sự thỏa thuận giữa các bên về việc xác lập, thay đổi hoặc chấm dứt quyền, nghĩa vụ dân sự. Hợp đồng có hiệu lực từ thời điểm giao kết, trừ trường hợp có thỏa thuận khác hoặc luật liên quan có quy định khác."
+    },
+    {
+      "id": "BLDS2015-Đ418",
+      "text": "Phạt vi phạm là sự thỏa thuận giữa các bên trong hợp đồng, theo đó bên vi phạm nghĩa vụ phải nộp một khoản tiền cho bên bị vi phạm. Mức phạt vi phạm do các bên thỏa thuận, trừ trường hợp luật liên quan có quy định khác."
+    },
+    {
+      "id": "BLDS2015-Đ423",
+      "text": "Một bên có quyền hủy bỏ hợp đồng và không phải bồi thường thiệt hại trong trường hợp bên kia vi phạm hợp đồng là điều kiện hủy bỏ mà các bên đã thỏa thuận, hoặc bên kia vi phạm nghiêm trọng nghĩa vụ hợp đồng, hoặc trường hợp khác do luật quy định."
+    },
+    {
+      "id": "BLLĐ2019-Đ20",
+      "text": "Hợp đồng lao động là sự thỏa thuận giữa người lao động và người sử dụng lao động về việc làm có trả công, tiền lương, điều kiện lao động, quyền và nghĩa vụ của mỗi bên trong quan hệ lao động."
+    },
+    {
+      "id": "BLLĐ2019-Đ34",
+      "text": "Người lao động có quyền đơn phương chấm dứt hợp đồng lao động nhưng phải báo trước cho người sử dụng lao động: ít nhất 45 ngày nếu làm việc theo hợp đồng lao động không xác định thời hạn; ít nhất 30 ngày nếu làm việc theo hợp đồng lao động xác định thời hạn từ 12 tháng đến 36 tháng; ít nhất 03 ngày làm việc nếu làm việc theo hợp đồng lao động dưới 12 tháng."
+    },
+    {
+      "id": "BLLĐ2019-Đ113",
+      "text": "Người lao động làm việc đủ 12 tháng cho một người sử dụng lao động thì được nghỉ hằng năm, hưởng nguyên lương theo hợp đồng lao động: 12 ngày làm việc đối với người làm công việc trong điều kiện bình thường; 14 ngày làm việc đối với người chưa thành niên hoặc người làm nghề, công việc nặng nhọc, độc hại, nguy hiểm."
+    },
+    {
+      "id": "LĐĐ2024-Đ9",
+      "text": "Đất đai thuộc sở hữu toàn dân do Nhà nước đại diện chủ sở hữu và thống nhất quản lý. Nhà nước trao quyền sử dụng đất cho người sử dụng đất theo quy định của Luật này."
+    },
+    {
+      "id": "LĐĐ2024-Đ47",
+      "text": "Người sử dụng đất được thực hiện các quyền chuyển đổi, chuyển nhượng, cho thuê, cho thuê lại, thừa kế, tặng cho quyền sử dụng đất; thế chấp, góp vốn bằng quyền sử dụng đất theo quy định của Luật này."
+    }
+  ],
+  "questions": [
+    {
+      "q": "Doanh nghiệp gồm những loại hình nào theo quy định pháp luật?",
+      "gold_ids": ["LDN2020-Đ4"]
+    },
+    {
+      "q": "Số lượng cổ đông tối thiểu của công ty cổ phần là bao nhiêu?",
+      "gold_ids": ["LDN2020-Đ111"]
+    },
+    {
+      "q": "Chủ sở hữu công ty TNHH một thành viên phải góp đủ vốn trong thời hạn bao lâu?",
+      "gold_ids": ["LDN2020-Đ75"]
+    },
+    {
+      "q": "Hợp đồng có hiệu lực từ thời điểm nào?",
+      "gold_ids": ["BLDS2015-Đ385"]
+    },
+    {
+      "q": "Mức phạt vi phạm hợp đồng được xác định như thế nào?",
+      "gold_ids": ["BLDS2015-Đ418"]
+    },
+    {
+      "q": "Khi nào một bên có quyền hủy bỏ hợp đồng mà không phải bồi thường thiệt hại?",
+      "gold_ids": ["BLDS2015-Đ423"]
+    },
+    {
+      "q": "Người lao động có hợp đồng không xác định thời hạn phải báo trước bao nhiêu ngày khi đơn phương chấm dứt hợp đồng?",
+      "gold_ids": ["BLLĐ2019-Đ34"]
+    },
+    {
+      "q": "Người lao động làm việc trong điều kiện bình thường được nghỉ phép năm bao nhiêu ngày?",
+      "gold_ids": ["BLLĐ2019-Đ113"]
+    },
+    {
+      "q": "Đất đai ở Việt Nam thuộc sở hữu của ai?",
+      "gold_ids": ["LĐĐ2024-Đ9"]
+    },
+    {
+      "q": "Người sử dụng đất có quyền gì đối với quyền sử dụng đất?",
+      "gold_ids": ["LĐĐ2024-Đ47"]
+    },
+    {
+      "q": "Định nghĩa hợp đồng lao động là gì?",
+      "gold_ids": ["BLLĐ2019-Đ20"]
+    },
+    {
+      "q": "Trách nhiệm của chủ sở hữu công ty TNHH một thành viên đối với các khoản nợ là gì?",
+      "gold_ids": ["LDN2020-Đ74"]
+    }
+  ]
+}

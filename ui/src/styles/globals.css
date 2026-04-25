@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------- *
+ * Base — editorial parchment.
+ * Body is the cream paper; typography defaults to Inter for body,
+ * Space Grotesk for display via Tailwind classes at the call site.
+ * ---------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f1ede3;
+  color: #141414;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14.5px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Section markers (§) used in headings — keep them tiny + uppercase + tracked. */
+.section-mark {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6a6a66;
+  font-weight: 600;
+}
+
+/* Editorial scrollbar — thin, ink-tinted, no decoration. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(20, 20, 20, 0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(20, 20, 20, 0.4);
+}
+
+/* Selection styling — burnt orange tint. */
+::selection {
+  background: #c46a37;
+  color: #1a0f06;
+}
+
+/* Focus ring — sharp single-stroke, accent color. */
+:focus-visible {
+  outline: 2px solid #c46a37;
+  outline-offset: 2px;
+}
+
+/* Cursor affordances. Buttons, role=button, links → pointer.
+ * Disabled controls → not-allowed. Text inputs default cursor (text). */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href],
+summary,
+.cursor-pointer {
+  cursor: pointer;
+}
+button:disabled,
+[role="button"][aria-disabled="true"],
+input:disabled,
+textarea:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+/* Smooth motion only where it serves intent. */
+button,
+[role="button"],
+a,
+.transition-colors,
+.transition-all {
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Diacritic-friendly font feature settings for Vietnamese. */
+.vn-text {
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1,
+    "calt" 1;
+  font-variant-ligatures: common-ligatures;
+}
+
+/* Resizable handle — barely visible until hover, then ink. */
+[data-panel-resize-handle-id] {
+  background: transparent;
+  transition: background-color 120ms ease-in-out;
+}
+[data-panel-resize-handle-id]:hover,
+[data-panel-resize-handle-id][data-resize-handle-active] {
+  background: rgba(20, 20, 20, 0.3);
+}
+
+/* ---------------------------------------------------------------- *
+ * Markdown content — applied to assistant message bubbles.
+ * Editorial typography: tight line-height for prose, monospace + cream
+ * inset for inline / fenced code, accent underline for links, sharp
+ * bullet markers, no extra block margins (we control spacing).
+ * ---------------------------------------------------------------- */
+
+.md-content > :first-child {
+  margin-top: 0;
+}
+.md-content > :last-child {
+  margin-bottom: 0;
+}
+.md-content p {
+  margin: 0 0 0.6em;
+}
+.md-content p:last-child {
+  margin-bottom: 0;
+}
+.md-content strong {
+  font-weight: 600;
+  color: #141414;
+}
+.md-content em {
+  font-style: italic;
+}
+.md-content a {
+  color: #c46a37;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+.md-content a:hover {
+  color: #1a0f06;
+  background: #c46a37;
+}
+.md-content .md-code,
+.md-content code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88em;
+  background: #e8e2d3;
+  padding: 1px 5px;
+  white-space: pre-wrap;
+}
+.md-content .md-pre,
+.md-content pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  background: #141414;
+  color: #f1ede3;
+  padding: 10px 12px;
+  margin: 0.6em 0;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+.md-content pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  white-space: pre;
+}
+.md-content .md-ul,
+.md-content .md-ol,
+.md-content ul,
+.md-content ol {
+  margin: 0.4em 0 0.6em;
+  padding-left: 1.4em;
+}
+.md-content .md-ul,
+.md-content ul {
+  list-style: none;
+}
+.md-content .md-ul > li::before,
+.md-content ul > li::before {
+  content: "▸";
+  color: #c46a37;
+  margin-left: -1.1em;
+  margin-right: 0.4em;
+  font-size: 0.85em;
+}
+.md-content .md-ol,
+.md-content ol {
+  list-style: decimal;
+  list-style-position: outside;
+}
+.md-content li {
+  margin: 0.15em 0;
+}
+.md-content li::marker {
+  color: #6a6a66;
+  font-family: ui-monospace, monospace;
+  font-size: 0.9em;
+}
+/* Tight bottom-margin if a list is followed by a paragraph. */
+.md-content ul + p,
+.md-content ol + p {
+  margin-top: 0.5em;
+}

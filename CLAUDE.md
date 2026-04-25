@@ -1,0 +1,197 @@
+# CLAUDE.md — nom-vn project notes for AI assistants
+
+This file is auto-loaded by Claude Code when working inside `nom-vn/`. It points
+to durable project context. For the broader Atlas operating manual see the
+parent `PPlanning/CLAUDE.md`.
+
+## Vietnamese benchmark datasets
+
+Test corpora live under [`benchmarks/data/`](benchmarks/data/). The full
+catalogue, license notes, and intended-use map are in
+[`docs/datasets.md`](docs/datasets.md).
+
+When you need Vietnamese text, PDF, or image fixtures for tests or benchmarks,
+prefer these over hand-curating new examples:
+
+- **Sentences (4 registers)** → `benchmarks/data/diacritic_eval_v0.txt` (CC0)
+- **Declarative prose** → `benchmarks/data/udhr_vi/` (CC-BY-SA / PD)
+- **Classical literary** → `benchmarks/data/wikisource_vi/` (PD content)
+- **Encyclopedia long-form** → `benchmarks/data/wiki_vi/articles.jsonl` (CC-BY-SA)
+- **Conversational sentences** → `benchmarks/data/tatoeba_vi/` (CC-BY)
+- **Born-digital PDF** → `benchmarks/data/udhr_vi/udhr_vie.pdf` (PD)
+- **OCR images (with ground truth)** → `benchmarks/data/synthetic_ocr_vi/` (CC0)
+- **Vietnamese legal / governance** → `benchmarks/data/legal_vi/` (PD per Luật SHTT §15)
+- **Synthetic Office (DOCX/XLSX/PPTX)** → `benchmarks/data/office_vi/` (PD, generator-built)
+
+All datasets are regeneratable via:
+
+```bash
+python benchmarks/data/_fetch_all.py
+python benchmarks/data/synthetic_ocr_vi/render.py
+```
+
+When adding a new dataset, follow the rules in `benchmarks/data/README.md` and
+update `docs/datasets.md` so the catalogue stays current.
+
+## Scope clarification
+
+`nom-vn` is named after **chữ Nôm** (the historical Vietnamese script) but the
+OCR target and processing pipeline are **modern Vietnamese in chữ Quốc Ngữ** —
+Latin script with diacritics. Do not prioritize Hán-Nôm corpora or features
+when scoping training data, benchmarks, or modules.
+
+## Research and citations
+
+Any document under `docs/research/` (and SOTA / landscape docs in `docs/`) must
+back factual claims with verifiable citations:
+
+- Inline links or numbered footnotes for every dataset size, license, benchmark
+  number, and model detail.
+- A "References" section at the end listing every URL.
+- If a claim cannot be cited, write **"no published source"** or **"unverified"**
+  explicitly. Do not guess.
+
+This enforces CLAUDE.md principle 12 (verified benchmarks only) at the
+documentation layer.
+
+## Environment setup
+
+One-time setup for a fresh clone:
+
+```bash
+# 1. Python (3.10+)
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev,chat,otel]"
+
+# 2. Frontend (Node 20+ / pnpm 10+)
+cd ui && pnpm install && cd ..
+
+# 3. OCR (optional but recommended for image / scanned-PDF tests)
+sudo apt install tesseract-ocr tesseract-ocr-vie       # Debian / Ubuntu
+# OR
+conda install -c conda-forge tesseract                 # cross-platform
+brew install tesseract tesseract-lang                  # macOS
+
+# 4. Pre-commit hooks
+pre-commit install
+
+# 5. Local LLM (Ollama for the chat web app)
+ollama pull qwen3:8b   # default; or qwen3:1.7b for laptop / phi4 for headroom
+```
+
+Verify the install:
+
+```bash
+pytest                           # 250+ tests should pass
+cd ui && pnpm typecheck && pnpm lint && pnpm build && cd ..
+nom serve --in-memory            # then open http://localhost:8080
+```
+
+## Code style — Python
+
+Hard rules. CI fails if any are violated.
+
+- **Type-everywhere.** Public functions get full type annotations. Use
+  `from __future__ import annotations` so forward references work cheaply.
+  No `Any` in public APIs except for genuine duck-types (callbacks, dynamic
+  config dicts) — comment why.
+- **Protocols, not ABCs.** `typing.Protocol` (with `runtime_checkable`
+  when `isinstance` checks help) for every swap point. See
+  `nom.chat.Store` and `nom.chat.EmbeddingsCache` as references. ABCs
+  are banned for shared behavior — use module-level helpers instead.
+- **Frozen dataclasses for value objects.** `@dataclass(frozen=True, slots=True)`
+  for hot-path immutables (`Citation`, `Hit`, `Chunk`).
+- **No mutable default args.** `field(default_factory=list)`, never `= []`.
+- **Local imports for heavy / optional deps.** numpy, torch,
+  sentence-transformers, pdfplumber etc. import inside the function
+  that needs them so `from nom import …` stays cheap. See
+  `MemoryStore.ask` for the pattern.
+- **Lint + format.** `ruff check .` and `ruff format --check .` must
+  pass. Line length 100. Sort imports with isort (config in
+  `pyproject.toml`).
+- **Type check.** `mypy --strict src/` must pass. Files outside `src/`
+  are excluded but should still be type-aware where it helps.
+- **Comments.** Default to writing none. Add one when WHY is non-obvious
+  (a workaround, a hidden invariant, a measured tradeoff). Never
+  narrate WHAT the code does — well-named identifiers do that. See
+  parent `PPlanning/CLAUDE.md` principles for the full rule.
+- **No `…Manager` class names.** A pre-commit hook bans them — see
+  `docs/architecture.md` anti-pattern rule #2 and the cited Verba
+  example in `docs/oss_landscape_2026q2.md`.
+
+## Code style — TypeScript / React (`ui/`)
+
+- **Strict TS.** `strict`, `noUnusedLocals`, `noUnusedParameters`,
+  `noFallthroughCasesInSwitch` all on. `any` lints to a warning;
+  use `unknown` + narrow.
+- **Prettier owns formatting.** 100-col, double quotes, semicolons,
+  trailing commas. `pnpm format` to apply, `pnpm format:check` in CI.
+- **ESLint flat config** with `typescript-eslint` strict + react-hooks.
+  No console outside `console.warn` / `console.error`.
+- **Functional components only.** No class components. State via
+  `useState` / `useReducer`; data via TanStack Query.
+- **No new global state libs.** Zustand / Redux / Jotai are off the
+  table — TanStack Query handles server state, `useState` lifted to a
+  parent handles client state. If that's painful, the component is too
+  big.
+- **Tailwind** for styling. Design tokens encoded in
+  `ui/tailwind.config.ts` (cream `#f1ede3` / ink `#141414` / accent
+  `#c46a37`). Sharp corners (no `border-radius`). Editorial palette is
+  non-negotiable.
+- **Radix primitives** copied into `ui/src/components/ui/` (the ShadCN
+  pattern). Don't depend on `@shadcn/ui` as a runtime package.
+- **No new bundle-bloating deps without measurement.** The current
+  bundle is ~125 KB gzipped — keep it under 200 KB unless a feature
+  earns the increase.
+
+## Test rules
+
+- **`pytest tests/` from repo root.** Excluding
+  `test_pipeline.py::TestOCRStage` is acceptable when tesseract isn't
+  installed.
+- **Integration tests skip cleanly** when their optional deps are
+  absent (use `pytest.importorskip` or `pytest.mark.skipif`). Don't
+  gate the whole suite on a heavy dep.
+- **No real LLM / embedder calls in unit tests.** Use the `_FakeLLM` /
+  `_FakeEmbedder` doubles in `tests/test_chat.py` (or
+  duplicate-into-test pattern). `tests/test_data_pipelines.py` is the
+  integration tier and may use real models — mark it explicitly.
+- **Multi-store coverage**: anything touching `Store` Protocol uses
+  the `@pytest.fixture(params=["memory", "sqlite"])` pattern in
+  `tests/test_multi_space.py`. Both impls must stay in lockstep.
+
+## Pre-commit
+
+```bash
+pre-commit run --all-files
+```
+
+Runs: ruff (lint + format), mypy strict, codespell, markdownlint, the
+ban-Manager-class-names check, and the ui-* hooks (prettier check,
+eslint, tsc no-emit). All hooks must pass before merge — never use
+`--no-verify` to bypass.
+
+## Run / dev commands
+
+| Goal | Command |
+|---|---|
+| Run the chat web app (persistent at `~/.nom`) | `nom serve` |
+| Same, ephemeral / no disk | `nom serve --in-memory` |
+| Same, custom port + model | `nom serve --port 9000 --model phi4` |
+| Frontend dev with hot reload | `cd ui && pnpm dev` (proxies `/api` to localhost:8090) |
+| Build the UI bundle for the wheel | `scripts/build_ui.sh` |
+| Run tests | `pytest` |
+| Run RAG retrieval bench | `python benchmarks/rag/bench_rag_vn.py` |
+| Generate Office test fixtures | `python benchmarks/data/office_vi/_generate.py` |
+| Seed a running server with demo spaces | `python scripts/seed_demo.py` |
+
+## Other reading
+
+- [`docs/architecture.md`](docs/architecture.md) — module map and design
+- [`docs/pipeline.md`](docs/pipeline.md) — v0.1 doc-extraction pipeline
+- [`docs/benchmark.md`](docs/benchmark.md) — measured numbers per module
+- [`docs/sota_vn_2026q2.md`](docs/sota_vn_2026q2.md) — current LLM/embed/OCR picks
+- [`docs/oss_landscape_2026q2.md`](docs/oss_landscape_2026q2.md) — OSS borrow / avoid analysis
+- [`docs/research/`](docs/research/) — deeper research notes
+- [`benchmarks/README.md`](benchmarks/README.md) — how to reproduce numbers
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — dev setup and PR rules

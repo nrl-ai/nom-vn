@@ -14,6 +14,7 @@ Design goals:
 
 from __future__ import annotations
 
+import contextlib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -270,19 +271,28 @@ class RAG:
 def _source_to_text(source: str | Path | bytes) -> str:
     """Convert any supported source to a single text string.
 
-    - Paths and bytes go through ``nom.doc.Pipeline`` (Load → Parse →
-      Normalize) to get clean text.
-    - Plain strings are returned as-is.
+    Routes through ``nom.doc`` for paths / bytes:
+    Load → Parse → OCR (when needed) → Normalize. Plain strings (not
+    looking like a path) are returned as-is.
+
+    The OCR stage runs only when ``Parse`` flagged unindexable pages
+    (image inputs and image-only PDF pages). If pytesseract isn't
+    installed we degrade gracefully — the unindexable pages stay empty
+    and the caller sees a zero-chunk material, not a hard failure.
     """
     if isinstance(source, str) and not _looks_like_path(source):
         return source
 
-    # Path or bytes: route through nom.doc
-    from nom.doc import Context, Load, Normalize, Parse
+    from nom.doc import OCR, Context, Load, Normalize, Parse
 
     ctx = Context(source=source)
     Load().run(ctx)
     Parse().run(ctx)
+    if ctx.needs_ocr:
+        # pytesseract not installed → skip OCR rather than failing the
+        # whole upload. User gets empty extraction; visible as 0 chunks.
+        with contextlib.suppress(ImportError):
+            OCR().run(ctx)
     Normalize().run(ctx)
     return ctx.text
 

@@ -1,91 +1,157 @@
-# Nôm
+# Nôm 喃
 
 **Open-source Python toolkit for building Vietnamese AI applications.**
 
 > Named after *chữ Nôm* — the script Vietnam wrote in for a millennium.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0%20in%20development-orange)](https://nrl.ai/nom)
+[![Status](https://img.shields.io/badge/status-v0.2.2-orange)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
 
-Every team building Vietnamese AI re-implements OCR, text utilities, prompts. Nôm packages them as one library. One `pip install` — you focus on the product.
+A local-first toolkit. **No data leaves your machine.** Use any LLM (Ollama by default), any embedder, any document type — Nôm wires them into a Vietnamese-aware RAG pipeline you can ship as either a Python library or a deployable chat web app.
+
+---
+
+## The 3-line demo
 
 ```bash
-pip install nom-vn
+pip install "nom-vn[chat]"     # FastAPI + React UI + parsers + embeddings
+nom serve                       # opens http://localhost:8080
+# upload PDFs/Word/Excel/PowerPoint/images, ask questions in Vietnamese
 ```
 
-> **Status: v0 in development.** `nom.text` ships in v0.0.1 (working). `nom.doc` and `nom.prompts` ship with v0.1. Star the repo to follow.
+![Nôm — chat with citations grounded in indexed Vietnamese documents](docs/screenshots/02-chat-with-answer.png)
 
-## Modules
+The web app is built into the wheel — there's nothing else to install.
+
+---
+
+## What ships today
 
 | Module | What it does | Status |
 |---|---|---|
-| `nom.text` | Vietnamese text utilities — NFC, diacritic correction, code-switch detection | **v0.0.1** |
-| `nom.doc` | Document extraction — PDF/scan → structured JSON via your LLM | v0.1 |
-| `nom.prompts` | Battle-tested prompt library for contracts, official docs, business email | v0.2 |
-| `nom.llm` | One-interface adapter for OpenAI, Anthropic, Ollama | v0.1 |
+| `nom.text` | Vietnamese text utilities — NFC, diacritic restoration, word/sentence tokenization | ✅ |
+| `nom.chunking` | VN-aware document chunking | ✅ |
+| `nom.embeddings` | `Embedder` Protocol + `VietnameseEmbedder` (BGE-base ft) + `AITeamVNEmbedder` (BGE-M3 ft) | ✅ |
+| `nom.retrieve` | `BM25Retriever`, `DenseRetriever`, hybrid RRF fusion | ✅ |
+| `nom.doc` | Document pipeline: PDF / DOCX / XLSX / PPTX / HTML / JSON / image (OCR) → text | ✅ |
+| `nom.llm` | `LLM` Protocol + `Ollama` adapter (any model: Qwen3, Sailor2, Phi-4, …) | ✅ |
+| `nom.rag` | One-line RAG composition (`RAG.from_documents(...)`) | ✅ |
+| `nom.chat` | FastAPI server + React/ShadCN UI, `MemoryStore` + `SqliteStore` + pluggable `EmbeddingsCache` | ✅ |
 
-## Quick start
+---
 
-### Text normalization (works today)
+## NotebookLM-style document Q&A web app
+
+Three-pane editorial layout: spaces sidebar / chat thread / sources + studio. Dark editorial palette, sharp corners, citation traceability.
+
+Three-pane editorial layout (1920×1080 desktop):
+
+![Default chat view — space selected, materials indexed, suggested questions](docs/screenshots/01-welcome.png)
+
+Citations are first-class. Every chunk number is a chip you can click to see the source passage:
+
+![Citations expanded — Vietnamese chunks shown inline](docs/screenshots/03-citations-expanded.png)
+
+---
+
+## Browser viewers for every supported format
+
+Click any material in the right panel — **Original** tab renders the file natively, **Extracted** tab shows what the chunker + embedder saw. PDFs / images use the browser's native viewer; Office formats render as structured HTML so the browser can show them without LibreOffice.
+
+| DOCX → editorial paragraphs | PPTX → 16:10 slide cards | XLSX → HTML tables with sheet picker |
+|---|---|---|
+| ![DOCX viewer](docs/screenshots/04-viewer-docx.png) | ![PPTX viewer](docs/screenshots/05-viewer-pptx.png) | ![XLSX viewer](docs/screenshots/06-viewer-xlsx.png) |
+
+---
+
+## Library use (no web app)
 
 ```python
-from nom.text import normalize, fix_diacritics
+from nom.rag import RAG
+from nom.llm import Ollama
 
-# NFC + tone-mark normalization
+rag = RAG.from_documents(
+    ["contract.pdf", "letter.docx", "Hợp đồng số HD-001..."],
+    llm=Ollama(model="qwen3:8b"),
+)
+
+answer = rag.ask("Có bao nhiêu hợp đồng có phạt vi phạm?")
+print(answer.text)         # the LLM's response
+print(answer.citations)    # [(doc_idx, chunk_idx, score, text), ...]
+```
+
+Document extraction without RAG:
+
+```python
+from nom.doc import extract
+from nom.llm import Ollama
+
+result = extract(
+    "hop_dong.pdf",
+    schema={"so_hop_dong": str, "ngay_ky": "date", "tong_gia_tri": "amount_vnd"},
+    llm=Ollama(model="qwen3:8b"),
+)
+```
+
+Text utilities without the rest:
+
+```python
+from nom.text import normalize, fix_diacritics, word_tokenize
+
 clean = normalize("Hợp đồng số 02/HĐ/2025")
-
-# Restore diacritics on OCR output that lost them
-fixed = fix_diacritics("Hop dong nay duoc lap ngay 14 thang 3")
-# → "Hợp đồng này được lập ngày 14 tháng 3"
+fixed = fix_diacritics("Hop dong nay duoc lap")  # → "Hợp đồng này được lập"
+toks  = word_tokenize("Thành phố Hồ Chí Minh")    # ["Thành phố", "Hồ Chí Minh"]
 ```
 
-### Document extraction (planned for v0.1)
+---
 
-```python
-from nom.doc import extract
+## Install
 
-result = extract("contract.pdf", schema={
-    "contract_number": str,
-    "signed_date": "date",
-    "party_a": "party",
-    "party_b": "party",
-    "total_value_vnd": "amount_vnd",
-})
+```bash
+pip install nom-vn                            # text + chunking + retrieve + rag (no I/O deps)
+pip install "nom-vn[doc]"                     # + PDF / Office / OCR parsers
+pip install "nom-vn[embeddings]"              # + sentence-transformers
+pip install "nom-vn[llm]"                     # + httpx for Ollama / OpenAI-compat
+pip install "nom-vn[chat]"                    # + FastAPI / uvicorn + everything above
+pip install "nom-vn[all]"                     # the lot
 ```
 
-### Bring your own LLM (planned for v0.1)
+OCR (image / scanned PDF) needs Tesseract installed system-wide:
 
-```python
-from nom.doc import extract
-from nom.llm import OpenAI, Anthropic, Ollama
-
-# Any LLM, one interface
-llm = Ollama(model="qwen3:8b")            # local, free
-# llm = OpenAI(model="gpt-4o")            # cloud
-# llm = Anthropic(model="claude-sonnet")  # cloud
-
-result = extract("doc.pdf", schema={...}, llm=llm)
+```bash
+# Debian/Ubuntu
+sudo apt install tesseract-ocr tesseract-ocr-vie
+# Conda
+conda install -c conda-forge tesseract
+# macOS
+brew install tesseract tesseract-lang
 ```
 
-## Why Nôm?
+`nom serve` auto-detects the Tesseract binary + finds `vie.traineddata`; if absent, image uploads index as zero chunks rather than failing.
 
-Nôm is **infrastructure, not a model**. It doesn't ship LLM weights. It teaches whatever LLM you use to handle Vietnamese context properly:
+---
 
-- **Diacritic-aware tokenization** — most tokenizers split Vietnamese diacritics badly
-- **OCR pipeline** — Tesseract + post-processing for Vietnamese tone marks
-- **Prompts library** — system prompts tested against contracts, official docs, business email
-- **Schema extraction** — structured output for VND amounts, contract numbers, official dates
+## Architecture in one line
 
-Use any model — Qwen, Llama, GPT-4o, Claude. Nôm makes them better at Vietnamese.
+7 layers (Primitives / Models / Retrieval / RAG / Storage / Application / Deployment), every meaningful boundary is a `typing.Protocol`. Local single-process today; the cloud path replaces three Protocol implementations and changes nothing in the application layer.
+
+See **[docs/architecture.md](docs/architecture.md)** for the full layered model, Protocol seam table, and scaling-path reference.
+
+---
 
 ## Documentation
 
-- **[docs/PIPELINE.md](docs/PIPELINE.md)** — the v0.1 doc-extraction pipeline end-to-end with cited per-stage picks
-- **[docs/BENCHMARK.md](docs/BENCHMARK.md)** — measured numbers per module + research-backed component selection
-- **[benchmarks/README.md](benchmarks/README.md)** — how to reproduce every published number
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** — dev setup, PR rules, dataset contributions
+- **[docs/architecture.md](docs/architecture.md)** — the 7-layer model, Protocol seams, scaling path, anti-architecture rules
+- **[docs/pipeline.md](docs/pipeline.md)** — the document-extraction pipeline end-to-end with per-stage picks
+- **[docs/benchmark.md](docs/benchmark.md)** — measured numbers per module
+- **[docs/sota_vn_2026q2.md](docs/sota_vn_2026q2.md)** — SOTA local LLM / embedding / OCR for Vietnamese (April 2026 snapshot, every claim cited)
+- **[docs/oss_landscape_2026q2.md](docs/oss_landscape_2026q2.md)** — OSS local-AI / RAG landscape: patterns to steal, traps to avoid
+- **[benchmarks/](benchmarks/)** — reproducible measurement scripts (perf + retrieval + accuracy)
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — dev setup, PR rules
 - **[CHANGELOG.md](CHANGELOG.md)** — version history
+
+---
 
 ## License
 

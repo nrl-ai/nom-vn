@@ -75,7 +75,7 @@ python benchmarks/accuracy/bench_diacritics.py --json results/run.json      # ma
 
 Today the script is a smoke test that lists the planned models and confirms the harness shape. The real corpus + extractions arrive with v0.1.
 
-Planned model coverage (selection rationale in [`docs/BENCHMARK.md`](../docs/BENCHMARK.md)):
+Planned model coverage (selection rationale in [`docs/benchmark.md`](../docs/benchmark.md)):
 
 | Model | Tier | License | Why |
 |---|---|---|---|

@@ -1,0 +1,80 @@
+# Vietnamese benchmark datasets
+
+Catalogue of every Vietnamese corpus shipped with `nom-vn` for testing and
+benchmarking. All datasets are license-clean for **redistribution + modification**
+(Apache 2.0 / CC-BY / CC-BY-SA / CC0 / public domain). Each folder has its
+own `LICENSE` and per-file attribution.
+
+> **Looking for OCR _training_ data?** That's a separate audit:
+> [`research/ocr_training_data_vn_2026q2.md`](research/ocr_training_data_vn_2026q2.md)
+> covers what's redistributable vs research-only vs commercial, with cost
+> estimates for synthetic generation, labeling, and PaddleOCR fine-tuning.
+
+## Quick map
+
+| Dataset | Modality | Register | Size | License | Path |
+|---|---|---|---|---|---|
+| `diacritic_eval_v0` | text (sentences) | mixed (4 registers) | 55 sentences | CC0 | [`benchmarks/data/diacritic_eval_v0.txt`](../benchmarks/data/diacritic_eval_v0.txt) |
+| `udhr_vi` (text) | text (declarative) | formal/translated | ~19 KB | CC-BY-SA 4.0 | [`benchmarks/data/udhr_vi/udhr_vi.txt`](../benchmarks/data/udhr_vi/) |
+| `udhr_vi` (PDF) | PDF (text-layer) | formal | ~113 KB | public domain | [`benchmarks/data/udhr_vi/udhr_vie.pdf`](../benchmarks/data/udhr_vi/) |
+| `wikisource_vi` | text (prose) | classical literary | ~14 KB across 3 files | CC-BY-SA 4.0 (PD content) | [`benchmarks/data/wikisource_vi/`](../benchmarks/data/wikisource_vi/) |
+| `wiki_vi` | text (articles) | encyclopedia | 28 articles, ~1.16M chars | CC-BY-SA 4.0 | [`benchmarks/data/wiki_vi/articles.jsonl`](../benchmarks/data/wiki_vi/) |
+| `tatoeba_vi` | text (sentences) | conversational | 31,292 / 3,000 sample | CC-BY 2.0 FR | [`benchmarks/data/tatoeba_vi/`](../benchmarks/data/tatoeba_vi/) |
+| `synthetic_ocr_vi` | PNG images | OCR target | 40 images (clean+noisy) | CC0 | [`benchmarks/data/synthetic_ocr_vi/`](../benchmarks/data/synthetic_ocr_vi/) |
+| `flores_vi` | text (parallel) | news / mixed | gated, not committed | CC-BY-SA 4.0 | [`benchmarks/data/flores_vi/`](../benchmarks/data/flores_vi/) |
+
+Total committed footprint: **~2.8 MB**.
+
+## What each dataset is good for
+
+| Module | Recommended datasets | Why |
+|---|---|---|
+| `nom.text` (normalize, fix_diacritics) | `diacritic_eval_v0`, `udhr_vi`, `wikisource_vi` | Multi-register sentences with rich diacritics |
+| `nom.chunking` | `wiki_vi`, `wikisource_vi`, `udhr_vi` | Long-form prose with paragraph structure |
+| `nom.embeddings` | `tatoeba_vi`, `flores_vi` (when available) | Sentence-level evaluation pairs |
+| `nom.retrieve` (BM25, dense, hybrid) | `wiki_vi` corpus + handcrafted queries | Diverse encyclopedia topics for IR |
+| `nom.rag` | `wiki_vi` (corpus) + `tatoeba_vi` (queries) | End-to-end retrieval + generation |
+| `nom.doc` (PDF text extraction) | `udhr_vi/udhr_vie.pdf` | Born-digital PDF baseline |
+| `nom.doc` (OCR on images) | `synthetic_ocr_vi` (clean + noisy) | Perfect ground truth, regression-safe |
+
+## Reproducing the corpora from a clean clone
+
+```bash
+# Text + PDF — all idempotent
+python benchmarks/data/_fetch_all.py
+
+# Synthetic OCR images — deterministic via seeded RNG
+python benchmarks/data/synthetic_ocr_vi/render.py
+```
+
+The fetcher uses only stdlib (`urllib.request`) plus `huggingface_hub` for
+gated-dataset paths. The renderer requires `Pillow` and Vietnamese-capable
+system fonts (DejaVu / Lato / FreeFont — present on most Linux distros).
+
+## License posture (CLAUDE.md principle 11 + 12)
+
+- **Per-folder LICENSE** with explicit attribution rules — never relying on
+  global "license file" inheritance.
+- **No pickle, no opaque binary** in any committed dataset. PNGs and PDFs are
+  open formats; everything else is plaintext or TSV.
+- **Reproducible from script** — every committed dataset is regeneratable from
+  `_fetch_all.py` or `render.py`. No black-box artifacts.
+- **CC-BY-SA "share-alike" caveat**: derivative works that incorporate
+  CC-BY-SA datasets inherit the share-alike obligation. The library code itself
+  (Apache 2.0) does not — only outputs that bake-in CC-BY-SA *content*.
+
+## Sources we considered and rejected
+
+| Source | Why excluded |
+|---|---|
+| VLSP shared-task corpora | Research-only license, no redistribution |
+| VnExpress / Tuoi Tre / news scrapes | Copyrighted, no permissive license |
+| CC-100 / mC4 / CulturaX | License unclear (Common Crawl ToS murkiness) |
+| VietAI medical-QA | Research-only |
+| Vinacademy / VinAI scanned docs | License unclear |
+
+## Pending additions
+
+- **Wikimedia Commons VN signs** — real-world OCR images, CC-BY-SA / PD per file
+- **Internet Archive scanned VN books** — pre-1928 US PD, fetch via `download.sh`
+- **vbpl.vn legal documents** — PD by Vietnamese law (Luật SHTT 2005, Art. 15)

@@ -33,6 +33,7 @@ reported STS Pearson of 84.87 — the strongest public number at the
 
 from __future__ import annotations
 
+import contextlib
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -164,6 +165,52 @@ class VietnameseEmbedder:
             cache_folder=self.cache_folder,
         )
         self._dim = self._model.get_sentence_embedding_dimension()
+        # Hard-cap sequence length to the *real* size of the model's
+        # position-embedding table, not the model card's `max_seq_length`.
+        #
+        # We've seen ``dangvantuan/vietnamese-embedding`` advertise
+        # max_seq_length=512 while the actual position-embeddings table
+        # is 258 entries — a misconfiguration on the upstream model card
+        # that makes any input >~256 subwords trigger an IndexError /
+        # CUDA assert in F.embedding (the "padding_idx + cumsum"
+        # XLM-RoBERTa quirk magnifies this off-by-one). We've also seen
+        # AITeamVN/Vietnamese_Embedding (BGE-M3) advertise 8192 while
+        # the table is 8194. Trust the table, not the card.
+        actual_pos = self._actual_position_table_size()
+        advertised = int(getattr(self._model, "max_seq_length", 512) or 512)
+        # Leave 2-token headroom for [CLS]/[SEP] + the +padding_idx
+        # offset XLM-RoBERTa adds.
+        cap = max(8, min(advertised, actual_pos - 4))
+        self._model.max_seq_length = cap
+        tok = getattr(self._model, "tokenizer", None)
+        if tok is not None:
+            with contextlib.suppress(Exception):
+                tok.model_max_length = cap
+
+    def _actual_position_table_size(self) -> int:
+        """Return the number of rows in the position-embeddings table.
+
+        Walks the SentenceTransformer module to find the underlying
+        transformer's positional embeddings. Returns a high default if
+        we can't introspect (some encoder types don't have absolute
+        position embeddings — they use rotary or relative — and don't
+        have this overflow class of bug).
+        """
+        try:
+            assert self._model is not None  # narrowed by _ensure_loaded callers
+            mod = self._model._first_module()
+            auto = getattr(mod, "auto_model", None)
+            if auto is None:
+                return 100_000
+            emb = getattr(auto, "embeddings", None)
+            if emb is None:
+                return 100_000
+            pos = getattr(emb, "position_embeddings", None)
+            if pos is None:
+                return 100_000
+            return int(pos.num_embeddings)
+        except Exception:
+            return 100_000
 
     def __repr__(self) -> str:
         loaded = "loaded" if self._model is not None else "lazy"

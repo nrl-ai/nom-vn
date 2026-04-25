@@ -5,6 +5,273 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] — 2026-04-25
+
+### Architecture — Protocol seams promoted
+
+Two new `runtime_checkable` Protocols formalize the swap points in the
+chat layer. Both have multiple shipping implementations and conformance
+tests that catch shape drift.
+
+- **`nom.chat.Store`** is now a Protocol (was duck-typed). The
+  in-memory class was renamed `MemoryStore`. `SqliteStore` continues
+  to conform. `isinstance(store, Store)` works at boot and in tests.
+- **`nom.chat.EmbeddingsCache`** is a new Protocol pulled out of
+  `SqliteStore`'s inline `.npy` operations. Two impls ship today:
+  `LocalDiskCache` (one `.npy` per material — the previous behavior)
+  and `MemoryCache` (dict-backed, for tests / ephemeral). Future
+  `S3Cache` / `GcsCache` / `RedisCache` slot in unchanged.
+- `SqliteStore.__init__` gained an optional `embeddings_cache=` kwarg.
+  Default is `LocalDiskCache(data_dir / "embeddings")` — bit-for-bit
+  the same as 0.2.1 on disk.
+
+### Added — `AITeamVNEmbedder` (heavier, higher-quality VN embedder)
+
+New opt-in embedder. Loads `AITeamVN/Vietnamese_Embedding` (BGE-M3
+fine-tune for VN, 1024-d, ~2.3 GB, Apache 2.0, safetensors).
+
+```python
+from nom.embeddings import AITeamVNEmbedder
+e = AITeamVNEmbedder()  # cheap; lazy-loads on first .embed()
+```
+
+Reported quality (verified on the model card, Zalo Legal QA held-out
+20% split): **Acc@1 0.7274 vs 0.5682 base BGE-M3 (+27.9%)**, MRR@10
+**0.8181 vs 0.6822**. Source:
+https://huggingface.co/AITeamVN/Vietnamese_Embedding.
+
+`VietnameseEmbedder` (BGE-base ft, 768-d, ~440 MB) remains the
+default — `AITeamVNEmbedder` is opt-in for users with the disk +
+RAM and a legal/formal corpus where the gain applies. Re-bench
+against your own corpus via `benchmarks/rag/bench_rag_vn.py` before
+promoting it your default for non-legal text.
+
+### Fixed — BGE-M3 ranking claim in `nom.embeddings` docstring
+
+The module docstring at `src/nom/embeddings/__init__.py:18` previously
+claimed BGE-M3 is the VN-MTEB #1 at 64.90 overall. Per Table 3 of
+[arXiv 2507.21500](https://arxiv.org/html/2507.21500v1), the actual
+top of that table is `intfloat/multilingual-e5-large-instruct` at
+**67.99**, with `intfloat/e5-mistral-7b-instruct` (67.67) and
+`Alibaba-NLP/gte-Qwen2-7B-instruct` (65.84) above BGE-M3 (~4th).
+Corrected per CLAUDE.md principle 12.
+
+### Docs — `docs/architecture.md` extended
+
+New section "Protocol seams & scaling path" added at the top:
+- **Seven-layer model** (Primitives / Models / Retrieval / RAG /
+  Storage / Application / Deployment) with the modules at each layer.
+- **Protocol-seam table** mapping each seam to its definition file,
+  default impl, and concrete future impls.
+- **Data-flow diagram** (RAG ingest → query → answer) showing where
+  each Protocol plugs in.
+- **Scaling-path table** (1 user → 100K chunks → small team → cloud
+  → SaaS) with the swap deltas at each tier.
+- **Anti-architecture rules** — what we deliberately don't build
+  (no ORM, no DI framework, no event bus, no Manager classes,
+  no future-proof generic Repository/Entity/DTO layers, …).
+
+### Added — VN RAG retrieval benchmark (`benchmarks/rag/`)
+
+Reproducible measurement harness for the retrieval half of `nom.rag`:
+Recall@{1,3,5,10}, MRR@10, per-query p50/p95 latency. Pluggable
+embedder (`fake` for offline / CI; `vietnamese` for real signal) and
+pluggable corpus loader.
+
+```bash
+python benchmarks/rag/bench_rag_vn.py                       # offline
+python benchmarks/rag/bench_rag_vn.py --embedder vietnamese # real
+```
+
+Committed:
+- `benchmarks/rag/bench_rag_vn.py` — the harness, ~350 LOC.
+- `benchmarks/rag/fixtures/vn_legal_tiny.json` — 12 paraphrased VN
+  legal articles + 12 questions (Luật Doanh nghiệp 2020, Bộ luật
+  Dân sự 2015, Bộ luật Lao động 2019, Luật Đất đai 2024).
+- `benchmarks/rag/baselines/vn_legal_tiny__fake_embedder.json`
+- `benchmarks/rag/baselines/vn_legal_tiny__vietnamese_embedder.json`
+- `benchmarks/rag/README.md` — methodology + path to scaling against
+  Zalo Legal QA full corpus.
+
+Honest read of the committed baselines: every retriever saturates
+(recall@1 = 1.000, mrr@10 = 1.000) on the tiny fixture with the real
+embedder. The fixture **validates the harness; it does not differentiate
+retrievers**. To rank retrievers (and to honestly evaluate GraphRAG /
+agentic methods later), we need a larger, harder corpus where recall@1
+lands well below 1.0 — Zalo Legal QA is the next step (download
+documented in the README).
+
+A finding from the **fake-embedder** baseline (dense = noise): hybrid
+RRF on signal + noise scored *worse* than the strong leg alone (BM25
+recall@1 1.000 → hybrid 0.750). RRF assumes equally-informative
+retrievers; when one is noise it dilutes the strong signal. Documented
+in the README as a known property.
+
+### Added — React + ShadCN UI (NotebookLM-style)
+
+The chat web app now ships a comprehensive React/TypeScript frontend
+in addition to the FastAPI backend. Three-pane editorial layout modeled
+on NotebookLM: spaces sidebar / chat thread / sources + studio.
+
+```bash
+cd ui && pnpm install && pnpm build   # one-time UI build
+nom serve                              # FastAPI auto-detects ui/dist
+```
+
+Stack:
+- **Vite + React 18 + TypeScript** — strict mode, no untyped surface.
+- **TanStack Query (React Query) v5** — typed hooks per endpoint
+  (`useSpaces`, `useUploadMaterial`, `useAsk`, …) with optimistic
+  invalidation.
+- **Radix UI primitives** — Dialog, Tooltip, ScrollArea, Separator —
+  copied-in (ShadCN pattern), no runtime npm-on-us dep.
+- **Tailwind CSS** — design tokens encode the editorial palette
+  (cream `#f1ede3` / ink `#141414` / burnt orange `#c46a37`), sharp
+  corners (`border-radius: 0`), Space Grotesk display + Inter body +
+  ui-monospace for `§` section markers.
+- **react-resizable-panels** — desktop 3-pane split; mobile collapses
+  to a single chat column with floating sheet drawers.
+
+Features:
+- Per-space localStorage chat history with Cmd/Ctrl+Enter to send,
+  Esc to clear.
+- Inline citation chips `[1]` `[2]` with hover-tooltip preview and
+  click-expand "Sources" panel showing the cited chunks.
+- Drag-and-drop multi-file upload zone.
+- Empty / loading / error states polished. Suggested Vietnamese
+  questions pre-populate when a space has materials but no chat
+  history yet.
+- Studio panel placeholders (Briefing doc / Mind map / FAQ / Audio
+  overview) labeled `v0.3` — honest about what isn't built.
+
+Server integration:
+- `nom.chat.server.build_app` auto-discovers `ui/dist/` (or
+  `src/nom/chat/ui_dist/` when packaged) via `_find_ui_dist()` and
+  mounts it; falls back to the embedded HTML when the bundle is
+  absent (chat-only installs still work).
+- New `scripts/build_ui.sh` runs `pnpm build` and stages the output
+  under `src/nom/chat/ui_dist/` so `pip wheel .` ships the UI.
+- `[tool.hatch.build.targets.wheel] artifacts = ["src/nom/chat/ui_dist/**"]`
+  ensures the staged bundle is included in the wheel.
+
+### Engineering — SqliteStore refinements (post-simplify pass)
+The persistence layer landed in 0.2.1 was reviewed in three parallel
+agents (reuse / quality / efficiency) and refactored:
+
+- **N+1 fix** — `list_spaces()` now uses two queries (spaces +
+  all-materials grouped in Python) regardless of N spaces.
+- **Race fix** — `ask()` uses double-checked locking against a
+  dedicated `_build_lock`; concurrent first-asks no longer
+  double-build the RAG.
+- **Bounded LRU cache** — `_rag_cache` capped at 16 spaces by default
+  (`cache_max=` constructor arg), evicting least-recently-used.
+- **Batched embedding** — pending materials in `_build_rag()` are now
+  parsed and chunked first, then a **single** `embed_batch` runs over
+  the union of their chunks; previously each material made its own
+  `embed_batch` call.
+- **Embedder dim validation** — first index records the embedder
+  identity in the meta table; subsequent indexings (or reloads from
+  cache) raise a clear error if the dim differs, instead of crashing
+  inside `np.vstack`.
+- **EXISTS instead of COUNT(\*)** on the per-`ask()` material check
+  hot path.
+- **TOCTOU fix** — `_delete_embedding_file` uses `unlink(missing_ok=True)`.
+- `_source_to_text` promoted from private import to public
+  `nom.rag.source_to_text`.
+- Schema version write guarded — only on first init.
+
+## [0.2.1] — 2026-04-25
+
+### Added — `nom.chat.SqliteStore` (persistent storage)
+
+`nom serve` now persists state by default — spaces, raw material bytes,
+chunked text, and embeddings survive restarts. Cold-start `ask` reads
+from disk only; the expensive embed-batch runs **once per material
+lifetime**.
+
+```bash
+nom serve                          # persistent at ~/.nom (default)
+nom serve --data-dir /var/lib/nom  # custom location
+nom serve --in-memory              # ephemeral (old behavior)
+```
+
+Layout under the data dir:
+
+```
+nom.db                 # SQLite — spaces, materials (BLOB), chunks
+embeddings/<id>.npy    # one float32 matrix per indexed material
+```
+
+`SqliteStore` mirrors the in-memory `Store` shape exactly (duck-typed)
+— either can be passed to `build_app(store=...)`. The CLI picks
+`SqliteStore` by default and falls back to `Store` only when
+`--in-memory` is set.
+
+### Engineering
+- 8 new tests (238 total) — `TestSqliteStore` covers create/list,
+  cross-restart persistence, embedding cache hit (asserts a fresh
+  embedder is **not** called for `embed_batch` after reopen), space
+  delete cascading to embedding files, and end-to-end through
+  `build_app`.
+- Atomic write for embedding files: `<id>.npy.tmp` → `replace()`.
+- Crash-safety ordering: write embedding file first (atomic rename),
+  then commit chunk rows + flip `indexed=1` in one transaction. A
+  crash between leaves at most an orphan `.npy` (harmless, overwritten
+  on retry).
+- WAL journal mode + foreign-key cascades on the SQLite connection.
+
+## [0.2.0] — 2026-04-25
+
+### Added — `nom.chat` (the deployable web app)
+
+The full v0.2 milestone: Nôm now ships a deployable Vietnamese
+document-Q&A web app, launched from the Python package with one CLI:
+
+```bash
+pip install "nom-vn[chat]"
+nom serve                            # opens http://localhost:8080
+nom serve --port 9000 --model phi4
+```
+
+Architecture (matches the spec in `docs/architecture.md`):
+
+- **`nom.chat.server.build_app`** — FastAPI factory. Routes:
+  `GET /` (UI), `GET/POST/DELETE /api/spaces[/{id}]`,
+  `POST/GET /api/spaces/{id}/materials`, `POST /api/spaces/{id}/ask`.
+  Each endpoint returns documented JSON with `Hit`-shaped citation
+  payloads.
+- **`nom.chat.store.Store`** — thread-safe in-memory store for spaces,
+  raw material bytes, and one `nom.rag.RAG` per space (lazy-rebuilt
+  when materials change). v0.2.1 swaps to SQLite-backed persistence
+  behind the same shape — no API changes.
+- **`nom.chat.cli`** — `nom serve` entry point with sensible defaults
+  (qwen3:8b via local Ollama, port 8080, auto-opens browser).
+- **Minimal vanilla-HTML UI** at `/` — three sections: spaces list,
+  upload, ask. Inline citations show doc/chunk/score per hit.
+  Replaced by React + ShadCN `dist/` in v0.2.1; the swap is a
+  one-line `StaticFiles` mount.
+
+### SOTA pointers folded into module docs (April 2026)
+
+- `nom.embeddings` — VN-MTEB (arXiv 2507.21500) lists BGE-M3 #1 at
+  64.90 overall; RoPE-based instruction-tuned variants
+  (e5-Mistral-7B-Instruct, e5-Qwen2-7B-Instruct) lead at 7B scale.
+  All drop in via the same sentence-transformers wrapper.
+- `nom.llm` — Phi-4 (MIT, exceptional reasoning per published
+  benchmarks) and DeepSeek-V3.2/V4 added as headroom options;
+  Qwen3-VL listed as the v0.2.1 vision-direct path.
+- `nom.doc` (planned) — `dots.ocr` (rednote-hilab, SOTA multilingual
+  VLM document parsing) and Surya (90+ languages, layout + reading
+  order) flagged as next-gen alternatives to Tesseract+VietOCR.
+
+### Engineering
+- 19 new tests (230 total passing) — `TestClient` exercises the
+  FastAPI routes end-to-end with `_FakeLLM` + `_FakeEmbedder` doubles.
+  No real model downloads or LLM calls in CI.
+- `[chat]` extras: `fastapi`, `uvicorn[standard]`, `python-multipart`.
+- `[project.scripts] nom = nom.chat.cli:main` — `nom serve` works
+  immediately after install.
+
 ## [0.0.7] — 2026-04-25
 
 ### Added — `nom.rag` (the easy-to-use front door)
@@ -247,4 +514,4 @@ Initial release. Working `nom.text` module; preview API for `nom.doc` and
 - Preview API stubs for `nom.doc.extract` and `nom.llm.{Ollama, OpenAI, Anthropic}`.
 - Test suite — 22 tests, all passing.
 - Performance benchmark — `scripts/bench_text.py`.
-- Component selection rationale + benchmark numbers — `docs/BENCHMARK.md`.
+- Component selection rationale + benchmark numbers — `docs/benchmark.md`.

@@ -32,7 +32,7 @@ Performance tuning (v0.0.6 vs v0.0.5):
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -62,7 +62,7 @@ class DenseRetriever:
         >>> hits = r.search(q, top_k=5)
     """
 
-    embeddings: NDArray[np.floating]
+    embeddings: NDArray[np.floating[Any]]
     documents: list[str] | None = None
     name: str = field(default="dense", init=False)
 
@@ -93,7 +93,7 @@ class DenseRetriever:
     # Query
     # ------------------------------------------------------------------
 
-    def score(self, query_vector: NDArray[np.floating]) -> NDArray[np.floating]:
+    def score(self, query_vector: NDArray[np.floating[Any]]) -> NDArray[np.floating[Any]]:
         """Return cosine similarity (= dot product, given normalized inputs)
         between ``query_vector`` and every doc embedding.
 
@@ -118,7 +118,7 @@ class DenseRetriever:
         # (N, D) @ (D,) → (N,). One BLAS call.
         return self.embeddings @ q
 
-    def search(self, query_vector: NDArray[np.floating], *, top_k: int = 10) -> list[Hit]:
+    def search(self, query_vector: NDArray[np.floating[Any]], *, top_k: int = 10) -> list[Hit]:
         """Return up to ``top_k`` nearest neighbors by cosine similarity.
 
         Hot-path notes (v0.0.6 retune):

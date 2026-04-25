@@ -73,6 +73,138 @@ This also simplifies:
 
 ---
 
+## Protocol seams & scaling path
+
+Every meaningful boundary in `nom-vn` is a `typing.Protocol` (where it
+makes sense, `runtime_checkable`). The fast path is single-process
+Python; the cloud path replaces three Protocol implementations and
+changes nothing in the application layer. State lives in storage;
+computation is stateless. Caching is selective — we cache only what's
+expensive to recompute (embeddings), never what isn't (BM25, parsing).
+
+### The seven layers
+
+| Layer | Role | Stateful? | Today's modules |
+|---|---|---|---|
+| **0 · Primitives** | VN text utilities, chunking | No | `nom.text`, `nom.chunking` |
+| **1 · Models** | Embedder, LLM, OCR backends | Yes (lazy-loaded weights) | `nom.embeddings`, `nom.llm`, `nom.doc.OCR` |
+| **2 · Retrieval** | BM25, Dense, hybrid fusion | Yes (in-RAM index per corpus) | `nom.retrieve` |
+| **3 · RAG** | Compose models + retrieval into ask() | Immutable per-corpus | `nom.rag.RAG` |
+| **4 · Storage** | Persistence boundary | Yes (the only durable state) | `nom.chat.Store`, `nom.chat.EmbeddingsCache` |
+| **5 · Application** | HTTP + UI bundle, DI factory | No (delegates to Layer 4) | `nom.chat.server.build_app` |
+| **6 · Deployment** | CLI, config, packaging | No | `nom.chat.cli`, `pyproject.toml`, `ui/` |
+
+### Where each Protocol seam lives in the code
+
+| Seam | Defined in | Default impl | Future impls (concrete, not hypothetical) |
+|---|---|---|---|
+| `nom.embeddings.Embedder` | `src/nom/embeddings/base.py` | `VietnameseEmbedder` (BGE-base, 768d) | `AITeamVNEmbedder` (BGE-M3 ft, +27.9% Acc@1 on Zalo Legal — see `docs/sota_vn_2026q2.md`) |
+| `nom.llm.LLM` | `src/nom/llm/base.py` | `Ollama` | `OpenAI`, `Anthropic`, `LlamaCppPython` |
+| `nom.retrieve.Retriever` | `src/nom/retrieve/base.py` | `BM25Retriever`, `DenseRetriever` (numpy in-RAM) | `FaissRetriever` / `QdrantRetriever` at >100k chunks (planned `nom.index`) |
+| `nom.doc.Stage` | `src/nom/doc/stages.py` | `Tesseract` for OCR | `DotsMocrOCR`, `PaddleOcrV5`, `Qwen3VLOCR` (gated on VN-corpus benchmark per principle 12) |
+| `nom.chat.Store` | `src/nom/chat/store.py` | `MemoryStore`, `SqliteStore` | `PostgresStore` (~250 LOC `psycopg`, no ORM) |
+| `nom.chat.EmbeddingsCache` | `src/nom/chat/embeddings_cache.py` | `LocalDiskCache` (one `.npy` per material), `MemoryCache` | `S3Cache`, `GcsCache`, `RedisCache` |
+
+### Data flow (RAG ingest → query → answer)
+
+```
+                   [bytes / paths / strings]
+                              │
+                  ┌───────────▼───────────┐
+                  │  nom.doc.Pipeline     │  Layer 1 (Stage Protocol)
+                  │  Load → Parse → OCR   │  swap: Tesseract / dots.mocr / Qwen3-VL
+                  │  → Normalize          │
+                  └───────────┬───────────┘
+                              │   text per doc
+                  ┌───────────▼───────────┐
+                  │  nom.chunking         │  Layer 0
+                  │  smart_chunk()        │  pure Python, no swap
+                  └───────────┬───────────┘
+                              │   list[Chunk]
+                  ┌───────────▼───────────┐
+                  │  nom.embeddings       │  Layer 1 (Embedder Protocol)
+                  │  embed_batch()        │  swap: dangvantuan / AITeamVN / e5-mistral
+                  └───────────┬───────────┘
+                              │   (N, D) float32 + texts
+                  ┌───────────▼───────────┐
+                  │  EmbeddingsCache      │  Layer 4 (Protocol)
+                  │  put(material, vecs)  │  swap: LocalDisk / S3 / Memory
+                  └───────────┬───────────┘
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+   ┌──────────▼─────┐ ┌──────▼────────┐ ┌────▼──────────┐
+   │ BM25Retriever  │ │ DenseRetriever│ │ Future:       │  Layer 2
+   │  (lexical)     │ │  (cosine)     │ │ FaissRetriever│  swap at >100k chunks
+   └──────────┬─────┘ └──────┬────────┘ └────┬──────────┘
+              │              │               │
+              └──────────────┼───────────────┘
+                             │   list[Hit]
+                  ┌──────────▼──────────┐
+                  │  hybrid_score()     │  Layer 2 (function, no swap)
+                  │  RRF fusion         │
+                  └──────────┬──────────┘
+                             │   ranked context
+                  ┌──────────▼──────────┐
+                  │  nom.llm.LLM        │  Layer 1 (LLM Protocol)
+                  │  complete(prompt)   │  swap: Ollama / OpenAI / Anthropic
+                  └──────────┬──────────┘
+                             │
+                       Answer + citations
+```
+
+### Scaling path (concrete, no fantasy numbers)
+
+| Scale | Topology | Store | EmbeddingsCache | Retriever | Net change |
+|---|---|---|---|---|---|
+| 1 user, laptop | 1 proc | `SqliteStore` | `LocalDiskCache` | BM25 + Dense | (today's default) |
+| 1 user, 100K+ chunks | 1 proc | `SqliteStore` | `LocalDiskCache` | swap → `FaissRetriever` | one constructor swap |
+| Small team, 1 host | uvicorn workers | `SqliteStore` (WAL) | `LocalDiskCache` (shared volume) | as above | add nginx in front |
+| Multi-host / cloud | N stateless app pods | `PostgresStore` | `S3Cache` | `QdrantRetriever` | three Protocol impls, **zero app changes** |
+| Multi-tenant SaaS | N pods + auth | as above + tenant scoping | as above + tenant prefix | as above | add auth middleware in `nom.chat.server` |
+
+Throughput / latency numbers per tier are deliberately omitted —
+those need a benchmark, not a guess (CLAUDE.md principle 12).
+`benchmarks/perf/` (component-level) and `benchmarks/rag/`
+(end-to-end retrieval) are the places to measure for your workload.
+
+### Anti-architecture rules
+
+What we deliberately **don't** build, and why:
+
+1. **No service locator / DI framework.** Pass dependencies through
+   constructors. 8+ params is a sign the class is doing too much.
+2. **No `…Manager` classes.** If the name doesn't describe what it
+   owns, the class probably shouldn't exist.
+3. **No abstract base classes for behavior sharing.** Protocols are
+   for contracts; module-level helpers are for shared code.
+4. **No event-emitter / pub-sub.** Python's call stack is your event
+   log.
+5. **No "future-proof" generic Repository / Entity / DTO layer.**
+   Call things what they are.
+6. **No ORM.** SQL is a language; we know it. Direct `sqlite3` /
+   `psycopg` keeps query plans visible. (Considered SQLAlchemy /
+   SQLModel; rejected — adds ~15 MB of deps to support a one-config
+   swap that's already a 7-method Protocol.)
+7. **No micro-services until we have ≥3 independently-deployed
+   teams.** We have one repo and one developer.
+8. **No config framework.** `argparse` + env vars + a single
+   `Config` dataclass is enough.
+
+### What we deliberately don't abstract
+
+- **Tokenization** (`nom.text.word_tokenize`) — too foundational;
+  swapping invalidates every benchmark. Stays a function call.
+- **The fusion algorithm** (`hybrid_score`'s RRF) — too small to
+  warrant a Protocol; just a function with a `method` arg.
+- **Chunking strategy** — `smart_chunk` is a function, not a service.
+  Could grow a `Chunker` Protocol when there's a second strategy
+  worth swapping.
+- **The HTTP framework** (FastAPI) — replacing it would be more work
+  than it's worth. We accept the lock-in.
+
+---
+
 ## Module-by-module spec
 
 ### `nom.text` — Vietnamese text utilities (shipped, v0.0.2)
@@ -104,7 +236,7 @@ result = extract(
 )
 ```
 
-See `docs/PIPELINE.md` for the full per-stage detail.
+See `docs/pipeline.md` for the full per-stage detail.
 
 ### `nom.llm` — LLM adapters (shipped, v0.0.3)
 
@@ -525,7 +657,7 @@ Numbers in user-facing materials must trace back to a script in this tree. No co
 
 ### 6. Dependency audit (CLAUDE.md principle 11)
 
-Each addition to `pyproject.toml` requires a matching note in `docs/BENCHMARK.md` covering:
+Each addition to `pyproject.toml` requires a matching note in `docs/benchmark.md` covering:
 
 1. License (must be permissive — Apache / MIT / BSD / CC0)
 2. Bundled artifact format (`.pkl` = auto-reject; safe formats include `safetensors`, `pt` if directly loadable, CRFsuite native binary, ONNX)

@@ -1,0 +1,18 @@
+Vietnamese Wikipedia article extracts — license summary
+========================================================
+
+File: articles.jsonl
+- Source: https://vi.wikipedia.org (per-article URL in each record's `url` field)
+- License: CC-BY-SA 4.0 and GFDL (dual)
+- Effective license: CC-BY-SA 4.0 (we use the more recent / more permissive variant)
+
+Attribution required:
+  "Vietnamese Wikipedia contributors" + per-article URL.
+
+Share-alike applies — derivative works must be licensed CC-BY-SA-compatible.
+
+Full license text:
+- CC-BY-SA 4.0: https://creativecommons.org/licenses/by-sa/4.0/
+- GFDL: https://www.gnu.org/licenses/fdl-1.3.html
+
+Wikimedia Foundation terms of use: https://foundation.wikimedia.org/wiki/Terms_of_Use

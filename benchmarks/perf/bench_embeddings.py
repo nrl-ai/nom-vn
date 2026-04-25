@@ -155,8 +155,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     print(
-        "Note: first run downloads model weights to ~/.cache/huggingface "
-        "(~440 MB for default).\n"
+        "Note: first run downloads model weights to ~/.cache/huggingface (~440 MB for default).\n"
     )
 
     result = run(args.model)

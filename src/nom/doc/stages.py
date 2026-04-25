@@ -24,7 +24,7 @@ OSS prior art studied while designing this module:
   stage is lifted from this library, reimplemented in ~30 LOC so we
   don't add the dep.
 
-See ``docs/PIPELINE.md`` for the per-stage component picks and rationale.
+See ``docs/pipeline.md`` for the per-stage component picks and rationale.
 """
 
 from __future__ import annotations
@@ -59,24 +59,42 @@ _IMAGE_MAGICS: dict[bytes, str] = {
     b"BM": "image/bmp",
 }
 
-_TEXT_EXTENSIONS = {".txt", ".md", ".rst", ".log"}
+_TEXT_EXTENSIONS = {".txt", ".md", ".markdown", ".rst", ".log", ".csv", ".tsv"}
+_HTML_EXTENSIONS = {".html", ".htm", ".xhtml"}
+_JSON_EXTENSIONS = {".json", ".jsonl", ".ndjson"}
+
+# Office Open XML magic prefix is ``PK\x03\x04`` — the same as any ZIP.
+# We disambiguate by extension when the file is path-based, and by
+# inspecting the central directory when it's bytes (looking for the
+# format-specific top-level entries).
+_ZIP_MAGIC = b"PK\x03\x04"
 
 
 def _detect_format(source: str | Path | bytes) -> str:
-    """Return ``"pdf"``, ``"image"``, or ``"text"``.
+    """Return one of ``"pdf"``, ``"image"``, ``"docx"``, ``"xlsx"``,
+    ``"pptx"``, ``"html"``, ``"json"``, ``"text"``.
 
-    For bytes: read the first 16 bytes and match magic numbers.
-    For path: try magic first, fall back to extension.
+    For bytes: magic-byte sniff, with ZIP-based formats disambiguated by
+    inspecting the embedded central directory.
+    For path: magic first, fall back to extension.
     """
     if isinstance(source, bytes):
         head = source[:16]
-        return _format_from_head(head, ext="")
+        fmt = _format_from_head(head, ext="")
+        if fmt == "zip":
+            return _format_from_zip_bytes(source)
+        return fmt
     path = Path(source)
     if path.is_file():
         with path.open("rb") as f:
             head = f.read(16)
         ext = path.suffix.lower()
-        return _format_from_head(head, ext=ext)
+        fmt = _format_from_head(head, ext=ext)
+        if fmt == "zip":
+            # Path-based: trust the extension first; fall back to inspection.
+            ext_fmt = _office_format_from_ext(ext)
+            return ext_fmt or _format_from_zip_path(path)
+        return fmt
     # Path doesn't exist (yet) — extension only
     return _format_from_extension(path.suffix.lower())
 
@@ -90,6 +108,8 @@ def _format_from_head(head: bytes, *, ext: str) -> str:
             if magic == b"RIFF" and len(head) >= 12 and head[8:12] != b"WEBP":
                 continue
             return "image"
+    if head.startswith(_ZIP_MAGIC):
+        return "zip"
     return _format_from_extension(ext)
 
 
@@ -98,11 +118,60 @@ def _format_from_extension(ext: str) -> str:
         return "pdf"
     if ext in {".png", ".jpg", ".jpeg", ".gif", ".tiff", ".tif", ".bmp", ".webp"}:
         return "image"
+    if ext in {".docx", ".docm"}:
+        return "docx"
+    if ext in {".xlsx", ".xlsm"}:
+        return "xlsx"
+    if ext in {".pptx", ".pptm"}:
+        return "pptx"
+    if ext in _HTML_EXTENSIONS:
+        return "html"
+    if ext in _JSON_EXTENSIONS:
+        return "json"
     if ext in _TEXT_EXTENSIONS:
         return "text"
     # Default: treat unknowns as text. Keeps the pipeline running rather than
     # blowing up on a misnamed file.
     return "text"
+
+
+def _office_format_from_ext(ext: str) -> str | None:
+    """Return docx/xlsx/pptx for known Office extensions, else None."""
+    return {
+        ".docx": "docx",
+        ".docm": "docx",
+        ".xlsx": "xlsx",
+        ".xlsm": "xlsx",
+        ".pptx": "pptx",
+        ".pptm": "pptx",
+    }.get(ext)
+
+
+def _format_from_zip_bytes(data: bytes) -> str:
+    """Look inside a ZIP to detect Office Open XML variants.
+
+    Word: ``word/document.xml``. Excel: ``xl/workbook.xml``.
+    PowerPoint: ``ppt/presentation.xml``.
+    """
+    import io
+    import zipfile
+
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as zf:
+            names = set(zf.namelist())
+    except zipfile.BadZipFile:
+        return "text"
+    if "word/document.xml" in names:
+        return "docx"
+    if "xl/workbook.xml" in names:
+        return "xlsx"
+    if "ppt/presentation.xml" in names:
+        return "pptx"
+    return "text"
+
+
+def _format_from_zip_path(path: Path) -> str:
+    return _format_from_zip_bytes(path.read_bytes())
 
 
 class Load:
@@ -171,12 +240,205 @@ class Parse:
             ctx.needs_ocr = [0]
             return ctx
 
+        if ctx.fmt == "html":
+            self._parse_html(ctx)
+            return ctx
+        if ctx.fmt == "json":
+            self._parse_json(ctx)
+            return ctx
+        if ctx.fmt == "docx":
+            self._parse_docx(ctx)
+            return ctx
+        if ctx.fmt == "xlsx":
+            self._parse_xlsx(ctx)
+            return ctx
+        if ctx.fmt == "pptx":
+            self._parse_pptx(ctx)
+            return ctx
+
         # PDF path
         if self.backend == "pdfplumber":
             self._parse_pdf_pdfplumber(ctx)
         else:
             self._parse_pdf_pymupdf(ctx)
         return ctx
+
+    # ------------------------------------------------------------------
+    # Office Open XML parsers — pure-Python deps, MIT-licensed
+    # ------------------------------------------------------------------
+
+    def _parse_docx(self, ctx: Context) -> None:
+        try:
+            from docx import Document  # python-docx
+        except ImportError as exc:
+            raise ImportError(
+                "Parse for .docx requires python-docx. Install with: pip install nom-vn[doc]"
+            ) from exc
+        import io
+
+        data = ctx.metadata.get("bytes")
+        if data is None:
+            raise RuntimeError("Parse: no bytes available on context.")
+        doc = Document(io.BytesIO(data))
+        # Paragraphs first; then any tables (each cell as text).
+        parts: list[str] = [p.text for p in doc.paragraphs if p.text]
+        for tbl in doc.tables:
+            for row in tbl.rows:
+                row_text = " | ".join(c.text.strip() for c in row.cells)
+                if row_text.strip(" |"):
+                    parts.append(row_text)
+        ctx.pages_text = parts
+        ctx.text = "\n\n".join(parts)
+
+    def _parse_xlsx(self, ctx: Context) -> None:
+        try:
+            from openpyxl import load_workbook
+        except ImportError as exc:
+            raise ImportError(
+                "Parse for .xlsx requires openpyxl. Install with: pip install nom-vn[doc]"
+            ) from exc
+        import io
+
+        data = ctx.metadata.get("bytes")
+        if data is None:
+            raise RuntimeError("Parse: no bytes available on context.")
+        wb = load_workbook(io.BytesIO(data), read_only=True, data_only=True)
+        # One "page" per sheet; each sheet rendered as TSV-ish lines.
+        # data_only=True follows formula results, not the formula text.
+        pages: list[str] = []
+        for sheet in wb.worksheets:
+            lines: list[str] = [f"# {sheet.title}"]
+            for row in sheet.iter_rows(values_only=True):
+                cells = ["" if v is None else str(v) for v in row]
+                if any(c.strip() for c in cells):
+                    lines.append("\t".join(cells))
+            pages.append("\n".join(lines))
+        wb.close()
+        ctx.pages_text = pages
+        ctx.text = "\n\n".join(pages)
+
+    def _parse_pptx(self, ctx: Context) -> None:
+        try:
+            from pptx import Presentation  # python-pptx
+        except ImportError as exc:
+            raise ImportError(
+                "Parse for .pptx requires python-pptx. Install with: pip install nom-vn[doc]"
+            ) from exc
+        import io
+
+        data = ctx.metadata.get("bytes")
+        if data is None:
+            raise RuntimeError("Parse: no bytes available on context.")
+        prs = Presentation(io.BytesIO(data))
+        # One page per slide. Format per slide:
+        #   <title>          (from slide.shapes.title; may be empty)
+        #   <body line 1>    (from non-title text frames)
+        #   <body line 2>
+        #   _notes: <notes>  (only if speaker notes present)
+        # We don't prepend a "Slide N" marker because viewers know the
+        # slide index from the page's position in the list.
+        pages: list[str] = []
+        for slide in prs.slides:
+            title = ""
+            try:
+                if slide.shapes.title is not None:
+                    title = (slide.shapes.title.text or "").strip()
+            except Exception:
+                pass
+            body_lines: list[str] = []
+            for shape in slide.shapes:
+                tf = getattr(shape, "text_frame", None)
+                if tf is None or not tf.text.strip():
+                    continue
+                # Skip the title shape — already captured above.
+                if shape == slide.shapes.title:
+                    continue
+                body_lines.append(tf.text.strip())
+            notes = ""
+            if slide.has_notes_slide:
+                notes = (slide.notes_slide.notes_text_frame.text or "").strip()
+            parts: list[str] = []
+            if title:
+                parts.append(title)
+            parts.extend(body_lines)
+            if notes:
+                parts.append(f"_notes: {notes}")
+            pages.append("\n".join(parts) if parts else "(empty slide)")
+        ctx.pages_text = pages
+        ctx.text = "\n\n".join(pages)
+
+    # ------------------------------------------------------------------
+    # HTML / JSON — stdlib parsers, no extra deps
+    # ------------------------------------------------------------------
+
+    def _parse_html(self, ctx: Context) -> None:
+        from html.parser import HTMLParser
+
+        data = ctx.metadata.get("bytes", b"")
+        text = data.decode("utf-8", errors="replace")
+
+        # Minimal HTML stripper — drop <script>/<style>, collect text.
+        # No third-party dep; XSS-safe (we never re-emit HTML).
+        class _Stripper(HTMLParser):
+            def __init__(self) -> None:
+                super().__init__()
+                self._skip = 0
+                self.parts: list[str] = []
+
+            def handle_starttag(self, tag: str, _attrs: list[tuple[str, str | None]]) -> None:
+                if tag in ("script", "style", "noscript"):
+                    self._skip += 1
+
+            def handle_endtag(self, tag: str) -> None:
+                if tag in ("script", "style", "noscript") and self._skip > 0:
+                    self._skip -= 1
+
+            def handle_data(self, data: str) -> None:
+                if self._skip == 0:
+                    self.parts.append(data)
+
+        s = _Stripper()
+        s.feed(text)
+        joined = "\n".join(p.strip() for p in s.parts if p.strip())
+        ctx.pages_text = [joined]
+        ctx.text = joined
+
+    def _parse_json(self, ctx: Context) -> None:
+        """Render JSON / JSONL as readable lines.
+
+        Each top-level object → one block. JSONL is line-delimited so
+        each line becomes one entry. Strings are kept as-is; nested
+        objects are JSON-pretty-printed so structure is searchable.
+        """
+        import json as _json
+
+        data = ctx.metadata.get("bytes", b"").decode("utf-8", errors="replace")
+        records: list[Any] = []
+        # Try JSONL first.
+        looks_jsonl = "\n" in data.strip() and data.strip().startswith(("{", "["))
+        if looks_jsonl:
+            for line in data.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    records.append(_json.loads(line))
+                except _json.JSONDecodeError:
+                    records.append(line)
+        else:
+            try:
+                obj = _json.loads(data)
+                records = obj if isinstance(obj, list) else [obj]
+            except _json.JSONDecodeError:
+                records = [data]
+        pages: list[str] = []
+        for r in records:
+            if isinstance(r, str):
+                pages.append(r)
+            else:
+                pages.append(_json.dumps(r, ensure_ascii=False, indent=2))
+        ctx.pages_text = pages
+        ctx.text = "\n\n".join(pages)
 
     def _parse_pdf_pdfplumber(self, ctx: Context) -> None:
         try:
@@ -272,7 +534,7 @@ class OCR:
     Arial, Verdana, Courier New — accuracy is best on those fonts and
     inputs scanned at 200-400 DPI.
 
-    Future v0.x backends in docs/PIPELINE.md (VietOCR Transformer,
+    Future v0.x backends in docs/pipeline.md (VietOCR Transformer,
     PaddleOCR PP-OCRv5) will integrate as opt-in alternatives once we
     have measured accuracy comparisons on a curated VN scan corpus.
 
@@ -313,7 +575,7 @@ class OCR:
         except ImportError as exc:
             missing = "pytesseract" if "pytesseract" in str(exc) else "Pillow"
             raise ImportError(
-                f"OCR stage requires {missing}. " f"Install with: pip install nom-vn[doc]"
+                f"OCR stage requires {missing}. Install with: pip install nom-vn[doc]"
             ) from exc
 
         if ctx.fmt == "image":
@@ -449,8 +711,7 @@ class Extract:
     def run(self, ctx: Context) -> Context:
         if not ctx.schema:
             raise RuntimeError(
-                "Extract requires ctx.schema to be set. "
-                "Provide one when calling Pipeline.run(...)."
+                "Extract requires ctx.schema to be set. Provide one when calling Pipeline.run(...)."
             )
         if not ctx.text:
             raise RuntimeError("Extract requires ctx.text — did Parse and Normalize run?")
@@ -488,7 +749,7 @@ class Extract:
                 )
 
         raise RuntimeError(
-            f"Extract failed after {self.max_retries} attempts. " f"Last error: {last_error}"
+            f"Extract failed after {self.max_retries} attempts. Last error: {last_error}"
         )
 
     @staticmethod

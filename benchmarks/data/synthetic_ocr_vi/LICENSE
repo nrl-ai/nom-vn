@@ -1,0 +1,18 @@
+Synthetic OCR Vietnamese — license summary
+==========================================
+
+Files: clean/*.png, noisy/*.png, ground_truth.jsonl
+
+License: CC0 1.0 Universal (public domain dedication)
+
+Source text: benchmarks/data/diacritic_eval_v0.txt (also CC0, Neural Research
+Lab, 2026-04-25). Rendering script (render.py) is part of nom-vn (Apache 2.0).
+
+Use, copy, modify, redistribute, sell, sublicense — no restrictions, no
+attribution required (though it's appreciated).
+
+Full text: https://creativecommons.org/publicdomain/zero/1.0/
+
+Note: The system fonts used by render.py (DejaVu, Lato, FreeSans/FreeSerif)
+are NOT redistributed in this folder. They are installed system-wide on most
+Linux distros and licensed separately (Bitstream Vera, OFL, GPL respectively).

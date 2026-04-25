@@ -1,0 +1,44 @@
+{
+  "docx": {
+    "file": "hop_dong.docx",
+    "expected_paragraphs_contain": [
+      "HĐ-2026/045",
+      "Hồng Hà",
+      "Sông Hồng",
+      "300.000.000",
+      "8%"
+    ],
+    "expected_min_pages": 7
+  },
+  "xlsx": {
+    "file": "so_sach.xlsx",
+    "expected_sheets": [
+      "Doanh thu Q1",
+      "Nhân sự",
+      "Dự án"
+    ],
+    "expected_pages_contain": [
+      "Doanh thu Q1",
+      "Nhân sự",
+      "Dự án"
+    ],
+    "expected_text_contains": [
+      "1050000000",
+      "Trường Chinh",
+      "Lê Thị D"
+    ]
+  },
+  "pptx": {
+    "file": "thuyet_trinh.pptx",
+    "expected_n_slides": 3,
+    "expected_titles": [
+      "Báo cáo kết quả Quý 1 năm 2026",
+      "Doanh thu vượt kế hoạch 12%",
+      "Kế hoạch Q2"
+    ],
+    "expected_notes_contain": [
+      "30 giây",
+      "tháng 3"
+    ]
+  }
+}

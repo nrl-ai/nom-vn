@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from nom.embeddings import Embedder, VietnameseEmbedder
+from nom.embeddings import AITeamVNEmbedder, Embedder, VietnameseEmbedder
 
 # ---------------------------------------------------------------------------
 # Construction is cheap — no disk/network at __init__
@@ -44,6 +44,23 @@ class TestConstruction:
         e = VietnameseEmbedder()
         assert "lazy" in repr(e)
         assert "dangvantuan/vietnamese-embedding" in repr(e)
+
+    def test_aiteamvn_default_model(self) -> None:
+        e = AITeamVNEmbedder()
+        assert e.model_name == "AITeamVN/Vietnamese_Embedding"
+        assert e.name == "AITeamVN/Vietnamese_Embedding"
+        assert "lazy" in repr(e)
+        assert "AITeamVN" in repr(e)
+        # No model loaded yet — same lazy contract as parent
+        assert e._model is None  # type: ignore[reportPrivateUsage]
+
+    def test_aiteamvn_satisfies_embedder_protocol(self) -> None:
+        e: Embedder = AITeamVNEmbedder()
+        # Attribute presence is what the Protocol checks (it's not
+        # runtime_checkable so isinstance is structural via TYPE_CHECKING).
+        # Confirm the methods exist and are callable.
+        assert callable(e.embed)
+        assert callable(e.embed_batch)
 
 
 # ---------------------------------------------------------------------------

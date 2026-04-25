@@ -7,7 +7,7 @@ and the protocol auditable. Ollama's structured-output feature (since
 constrains the model's output accordingly — see
 https://ollama.com/blog/structured-outputs.
 
-Recommended local model for Vietnamese (per docs/PIPELINE.md): ``qwen3:8b``
+Recommended local model for Vietnamese (per docs/pipeline.md): ``qwen3:8b``
 (Apache 2.0, ~6GB Q4 VRAM). Configure with ``ollama pull qwen3:8b`` first.
 
 This module is loaded only when the user explicitly imports it. Importing
@@ -57,7 +57,7 @@ class Ollama:
             import httpx
         except ImportError as exc:
             raise ImportError(
-                "nom.llm.Ollama requires httpx. " "Install with: pip install nom-vn[llm]"
+                "nom.llm.Ollama requires httpx. Install with: pip install nom-vn[llm]"
             ) from exc
         self._httpx = httpx
         self.model = model

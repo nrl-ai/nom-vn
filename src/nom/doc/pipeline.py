@@ -9,7 +9,7 @@ are scaffolds that raise ``NotImplementedError`` until v0.1 — but the API
 is stable. Code written against this preview will continue to work after
 the v0.1 release.
 
-See ``docs/PIPELINE.md`` for the picks driving each default stage.
+See ``docs/pipeline.md`` for the picks driving each default stage.
 """
 
 from __future__ import annotations
@@ -102,7 +102,7 @@ def default_pipeline(llm: Any) -> Pipeline:
 
         Load → Parse → OCR → Normalize → Extract → Validate
 
-    Each stage's backend pick is documented in ``docs/PIPELINE.md``.
+    Each stage's backend pick is documented in ``docs/pipeline.md``.
 
     Args:
         llm: an :class:`nom.llm.LLM` adapter (Ollama / OpenAI / Anthropic

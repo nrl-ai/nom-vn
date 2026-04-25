@@ -39,5 +39,6 @@ contracts of each submodule are the seam.
 """
 
 from nom.rag.pipeline import RAG, Answer, Citation
+from nom.rag.pipeline import _source_to_text as source_to_text
 
-__all__ = ["RAG", "Answer", "Citation"]
+__all__ = ["RAG", "Answer", "Citation", "source_to_text"]
