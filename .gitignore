@@ -95,3 +95,7 @@ nom-demo/
 # Mirrored at https://huggingface.co/datasets/nrl-ai/vn-rag-bench.
 # Regenerate locally via benchmarks/rag/fixtures/_build_zalo_legal.py.
 benchmarks/rag/fixtures/vn_legal_zalo_*.json
+
+# OCR fixture images (regenerate via benchmarks/data/vn_ocr_subset/_build.py).
+# Mirrored at https://huggingface.co/datasets/nrl-ai/vn-rag-bench.
+benchmarks/data/vn_ocr_subset/images/
