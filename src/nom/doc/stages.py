@@ -5,7 +5,7 @@ raise ``NotImplementedError`` when run. Real implementations land in v0.1
 under the names exported here (``Load``, ``Parse``, ``OCR``, etc.) — code
 written against the v0.0.1 names will keep working.
 
-See PIPELINE.md for the picks each real stage will use.
+See ``docs/PIPELINE.md`` for the picks each real stage will use.
 """
 
 from __future__ import annotations

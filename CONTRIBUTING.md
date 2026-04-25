@@ -78,7 +78,7 @@ Every benchmark must:
 - Document its data source clearly (cite if external).
 - Output JSON results to `benchmarks/results/` so CI can track regressions.
 
-**Numbers to be published anywhere (README, BENCHMARK.md, website) must be reproducible from a committed script.** Don't publish estimates.
+**Numbers to be published anywhere (README, `docs/BENCHMARK.md`, website) must be reproducible from a committed script.** Don't publish estimates.
 
 ## Adding a Vietnamese dataset
 

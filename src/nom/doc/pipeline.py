@@ -9,7 +9,7 @@ are scaffolds that raise ``NotImplementedError`` until v0.1 — but the API
 is stable. Code written against this preview will continue to work after
 the v0.1 release.
 
-See PIPELINE.md for the picks driving each default stage.
+See ``docs/PIPELINE.md`` for the picks driving each default stage.
 """
 
 from __future__ import annotations
@@ -102,7 +102,7 @@ def default_pipeline() -> Pipeline:
 
         Load → Parse → OCR → Normalize → Extract → Validate
 
-    Each default stage's pick is documented in PIPELINE.md. The defaults are
+    Each default stage's pick is documented in docs/PIPELINE.md. The defaults are
     designed to work without any extra installs for the text path; OCR and
     Extract require the ``[doc]`` and ``[llm]`` extras respectively.
     """

@@ -79,6 +79,14 @@ Nôm is **infrastructure, not a model**. It doesn't ship LLM weights. It teaches
 
 Use any model — Qwen, Llama, GPT-4o, Claude. Nôm makes them better at Vietnamese.
 
+## Documentation
+
+- **[docs/PIPELINE.md](docs/PIPELINE.md)** — the v0.1 doc-extraction pipeline end-to-end with cited per-stage picks
+- **[docs/BENCHMARK.md](docs/BENCHMARK.md)** — measured numbers per module + research-backed component selection
+- **[benchmarks/README.md](benchmarks/README.md)** — how to reproduce every published number
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — dev setup, PR rules, dataset contributions
+- **[CHANGELOG.md](CHANGELOG.md)** — version history
+
 ## License
 
 Apache 2.0. Fine-tune, redistribute, commercialize freely. Please keep attribution.

@@ -41,4 +41,4 @@ Initial release. Working `nom.text` module; preview API for `nom.doc` and
 - Preview API stubs for `nom.doc.extract` and `nom.llm.{Ollama, OpenAI, Anthropic}`.
 - Test suite — 22 tests, all passing.
 - Performance benchmark — `scripts/bench_text.py`.
-- Component selection rationale + benchmark numbers — `BENCHMARK.md`.
+- Component selection rationale + benchmark numbers — `docs/BENCHMARK.md`.

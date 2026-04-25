@@ -33,7 +33,7 @@ dependencies = []
 # We pin the chosen backend here once we've measured candidates.
 diacritics = [
   # Decided in v0.0.2 — currently evaluating PyVi vs. DistilBERT-Viet vs.
-  # restore_vietnamese_diacritics. See BENCHMARK.md for the shortlist.
+  # restore_vietnamese_diacritics. See docs/BENCHMARK.md for the shortlist.
 ]
 doc = [
   "pytesseract>=0.3.10",

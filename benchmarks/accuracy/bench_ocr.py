@@ -18,7 +18,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-# Engines we plan to compare in v0.1. See PIPELINE.md for selection rationale.
+# Engines we plan to compare in v0.1. See docs/PIPELINE.md for selection rationale.
 PLANNED_ENGINES: list[dict[str, str]] = [
     {
         "name": "vietocr",
