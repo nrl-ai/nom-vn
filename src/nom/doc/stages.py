@@ -270,19 +270,50 @@ class OCR(_PlaceholderStage):
         self.engine = engine
 
 
-class Normalize(_PlaceholderStage):
-    """Apply ``nom.text`` cleanup: NFC, diacritic restoration on OCR output.
+class Normalize:
+    """Apply ``nom.text`` cleanup to the parsed text.
 
-    Joins ``ctx.pages_text`` into ``ctx.text`` after normalization.
+    What it does (v0.0.3 implementation):
+      1. Joins ``ctx.pages_text`` into ``ctx.text`` (page-separator: blank line).
+      2. Applies Unicode NFC normalization.
+      3. Applies VN-aware text normalization (whitespace + punctuation cleanup).
+      4. Optionally applies diacritic restoration (off by default — the rule-
+         based path corrupts text with high diacritic content; useful only on
+         OCR-stripped text).
 
     Args:
-        fix_diacritics_backend: ``"rules"`` (v0.0.1, zero deps) |
-            ``"model"`` (v0.0.3, ML-backed) | ``"llm"`` (v0.1, LLM-backed).
+        restore_diacritics: when True, apply ``nom.text.fix_diacritics`` to
+            the joined text. Default False because the v0.0.1 rule-based
+            implementation only helps OCR-stripped input — it can damage
+            already-correct VN text. v0.0.3 plans an ML-backed restoration
+            that will be safe to run unconditionally; until then this stays
+            opt-in.
     """
 
-    def __init__(self, fix_diacritics_backend: str = "rules") -> None:
-        super().__init__("Normalize")
-        self.fix_diacritics_backend = fix_diacritics_backend
+    name = "Normalize"
+
+    def __init__(self, restore_diacritics: bool = False) -> None:
+        self.restore_diacritics = restore_diacritics
+
+    def run(self, ctx: Context) -> Context:
+        # Lazy import to keep the placeholder stages dep-free.
+        from nom.text import fix_diacritics, normalize, text_normalize
+
+        def _clean(s: str) -> str:
+            out = text_normalize(normalize(s))
+            return fix_diacritics(out) if self.restore_diacritics else out
+
+        # Apply normalization per-page so we can preserve page boundaries in
+        # ctx.text. text_normalize collapses internal whitespace, so joining
+        # raw pages first would lose the page break.
+        if ctx.pages_text:
+            ctx.pages_text = [_clean(p) for p in ctx.pages_text]
+            ctx.text = "\n\n".join(ctx.pages_text)
+        elif ctx.text:
+            # Defensive: if Parse didn't populate pages_text but did set
+            # ctx.text directly (unusual), still normalize it.
+            ctx.text = _clean(ctx.text)
+        return ctx
 
 
 class Extract(_PlaceholderStage):

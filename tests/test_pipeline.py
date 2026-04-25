@@ -152,17 +152,62 @@ class TestParseStage:
             Parse().run(ctx)
 
 
+class TestNormalizeStage:
+    """Real Normalize stage — wraps nom.text utilities."""
+
+    def test_joins_pages_with_blank_line(self) -> None:
+        ctx = Context(source="x.txt")
+        ctx.pages_text = ["page 1", "page 2"]
+        Normalize().run(ctx)
+        assert ctx.text == "page 1\n\npage 2"
+
+    def test_applies_nfc(self) -> None:
+        ctx = Context(source="x.txt")
+        # decomposed "co" + combining hook above
+        ctx.pages_text = ["co" + "̉"]
+        Normalize().run(ctx)
+        assert ctx.text == "cỏ"
+
+    def test_applies_vn_text_normalize(self) -> None:
+        # text_normalize collapses whitespace and fixes punctuation spacing
+        ctx = Context(source="x.txt")
+        ctx.pages_text = ["Hợp đồng được lập   ngày 14, tháng 3."]
+        Normalize().run(ctx)
+        assert "  " not in ctx.text  # multi-space collapsed
+        assert " ," not in ctx.text  # no space before comma
+
+    def test_diacritics_off_by_default(self) -> None:
+        # By default we should not run fix_diacritics — the rule-based path
+        # can corrupt already-correct VN text.
+        ctx = Context(source="x.txt")
+        ctx.pages_text = ["Tôi đi học"]  # already has correct diacritics
+        Normalize().run(ctx)
+        assert "Tôi" in ctx.text  # unchanged
+
+    def test_diacritics_opt_in(self) -> None:
+        ctx = Context(source="x.txt")
+        ctx.pages_text = ["Hop dong nay"]
+        Normalize(restore_diacritics=True).run(ctx)
+        # Should restore at least some words from our table
+        assert "Hợp" in ctx.text or "đồng" in ctx.text or "này" in ctx.text
+
+    def test_uses_ctx_text_if_pages_empty(self) -> None:
+        ctx = Context(source="x.txt")
+        ctx.text = "preset text"
+        Normalize().run(ctx)
+        assert ctx.text == "preset text"
+
+
 class TestPlaceholderStages:
-    """OCR / Extract / Validate / Normalize still raise NotImplementedError."""
+    """OCR / Extract / Validate still raise NotImplementedError."""
 
     def test_each_stage_has_name(self) -> None:
         assert OCR().name == "OCR"
-        assert Normalize().name == "Normalize"
         assert Extract(llm=None).name == "Extract"
         assert Validate().name == "Validate"
 
     def test_placeholders_raise_in_v0(self) -> None:
-        for stage in [OCR(), Normalize(), Extract(llm=None), Validate()]:
+        for stage in [OCR(), Extract(llm=None), Validate()]:
             with pytest.raises(NotImplementedError, match=r"v0\.1"):
                 stage.run(Context(source="x.pdf"))
 
@@ -185,12 +230,9 @@ class TestPipeline:
         assert names == ["Load", "Parse", "OCR", "Normalize", "Extract", "Validate"]
 
     def test_default_pipeline_runs_through_load_then_fails_at_ocr(self) -> None:
-        # Load + Parse work; OCR is still a placeholder. Pass a text input so
-        # Parse short-circuits and we hit OCR (which is a placeholder).
+        # Load + Parse + Normalize work; OCR is still a placeholder.
+        # The default pipeline invokes OCR unconditionally, so it raises.
         pipe = default_pipeline()
-        # Hmm — for text input, Parse doesn't trigger OCR (needs_ocr stays empty).
-        # The default pipeline invokes OCR unconditionally though, so it raises.
-        # That's fine — confirms placeholders still raise for now.
         with pytest.raises(NotImplementedError, match=r"v0\.1"):
             pipe.run(b"hello text")
 
