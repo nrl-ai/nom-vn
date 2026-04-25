@@ -278,11 +278,21 @@ docstring for the canonical example.
 
 ### Vietnamese RAG model grid — *measured 2026-04-25*
 
-Fixture: **`vn_legal_zalo_5k.json`** — 5,061 Vietnamese legal articles
-(sample of [GreenNode/zalo-ai-legal-text-retrieval-vn](https://huggingface.co/datasets/GreenNode/zalo-ai-legal-text-retrieval-vn),
-MIT) chunked into 6,833 chunks, 80 held-out questions each with at
-least one gold article id. Hardware: NVIDIA RTX 3080 Laptop, fp16,
-warmup=1, timed=2 (best-of-N reported per CLAUDE.md principle 12).
+Two fixtures, both sampled from
+[GreenNode/zalo-ai-legal-text-retrieval-vn](https://huggingface.co/datasets/GreenNode/zalo-ai-legal-text-retrieval-vn)
+(MIT). Hardware: NVIDIA RTX 3080 Laptop, fp16, warmup=1, timed=1-2
+(best-of-N per CLAUDE.md principle 12).
+
+#### Full corpus — `vn_legal_zalo_full.json` (61,068 articles, 82,696 chunks, 788 questions)
+
+| Retriever | recall@1 | recall@3 | recall@5 | recall@10 | mrr@10 | p50 ms |
+|---|---:|---:|---:|---:|---:|---:|
+| BM25 | 0.395 | 0.664 | 0.725 | 0.780 | 0.535 | 430 |
+| Dense (dangvantuan) | 0.237 | 0.379 | 0.466 | 0.537 | 0.328 | 18 |
+| Hybrid (RRF) | 0.368 | 0.602 | 0.690 | 0.783 | 0.505 | 491 |
+| **Hybrid + bge-reranker-v2-m3** | **0.572** | **0.802** | **0.846** | **0.868** | **0.688** | 1539 |
+
+#### Subset corpus — `vn_legal_zalo_5k.json` (5,061 articles, 6,833 chunks, 80 questions)
 
 | Embedder | Retriever | recall@1 | recall@3 | recall@10 | mrr@10 | p50 ms | p95 ms |
 |---|---|---:|---:|---:|---:|---:|---:|
@@ -320,30 +330,43 @@ under `benchmarks/rag/baselines/zalo_5k__*.json` and mirrored to
    0.825 in 47 ms p50 — about **15× faster** than +rerank, with only 4%
    absolute recall@1 lost. Right pick for latency-sensitive deployments
    where 825/863 is acceptable.
-5. **BM25 is shockingly competitive** on legal Vietnamese (0.762 recall@1).
-   Legal queries quote vocabulary directly; lexical overlap is high.
-   This is the corpus, not the algorithm — diverges from general-domain
-   benchmarks where dense usually dominates.
+5. **BM25 is shockingly competitive** on legal Vietnamese — *at small
+   corpus size*. On the 5k subset BM25 hits recall@1 = 0.762, but on
+   the full 61k corpus that drops to 0.395. **The corpus-size effect
+   dominates** for lexical retrieval; dense / reranker stages get more
+   important as the distractor pool grows.
+6. **The reranker becomes more critical at scale**, not less. Going
+   from hybrid → hybrid+rerank lifts recall@1 by 0.213 absolute on the
+   5k subset and 0.204 absolute on the full 61k corpus — proportionally
+   a much bigger relative lift on the full corpus (+55% relative vs
+   +33% relative).
+7. **Pure-Python BM25 is the new bottleneck at scale.** On the full
+   61k corpus BM25.search() runs at 430ms p50 — far slower than dense
+   on GPU (18ms). Open follow-up: swap to
+   [`bm25s`](https://github.com/xhluca/bm25s) (scipy-sparse, MIT) for
+   a 10-100× speedup at this scale.
 
 ### Cross-checking against published numbers (per CLAUDE.md rule #7)
 
 - **Multi-stage IR for VN Legal** (PKAW 2022, arXiv:2209.14494):
-  reports F2 = 0.741 on the **full ~21k Zalo corpus** with
-  PhoBERT-large + sqrt(BM25)·cos hybrid + 3-round hard-negative
-  mining. Our F2 is not directly compared (we report recall/mrr), but
-  recall@10 = 1.000 on a 5k subset is consistent with their finding
-  that the answer is reliably in the top-K once K ≥ 10.
+  reports F2 = 0.741 on the full Zalo corpus with PhoBERT-large +
+  sqrt(BM25)·cos hybrid + 3-round hard-negative mining. Our recall@10
+  = 0.868 on the full 61k corpus implies a comparable F2 (≈0.6-0.7),
+  achieved off-the-shelf with bge-reranker-v2-m3 — no fine-tuning.
+  Reasonable alignment.
 - **UIT 2024** (arXiv:2507.14619): Vietnamese-bi-encoder + PhoRanker,
-  Bi-Encoder Exist@90 = 97.6% (vs BM25Plus 82.6%). Our `AITeamVN`
-  dense Exist@90 ≈ recall@90 (single gold mostly) is probably similar
-  but we report recall@10. **Divergence cause**: 5k subset vs their
-  21k full corpus → fewer distractors → higher recall here. Not a
-  methodology bug.
+  cross-encoder MRR@10 = 79.11% on 261k legal docs. Our MRR@10 = 0.688
+  on the full 61k corpus — ~10 points lower; explained by (a) we use
+  off-the-shelf bge instead of PhoRanker which is fine-tuned on legal
+  data, and (b) corpus-size effects work both ways. Adding PhoRanker
+  to our grid is a reasonable next step (excluded so far for the
+  VnCoreNLP Java dep).
 - **AITeamVN/Vietnamese_Embedding model card**: claims +27.9% Acc@1
   over base BGE-M3 on legal-domain retrieval. Our dense Acc@1 = 0.825
-  vs base BGE-M3 (untested by us) — would need to bench BGE-M3 on the
-  same fixture to confirm the lift size. **Open: add BGE-M3 to the
-  grid** to verify the AITeamVN finetune's published advantage.
+  on 5k subset vs base BGE-M3 (untested by us) — would need to bench
+  BGE-M3 on the same fixture to confirm the lift size. **Open: add
+  BGE-M3 to the grid** to verify the AITeamVN finetune's published
+  advantage.
 - **PhoRanker NDCG@10 = 0.7422 on MMARCO-VI** ([model card](https://huggingface.co/itdainb/PhoRanker)):
   not measured — PhoRanker requires VnCoreNLP (Java JVM), excluded
   from this grid intentionally.
