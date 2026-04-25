@@ -10,18 +10,20 @@ content). This means:
 
 Measured against underthesea (CRF, the de-facto VN tokenizer) on
 ``benchmarks/data/diacritic_eval_v0.txt`` — see baseline at
-``benchmarks/results/baseline_segment_v0.0.2.json``:
+``benchmarks/results/baseline_segment_v0.0.2.json``. Methodology: warmup
+3 calls over the first 5 sentences to amortize lazy model load, then best-of-5
+runs over the full 55-sentence corpus.
 
 ==========================  ======================  ==================
 metric                      nom.text (this code)    underthesea (CRF)
 ==========================  ======================  ==================
 boundary agreement (Jacc)   reference (this code)   77.77%
-throughput                  131,497 tok/s           973 tok/s
+throughput (steady-state)   734,296 tok/s           34,217 tok/s
 license                     Apache 2.0 (us)         Apache 2.0
 deps                        none (pure stdlib)      26MB CRF blobs
 ==========================  ======================  ==================
 
-We trade ~22% boundary disagreement for **135x speedup** and zero binary
+We trade ~22% boundary disagreement for **~21x speedup** and zero binary
 dependencies. The compound-word table (~300 entries of high-frequency
 business + conversational compounds) is the leverage point — contributors
 extend it in ``src/nom/text/_compounds.py``.

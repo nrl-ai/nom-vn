@@ -3,8 +3,8 @@
     "n_sentences": 55,
     "underthesea_available": true,
     "avg_boundary_jaccard": 0.7777,
-    "nom_throughput_tokens_per_sec": 131497.0,
-    "underthesea_throughput_tokens_per_sec": 973.0,
+    "nom_throughput_tokens_per_sec": 724890.0,
+    "underthesea_throughput_tokens_per_sec": 33559.0,
     "total_compound_hits": 72
   },
   "results": [

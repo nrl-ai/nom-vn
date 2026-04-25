@@ -8,15 +8,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned for v0.0.3
-- **Diacritic ML backend** — what v0.0.2 deferred. We evaluated PyVi (MIT, but
-  crashes on common input — `KeyError: 'dr'` on `"duoc"`) and the HuggingFace
-  DistilBERT-Viet model (Apache 2.0, ~90%+ accuracy but ~1GB install weight).
-  v0.0.3 will integrate one of:
-    - DistilBERT-Viet wrapped behind `[diacritics]` extras
-    - A trained-from-scratch lightweight char-level model we ship ourselves
+- **Study underthesea to build a better tokenizer in-tree.** underthesea
+  (Apache 2.0) is the de-facto VN tokenizer and we reach ~78% boundary
+  agreement at ~21× their throughput with a pure-rule approach. v0.0.3
+  starts the work to close the accuracy gap *while keeping* the
+  zero-dep / pure-Python / fully-auditable property:
+    - Read the underthesea CRF feature templates (Apache 2.0 source)
+    - Build our own training corpus from CC-BY-SA Vietnamese Wikipedia
+      and ODC-BY mC4-vi
+    - Train a small CRF (or distilled char-level Transformer) and ship
+      the weights as part of nom-vn (with checksums and a public
+      training script — no opaque blobs)
+    - Run the same comparison bench; release v0.0.3 when we beat
+      underthesea on agreement at our throughput
+- **Diacritic ML backend.** v0.0.2 deferred this honestly. We evaluated PyVi
+  (MIT, but crashes on `"duoc"` and bundles `.pkl` files) and HuggingFace
+  DistilBERT-Viet (Apache 2.0, ~90%+ accuracy but ~1GB install weight).
+  v0.0.3 picks: ship the DistilBERT-Viet wrapper as `[diacritics]` extras,
+  or train our own lighter model alongside the tokenizer work above.
 - Add `nom.text.is_diacritic_correct()` to detect misplaced tone marks.
-- Expanded eval corpus (~500 sentences) drawn from CC-BY-SA Vietnamese Wikipedia
-  samples + ODC-BY mC4 Vietnamese.
+- Expanded eval corpus (~500 sentences) drawn from CC-BY-SA Vietnamese
+  Wikipedia samples + ODC-BY mC4-vi.
 
 ### Planned for v0.1.0
 - `nom.doc.extract()` — real implementation: `pdfplumber`/`pymupdf` for PDFs,
@@ -33,7 +45,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `nom.text.word_tokenize` — **pure-Python** Vietnamese word segmentation
   with greedy compound-word merging (~300-entry curated table in
   `src/nom/text/_compounds.py`). Zero third-party deps. **77.77% boundary
-  agreement with underthesea (CRF) at 135× the throughput**, measured on
+  agreement with underthesea (CRF) at ~21× the throughput** (734k vs 34k
+  tok/s, warmup + best-of-5), measured on
   `benchmarks/data/diacritic_eval_v0.txt`. Baseline JSON committed at
   `benchmarks/results/baseline_segment_v0.0.2.json`.
 - `nom.text.sent_tokenize` — pure-Python sentence splitting with VN

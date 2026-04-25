@@ -115,25 +115,45 @@ class BenchSummary:
     total_compound_hits: int
 
 
+def _time_tokenizer(fn, sentences: list[str], *, warmup_calls: int = 3, runs: int = 5) -> float:
+    """Return best-of-N elapsed time over the corpus, after warmup.
+
+    Warmup is critical: underthesea (and any model-backed tokenizer) lazy-loads
+    weights on first call. Without warmup we'd be measuring model load, not
+    steady-state throughput.
+    """
+    # Warmup: trigger lazy loads, JIT, allocator, branch prediction.
+    for _ in range(warmup_calls):
+        for s in sentences[:5]:
+            fn(s)
+    best = float("inf")
+    for _ in range(runs):
+        start = time.perf_counter()
+        for s in sentences:
+            fn(s)
+        elapsed = time.perf_counter() - start
+        if elapsed < best:
+            best = elapsed
+    return best
+
+
 def run() -> tuple[list[SentenceResult], BenchSummary]:
     sentences = _load_corpus(DATA_PATH)
     underthesea = _try_underthesea()
 
-    # Time nom
-    nom_start = time.perf_counter()
-    nom_runs = [nom_tokenize(s) for s in sentences]
-    nom_elapsed = time.perf_counter() - nom_start
+    # Steady-state throughput (warmup + best-of-5).
+    nom_elapsed = _time_tokenizer(nom_tokenize, sentences)
 
-    # Type checker: we know fmt='list' returns list[str]
+    # Get token lists (single pass; not used for timing).
+    nom_runs = [nom_tokenize(s) for s in sentences]
     nom_token_lists: list[list[str]] = [r if isinstance(r, list) else [] for r in nom_runs]
 
-    # Time underthesea (if available)
+    # Time underthesea (if available) — same warmup + best-of-5 protocol.
     un_token_lists: list[list[str]] | None = None
     un_elapsed: float | None = None
     if underthesea is not None:
-        un_start = time.perf_counter()
+        un_elapsed = _time_tokenizer(underthesea.word_tokenize, sentences)  # type: ignore[attr-defined]
         un_token_lists = [underthesea.word_tokenize(s) for s in sentences]  # type: ignore[attr-defined]
-        un_elapsed = time.perf_counter() - un_start
 
     # Per-sentence metrics
     results: list[SentenceResult] = []
