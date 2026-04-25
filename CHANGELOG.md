@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4] — 2026-04-25
+
+### Added
+- **`nom.chunking`** — pure-Python VN-aware document chunking. Three
+  boundary modes (sentence/paragraph/character), frozen `Chunk` dataclass,
+  zero deps. Measured throughput: 812 docs/sec (sentence mode) on 50 ×
+  4.5 KB synthetic VN corpus, baseline at
+  `benchmarks/results/baseline_chunking_v0.0.4.json`.
+- **`nom.embeddings`** — `Embedder` Protocol + `VietnameseEmbedder` class
+  wrapping sentence-transformers (Apache 2.0). Default model:
+  `dangvantuan/vietnamese-embedding` (BGE-base VN fine-tune, 768-dim,
+  ~440 MB on disk, top public VN STS at its size class). Lazy load —
+  `__init__` is dep-free. Always L2-normalizes output.
+- New optional dep: `pip install nom-vn[embeddings]` adds
+  `sentence-transformers`.
+- `benchmarks/perf/bench_chunking.py` — committed throughput bench.
+- `benchmarks/perf/bench_embeddings.py` — gated real-model bench
+  (skipped if `sentence-transformers` not installed; ~440 MB download
+  on first run).
+
+### Engineering
+- 34 new tests across the two modules (167 total passing).
+- `PPlanning/CLAUDE.md` gained a 4-stage component-build workflow:
+  Research → Build → Benchmark → Tune. Each new component must show
+  cited OSS prior art, smallest dep surface that meets quality goals,
+  warmup + best-of-N benchmarks with committed baselines, and any
+  optimization re-measured to confirm it actually helped.
+
 ## [Unreleased]
 
 ### Added — all six pipeline stages real (v0.1.0-rc)

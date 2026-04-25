@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.0.2"
+version = "0.0.4"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -33,6 +33,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Vietnamese embeddings via sentence-transformers (Apache 2.0).
+#
+# Security audit (2026-04-25): sentence-transformers loads HuggingFace
+# models in safetensors format — deterministic, not pickle. The library
+# itself is Apache 2.0 and a thin wrapper over HF transformers (also
+# Apache 2.0). Default VN model: dangvantuan/vietnamese-embedding
+# (Apache 2.0, ~440 MB on disk, 768-dim, top public VN STS at its size).
+embeddings = [
+  "sentence-transformers>=3.0",
+  "numpy>=1.26",
+]
 # Stronger Vietnamese tokenization via underthesea (Apache 2.0).
 #
 # Security audit (2026-04-25): underthesea ships CRFsuite native binary
@@ -63,7 +74,7 @@ llm = [
   "httpx>=0.27",
 ]
 all = [
-  "nom-vn[diacritics,doc,llm]",
+  "nom-vn[diacritics,doc,embeddings,llm]",
 ]
 dev = [
   "pytest>=8",
@@ -142,5 +153,11 @@ files = ["src/nom"]
 exclude = ["tests/", "benchmarks/", "scripts/"]
 
 [[tool.mypy.overrides]]
-module = ["pytesseract.*", "pdfplumber.*", "fitz.*", "underthesea.*"]
+module = [
+  "pytesseract.*",
+  "pdfplumber.*",
+  "fitz.*",
+  "underthesea.*",
+  "sentence_transformers.*",
+]
 ignore_missing_imports = true
