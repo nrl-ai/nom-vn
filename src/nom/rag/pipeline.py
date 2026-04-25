@@ -193,33 +193,92 @@ class RAG:
     # Query
     # ------------------------------------------------------------------
 
-    def ask(self, question: str, *, top_k: int | None = None) -> Answer:
+    def ask(
+        self,
+        question: str,
+        *,
+        top_k: int | None = None,
+        query_strategy: str = "direct",
+        n_queries: int = 3,
+    ) -> Answer:
         """Ask a question over the indexed corpus.
 
         Steps:
-          1. Embed the question.
-          2. BM25 + Dense retrieve ``n_retrieve`` candidates each.
-          3. Hybrid-fuse via RRF, take top ``n_retrieve`` after fusion.
-          4. Pass the top chunks + the question to the LLM with a
-             grounding prompt.
+          1. Optionally transform the query (HyDE or multi-query).
+          2. Retrieve via BM25 + Dense (one round, or one round per
+             rewritten query when ``query_strategy="multi_query"``).
+          3. Hybrid-fuse via RRF, take top ``top_k`` after fusion.
+          4. Pass the top chunks + the **original** question to the
+             LLM with a grounding prompt.
           5. Return the LLM's answer + the citations.
 
         Args:
             question: natural-language query.
             top_k: override the default citation count for this call.
+            query_strategy: how to expand / transform the question.
+
+                - ``"direct"`` (default) — embed the question as-is.
+                - ``"hyde"`` — ask the LLM for a short hypothetical
+                  answer and embed *that* for dense retrieval.
+                  Helps when query and corpus phrasings differ.
+                  One extra LLM call.
+                - ``"multi_query"`` — ask the LLM to rewrite the
+                  question ``n_queries`` times, retrieve over each,
+                  RRF-merge the results. One extra LLM call.
+
+            n_queries: number of LLM rewrites for ``"multi_query"``.
+                Ignored otherwise. Default 3 (4 total searches).
 
         Returns:
             An :class:`Answer` with the LLM's response and source chunks.
+
+        Note:
+            All strategies use the **original** question for the final
+            answer-generation prompt — only retrieval is changed. So
+            the LLM still sees the user's actual phrasing in step 4.
         """
         if not question.strip():
             raise ValueError("ask() requires a non-empty question")
+        if query_strategy not in {"direct", "hyde", "multi_query"}:
+            raise ValueError(
+                f"Unknown query_strategy={query_strategy!r}. "
+                "Use 'direct', 'hyde', or 'multi_query'."
+            )
 
         k = top_k if top_k is not None else self.top_k
 
-        # 1. Retrieve from both indexes
-        bm25_hits = self.bm25.search(question, top_k=self.n_retrieve)
-        query_vec = self.embedder.embed(question)
-        dense_hits = self.dense.search(query_vec, top_k=self.n_retrieve)
+        # 1. Retrieve — branch on query_strategy
+        if query_strategy == "direct":
+            bm25_hits = self.bm25.search(question, top_k=self.n_retrieve)
+            query_vec = self.embedder.embed(question)
+            dense_hits = self.dense.search(query_vec, top_k=self.n_retrieve)
+        elif query_strategy == "hyde":
+            from nom.rag.queries import hyde
+
+            # BM25 still uses the question (keyword overlap is the point);
+            # dense uses the LLM's hypothetical answer (richer vocabulary
+            # closer to corpus prose).
+            hypothetical = hyde(question, self.llm)
+            bm25_hits = self.bm25.search(question, top_k=self.n_retrieve)
+            query_vec = self.embedder.embed(hypothetical)
+            dense_hits = self.dense.search(query_vec, top_k=self.n_retrieve)
+        else:  # multi_query
+            from nom.rag.queries import multi_query as _mq
+
+            queries = _mq(question, self.llm, n=n_queries)
+            bm25_lists = [self.bm25.search(q, top_k=self.n_retrieve) for q in queries]
+            dense_lists = [
+                self.dense.search(self.embedder.embed(q), top_k=self.n_retrieve) for q in queries
+            ]
+            # Flatten per-side: pre-fuse each side's per-query results, so
+            # downstream hybrid_score still sees one bm25 list and one
+            # dense list.
+            bm25_hits = hybrid_score(
+                bm25_lists, method="rrf", top_k=self.n_retrieve, rrf_k=self.rrf_k
+            )
+            dense_hits = hybrid_score(
+                dense_lists, method="rrf", top_k=self.n_retrieve, rrf_k=self.rrf_k
+            )
 
         # 2. Hybrid fuse
         fused = hybrid_score(

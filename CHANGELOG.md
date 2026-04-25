@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] — 2026-04-25
+
+### Advanced RAG — opt-in query strategies
+
+`RAG.ask()` gained a `query_strategy=` kwarg with three options:
+
+- **`"direct"`** (default, unchanged behavior) — embed the question
+  as-is and retrieve.
+- **`"hyde"`** — Hypothetical Document Embeddings (Gao et al. 2022).
+  Asks the LLM to write a short hypothetical answer, then embeds
+  *that* for dense retrieval. BM25 still uses the question. One
+  extra LLM call. Helps when query and corpus phrasings differ.
+- **`"multi_query"`** — LLM rewrites the question `n_queries` times
+  (default 3 → 4 total searches), retrieves over each, RRF-merges
+  the results. One extra LLM call. Smooths brittleness from a
+  single phrasing.
+
+In all three strategies, the **final answer-generation prompt** still
+uses the user's original question — only retrieval is changed. So
+the LLM sees the actual phrasing in step 4.
+
+The query helpers ship as standalone exports too, for users wiring
+nom-vn into other agentic frameworks:
+
+```python
+from nom.rag import hyde, multi_query
+from nom.llm import OpenAI
+
+llm = OpenAI()
+hypothetical = hyde("Quyền cơ bản của công dân?", llm)
+queries = multi_query("Quyền cơ bản?", llm, n=3)  # ["Quyền…", *3 rewrites]
+```
+
+10 new tests in `tests/test_rag.py` covering the strategies and the
+standalone helpers (deterministic — no real LLM calls).
+
+**No quality numbers claimed.** Per CLAUDE.md principle 12, we won't
+publish "X% improvement" without a real VN benchmark corpus
+(Zalo Legal QA being the obvious target). The primitives ship; the
+quality claims wait.
+
 ## [0.2.3] — 2026-04-25
 
 ### Cloud LLM adapters — OpenAI + Anthropic now real

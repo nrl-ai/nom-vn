@@ -189,6 +189,101 @@ class TestAsk:
         assert "Context" in prompt
         assert "[1]" in prompt or "[ 1 ]" in prompt  # at least one block
 
+    def test_unknown_strategy_rejected(self) -> None:
+        rag = self._rag()
+        with pytest.raises(ValueError, match=r"Unknown query_strategy"):
+            rag.ask("hợp đồng", query_strategy="bogus")
+
+
+class TestQueryStrategies:
+    """HyDE + multi-query — verify the LLM is consulted before retrieval
+    and the original question still drives the final answer prompt."""
+
+    def _rag(self, llm: _FakeLLM) -> RAG:
+        return RAG.from_documents(
+            SAMPLE_DOCS,
+            llm=llm,
+            embedder=_FakeEmbedder(),
+        )
+
+    def test_hyde_makes_two_llm_calls_first_is_query_expansion(self) -> None:
+        # First call: hypothetical-answer generation. Second call: final
+        # grounded answer. The query-expansion call's prompt must contain
+        # the user's question; the final call's prompt must too.
+        llm = _FakeLLM(response="Hà Nội là thủ đô…")
+        rag = self._rag(llm)
+        rag.ask("Thủ đô của Việt Nam là gì?", query_strategy="hyde")
+        assert len(llm.calls) == 2
+        assert "Thủ đô của Việt Nam là gì?" in llm.calls[0]["prompt"]
+        assert "Đoạn văn:" in llm.calls[0]["prompt"]  # HyDE prompt marker
+        # Final answer call still sees the original question as-asked
+        assert "Thủ đô của Việt Nam là gì?" in llm.calls[1]["prompt"]
+        assert "Context" in llm.calls[1]["prompt"]
+
+    def test_multi_query_makes_two_calls_then_retrieves_per_rewrite(self) -> None:
+        # The rewrite call returns three lines → 4 total queries
+        # (original + 3 rewrites). Final answer is one more LLM call.
+        llm = _FakeLLM(response="Q1\nQ2\nQ3")
+        rag = self._rag(llm)
+        rag.ask("Bao nhiêu hợp đồng?", query_strategy="multi_query", n_queries=3)
+        assert len(llm.calls) == 2
+        # The final call uses the user's original question
+        final_prompt = llm.calls[1]["prompt"]
+        assert "Bao nhiêu hợp đồng?" in final_prompt
+
+    def test_direct_strategy_makes_only_one_llm_call(self) -> None:
+        # Default behavior unchanged: just the final grounded-answer call.
+        llm = _FakeLLM()
+        rag = self._rag(llm)
+        rag.ask("hợp đồng")
+        assert len(llm.calls) == 1
+
+
+class TestQueryHelpers:
+    """The ``hyde`` and ``multi_query`` helpers are also usable
+    standalone (e.g., when wiring nom-vn into another framework)."""
+
+    def test_hyde_strips_and_passes_question(self) -> None:
+        from nom.rag import hyde
+
+        llm = _FakeLLM(response="  Hà Nội là thủ đô…  \n")
+        result = hyde("Thủ đô?", llm)
+        assert result == "Hà Nội là thủ đô…"
+        assert "Thủ đô?" in llm.calls[0]["prompt"]
+
+    def test_hyde_rejects_empty(self) -> None:
+        from nom.rag import hyde
+
+        with pytest.raises(ValueError, match=r"non-empty"):
+            hyde("   ", _FakeLLM())
+
+    def test_multi_query_returns_original_plus_n_rewrites(self) -> None:
+        from nom.rag import multi_query
+
+        llm = _FakeLLM(response="Rewrite A\nRewrite B\nRewrite C")
+        out = multi_query("Question?", llm, n=3)
+        assert out == ["Question?", "Rewrite A", "Rewrite B", "Rewrite C"]
+
+    def test_multi_query_truncates_excess_rewrites(self) -> None:
+        from nom.rag import multi_query
+
+        llm = _FakeLLM(response="A\nB\nC\nD\nE")  # LLM emitted 5
+        out = multi_query("Q?", llm, n=2)
+        assert out == ["Q?", "A", "B"]
+
+    def test_multi_query_rejects_n_zero(self) -> None:
+        from nom.rag import multi_query
+
+        with pytest.raises(ValueError, match=r"n="):
+            multi_query("Q?", _FakeLLM(), n=0)
+
+    def test_multi_query_drops_blank_lines(self) -> None:
+        from nom.rag import multi_query
+
+        llm = _FakeLLM(response="\n\nRewrite A\n  \n\nRewrite B\n")
+        out = multi_query("Q?", llm, n=3)
+        assert out == ["Q?", "Rewrite A", "Rewrite B"]
+
 
 # ---------------------------------------------------------------------------
 # String-vs-path source detection
