@@ -1,0 +1,74 @@
+{
+  "config": {
+    "fixture": "vn_legal_zalo_1k",
+    "n_corpus_articles": 1536,
+    "n_chunks": 2003,
+    "n_questions": 50,
+    "embedder": "dangvantuan/vietnamese-embedding",
+    "embedder_dim": 768,
+    "embedder_device": "cuda",
+    "reranker": "BAAI/bge-reranker-v2-m3",
+    "reranker_device": "cuda",
+    "rerank_candidates": 30,
+    "chunk_max_tokens": 512,
+    "chunk_overlap": 64,
+    "fusion": "rrf",
+    "rrf_k": 60,
+    "n_retrieve": 20
+  },
+  "metrics": {
+    "bm25": {
+      "recall@1": 0.92,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "recall@10": 1.0,
+      "mrr@10": 0.96
+    },
+    "dense": {
+      "recall@1": 0.6,
+      "recall@3": 0.8,
+      "recall@5": 0.88,
+      "recall@10": 0.92,
+      "mrr@10": 0.7212
+    },
+    "hybrid": {
+      "recall@1": 0.8,
+      "recall@3": 0.98,
+      "recall@5": 1.0,
+      "recall@10": 1.0,
+      "mrr@10": 0.8883
+    },
+    "hybrid+rerank": {
+      "recall@1": 0.92,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "recall@10": 1.0,
+      "mrr@10": 0.96
+    }
+  },
+  "latency_ms": {
+    "bm25": {
+      "p50_ms": 17.051,
+      "p95_ms": 26.767
+    },
+    "dense": {
+      "p50_ms": 22.223,
+      "p95_ms": 33.011
+    },
+    "hybrid": {
+      "p50_ms": 28.652,
+      "p95_ms": 37.848
+    },
+    "hybrid+rerank": {
+      "p50_ms": 605.716,
+      "p95_ms": 630.023
+    }
+  },
+  "meta": {
+    "ran_at": "2026-04-25T15:24:11+00:00",
+    "git_sha": "c9ffe5a7c80c",
+    "n_warmup": 1,
+    "n_timed": 2,
+    "python": "3.13.9"
+  }
+}

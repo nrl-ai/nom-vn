@@ -90,3 +90,8 @@ src/nom/chat/ui_dist/
 # Server runtime data dirs (default ~/.nom and the demo dir)
 .nom/
 nom-demo/
+
+# Large RAG benchmark fixtures (sampled from public HF datasets).
+# Mirrored at https://huggingface.co/datasets/nrl-ai/vn-rag-bench.
+# Regenerate locally via benchmarks/rag/fixtures/_build_zalo_legal.py.
+benchmarks/rag/fixtures/vn_legal_zalo_*.json

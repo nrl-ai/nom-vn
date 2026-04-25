@@ -33,6 +33,77 @@ python benchmarks/data/synthetic_ocr_vi/render.py
 When adding a new dataset, follow the rules in `benchmarks/data/README.md` and
 update `docs/datasets.md` so the catalogue stays current.
 
+## Component build workflow — real models, real data, VN-specific research
+
+When building or refining any pipeline component (retriever, reranker, embedder,
+chunker, parser, generator), follow this loop. Skipping stages produces brittle
+or untruthful results.
+
+1. **Research the lightweight VN-specific options first.** Survey Hugging Face
+   and recent papers (2024-2026) for the smallest open-source model that gets
+   close to SOTA on Vietnamese. Record license, file format, reported VN
+   benchmark numbers from a public source, and base architecture.
+   General-multilingual baselines (BGE, mE5, Qwen3) are valid candidates but
+   prefer VN-finetuned variants when license + audit pass and the gap is
+   measurable. Document the survey in
+   `research/<YYYY-MM-DD>-<topic>/report.md` or the relevant
+   `docs/sota_*` page with citations.
+
+   **File-format trust ladder** (refines parent CLAUDE.md principle 11):
+
+   | Format | Status | Why |
+   |---|---|---|
+   | `safetensors` | ✅ **always preferred** | Deterministic, zero code execution on load. |
+   | HF `.bin` / `pytorch_model.bin` | ⚠️ acceptable from a major lab when no safetensors variant exists | These are pickled too, *but* they're audited at scale and downloaded with a SHA256 checksum from a known-trusted host (HuggingFace Hub). Bias: prefer the safetensors revision when both exist (most BAAI / Meta / Google / Mistral / Qwen models now ship both). When only `.bin` is offered (older models, some research repos), accept *only* if the publisher is a major institution with reproducible weights. Document the choice in the model wrapper docstring with a one-line "no safetensors variant published — trusting HF SHA256 + publisher" note. |
+   | `.pkl` / `.pickle` | ❌ **auto-reject regardless of source** | Same RCE surface as `.bin`, but without the HF checksum infrastructure or publisher accountability. We caught PyVi shipping these in v0.1 — never again. |
+   | Opaque native binaries (CRFsuite `lCRF…`, etc.) | ⚠️ acceptable when license + format are documented and the format spec is public | Deterministic but opaque. Prefer in-tree reimplementation if accuracy gap is small. |
+
+   The parent rule "prefer in-tree reimplementation when feasible" still
+   applies — but it's a tradeoff, not an absolute. Reimplementing a
+   1B-param transformer is not feasible; reimplementing a 5kb CRF
+   tokenizer is.
+2. **Build the smallest dependency surface that meets the quality goal.** Lazy
+   imports, Protocol seams, frozen dataclasses on hot paths.
+3. **Test with real models, not just fakes.** Unit tests use fakes for speed —
+   that's correct. But before claiming a feature ships, write at least one
+   integration test or benchmark run against the actual model the user will
+   download (`pytest -k integration` or `python benchmarks/.../bench_*.py
+   --embedder vietnamese --reranker BAAI/bge-reranker-v2-m3`). Skip-on-import
+   patterns are fine for CI environments without the model cache.
+4. **Benchmark on real Vietnamese datasets, not toy fixtures.** Tiny synthetic
+   fixtures are useful for harness validation but cannot show component value
+   when every retriever scores 1.000. Pull from a real public VN corpus
+   (Zalo Legal QA mirror, ViQuAD, MIRACL-vi, or a Wikipedia sample of similar
+   size). Commit a baseline JSON under `benchmarks/.../baselines/` so the next
+   change re-measures cleanly.
+5. **Iterate components and pipelines as a grid, not one at a time.** Try
+   each candidate model under the same fixture, same metrics, same warmup +
+   best-of-N protocol. Report the table with explicit `embedder`, `reranker`,
+   `chunk_max_tokens`, etc., in the result JSON config block — silent
+   defaults will desync from claims later.
+6. **Honest empties beat fake numbers.** Quality cells without a
+   committed-and-runnable bench script must be left empty / TBD per parent
+   CLAUDE.md principle 12. Disclaimers like "preliminary" do not rescue
+   fabricated metrics.
+7. **Cross-check our numbers against the model's published benchmarks.** After
+   running a real-model bench, find the model card / paper for each component
+   and compare. If our number is materially different from the public number
+   (say >10% relative on the same metric), **stop and investigate** before
+   shipping or claiming. Common causes:
+   - Different test corpus (ours is harder/easier or different register).
+   - Wrong tokenization (model expects word-segmented input but we pass raw).
+   - Wrong sequence length / truncation cap (model card says 512, we cap at
+     256; or position-table off-by-one; see VietnameseEmbedder docstring for
+     the XLM-RoBERTa quirk).
+   - fp16/fp32 mismatch, wrong device (CPU vs GPU), missing normalization.
+   - Cold-start artefacts (no warmup, lazy model load inflating first-pass
+     latency — caught the 135× → 21× ratio incident on 2026-04-25).
+   - Wrong metric variant (NDCG vs MAP, @10 vs @20, micro vs macro average).
+   Either fix the issue and re-measure, or document the divergence honestly
+   in `docs/benchmark.md` with the explanation. **Do not ship a number that
+   silently disagrees with the upstream's published number** — readers will
+   compare and lose trust.
+
 ## Scope clarification
 
 `nom-vn` is named after **chữ Nôm** (the historical Vietnamese script) but the

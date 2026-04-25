@@ -5,6 +5,105 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] — 2026-04-25
+
+### Cross-encoder reranker — opt-in, default `BAAI/bge-reranker-v2-m3`
+
+The single biggest quality lever we hadn't shipped, now wired in.
+`nom.rag` gained a `Reranker` Protocol and a `CrossEncoderReranker`
+implementation backed by `sentence_transformers.CrossEncoder` (no new
+runtime dep — already pulled by `[embeddings]`).
+
+```python
+from nom.rag import RAG, CrossEncoderReranker
+rag = RAG.from_documents(
+    docs,
+    llm=Ollama(model="qwen3:8b"),
+    reranker=CrossEncoderReranker(),  # default = BAAI/bge-reranker-v2-m3
+)
+answer = rag.ask("Quyền cơ bản của công dân?", rerank=True)
+```
+
+`RAG.ask()` gained:
+
+- `rerank=False` (default — backward-compatible, v0.2.4 behavior unchanged)
+- `rerank_candidates=30` — bi-encoder pool size sent to the reranker
+  (production sweet spot 30–75 per the survey papers)
+- `rerank_keep=None` — top-K to keep after reranking (defaults to `top_k`)
+
+Pipeline order: BM25 + dense → fuse to `rerank_candidates` → cross-encoder
+rerank → top `rerank_keep` → LLM. Composes with `query_strategy="hyde"` /
+`"multi_query"` from v0.2.4.
+
+**Default model:** [`BAAI/bge-reranker-v2-m3`](https://huggingface.co/BAAI/bge-reranker-v2-m3)
+— Apache 2.0, safetensors, multilingual including Vietnamese, no special
+preprocessing. Battle-tested in production RAG stacks.
+
+**Documented alternatives** (one-line model_name swap):
+
+- `namdp-ptit/ViRanker` — Apache 2.0, BGE-M3-base, best NDCG@3 on
+  MMARCO-VI per arXiv:2509.09131.
+- `itdainb/PhoRanker` — Apache 2.0, 100M params, best NDCG@10 on
+  MMARCO-VI. Requires VnCoreNLP word segmentation (Java JVM); use only
+  if you've already wired that up.
+
+19 new tests in `tests/test_reranker.py` covering protocol conformance,
+lazy load, fp16 path, error cases, and full RAG.ask integration.
+
+### Real benchmarks on Vietnamese legal RAG
+
+Two new fixtures sampled from the
+[`GreenNode/zalo-ai-legal-text-retrieval-vn`](https://huggingface.co/datasets/GreenNode/zalo-ai-legal-text-retrieval-vn)
+mirror (MIT) of the Zalo AI Challenge 2021 Legal Text Retrieval corpus:
+
+- `benchmarks/rag/fixtures/vn_legal_zalo_2k.json` (1.5k articles, 50 q)
+- `benchmarks/rag/fixtures/vn_legal_zalo_5k.json` (5k articles, 80 q)
+
+Regenerate via `python benchmarks/rag/fixtures/_build_zalo_legal.py`.
+
+`bench_rag_vn.py` extended with `--reranker` and `--device` (auto-picks
+CUDA when available). 10-condition grid on the 5k fixture, RTX 3080
+Laptop GPU, fp16, warmup=1, timed=2 (full table in `docs/benchmark.md`):
+
+| Embedder | Retriever | recall@1 | recall@10 | mrr@10 | p50 ms |
+|---|---|---:|---:|---:|---:|
+| dangvantuan | BM25 | 0.762 | 0.975 | 0.843 | 27 |
+| dangvantuan | Hybrid (RRF) | 0.650 | 0.975 | 0.780 | 59 |
+| dangvantuan | + bge-reranker-v2-m3 | **0.863** | **1.000** | **0.931** | 681 |
+| AITeamVN | Dense only | **0.825** | 0.975 | 0.894 | 47 |
+| AITeamVN | + bge-reranker-v2-m3 | 0.863 | 0.988 | 0.923 | 720 |
+
+Three findings worth noting:
+- **Embedder choice matters more than reranker choice** for the
+  bi-encoder stage. AITeamVN (BGE-M3 finetuned for VN legal) doubles
+  dense recall@1 vs dangvantuan (0.412 → 0.825).
+- **Rerankers converge** — both `bge-reranker-v2-m3` and ViRanker bring
+  final recall@1 to ~0.863 regardless of feeder embedder.
+- **Skip-the-reranker option exists** — AITeamVN dense alone gets 0.825
+  recall@1 in 47 ms, ~15× faster than +rerank for a 4% absolute drop.
+
+Per CLAUDE.md principle 12 + new component-build rule #7: numbers come
+from a committed-and-runnable script (`benchmarks/rag/bench_rag_vn.py`)
+and a checked-in baseline JSON. Divergence from public Zalo numbers
+(BM25 alone here = 0.762 recall@1; UIT 2024 reports BM25Plus
+Exist@90=82.6% on full 21k corpus) is corpus-size-driven — fewer
+distractors in our 5k subset — not a methodology bug.
+
+### Datasets + baselines published to HuggingFace
+
+`nrl-ai/vn-rag-bench` ([dataset](https://huggingface.co/datasets/nrl-ai/vn-rag-bench))
+hosts the fixture builder + JSON fixtures + JSON baselines so anyone
+can reproduce or compare without re-sampling.
+
+### CLAUDE.md — component-build workflow
+
+Codified the loop applied here so every future component follows it:
+research → build → test with real models → benchmark on real datasets →
+iterate as a grid → cross-check against published numbers. See the
+"Component build workflow" section in `CLAUDE.md` for the full rule
+set including the file-format trust ladder (safetensors > HF .bin from
+a major lab > native opaque > pickle = always reject).
+
 ## [0.2.4] — 2026-04-25
 
 ### Advanced RAG — opt-in query strategies

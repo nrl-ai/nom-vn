@@ -54,6 +54,8 @@ repos:
           (?x)^(
             .*\.lock|
             benchmarks/data/.*|
+            benchmarks/rag/baselines/.*|
+            benchmarks/rag/fixtures/.*|
             benchmarks/results/.*|
             CHANGELOG\.md|
             README\.vi\.md

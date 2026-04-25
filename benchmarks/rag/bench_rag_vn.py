@@ -82,14 +82,32 @@ class _FakeEmbedder:
         return np.stack([self.embed(t) for t in texts])
 
 
-def _build_embedder(name: str) -> Any:
+def _auto_device() -> str:
+    """Pick the fastest available device. Mirrors what production should do."""
+    try:
+        import torch
+
+        if torch.cuda.is_available():
+            return "cuda"
+        if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+            return "mps"
+    except ImportError:
+        pass
+    return "cpu"
+
+
+def _build_embedder(name: str, device: str = "cpu") -> Any:
     if name == "fake":
         return _FakeEmbedder()
     if name == "vietnamese":
         from nom.embeddings import VietnameseEmbedder
 
-        return VietnameseEmbedder()
-    raise SystemExit(f"unknown embedder: {name!r} (choices: fake, vietnamese)")
+        return VietnameseEmbedder(device=device)
+    if name == "aiteamvn":
+        from nom.embeddings import AITeamVNEmbedder
+
+        return AITeamVNEmbedder(device=device)
+    raise SystemExit(f"unknown embedder: {name!r} (choices: fake, vietnamese, aiteamvn)")
 
 
 # ---------------------------------------------------------------------------
@@ -165,10 +183,16 @@ RetrievalFn = Any  # callable(question, k) -> list[Hit]
 
 
 def _make_retrievers(
-    indexed: IndexedCorpus, embedder: Any, *, n_retrieve: int
+    indexed: IndexedCorpus,
+    embedder: Any,
+    *,
+    n_retrieve: int,
+    reranker: Any | None = None,
+    rerank_candidates: int = 30,
 ) -> dict[str, RetrievalFn]:
     bm25 = indexed.bm25
     dense = indexed.dense
+    chunks_text = indexed.chunks_text
 
     def bm25_search(q: str, k: int) -> list[Any]:
         return bm25.search(q, top_k=k)
@@ -181,7 +205,30 @@ def _make_retrievers(
         d = dense.search(embedder.embed(q), top_k=n_retrieve)
         return hybrid_score([b, d], method="rrf", top_k=k, rrf_k=60)
 
-    return {"bm25": bm25_search, "dense": dense_search, "hybrid": hybrid_search}
+    retrievers: dict[str, RetrievalFn] = {
+        "bm25": bm25_search,
+        "dense": dense_search,
+        "hybrid": hybrid_search,
+    }
+
+    if reranker is not None:
+        # Wider per-leg pool so the reranker has enough to choose from.
+        pool = max(n_retrieve, rerank_candidates)
+
+        def hybrid_rerank_search(q: str, k: int) -> list[Any]:
+            b = bm25.search(q, top_k=pool)
+            d = dense.search(embedder.embed(q), top_k=pool)
+            fused = hybrid_score([b, d], method="rrf", top_k=rerank_candidates, rrf_k=60)
+            from nom.retrieve import Hit as _Hit
+
+            text_hits = [
+                _Hit(idx=h.idx, score=h.score, text=h.text or chunks_text[h.idx]) for h in fused
+            ]
+            return reranker.rerank(q, text_hits, top_k=k)
+
+        retrievers["hybrid+rerank"] = hybrid_rerank_search
+
+    return retrievers
 
 
 def _hits_to_articles(hits: list[Any], chunk_to_article: list[str]) -> list[str]:
@@ -293,6 +340,8 @@ def _dump_result(
     fixture: Fixture,
     indexed: IndexedCorpus,
     embedder: Any,
+    reranker: Any | None,
+    rerank_candidates: int,
     metrics: dict[str, dict[str, float]],
     latency: dict[str, dict[str, float]],
     n_warmup: int,
@@ -310,6 +359,10 @@ def _dump_result(
             "n_questions": len(fixture.questions),
             "embedder": getattr(embedder, "name", type(embedder).__name__),
             "embedder_dim": int(embedder.dim),
+            "embedder_device": getattr(embedder, "device", "n/a"),
+            "reranker": getattr(reranker, "name", None) if reranker else None,
+            "reranker_device": getattr(reranker, "device", None) if reranker else None,
+            "rerank_candidates": rerank_candidates if reranker else None,
             "chunk_max_tokens": chunk_max_tokens,
             "chunk_overlap": chunk_overlap,
             "fusion": "rrf",
@@ -377,15 +430,36 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument(
         "--embedder",
-        choices=("fake", "vietnamese"),
+        choices=("fake", "vietnamese", "aiteamvn"),
         default="fake",
         help="Embedder backend. 'fake' is offline + deterministic; "
-        "'vietnamese' downloads ~440 MB and produces real signal.",
+        "'vietnamese' = dangvantuan/vietnamese-embedding (~440 MB, dim 768); "
+        "'aiteamvn' = AITeamVN/Vietnamese_Embedding (~2 GB, dim 1024, BGE-M3 base).",
+    )
+    p.add_argument(
+        "--device",
+        default="auto",
+        help="Compute device. 'auto' picks cuda > mps > cpu. Pass 'cpu' to "
+        "force CPU even when a GPU is present.",
     )
     p.add_argument(
         "--retrievers",
         default="bm25,dense,hybrid",
-        help="Comma-separated list of retrievers to evaluate.",
+        help="Comma-separated list of retrievers to evaluate. "
+        "Add 'hybrid+rerank' to include the cross-encoder stage.",
+    )
+    p.add_argument(
+        "--reranker",
+        default=None,
+        help="HuggingFace cross-encoder model id (e.g. BAAI/bge-reranker-v2-m3, "
+        "namdp-ptit/ViRanker, itdainb/PhoRanker). Required when 'hybrid+rerank' "
+        "is in --retrievers.",
+    )
+    p.add_argument(
+        "--rerank-candidates",
+        type=int,
+        default=30,
+        help="Bi-encoder pool size sent to the reranker (production sweet spot 30-75).",
     )
     p.add_argument("--top-k", type=int, default=10, help="Top-K for metrics.")
     p.add_argument(
@@ -401,15 +475,28 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--json", type=Path, help="Write result JSON to this path.")
     args = p.parse_args(argv)
 
+    device = _auto_device() if args.device == "auto" else args.device
+    print(f"device={device}")
     fixture = _load_fixture(args.fixture)
-    embedder = _build_embedder(args.embedder)
+    embedder = _build_embedder(args.embedder, device=device)
     indexed = _build_index(
         fixture,
         embedder,
         chunk_max_tokens=args.chunk_max_tokens,
         chunk_overlap=args.chunk_overlap,
     )
-    retrievers = _make_retrievers(indexed, embedder, n_retrieve=args.n_retrieve)
+    reranker: Any | None = None
+    if args.reranker:
+        from nom.rag import CrossEncoderReranker
+
+        reranker = CrossEncoderReranker(args.reranker, device=device)
+    retrievers = _make_retrievers(
+        indexed,
+        embedder,
+        n_retrieve=args.n_retrieve,
+        reranker=reranker,
+        rerank_candidates=args.rerank_candidates,
+    )
 
     selected = [r.strip() for r in args.retrievers.split(",") if r.strip()]
     metrics: dict[str, dict[str, float]] = {}
@@ -435,6 +522,8 @@ def main(argv: list[str] | None = None) -> int:
         fixture=fixture,
         indexed=indexed,
         embedder=embedder,
+        reranker=reranker,
+        rerank_candidates=args.rerank_candidates,
         metrics=metrics,
         latency=latency,
         n_warmup=args.n_warmup,

@@ -41,5 +41,15 @@ contracts of each submodule are the seam.
 from nom.rag.pipeline import RAG, Answer, Citation
 from nom.rag.pipeline import _source_to_text as source_to_text
 from nom.rag.queries import hyde, multi_query
+from nom.rag.reranker import CrossEncoderReranker, Reranker
 
-__all__ = ["RAG", "Answer", "Citation", "hyde", "multi_query", "source_to_text"]
+__all__ = [
+    "RAG",
+    "Answer",
+    "Citation",
+    "CrossEncoderReranker",
+    "Reranker",
+    "hyde",
+    "multi_query",
+    "source_to_text",
+]

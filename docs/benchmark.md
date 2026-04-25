@@ -265,6 +265,107 @@ This is the work that will populate `nrl.ai/bench` with NRL-original numbers (vs
 
 ---
 
+## Module: `nom.rag` — *shipped v0.2.5*
+
+### What it does
+
+End-to-end RAG over Vietnamese documents: BM25 + dense (sentence-transformers
+encoder) hybrid retrieval with RRF fusion, optional cross-encoder
+reranking, optional HyDE / multi-query expansion, then an LLM call.
+
+Three lines from documents to answers — see `src/nom/rag/pipeline.py`
+docstring for the canonical example.
+
+### Vietnamese RAG model grid — *measured 2026-04-25*
+
+Fixture: **`vn_legal_zalo_5k.json`** — 5,061 Vietnamese legal articles
+(sample of [GreenNode/zalo-ai-legal-text-retrieval-vn](https://huggingface.co/datasets/GreenNode/zalo-ai-legal-text-retrieval-vn),
+MIT) chunked into 6,833 chunks, 80 held-out questions each with at
+least one gold article id. Hardware: NVIDIA RTX 3080 Laptop, fp16,
+warmup=1, timed=2 (best-of-N reported per CLAUDE.md principle 12).
+
+| Embedder | Retriever | recall@1 | recall@3 | recall@10 | mrr@10 | p50 ms | p95 ms |
+|---|---|---:|---:|---:|---:|---:|---:|
+| `dangvantuan/vietnamese-embedding` (768-d, ~440 MB) | BM25 only | 0.762 | 0.912 | 0.975 | 0.843 | 27 | 48 |
+|  | Dense only | 0.412 | 0.725 | 0.863 | 0.585 | 15 | 25 |
+|  | Hybrid (RRF) | 0.650 | 0.875 | 0.975 | 0.780 | 59 | 113 |
+|  | + `BAAI/bge-reranker-v2-m3` | **0.863** | **1.000** | **1.000** | **0.931** | 681 | 747 |
+|  | + `namdp-ptit/ViRanker` | 0.850 | 0.963 | 1.000 | 0.913 | 687 | 743 |
+| `AITeamVN/Vietnamese_Embedding` (1024-d, ~2.3 GB, BGE-M3 base) | BM25 only | 0.762 | 0.912 | 0.950 | 0.843 | 24 | 41 |
+|  | Dense only | **0.825** | 0.963 | 0.975 | 0.894 | 47 | 77 |
+|  | Hybrid (RRF) | 0.800 | 0.963 | 0.975 | 0.884 | 97 | 131 |
+|  | + `BAAI/bge-reranker-v2-m3` | **0.863** | 0.988 | 0.988 | 0.923 | 720 | 786 |
+|  | + `namdp-ptit/ViRanker` | **0.863** | 0.963 | 0.988 | 0.914 | 718 | 799 |
+
+Reproduce: `bash benchmarks/rag/run_grid.sh`. Per-config baseline JSONs
+under `benchmarks/rag/baselines/zalo_5k__*.json` and mirrored to
+[nrl-ai/vn-rag-bench](https://huggingface.co/datasets/nrl-ai/vn-rag-bench).
+
+### Findings
+
+1. **Embedder choice matters more than reranker choice — for the
+   bi-encoder stage.** Swapping from `dangvantuan` to `AITeamVN` doubles
+   dense recall@1 (0.412 → 0.825). The `AITeamVN/Vietnamese_Embedding`
+   BGE-M3 finetune was specifically tuned on Zalo Legal QA, which shows
+   in the in-domain numbers.
+2. **Rerankers converge.** Both `BAAI/bge-reranker-v2-m3` and
+   `namdp-ptit/ViRanker` bring final recall@1 to ~0.863 regardless of
+   feeder embedder. The reranker dominates the final ranking once the
+   gold article is in the top-30 candidate pool.
+3. **Best peak quality:** `dangvantuan` + `BAAI/bge-reranker-v2-m3` —
+   recall@10 = 1.000 and recall@3 = 1.000 on this fixture. The dangvantuan
+   embedder's higher BM25 affinity (its dense leg is weak so RRF leans
+   on BM25) lifts recall@10 ceiling.
+4. **Skip-the-reranker option:** `AITeamVN` dense alone gets recall@1 =
+   0.825 in 47 ms p50 — about **15× faster** than +rerank, with only 4%
+   absolute recall@1 lost. Right pick for latency-sensitive deployments
+   where 825/863 is acceptable.
+5. **BM25 is shockingly competitive** on legal Vietnamese (0.762 recall@1).
+   Legal queries quote vocabulary directly; lexical overlap is high.
+   This is the corpus, not the algorithm — diverges from general-domain
+   benchmarks where dense usually dominates.
+
+### Cross-checking against published numbers (per CLAUDE.md rule #7)
+
+- **Multi-stage IR for VN Legal** (PKAW 2022, arXiv:2209.14494):
+  reports F2 = 0.741 on the **full ~21k Zalo corpus** with
+  PhoBERT-large + sqrt(BM25)·cos hybrid + 3-round hard-negative
+  mining. Our F2 is not directly compared (we report recall/mrr), but
+  recall@10 = 1.000 on a 5k subset is consistent with their finding
+  that the answer is reliably in the top-K once K ≥ 10.
+- **UIT 2024** (arXiv:2507.14619): Vietnamese-bi-encoder + PhoRanker,
+  Bi-Encoder Exist@90 = 97.6% (vs BM25Plus 82.6%). Our `AITeamVN`
+  dense Exist@90 ≈ recall@90 (single gold mostly) is probably similar
+  but we report recall@10. **Divergence cause**: 5k subset vs their
+  21k full corpus → fewer distractors → higher recall here. Not a
+  methodology bug.
+- **AITeamVN/Vietnamese_Embedding model card**: claims +27.9% Acc@1
+  over base BGE-M3 on legal-domain retrieval. Our dense Acc@1 = 0.825
+  vs base BGE-M3 (untested by us) — would need to bench BGE-M3 on the
+  same fixture to confirm the lift size. **Open: add BGE-M3 to the
+  grid** to verify the AITeamVN finetune's published advantage.
+- **PhoRanker NDCG@10 = 0.7422 on MMARCO-VI** ([model card](https://huggingface.co/itdainb/PhoRanker)):
+  not measured — PhoRanker requires VnCoreNLP (Java JVM), excluded
+  from this grid intentionally.
+
+### Recommended config (default in `nom-vn` v0.2.5)
+
+```python
+from nom.rag import RAG, CrossEncoderReranker
+rag = RAG.from_documents(
+    docs,
+    llm=Ollama(model="qwen3:8b"),
+    embedder=VietnameseEmbedder(),                  # 440 MB, dim 768
+    reranker=CrossEncoderReranker(),                # bge-reranker-v2-m3
+)
+answer = rag.ask(question, rerank=True, rerank_candidates=30)
+```
+
+For latency-bound deployments without a GPU, drop the reranker and use
+`AITeamVNEmbedder()` (better dense, no cross-encoder tax).
+
+---
+
 ## Reproducibility
 
 Every "measured" number in this document is reproducible:

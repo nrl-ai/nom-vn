@@ -25,6 +25,7 @@ from nom.retrieve import BM25Retriever, DenseRetriever, hybrid_score
 if TYPE_CHECKING:
     from nom.embeddings import Embedder
     from nom.llm import LLM
+    from nom.rag.reranker import Reranker
 
 
 __all__ = ["RAG", "Answer", "Citation"]
@@ -90,6 +91,10 @@ class RAG:
     dense: DenseRetriever
     embedder: Embedder
     llm: LLM
+    # Optional cross-encoder reranker. When set, ``ask(rerank=True)``
+    # narrows the bi-encoder candidate pool with this model before the
+    # LLM call. ``None`` (default) keeps the v0.2.4 behaviour.
+    reranker: Reranker | None = None
     # Tunables
     top_k: int = 5
     n_retrieve: int = 20  # retrieve more, rerank-by-LLM via prompt
@@ -107,6 +112,7 @@ class RAG:
         *,
         llm: LLM,
         embedder: Embedder | None = None,
+        reranker: Reranker | None = None,
         chunk_max_tokens: int = 512,
         chunk_overlap: int = 64,
         top_k: int = 5,
@@ -125,6 +131,10 @@ class RAG:
                 local; OpenAI/Anthropic when wired up in v0.1.1).
             embedder: optional :class:`nom.embeddings.Embedder`. Defaults
                 to :class:`nom.embeddings.VietnameseEmbedder` (lazy-loaded).
+            reranker: optional :class:`nom.rag.Reranker` (cross-encoder).
+                When provided, ``ask(rerank=True)`` will narrow the
+                bi-encoder candidate pool with this model before the
+                LLM call. Default ``None`` (rerank=True will raise).
             chunk_max_tokens: target chunk size in tokens. Default 512.
             chunk_overlap: token overlap between chunks. Default 64.
             top_k: how many cited chunks to include with each answer.
@@ -185,6 +195,7 @@ class RAG:
             dense=dense,
             embedder=active_embedder,
             llm=llm,
+            reranker=reranker,
             top_k=top_k,
             n_retrieve=n_retrieve,
         )
@@ -200,6 +211,9 @@ class RAG:
         top_k: int | None = None,
         query_strategy: str = "direct",
         n_queries: int = 3,
+        rerank: bool = False,
+        rerank_candidates: int = 30,
+        rerank_keep: int | None = None,
     ) -> Answer:
         """Ask a question over the indexed corpus.
 
@@ -207,10 +221,13 @@ class RAG:
           1. Optionally transform the query (HyDE or multi-query).
           2. Retrieve via BM25 + Dense (one round, or one round per
              rewritten query when ``query_strategy="multi_query"``).
-          3. Hybrid-fuse via RRF, take top ``top_k`` after fusion.
-          4. Pass the top chunks + the **original** question to the
+          3. Hybrid-fuse via RRF.
+          4. **(Optional)** When ``rerank=True``, narrow the candidate
+             pool to ``rerank_candidates``, then cross-encoder rerank
+             down to ``rerank_keep``.
+          5. Pass the top chunks + the **original** question to the
              LLM with a grounding prompt.
-          5. Return the LLM's answer + the citations.
+          6. Return the LLM's answer + the citations.
 
         Args:
             question: natural-language query.
@@ -228,6 +245,16 @@ class RAG:
 
             n_queries: number of LLM rewrites for ``"multi_query"``.
                 Ignored otherwise. Default 3 (4 total searches).
+            rerank: when True, run the cross-encoder reranker on the
+                candidate pool before the LLM call. Requires that the
+                ``RAG`` was built with a ``reranker=`` argument.
+                Default False (v0.2.4 behaviour preserved).
+            rerank_candidates: bi-encoder pool size to send to the
+                reranker. Production sweet spot is 30-75 — larger
+                gives the reranker more to work with but adds latency
+                roughly linearly. Default 30.
+            rerank_keep: top-K to keep after reranking. Defaults to
+                ``top_k`` (or ``self.top_k``) when not set.
 
         Returns:
             An :class:`Answer` with the LLM's response and source chunks.
@@ -235,7 +262,7 @@ class RAG:
         Note:
             All strategies use the **original** question for the final
             answer-generation prompt — only retrieval is changed. So
-            the LLM still sees the user's actual phrasing in step 4.
+            the LLM still sees the user's actual phrasing in step 5.
         """
         if not question.strip():
             raise ValueError("ask() requires a non-empty question")
@@ -244,14 +271,24 @@ class RAG:
                 f"Unknown query_strategy={query_strategy!r}. "
                 "Use 'direct', 'hyde', or 'multi_query'."
             )
+        if rerank and self.reranker is None:
+            raise ValueError(
+                "ask(rerank=True) requires the RAG to be built with a reranker. "
+                "Pass reranker=CrossEncoderReranker() to RAG.from_documents()."
+            )
 
         k = top_k if top_k is not None else self.top_k
+        # When reranking, retrieve a wider pool so the cross-encoder has
+        # something to choose from. The per-side BM25/dense cap must
+        # cover ``rerank_candidates`` — bump it transparently when the
+        # user asked for a larger pool than n_retrieve.
+        retrieve_cap = max(self.n_retrieve, rerank_candidates) if rerank else self.n_retrieve
 
         # 1. Retrieve — branch on query_strategy
         if query_strategy == "direct":
-            bm25_hits = self.bm25.search(question, top_k=self.n_retrieve)
+            bm25_hits = self.bm25.search(question, top_k=retrieve_cap)
             query_vec = self.embedder.embed(question)
-            dense_hits = self.dense.search(query_vec, top_k=self.n_retrieve)
+            dense_hits = self.dense.search(query_vec, top_k=retrieve_cap)
         elif query_strategy == "hyde":
             from nom.rag.queries import hyde
 
@@ -259,35 +296,48 @@ class RAG:
             # dense uses the LLM's hypothetical answer (richer vocabulary
             # closer to corpus prose).
             hypothetical = hyde(question, self.llm)
-            bm25_hits = self.bm25.search(question, top_k=self.n_retrieve)
+            bm25_hits = self.bm25.search(question, top_k=retrieve_cap)
             query_vec = self.embedder.embed(hypothetical)
-            dense_hits = self.dense.search(query_vec, top_k=self.n_retrieve)
+            dense_hits = self.dense.search(query_vec, top_k=retrieve_cap)
         else:  # multi_query
             from nom.rag.queries import multi_query as _mq
 
             queries = _mq(question, self.llm, n=n_queries)
-            bm25_lists = [self.bm25.search(q, top_k=self.n_retrieve) for q in queries]
+            bm25_lists = [self.bm25.search(q, top_k=retrieve_cap) for q in queries]
             dense_lists = [
-                self.dense.search(self.embedder.embed(q), top_k=self.n_retrieve) for q in queries
+                self.dense.search(self.embedder.embed(q), top_k=retrieve_cap) for q in queries
             ]
             # Flatten per-side: pre-fuse each side's per-query results, so
             # downstream hybrid_score still sees one bm25 list and one
             # dense list.
-            bm25_hits = hybrid_score(
-                bm25_lists, method="rrf", top_k=self.n_retrieve, rrf_k=self.rrf_k
-            )
+            bm25_hits = hybrid_score(bm25_lists, method="rrf", top_k=retrieve_cap, rrf_k=self.rrf_k)
             dense_hits = hybrid_score(
-                dense_lists, method="rrf", top_k=self.n_retrieve, rrf_k=self.rrf_k
+                dense_lists, method="rrf", top_k=retrieve_cap, rrf_k=self.rrf_k
             )
 
-        # 2. Hybrid fuse
+        # 2. Hybrid fuse — pool size depends on whether we rerank next.
+        fuse_k = rerank_candidates if rerank else k
         fused = hybrid_score(
             [bm25_hits, dense_hits],
             method="rrf",
-            top_k=k,
+            top_k=fuse_k,
             rrf_k=self.rrf_k,
         )
         n_retrieved = len({h.idx for h in bm25_hits} | {h.idx for h in dense_hits})
+
+        # 3. Cross-encoder rerank (opt-in).
+        if rerank:
+            assert self.reranker is not None  # guarded above
+            keep = rerank_keep if rerank_keep is not None else k
+            # The reranker needs hit.text — backfill from the corpus
+            # store when retrievers returned indices only.
+            from nom.retrieve import Hit as _Hit
+
+            text_hits = [
+                _Hit(idx=h.idx, score=h.score, text=h.text or self.chunks_text[h.idx])
+                for h in fused
+            ]
+            fused = self.reranker.rerank(question, text_hits, top_k=keep)
 
         if not fused:
             return Answer(
