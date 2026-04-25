@@ -1,0 +1,588 @@
+{
+  "summary": {
+    "n_sentences": 55,
+    "n_words": 776,
+    "n_words_with_diacritic": 666,
+    "overall_word_accuracy": 0.4111,
+    "overall_diacritic_recall": 0.3483,
+    "by_register": {
+      "contracts / business": {
+        "n_sentences": 15,
+        "n_words": 204,
+        "word_accuracy": 0.5098,
+        "diacritic_recall": 0.4545
+      },
+      "official documents / công văn": {
+        "n_sentences": 12,
+        "n_words": 178,
+        "word_accuracy": 0.382,
+        "diacritic_recall": 0.2867
+      },
+      "everyday / conversational": {
+        "n_sentences": 15,
+        "n_words": 188,
+        "word_accuracy": 0.4681,
+        "diacritic_recall": 0.425
+      },
+      "news / long-form": {
+        "n_sentences": 13,
+        "n_words": 206,
+        "word_accuracy": 0.2864,
+        "diacritic_recall": 0.2278
+      }
+    },
+    "elapsed_seconds": 0.0011
+  },
+  "results": [
+    {
+      "register": "contracts / business",
+      "original": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+      "stripped": "Hop dong so 02/HD/2025 duoc lap ngay 14 thang 3 nam 2025 tai Ha Noi.",
+      "restored": "Hợp đồng số 02/HD/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nói.",
+      "word_total": 15,
+      "word_correct": 13,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 10
+    },
+    {
+      "register": "contracts / business",
+      "original": "Bên A: Công ty Cổ phần ProtonX, mã số thuế 0123456789.",
+      "stripped": "Ben A: Cong ty Co phan ProtonX, ma so thue 0123456789.",
+      "restored": "Ben A: Công ty Có phan ProtonX, mà số thue 0123456789.",
+      "word_total": 11,
+      "word_correct": 6,
+      "word_with_diacritic": 7,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "contracts / business",
+      "original": "Bên B: Bà Nguyễn Thị Hương, sinh năm 1990, địa chỉ tại Hà Nội.",
+      "stripped": "Ben B: Ba Nguyen Thi Huong, sinh nam 1990, dia chi tai Ha Noi.",
+      "restored": "Ben B: Ba Nguyen Thì Huong, sinh năm 1990, dia chị tại Hà Nói.",
+      "word_total": 14,
+      "word_correct": 6,
+      "word_with_diacritic": 11,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "contracts / business",
+      "original": "Tổng giá trị hợp đồng là một tỷ năm trăm triệu đồng chẵn.",
+      "stripped": "Tong gia tri hop dong la mot ty nam tram trieu dong chan.",
+      "restored": "Tong giá trị hợp đồng là mot ty năm trăm triệu đồng chan.",
+      "word_total": 13,
+      "word_correct": 9,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 9
+    },
+    {
+      "register": "contracts / business",
+      "original": "Thời hạn thực hiện sáu tháng kể từ ngày ký kết hợp đồng.",
+      "stripped": "Thoi han thuc hien sau thang ke tu ngay ky ket hop dong.",
+      "restored": "Thời hạn thức hien sáu tháng ke từ ngày ký ket hợp đồng.",
+      "word_total": 13,
+      "word_correct": 9,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 9
+    },
+    {
+      "register": "contracts / business",
+      "original": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+      "stripped": "Phuong thuc thanh toan bang chuyen khoan, chia lam ba dot.",
+      "restored": "Phuong thức thành toán bang chuyen khoan, chia làm ba dot.",
+      "word_total": 11,
+      "word_correct": 5,
+      "word_with_diacritic": 8,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "contracts / business",
+      "original": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+      "stripped": "Hai ben da doc, hieu va dong y ky vao hop dong nay.",
+      "restored": "Hai ben đã đọc, hiểu va đồng y ký vào hợp đồng này.",
+      "word_total": 13,
+      "word_correct": 10,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 9
+    },
+    {
+      "register": "contracts / business",
+      "original": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+      "stripped": "Moi tranh chap duoc giai quyet thong qua thuong luong va hoa giai.",
+      "restored": "Moi tranh chap được giai quyet thong qua thuong lượng va hoa giai.",
+      "word_total": 13,
+      "word_correct": 4,
+      "word_with_diacritic": 11,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "contracts / business",
+      "original": "Quyền và nghĩa vụ các bên thực hiện theo quy định pháp luật hiện hành.",
+      "stripped": "Quyen va nghia vu cac ben thuc hien theo quy dinh phap luat hien hanh.",
+      "restored": "Quyen va nghia vụ cac ben thức hien theo quy dinh phap luat hien hanh.",
+      "word_total": 15,
+      "word_correct": 3,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 1
+    },
+    {
+      "register": "contracts / business",
+      "original": "Hợp đồng có hiệu lực kể từ ngày được hai bên ký kết.",
+      "stripped": "Hop dong co hieu luc ke tu ngay duoc hai ben ky ket.",
+      "restored": "Hợp đồng có hiểu luc ke từ ngày được hai ben ký ket.",
+      "word_total": 13,
+      "word_correct": 8,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 7
+    },
+    {
+      "register": "contracts / business",
+      "original": "Bên thuê có trách nhiệm bảo quản tài sản trong suốt thời gian thuê.",
+      "stripped": "Ben thue co trach nhiem bao quan tai san trong suot thoi gian thue.",
+      "restored": "Ben thue có trách nhiệm bao quan tại san trong suot thời gian thue.",
+      "word_total": 14,
+      "word_correct": 6,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "contracts / business",
+      "original": "Phạt vi phạm hợp đồng tối đa không quá tám phần trăm giá trị nghĩa vụ vi phạm.",
+      "stripped": "Phat vi pham hop dong toi da khong qua tam phan tram gia tri nghia vu vi pham.",
+      "restored": "Phat vì pham hợp đồng tôi đã không qua tám phan trăm giá trị nghia vụ vì pham.",
+      "word_total": 18,
+      "word_correct": 8,
+      "word_with_diacritic": 16,
+      "word_diacritic_recovered": 8
+    },
+    {
+      "register": "contracts / business",
+      "original": "Hợp đồng này được lập thành bốn bản có giá trị pháp lý như nhau.",
+      "stripped": "Hop dong nay duoc lap thanh bon ban co gia tri phap ly nhu nhau.",
+      "restored": "Hợp đồng này được lập thành bốn bạn có giá trị phap ly nhu nhau.",
+      "word_total": 15,
+      "word_correct": 11,
+      "word_with_diacritic": 14,
+      "word_diacritic_recovered": 10
+    },
+    {
+      "register": "contracts / business",
+      "original": "Mỗi bên giữ hai bản để theo dõi và thực hiện.",
+      "stripped": "Moi ben giu hai ban de theo doi va thuc hien.",
+      "restored": "Moi ben giu hai bạn de theo doi va thức hien.",
+      "word_total": 11,
+      "word_correct": 2,
+      "word_with_diacritic": 9,
+      "word_diacritic_recovered": 0
+    },
+    {
+      "register": "contracts / business",
+      "original": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+      "stripped": "Ben cung cap dich vu cam ket hoan thanh dung tien do da thoa thuan.",
+      "restored": "Ben cung cap dich vụ cảm ket hoan thành dung tiền do đã thoa thuan.",
+      "word_total": 15,
+      "word_correct": 4,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+      "stripped": "Kinh gui Quy So Lao dong Thuong binh va Xa hoi thanh pho.",
+      "restored": "Kinh gửi Quy Số Lao đồng Thuong binh va Xa hỏi thành phó.",
+      "word_total": 13,
+      "word_correct": 4,
+      "word_with_diacritic": 11,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Căn cứ vào quyết định số 123 ngày 5 tháng 1 năm 2025 của Uỷ ban nhân dân.",
+      "stripped": "Can cu vao quyet dinh so 123 ngay 5 thang 1 nam 2025 cua Uy ban nhan dan.",
+      "restored": "Cần cu vào quyet dinh số 123 ngày 5 tháng 1 năm 2025 của Uy bạn nhận dan.",
+      "word_total": 18,
+      "word_correct": 10,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 6
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Đơn vị xin phép tổ chức hội nghị tổng kết năm vào tuần đầu tháng tới.",
+      "stripped": "Don vi xin phep to chuc hoi nghi tong ket nam vao tuan dau thang toi.",
+      "restored": "Don vì xin phep to chuc hỏi nghi tong ket năm vào tuần dau tháng tôi.",
+      "word_total": 16,
+      "word_correct": 5,
+      "word_with_diacritic": 15,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Đề nghị Quý cơ quan xem xét và phản hồi trong thời gian sớm nhất.",
+      "stripped": "De nghi Quy co quan xem xet va phan hoi trong thoi gian som nhat.",
+      "restored": "De nghi Quy có quan xem xet va phan hỏi trong thời gian som nhat.",
+      "word_total": 15,
+      "word_correct": 5,
+      "word_with_diacritic": 11,
+      "word_diacritic_recovered": 1
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Trân trọng kính chào và cám ơn sự hợp tác của Quý cơ quan.",
+      "stripped": "Tran trong kinh chao va cam on su hop tac cua Quy co quan.",
+      "restored": "Tran trong kinh chào va cảm ơn su hợp tác của Quy có quan.",
+      "word_total": 14,
+      "word_correct": 6,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 5
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+      "stripped": "Van ban nay duoc ban hanh theo tham quyen cua Giam doc So.",
+      "restored": "Văn bạn này được bạn hanh theo tham quyen của Giám đọc Số.",
+      "word_total": 13,
+      "word_correct": 6,
+      "word_with_diacritic": 11,
+      "word_diacritic_recovered": 5
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Người ký tên dưới đây xin cam đoan các thông tin đã khai là đúng sự thật.",
+      "stripped": "Nguoi ky ten duoi day xin cam doan cac thong tin da khai la dung su that.",
+      "restored": "Nguoi ký ten dưới dạy xin cảm doan cac thong tin đã khai là dung su that.",
+      "word_total": 17,
+      "word_correct": 7,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Đơn xin nghỉ việc không hưởng lương trong thời gian một tháng.",
+      "stripped": "Don xin nghi viec khong huong luong trong thoi gian mot thang.",
+      "restored": "Don xin nghi việc không huong lượng trong thời gian mot tháng.",
+      "word_total": 12,
+      "word_correct": 7,
+      "word_with_diacritic": 9,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Lý do xin nghỉ là để chăm sóc người thân đang ốm tại quê nhà.",
+      "stripped": "Ly do xin nghi la de cham soc nguoi than dang om tai que nha.",
+      "restored": "Ly do xin nghi là de cham soc nguoi than đang om tại que nha.",
+      "word_total": 15,
+      "word_correct": 5,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Tôi sẽ bàn giao công việc đầy đủ trước khi nghỉ phép.",
+      "stripped": "Toi se ban giao cong viec day du truoc khi nghi phep.",
+      "restored": "Tôi sẽ bạn giao công việc dạy du truoc khi nghi phep.",
+      "word_total": 12,
+      "word_correct": 6,
+      "word_with_diacritic": 10,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Hồ sơ gồm có đơn xin nghỉ, giấy xác nhận của bệnh viện và bản sao giấy tờ tuỳ thân.",
+      "stripped": "Ho so gom co don xin nghi, giay xac nhan cua benh vien va ban sao giay to tuy than.",
+      "restored": "Họ số gom có don xin nghi, giây xac nhận của benh vien va bạn sao giây to tuy than.",
+      "word_total": 20,
+      "word_correct": 5,
+      "word_with_diacritic": 18,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "official documents / công văn",
+      "original": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+      "stripped": "De nghi Quy Phong To chuc Can bo duyet va phan hoi som.",
+      "restored": "De nghi Quy Phòng To chuc Cần bộ duyet va phan hỏi som.",
+      "word_total": 13,
+      "word_correct": 2,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Hôm nay trời mưa to, anh có cần tôi đem ô đến không?",
+      "stripped": "Hom nay troi mua to, anh co can toi dem o den khong?",
+      "restored": "Hom này troi mua to, anh có cần tôi dem o đến không?",
+      "word_total": 13,
+      "word_correct": 7,
+      "word_with_diacritic": 10,
+      "word_diacritic_recovered": 5
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+      "stripped": "Minh dang di hoc ve, se ghe qua nha ban vao luc bay gio toi.",
+      "restored": "Mình đang đi học ve, sẽ ghe qua nha bạn vào luc bảy giờ tôi.",
+      "word_total": 15,
+      "word_correct": 10,
+      "word_with_diacritic": 14,
+      "word_diacritic_recovered": 9
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Em ăn cơm chưa, nếu chưa thì cùng đi ăn phở với chị nhé.",
+      "stripped": "Em an com chua, neu chua thi cung di an pho voi chi nhe.",
+      "restored": "Em ăn com chua, nếu chua thì cung đi ăn phó với chị nhe.",
+      "word_total": 14,
+      "word_correct": 8,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 7
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Cám ơn bạn đã giúp đỡ tôi rất nhiều trong thời gian qua.",
+      "stripped": "Cam on ban da giup do toi rat nhieu trong thoi gian qua.",
+      "restored": "Cảm ơn bạn đã giup do tôi rat nhieu trong thời gian qua.",
+      "word_total": 13,
+      "word_correct": 8,
+      "word_with_diacritic": 10,
+      "word_diacritic_recovered": 5
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+      "stripped": "Duong nay hom nay tac lam, di duong khac cho nhanh di.",
+      "restored": "Duong này hom này tác làm, đi duong khac cho nhanh đi.",
+      "word_total": 12,
+      "word_correct": 5,
+      "word_with_diacritic": 9,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+      "stripped": "Cuoi tuan nay toi muon ve tham bo me o que.",
+      "restored": "Cuoi tuần này tôi muốn ve tham bộ me o que.",
+      "word_total": 11,
+      "word_correct": 4,
+      "word_with_diacritic": 11,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Hôm nay là sinh nhật của con gái tôi, cả gia đình rất vui.",
+      "stripped": "Hom nay la sinh nhat cua con gai toi, ca gia dinh rat vui.",
+      "restored": "Hom này là sinh nhat của con gai tôi, ca giá dinh rat vui.",
+      "word_total": 14,
+      "word_correct": 6,
+      "word_with_diacritic": 9,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Bạn có thể cho tôi mượn quyển sách này một tuần được không?",
+      "stripped": "Ban co the cho toi muon quyen sach nay mot tuan duoc khong?",
+      "restored": "Bạn có the cho tôi muốn quyen sach này mot tuần được không?",
+      "word_total": 13,
+      "word_correct": 8,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 7
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+      "stripped": "Toi nghi chung ta nen hen nhau ca phe vao sang mai.",
+      "restored": "Tôi nghi chúng ta nên hen nhau ca phe vào sang mai.",
+      "word_total": 12,
+      "word_correct": 7,
+      "word_with_diacritic": 9,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+      "stripped": "Nam nay con be hoc lop nam, ket qua kha tot.",
+      "restored": "Năm này con be học lop năm, ket qua kha tot.",
+      "word_total": 11,
+      "word_correct": 4,
+      "word_with_diacritic": 9,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+      "stripped": "Troi dep qua, minh di dao cong vien mot chut nhe.",
+      "restored": "Troi dep qua, mình đi dao công vien mot chut nhe.",
+      "word_total": 11,
+      "word_correct": 3,
+      "word_with_diacritic": 11,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+      "stripped": "Toi moi chuyen nha, may hom nay van dang sap xep do dac.",
+      "restored": "Tôi moi chuyen nha, may hom này văn đang sap xep do dac.",
+      "word_total": 13,
+      "word_correct": 2,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+      "stripped": "He nay gia dinh toi se di nghi o Da Nang mot tuan.",
+      "restored": "He này giá dinh tôi sẽ đi nghi o Đã Nang mot tuần.",
+      "word_total": 13,
+      "word_correct": 5,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 5
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Bạn có biết nhà hàng nào ngon ở khu này không?",
+      "stripped": "Ban co biet nha hang nao ngon o khu nay khong?",
+      "restored": "Bạn có biết nha hang nào ngon o khu này không?",
+      "word_total": 11,
+      "word_correct": 8,
+      "word_with_diacritic": 9,
+      "word_diacritic_recovered": 6
+    },
+    {
+      "register": "everyday / conversational",
+      "original": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+      "stripped": "Sang nay toi day som de di tap the duc cung con.",
+      "restored": "Sang này tôi dạy som de đi tap the duc cung con.",
+      "word_total": 12,
+      "word_correct": 3,
+      "word_with_diacritic": 10,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "news / long-form",
+      "original": "Thủ tướng đã ký quyết định phê duyệt dự án vào sáng nay.",
+      "stripped": "Thu tuong da ky quyet dinh phe duyet du an vao sang nay.",
+      "restored": "Thứ tuong đã ký quyet dinh phe duyet du ăn vào sang này.",
+      "word_total": 13,
+      "word_correct": 3,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "news / long-form",
+      "original": "Theo báo cáo của Bộ Tài chính, tăng trưởng kinh tế quý đầu năm đạt sáu phẩy hai phần trăm.",
+      "stripped": "Theo bao cao cua Bo Tai chinh, tang truong kinh te quy dau nam dat sau phay hai phan tram.",
+      "restored": "Theo bao cao của Bộ Tại chinh, tang trưởng kinh te quy dau năm dat sáu phay hai phan trăm.",
+      "word_total": 20,
+      "word_correct": 9,
+      "word_with_diacritic": 17,
+      "word_diacritic_recovered": 6
+    },
+    {
+      "register": "news / long-form",
+      "original": "Hà Nội đang triển khai các tuyến xe buýt điện nhằm giảm ô nhiễm không khí.",
+      "stripped": "Ha Noi dang trien khai cac tuyen xe buyt dien nham giam o nhiem khong khi.",
+      "restored": "Hà Nói đang trien khai cac tuyen xe buyt dien nham giám o nhiệm không khi.",
+      "word_total": 16,
+      "word_correct": 5,
+      "word_with_diacritic": 14,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "news / long-form",
+      "original": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+      "stripped": "Dai hoc Quoc gia thanh pho Ho Chi Minh tuyen sinh dai tra tu thang ba.",
+      "restored": "Dai học Quoc giá thành phó Họ Chị Mình tuyen sinh dai trả từ tháng ba.",
+      "word_total": 16,
+      "word_correct": 6,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 4
+    },
+    {
+      "register": "news / long-form",
+      "original": "Đội tuyển bóng đá quốc gia chuẩn bị bước vào vòng loại giải đấu khu vực.",
+      "stripped": "Doi tuyen bong da quoc gia chuan bi buoc vao vong loai giai dau khu vuc.",
+      "restored": "Doi tuyen bong đã quoc giá chuan bi buoc vào vong loai giai dau khu vuc.",
+      "word_total": 16,
+      "word_correct": 2,
+      "word_with_diacritic": 14,
+      "word_diacritic_recovered": 1
+    },
+    {
+      "register": "news / long-form",
+      "original": "Doanh nghiệp công nghệ Việt Nam đang đẩy mạnh xuất khẩu phần mềm sang thị trường Nhật.",
+      "stripped": "Doanh nghiep cong nghe Viet Nam dang day manh xuat khau phan mem sang thi truong Nhat.",
+      "restored": "Doanh nghiep công nghe Viết Năm đang dạy manh xuat khau phan mem sang thì trưởng Nhat.",
+      "word_total": 17,
+      "word_correct": 4,
+      "word_with_diacritic": 14,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "news / long-form",
+      "original": "Cộng đồng nghiên cứu trí tuệ nhân tạo trong nước có nhiều bước tiến đáng ghi nhận.",
+      "stripped": "Cong dong nghien cuu tri tue nhan tao trong nuoc co nhieu buoc tien dang ghi nhan.",
+      "restored": "Công đồng nghien cuu trị tue nhận tao trong nuoc có nhieu buoc tiền đang ghi nhận.",
+      "word_total": 17,
+      "word_correct": 5,
+      "word_with_diacritic": 15,
+      "word_diacritic_recovered": 3
+    },
+    {
+      "register": "news / long-form",
+      "original": "Một số tỉnh miền núi phía bắc đang chịu ảnh hưởng nặng do mưa lớn kéo dài.",
+      "stripped": "Mot so tinh mien nui phia bac dang chiu anh huong nang do mua lon keo dai.",
+      "restored": "Mot số tinh mien nui phia bac đang chiu anh huong nang do mua lon keo dai.",
+      "word_total": 17,
+      "word_correct": 3,
+      "word_with_diacritic": 16,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "news / long-form",
+      "original": "Bộ Giáo dục công bố phương án tuyển sinh đại học cho năm học tới.",
+      "stripped": "Bo Giao duc cong bo phuong an tuyen sinh dai hoc cho nam hoc toi.",
+      "restored": "Bộ Giao duc công bộ phuong ăn tuyen sinh dai học cho năm học tôi.",
+      "word_total": 15,
+      "word_correct": 7,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 5
+    },
+    {
+      "register": "news / long-form",
+      "original": "Năm nay là dịp kỷ niệm năm mươi năm ngày thống nhất đất nước.",
+      "stripped": "Nam nay la dip ky niem nam muoi nam ngay thong nhat dat nuoc.",
+      "restored": "Năm này là dip ký niem năm mười năm ngày thong nhat dat nuoc.",
+      "word_total": 14,
+      "word_correct": 5,
+      "word_with_diacritic": 13,
+      "word_diacritic_recovered": 5
+    },
+    {
+      "register": "news / long-form",
+      "original": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+      "stripped": "Trien lam my thuat quoc te khai mac tai Bao tang My thuat Ha Noi.",
+      "restored": "Trien làm my thuat quoc te khai mac tại Bao tang My thuat Hà Nói.",
+      "word_total": 15,
+      "word_correct": 3,
+      "word_with_diacritic": 14,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "news / long-form",
+      "original": "Lễ hội đường phố thu hút hàng nghìn khách du lịch trong và ngoài nước.",
+      "stripped": "Le hoi duong pho thu hut hang nghin khach du lich trong va ngoai nuoc.",
+      "restored": "Le hỏi duong phó thứ hut hang nghìn khach du lich trong va ngoài nuoc.",
+      "word_total": 15,
+      "word_correct": 4,
+      "word_with_diacritic": 12,
+      "word_diacritic_recovered": 2
+    },
+    {
+      "register": "news / long-form",
+      "original": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+      "stripped": "Khoang nam ngoai, cong nghe tri tue nhan tao da thay doi nhieu nganh nghe.",
+      "restored": "Khoang năm ngoài, công nghe trị tue nhận tao đã thấy doi nhieu nganh nghe.",
+      "word_total": 15,
+      "word_correct": 3,
+      "word_with_diacritic": 14,
+      "word_diacritic_recovered": 3
+    }
+  ]
+}

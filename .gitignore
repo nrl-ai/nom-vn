@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+build/
+dist/
+wheels/
+.installed.cfg
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+
+# Tests / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Type checkers
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+
+# IDEs / editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Build artifacts
+*.log
+*.tmp
+.tsbuildinfo
+
+# Benchmark outputs — exclude ad-hoc runs but TRACK named baselines
+benchmarks/results/*.json
+benchmarks/results/*.csv
+benchmarks/results/*.png
+!benchmarks/results/baseline_*.json
+benchmarks/cache/
+
+# Local model / dataset caches (we don't ship these)
+models/
+data/raw/
+*.gguf
+*.safetensors
+*.bin
+
+# Secrets — never check these in
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.toml

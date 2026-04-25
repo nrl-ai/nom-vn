@@ -1,0 +1,61 @@
+# pre-commit hooks for nom-vn
+# https://pre-commit.com
+#
+# Install once:  pre-commit install
+# Run manually:  pre-commit run --all-files
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$  # markdown sometimes uses trailing spaces for line breaks
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=512"]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: debug-statements
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.7.4
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix"]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.13.0
+    hooks:
+      - id: mypy
+        files: ^src/
+        additional_dependencies: []
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell
+        args: ["--ignore-words=.codespellignore"]
+        # Skip auto-generated artifacts and corpora full of stripped VN
+        # (where every common word looks like an English typo to codespell).
+        exclude: |
+          (?x)^(
+            .*\.lock|
+            benchmarks/data/.*|
+            benchmarks/results/.*|
+            CHANGELOG\.md|
+            README\.vi\.md
+          )$
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.43.0
+    hooks:
+      - id: markdownlint
+        args: ["--config", ".markdownlint.json"]
+        exclude: ^(CHANGELOG|README\.vi)\.md$

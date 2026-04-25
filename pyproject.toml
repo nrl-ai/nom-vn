@@ -1,0 +1,120 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nom-vn"
+version = "0.0.1"
+description = "Open-source Python toolkit for building Vietnamese AI applications."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Viet-Anh Nguyen", email = "contact@nrl.ai" },
+  { name = "Neural Research Lab" },
+]
+keywords = ["vietnamese", "nlp", "ocr", "llm", "ai", "nôm", "tiếng việt"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Natural Language :: Vietnamese",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Text Processing :: Linguistic",
+]
+dependencies = []
+
+[project.optional-dependencies]
+# v0.0.2 — ML-backed diacritic restoration (replaces the rule table).
+# We pin the chosen backend here once we've measured candidates.
+diacritics = [
+  # Decided in v0.0.2 — currently evaluating PyVi vs. DistilBERT-Viet vs.
+  # restore_vietnamese_diacritics. See BENCHMARK.md for the shortlist.
+]
+doc = [
+  "pytesseract>=0.3.10",
+  "pdfplumber>=0.11",
+  "pillow>=10",
+  "pydantic>=2.5",
+]
+llm = [
+  "httpx>=0.27",
+]
+all = [
+  "nom-vn[diacritics,doc,llm]",
+]
+dev = [
+  "pytest>=8",
+  "pytest-cov>=5",
+  "ruff>=0.5",
+  "mypy>=1.10",
+  "pre-commit>=3.7",
+]
+
+[project.urls]
+Homepage = "https://nrl.ai/nom"
+Repository = "https://github.com/nrl-ai/nom"
+Documentation = "https://nrl.ai/nom"
+Issues = "https://github.com/nrl-ai/nom/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nom"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests", "benchmarks", "scripts"]
+
+[tool.ruff.lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # Pyflakes
+  "I",    # isort
+  "N",    # pep8-naming
+  "UP",   # pyupgrade
+  "B",    # bugbear
+  "A",    # builtins
+  "C4",   # comprehensions
+  "PIE",  # misc lints
+  "PT",   # pytest style
+  "RET",  # return statements
+  "SIM",  # simplify
+  "TID",  # tidy imports
+  "PTH",  # use pathlib
+  "RUF",  # ruff-specific
+]
+ignore = [
+  "E501",   # line length is enforced by formatter
+  "B008",   # FastAPI / typer use this pattern legitimately
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["N802", "N803"]  # test method naming flexibility
+"benchmarks/**" = ["T201"]      # print() is fine in benchmarks
+"scripts/**" = ["T201"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["nom"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src/nom"]
+exclude = ["tests/", "benchmarks/", "scripts/"]
+
+[[tool.mypy.overrides]]
+module = ["pytesseract.*", "pdfplumber.*", "fitz.*"]
+ignore_missing_imports = true

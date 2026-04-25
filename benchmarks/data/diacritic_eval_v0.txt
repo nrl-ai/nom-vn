@@ -1,0 +1,74 @@
+# Vietnamese diacritic-restoration evaluation set v0
+#
+# 55 sentences across 4 registers: business/contract (15), official/government (12),
+# everyday/conversational (15), news/long-form (13).
+#
+# All sentences hand-curated 2026-04-25 by Neural Research Lab — public domain
+# under CC0. Use, redistribute, modify freely. Cite as:
+#   nom-vn benchmarks · diacritic_eval_v0 · CC0
+#
+# Format: one Vietnamese sentence per line. Comments start with '#'.
+# Empty lines ignored. We strip diacritics at evaluation time.
+
+# === register: contracts / business ===
+Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.
+Bên A: Công ty Cổ phần ProtonX, mã số thuế 0123456789.
+Bên B: Bà Nguyễn Thị Hương, sinh năm 1990, địa chỉ tại Hà Nội.
+Tổng giá trị hợp đồng là một tỷ năm trăm triệu đồng chẵn.
+Thời hạn thực hiện sáu tháng kể từ ngày ký kết hợp đồng.
+Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.
+Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.
+Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.
+Quyền và nghĩa vụ các bên thực hiện theo quy định pháp luật hiện hành.
+Hợp đồng có hiệu lực kể từ ngày được hai bên ký kết.
+Bên thuê có trách nhiệm bảo quản tài sản trong suốt thời gian thuê.
+Phạt vi phạm hợp đồng tối đa không quá tám phần trăm giá trị nghĩa vụ vi phạm.
+Hợp đồng này được lập thành bốn bản có giá trị pháp lý như nhau.
+Mỗi bên giữ hai bản để theo dõi và thực hiện.
+Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.
+
+# === register: official documents / công văn ===
+Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.
+Căn cứ vào quyết định số 123 ngày 5 tháng 1 năm 2025 của Uỷ ban nhân dân.
+Đơn vị xin phép tổ chức hội nghị tổng kết năm vào tuần đầu tháng tới.
+Đề nghị Quý cơ quan xem xét và phản hồi trong thời gian sớm nhất.
+Trân trọng kính chào và cám ơn sự hợp tác của Quý cơ quan.
+Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.
+Người ký tên dưới đây xin cam đoan các thông tin đã khai là đúng sự thật.
+Đơn xin nghỉ việc không hưởng lương trong thời gian một tháng.
+Lý do xin nghỉ là để chăm sóc người thân đang ốm tại quê nhà.
+Tôi sẽ bàn giao công việc đầy đủ trước khi nghỉ phép.
+Hồ sơ gồm có đơn xin nghỉ, giấy xác nhận của bệnh viện và bản sao giấy tờ tuỳ thân.
+Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.
+
+# === register: everyday / conversational ===
+Hôm nay trời mưa to, anh có cần tôi đem ô đến không?
+Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.
+Em ăn cơm chưa, nếu chưa thì cùng đi ăn phở với chị nhé.
+Cám ơn bạn đã giúp đỡ tôi rất nhiều trong thời gian qua.
+Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.
+Cuối tuần này tôi muốn về thăm bố mẹ ở quê.
+Hôm nay là sinh nhật của con gái tôi, cả gia đình rất vui.
+Bạn có thể cho tôi mượn quyển sách này một tuần được không?
+Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.
+Năm nay con bé học lớp năm, kết quả khá tốt.
+Trời đẹp quá, mình đi dạo công viên một chút nhé.
+Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.
+Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.
+Bạn có biết nhà hàng nào ngon ở khu này không?
+Sáng nay tôi dậy sớm để đi tập thể dục cùng con.
+
+# === register: news / long-form ===
+Thủ tướng đã ký quyết định phê duyệt dự án vào sáng nay.
+Theo báo cáo của Bộ Tài chính, tăng trưởng kinh tế quý đầu năm đạt sáu phẩy hai phần trăm.
+Hà Nội đang triển khai các tuyến xe buýt điện nhằm giảm ô nhiễm không khí.
+Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.
+Đội tuyển bóng đá quốc gia chuẩn bị bước vào vòng loại giải đấu khu vực.
+Doanh nghiệp công nghệ Việt Nam đang đẩy mạnh xuất khẩu phần mềm sang thị trường Nhật.
+Cộng đồng nghiên cứu trí tuệ nhân tạo trong nước có nhiều bước tiến đáng ghi nhận.
+Một số tỉnh miền núi phía bắc đang chịu ảnh hưởng nặng do mưa lớn kéo dài.
+Bộ Giáo dục công bố phương án tuyển sinh đại học cho năm học tới.
+Năm nay là dịp kỷ niệm năm mươi năm ngày thống nhất đất nước.
+Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.
+Lễ hội đường phố thu hút hàng nghìn khách du lịch trong và ngoài nước.
+Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.
