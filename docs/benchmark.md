@@ -271,7 +271,7 @@ Every "measured" number in this document is reproducible:
 
 ```bash
 # Clone
-git clone https://github.com/nrl-ai/nom
+git clone https://github.com/nrl-ai/nom-vn
 cd nom-vn
 
 # Install

@@ -140,18 +140,19 @@ nom = "nom.chat.cli:main"
 
 [project.urls]
 Homepage = "https://nrl.ai/nom"
-Repository = "https://github.com/nrl-ai/nom"
+Repository = "https://github.com/nrl-ai/nom-vn"
 Documentation = "https://nrl.ai/nom"
-Issues = "https://github.com/nrl-ai/nom/issues"
+Issues = "https://github.com/nrl-ai/nom-vn/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/nom"]
-# When the React bundle has been pre-built and copied to
-# src/nom/chat/ui_dist/, include it in the wheel so `pip install nom-vn`
-# ships the UI. The build script `scripts/build_ui.sh` does the copy.
-# If ui_dist is absent, the wheel falls back to the embedded HTML at
-# runtime — no error.
-artifacts = ["src/nom/chat/ui_dist/**"]
+# Force-include the React UI bundle that scripts/build_ui.sh stages
+# under src/nom/chat/ui_dist/. The dir is in .gitignore (it's a build
+# artifact), so without force-include hatch's wheel target skips it.
+# When ui_dist is absent at build time the build fails with a clear
+# message — guarantees a wheel never ships without the UI.
+[tool.hatch.build.targets.wheel.force-include]
+"src/nom/chat/ui_dist" = "nom/chat/ui_dist"
 
 [tool.hatch.build.targets.sdist]
 include = [

@@ -162,7 +162,7 @@ Apache 2.0. Fine-tune, redistribute, commercialize freely. Please keep attributi
 ```bibtex
 @software{nom2026,
   title  = {Nôm: an open Python toolkit for Vietnamese AI applications},
-  author = {Nguyen, Viet Anh and {Neural Research Lab}},
+  author = {Nguyen, Viet-Anh and {Neural Research Lab}},
   year   = {2026},
   url    = {https://nrl.ai/nom},
   note   = {Apache 2.0}

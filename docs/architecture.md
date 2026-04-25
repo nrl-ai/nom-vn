@@ -27,7 +27,7 @@ The architecture follows two non-negotiable principles from `PPlanning/CLAUDE.md
         └─────────┴──────────┴────────────┴─────────────┴───────────┴──────────┴────────┘
                                               │
                                               ▼
-                            One repo: github.com/nrl-ai/nom
+                            One repo: github.com/nrl-ai/nom-vn
                             One package: nom-vn  (Apache 2.0)
 ```
 
@@ -700,7 +700,7 @@ The trade-offs explicitly chosen, recorded so future-us doesn't re-litigate from
 
 ## Migration plan from current state
 
-Where we are now: `nom-vn` v0.0.3 — `text` + `doc` + `llm` shipped at `github.com/nrl-ai/nom`.
+Where we are now: `nom-vn` v0.0.3 — `text` + `doc` + `llm` shipped at `github.com/nrl-ai/nom-vn`.
 
 The next four releases stay in this same repo:
 

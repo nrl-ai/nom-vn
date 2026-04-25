@@ -60,7 +60,7 @@ class _CloudStub:
         raise NotImplementedError(
             f"nom.llm.{cls} ships in v0.1.1 (planned). "
             f"For local inference today, use nom.llm.Ollama. "
-            f"Track release: https://github.com/nrl-ai/nom"
+            f"Track release: https://github.com/nrl-ai/nom-vn"
         )
 
 

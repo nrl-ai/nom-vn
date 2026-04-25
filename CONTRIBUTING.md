@@ -5,8 +5,8 @@ Thanks for your interest. Nôm is open-source infrastructure for Vietnamese AI a
 ## Quick start (development)
 
 ```bash
-git clone https://github.com/nrl-ai/nom
-cd nom
+git clone https://github.com/nrl-ai/nom-vn
+cd nom-vn
 
 # Set up environment
 python -m venv .venv && source .venv/bin/activate
