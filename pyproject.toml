@@ -72,9 +72,13 @@ dev = [
   "mypy>=1.10",
   "pre-commit>=3.7",
   # Test deps — match the runtime [llm] / [doc] extras so we can exercise
-  # the Ollama adapter and Parse stage with real types (not just stubs).
+  # the Ollama adapter, Parse stage, and OCR stage with real types
+  # (not just stubs). pytesseract is the Python wrapper; the Tesseract
+  # binary is system-installed (apt install tesseract-ocr tesseract-ocr-vie).
   "httpx>=0.27",
   "pdfplumber>=0.11",
+  "pytesseract>=0.3.10",
+  "pillow>=10",
 ]
 
 [project.urls]

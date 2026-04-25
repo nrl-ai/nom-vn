@@ -1,11 +1,8 @@
-"""Document extraction stub for v0.1 preview API.
+"""Top-level convenience: ``nom.doc.extract(source, schema, llm) -> dict``.
 
-Final implementation will:
-1. Detect input format (PDF, image, raw text).
-2. Run OCR if image/scan (pytesseract + post-processing for VN diacritics).
-3. Parse layout into blocks (pdfplumber for native PDFs).
-4. Call LLM with schema-driven prompt to extract fields.
-5. Validate output against schema, return typed dict.
+Wraps the default 6-stage pipeline. Use :class:`nom.doc.Pipeline` directly
+if you need to customize stages (different OCR engine, skip OCR for
+known-clean PDFs, custom prompts, etc.).
 """
 
 from __future__ import annotations
@@ -13,41 +10,51 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-__all__ = ["extract"]
-
 
 def extract(
-    source: str | Path,
+    source: str | Path | bytes,
     *,
     schema: dict[str, Any],
-    llm: Any | None = None,
+    llm: Any,
 ) -> dict[str, Any]:
     """Extract structured fields from a Vietnamese document.
 
+    Convenience wrapper around :func:`nom.doc.default_pipeline`. Equivalent
+    to::
+
+        from nom.doc import default_pipeline
+        result = default_pipeline(llm).run(source, schema=schema)
+
     Args:
-        source: path to PDF, image, or text file.
-        schema: dict mapping field name → type or type-name. Supports
-            primitives (str, int, float, bool), date strings, and built-in
-            shorthand types (``"date"``, ``"party"``, ``"amount_vnd"``).
-        llm: an LLM adapter from ``nom.llm`` (OpenAI, Anthropic, Ollama).
-            If None, raises — Nôm doesn't bundle a model.
+        source: path to PDF / image / text file, or raw bytes.
+        schema: dict mapping field name → type or shorthand string. See
+            :class:`nom.doc.schemas.SchemaResolver` for supported shorthand:
+            ``"date"``, ``"amount_vnd"``, ``"party"``, ``"str"``, ``"int"``,
+            ``"float"``, ``"bool"``. Direct types also accepted.
+        llm: an :class:`nom.llm.LLM` adapter (Ollama / OpenAI / Anthropic).
+            Required — Nôm doesn't bundle a model.
 
     Returns:
-        Dict matching the keys of ``schema`` with extracted values.
+        Dict matching the keys of ``schema`` with extracted, validated,
+        VN-coerced values (e.g. ``"14/3/2025"`` → ``date(2025, 3, 14)``,
+        ``"1.500.000.000"`` → ``1500000000``).
 
-    Raises:
-        NotImplementedError: until v0.1 release.
-
-    Example (planned API):
+    Example:
         >>> from nom.doc import extract
         >>> from nom.llm import Ollama
-        >>> result = extract("contract.pdf", schema={
-        ...     "contract_number": str,
-        ...     "signed_date": "date",
-        ...     "total_value_vnd": "amount_vnd",
-        ... }, llm=Ollama(model="qwen3:8b"))
+        >>> result = extract(
+        ...     "hop_dong.pdf",
+        ...     schema={
+        ...         "so_hop_dong": str,
+        ...         "ngay_ky": "date",
+        ...         "tong_gia_tri": "amount_vnd",
+        ...         "ben_a": "party",
+        ...         "ben_b": "party",
+        ...     },
+        ...     llm=Ollama(model="qwen3:8b"),
+        ... )
     """
-    raise NotImplementedError(
-        "nom.doc.extract is part of v0.1 (planned). "
-        "Track release: https://nrl.ai/nom · star github.com/nrl-ai/nom"
-    )
+    from nom.doc.pipeline import default_pipeline
+
+    pipe = default_pipeline(llm)
+    return pipe.run(source, schema=schema)

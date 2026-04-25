@@ -95,27 +95,43 @@ class Pipeline:
         return f"Pipeline({names})"
 
 
-def default_pipeline() -> Pipeline:
-    """Return the default v0.1 pipeline (currently raises NotImplementedError).
+def default_pipeline(llm: Any) -> Pipeline:
+    """Return the default 6-stage doc-extraction pipeline.
 
-    The real defaults will compose to::
+    Composes::
 
         Load → Parse → OCR → Normalize → Extract → Validate
 
-    Each default stage's pick is documented in docs/PIPELINE.md. The defaults are
-    designed to work without any extra installs for the text path; OCR and
-    Extract require the ``[doc]`` and ``[llm]`` extras respectively.
+    Each stage's backend pick is documented in ``docs/PIPELINE.md``.
+
+    Args:
+        llm: an :class:`nom.llm.LLM` adapter (Ollama / OpenAI / Anthropic
+            or any object implementing ``complete(prompt, schema, max_tokens)``).
+            Required because Extract calls into it.
+
+    Example:
+        >>> from nom.doc import default_pipeline
+        >>> from nom.llm import Ollama
+        >>> pipe = default_pipeline(Ollama(model="qwen3:8b"))
+        >>> result = pipe.run("contract.pdf", schema={...})
+
+    Notes on extras:
+        - Text inputs need only the core (no extras).
+        - PDF inputs need ``pip install nom-vn[doc]`` (pdfplumber).
+        - Image inputs need ``pip install nom-vn[doc]`` (pytesseract + Pillow)
+          plus the system Tesseract binary with ``vie`` traineddata.
+        - Any LLM call needs the appropriate adapter's deps (``[llm]``
+          for Ollama).
     """
-    # Lazy import — stages module is the v0.1 deliverable.
-    from nom.doc.stages import _PlaceholderStage
+    from nom.doc.stages import OCR, Extract, Load, Normalize, Parse, Validate
 
     return Pipeline(
         [
-            _PlaceholderStage("Load"),
-            _PlaceholderStage("Parse"),
-            _PlaceholderStage("OCR"),
-            _PlaceholderStage("Normalize"),
-            _PlaceholderStage("Extract"),
-            _PlaceholderStage("Validate"),
+            Load(),
+            Parse(),
+            OCR(),
+            Normalize(),
+            Extract(llm),
+            Validate(),
         ]
     )

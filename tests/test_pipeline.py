@@ -228,15 +228,83 @@ class TestValidateStage:
             Validate().run(ctx)
 
 
-class TestPlaceholderStages:
-    """OCR is the last placeholder — Extract is real now (see test_llm.py)."""
+class TestOCRStage:
+    """OCR via Tesseract — pytesseract mocked so no Tesseract binary needed."""
 
-    def test_ocr_has_name(self) -> None:
-        assert OCR().name == "OCR"
+    def test_no_op_for_text_input(self) -> None:
+        # Text inputs don't need OCR — should pass through.
+        ctx = Context(source=b"hello")
+        Load().run(ctx)
+        Parse().run(ctx)
+        before = ctx.text
+        OCR().run(ctx)
+        assert ctx.text == before
 
-    def test_ocr_still_raises(self) -> None:
-        with pytest.raises(NotImplementedError, match=r"v0\.1"):
-            OCR().run(Context(source="x.pdf"))
+    def test_no_fmt_raises(self) -> None:
+        ctx = Context(source="x.png")  # fmt not set
+        with pytest.raises(RuntimeError, match=r"fmt"):
+            OCR().run(ctx)
+
+    def test_image_input_calls_tesseract(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        # Build a real 1x1 PNG so PIL can decode.
+        import io
+
+        from PIL import Image as RealImage
+
+        img = RealImage.new("RGB", (10, 10), color="white")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        png_bytes = buf.getvalue()
+
+        # Patch pytesseract.image_to_string at the module level.
+        import pytesseract
+
+        called: dict[str, object] = {}
+
+        def fake_image_to_string(image, **kwargs):  # type: ignore[no-untyped-def]
+            called["image_size"] = image.size
+            called["lang"] = kwargs.get("lang")
+            called["config"] = kwargs.get("config")
+            return "Hợp đồng số HD-001\n\n"
+
+        monkeypatch.setattr(pytesseract, "image_to_string", fake_image_to_string)
+
+        ctx = Context(source=png_bytes)
+        Load().run(ctx)
+        Parse().run(ctx)
+        assert ctx.fmt == "image"
+        OCR(lang="vie").run(ctx)
+
+        assert called["lang"] == "vie"
+        assert ctx.text == "Hợp đồng số HD-001"  # stripped
+        assert ctx.pages_text == ["Hợp đồng số HD-001"]
+        assert ctx.needs_ocr == []
+
+    def test_pdf_with_scanned_pages_raises(self) -> None:
+        # PDF-with-scanned-pages OCR is a v0.1.1 feature.
+        ctx = Context(source="x.pdf")
+        ctx.fmt = "pdf"
+        ctx.needs_ocr = [0, 2]  # pages 0 and 2 needed OCR per Parse
+        with pytest.raises(NotImplementedError, match=r"v0\.1\.1"):
+            OCR().run(ctx)
+
+    def test_install_hint_when_pytesseract_missing(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        import builtins
+
+        original_import = builtins.__import__
+
+        def fake_import(name: str, *args: object, **kwargs: object) -> object:
+            if name == "pytesseract":
+                raise ImportError("simulated missing")
+            return original_import(name, *args, **kwargs)  # type: ignore[arg-type]
+
+        monkeypatch.setattr(builtins, "__import__", fake_import)
+
+        ctx = Context(source=b"\x89PNG\r\n\x1a\n" + b"\x00" * 100)
+        Load().run(ctx)
+        Parse().run(ctx)
+        with pytest.raises(ImportError, match=r"nom-vn\[doc\]"):
+            OCR().run(ctx)
 
 
 class TestPipeline:
@@ -252,18 +320,9 @@ class TestPipeline:
             Pipeline([])
 
     def test_default_pipeline_has_six_stages(self) -> None:
-        pipe = default_pipeline()
+        pipe = default_pipeline(llm=object())  # llm not called for stage list
         names = [s.name for s in pipe.stages]
         assert names == ["Load", "Parse", "OCR", "Normalize", "Extract", "Validate"]
-
-    def test_default_pipeline_fails_at_ocr_placeholder(self) -> None:
-        # Load + Parse + Normalize work; Extract + Validate work given a
-        # real LLM. OCR is the last unimplemented stage and the default
-        # pipeline invokes it unconditionally — so default_pipeline still
-        # raises until v0.1.
-        pipe = default_pipeline()
-        with pytest.raises(NotImplementedError, match=r"v0\.1"):
-            pipe.run(b"hello text")
 
     def test_load_and_parse_compose_for_text(self) -> None:
         # Build a partial pipeline with only the implemented stages.

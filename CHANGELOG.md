@@ -7,27 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added (toward v0.1)
-- **Real `Load` stage** (pure stdlib) — magic-byte format detection across PDF
-  / PNG / JPEG / GIF / TIFF / BMP / WebP, extension fallback, byte caching.
-- **Real `Parse` stage** — PDF text extraction via `pdfplumber` (MIT default)
-  with `pymupdf` (AGPL) as opt-in alternative.
-- **Real `Normalize` stage** — wires `nom.text` (NFC + VN-aware text cleanup),
-  with opt-in diacritic restoration.
-- **Real `Validate` stage** — Pydantic v2 schema validation with VN coercions
+### Added — all six pipeline stages real (v0.1.0-rc)
+- **`Load`** (pure stdlib) — magic-byte format detection across PDF / PNG /
+  JPEG / GIF / TIFF / BMP / WebP, extension fallback, byte caching.
+- **`Parse`** — PDF text extraction via `pdfplumber` (MIT default) with
+  `pymupdf` (AGPL) as opt-in alternative.
+- **`OCR`** — pytesseract + `vie` traineddata. Image inputs work end-to-end;
+  PDF-with-scanned-pages requires v0.1.1 (clear error pointing users at
+  `pdftoppm` for now). Configurable lang (default `"vie"`, use `"vie+eng"`
+  for mixed) and Tesseract config flags.
+- **`Normalize`** — wires `nom.text` (NFC + VN-aware text cleanup), opt-in
+  diacritic restoration.
+- **`Extract`** — schema-driven LLM extraction with auto-retry on invalid
+  JSON. Instructor pattern in ~30 LOC, no extra dep. Strips markdown fences.
+- **`Validate`** — Pydantic v2 schema validation with VN coercions
   (date, amount_vnd, party).
-- **Real `Ollama` LLM adapter** — direct httpx call to Ollama's
-  `/api/chat` endpoint with native structured-output support
-  (`format=schema`). No `ollama-python` dep — keeps the surface auditable.
-- **Real `Extract` stage** — schema-driven LLM extraction with auto-retry on
-  invalid JSON. Implements the `instructor` retry-with-error-feedback pattern
-  in ~30 LOC, no extra dep. Strips markdown fences if the model emits them.
-- **End-to-end pipeline** works for text input today: Load → Parse →
-  Normalize → Extract (with a real or fake LLM) → Validate produces a typed
-  dict matching the user's schema. OCR is the only remaining placeholder
-  (only required for image inputs).
-- **62 new tests across stages + schemas + LLM** — total 131 passing
-  (was 68). Mocked httpx for Ollama, FakeLLM test double for Extract.
+- **`Ollama` LLM adapter** — direct httpx call to `/api/chat` with native
+  structured-output (`format=schema`). No ollama-python dep.
+- **Top-level `extract(source, schema, llm)`** convenience — wraps the
+  default 6-stage pipeline. `default_pipeline(llm)` for direct use.
+- **End-to-end works** for text + image inputs today. PDF-with-scans is
+  the one open path (v0.1.1).
+- **64 new tests** — total 133 passing (was 68). Coverage includes:
+  - test_schemas.py (32 tests for VN type parsers + SchemaResolver)
+  - test_llm.py (22 tests for Ollama adapter, stub providers, Extract)
+  - test_pipeline.py (35 tests across all 6 stages + composition)
 
 ### Dep changes
 - `pydantic>=2.5` is now a hard dep (was optional `[doc]`). Required by

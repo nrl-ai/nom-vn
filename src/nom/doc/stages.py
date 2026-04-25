@@ -1,10 +1,15 @@
 """Pipeline stage implementations.
 
-v0.0.3 ships **real** Load and Parse stages. OCR / Extract / Validate remain
-placeholders for v0.1. The Stage protocol and pipeline shape are stable —
-code written against the v0.0.x preview API will keep working.
+All six default stages are real as of v0.0.3:
 
-See ``docs/PIPELINE.md`` for the picks each real stage will use.
+  - Load (pure stdlib, magic-byte format detection)
+  - Parse (pdfplumber MIT default; pymupdf AGPL opt-in)
+  - OCR (pytesseract + vie traineddata)
+  - Normalize (nom.text)
+  - Extract (LLM via nom.llm + Pydantic schema with retries)
+  - Validate (nom.doc.schemas SchemaResolver, Pydantic v2)
+
+See ``docs/PIPELINE.md`` for the per-stage component picks and rationale.
 """
 
 from __future__ import annotations
@@ -22,7 +27,6 @@ __all__ = [
     "Normalize",
     "Parse",
     "Validate",
-    "_PlaceholderStage",
 ]
 
 
@@ -238,37 +242,101 @@ class Parse:
         ctx.text = "\n\n".join(pages)
 
 
-# ---------------------------------------------------------------------------
-# Placeholders for v0.1 (still raise NotImplementedError).
-# ---------------------------------------------------------------------------
+class OCR:
+    """Run OCR on pages flagged as scans (or on direct image inputs).
 
+    v0.0.3 implementation: Tesseract via ``pytesseract`` (Apache 2.0).
+    Tesseract is the most-audited OCR engine in the open-source world,
+    and pytesseract is a thin wrapper (~hundreds of lines). Tesseract
+    binary is system-installed: ``apt install tesseract-ocr tesseract-ocr-vie``
+    on Debian/Ubuntu, or ``brew install tesseract tesseract-lang`` on
+    macOS.
 
-class _PlaceholderStage:
-    """Stage that documents its eventual behavior and refuses to run."""
+    For Vietnamese, this stage runs Tesseract with ``-l vie``. Per
+    upstream docs, the ``vie.traineddata`` was trained on Times New Roman,
+    Arial, Verdana, Courier New — accuracy is best on those fonts and
+    inputs scanned at 200-400 DPI.
 
-    def __init__(self, name: str) -> None:
-        self.name = name
+    Future v0.x backends in docs/PIPELINE.md (VietOCR Transformer,
+    PaddleOCR PP-OCRv5) will integrate as opt-in alternatives once we
+    have measured accuracy comparisons on a curated VN scan corpus.
 
-    def run(self, ctx: Context) -> Context:
-        raise NotImplementedError(
-            f"nom.doc.stages.{self.name} ships in v0.1. "
-            f"Track release: https://github.com/nrl-ai/nom"
-        )
+    Reads:
+        - ``ctx.fmt`` — must be ``"image"`` (else this is a no-op).
+        - ``ctx.metadata["bytes"]`` — raw image bytes from Load.
+        - Or for PDF inputs: pages flagged in ``ctx.needs_ocr`` (v0.1.1).
 
-
-class OCR(_PlaceholderStage):
-    """Run OCR on pages flagged as scans.
-
-    v0.1 default backend: VietOCR (Transformer, VN-specialized).
-    Fallbacks: PaddleOCR PP-OCRv5, Tesseract 5+vie.
+    Writes:
+        - ``ctx.pages_text`` — the OCR'd text per page.
+        - ``ctx.text`` — concatenated.
+        - ``ctx.needs_ocr`` — cleared.
 
     Args:
-        engine: ``"vietocr"`` | ``"paddleocr"`` | ``"tesseract"`` | ``"auto"``
+        lang: Tesseract language code. Default ``"vie"``. Use ``"vie+eng"``
+            for mixed Vietnamese/English documents.
+        config: extra Tesseract config flags (e.g. ``"--psm 6"`` for
+            uniform block of text). Default empty.
     """
 
-    def __init__(self, engine: str = "auto") -> None:
-        super().__init__("OCR")
-        self.engine = engine
+    name = "OCR"
+
+    def __init__(self, lang: str = "vie", config: str = "") -> None:
+        self.lang = lang
+        self.config = config
+
+    def run(self, ctx: Context) -> Context:
+        if ctx.fmt is None:
+            raise RuntimeError("OCR requires ctx.fmt — run Load first.")
+
+        # No-op for non-image, non-OCR-flagged inputs.
+        if ctx.fmt != "image" and not ctx.needs_ocr:
+            return ctx
+
+        try:
+            import pytesseract
+            from PIL import Image
+        except ImportError as exc:
+            missing = "pytesseract" if "pytesseract" in str(exc) else "Pillow"
+            raise ImportError(
+                f"OCR stage requires {missing}. " f"Install with: pip install nom-vn[doc]"
+            ) from exc
+
+        if ctx.fmt == "image":
+            data = ctx.metadata.get("bytes")
+            if data is None:
+                raise RuntimeError("OCR: no image bytes available on context.")
+            text = self._ocr_bytes(data, pytesseract, image_module=Image)
+            ctx.pages_text = [text]
+            ctx.text = text
+            ctx.needs_ocr = []
+        elif ctx.needs_ocr:
+            # PDF with scanned pages — v0.1.1 will render the page to image
+            # via pdfplumber.page.to_image() and OCR each. For v0.0.3 we
+            # emit a clear error so users know what to do.
+            raise NotImplementedError(
+                "OCR for PDF-with-scanned-pages ships in v0.1.1. "
+                "For now, convert your scanned PDF to images first "
+                "(e.g. with pdftoppm) and pass each image separately. "
+                f"Pages needing OCR: {ctx.needs_ocr}"
+            )
+
+        return ctx
+
+    def _ocr_bytes(self, data: bytes, pytesseract: Any, *, image_module: Any) -> str:
+        import io
+
+        image = image_module.open(io.BytesIO(data))
+        # Tesseract works best on RGB/grayscale; convert if needed.
+        if image.mode not in ("RGB", "L"):
+            image = image.convert("RGB")
+        text: str = pytesseract.image_to_string(
+            image,
+            lang=self.lang,
+            config=self.config,
+        )
+        # Tesseract sometimes emits trailing form-feeds and excessive
+        # whitespace — strip and collapse.
+        return text.strip()
 
 
 class Normalize:
