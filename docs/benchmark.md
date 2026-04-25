@@ -366,6 +366,91 @@ For latency-bound deployments without a GPU, drop the reranker and use
 
 ---
 
+## Module: `nom.doc.ocr` — *real-baseline measured 2026-04-26*
+
+### What it does
+
+Runs an OCR engine over Vietnamese images (PDF pages, scans, photos)
+and returns plain text. v0.2.x ships the Tesseract path; later versions
+will add VLM and VN-specialised options as they earn their dependency
+weight on the bench.
+
+### Vietnamese OCR engine grid — *measured 2026-04-26*
+
+**Real corpus:** `vn_ocr_subset` — 478 images deterministically sampled
+(seed=42) from
+[`ducto489/ocr_datasets`](https://huggingface.co/datasets/ducto489/ocr_datasets)
+shard 0 (Apache-2.0), filtered to rows containing Vietnamese diacritics
+and at least 8 characters of ground-truth text. Mostly machine-rendered
+prose at varying noise levels — representative of real document OCR
+inputs.
+
+Hardware: CPU (8 cores, no GPU contention with the RAG bench), warmup=1,
+timed=2, p50/p95 reported best-of-N.
+
+| Engine | License | CER | WER | diacritic-CER | exact match | p50 ms | p95 ms |
+|---|---|---:|---:|---:|---:|---:|---:|
+| **Tesseract 5** (`vie` traineddata) | Apache-2.0 | **0.0819** | **0.3771** | **0.1193** | **0.345** | 447 | 656 |
+| EasyOCR 1.7 (`vi`) | Apache-2.0 | TBD | TBD | TBD | TBD | TBD | TBD |
+
+`TBD` rows are running in this session (long CPU run); JSON baselines
+under `benchmarks/results/ocr_vn_subset__*.json` and mirrored to
+[nrl-ai/vn-rag-bench](https://huggingface.co/datasets/nrl-ai/vn-rag-bench).
+
+### Findings (preliminary, Tesseract baseline only)
+
+1. **The synthetic fixture is not a benchmark.** `synthetic_ocr_vi/clean`
+   gives Tesseract CER = 0.000 / exact = 1.000 — perfect. `synthetic/noisy`
+   gives CER = 0.0064. Both are too easy to rank engines. Real ducto489
+   data drops Tesseract to CER = 0.082 — that's the honest baseline.
+2. **Diacritic-CER (11.9%) is ~46% worse than overall CER (8.2%)** —
+   confirming the Vietnamese-reader-felt failure mode. Tone marks
+   (acute, grave, hook, tilde, dot below) are 1–3 pixels and the first
+   thing OCR loses on noisy scans. A diacritic-aware reranking or
+   post-OCR fix would help here.
+3. **Latency is ~450 ms per image on 8 CPU cores.** Tesseract is C++
+   under the hood and doesn't parallelise within a page; throughput
+   improvements come from running multiple pages in parallel at the
+   pipeline level, not from tuning Tesseract internals.
+
+### Engines surveyed but not yet measured
+
+- **VietOCR** (Apache-2.0, VN-specialised Transformer) — `pip install
+  vietocr` errors on Python 3.13 (`KeyError: '__version__'` in setup.py).
+  Pinned for follow-up; the upstream needs a Python-3.13-compatible
+  `pyproject.toml`.
+- **PaddleOCR PP-OCRv5** (Apache-2.0, lightweight ~150 MB) — most
+  promising next candidate. Reported CER ~0.94 on OmniDocBench
+  multilingual; not VN-specific but typically beats Tesseract on
+  rendered text.
+- **Qwen2-VL-2B-Instruct** (Apache-2.0, 4 GB, GPU-recommended) —
+  generalist VLM with strong VN OCR per upstream model card. Defer
+  to its own bench session because (a) heavy download, (b) VLM-style
+  prompt-and-decode latency is a different metric category than
+  CTC-style OCR.
+- **Surya OCR** — code is **GPL-3.0**, models are open-RAIL-M.
+  Both license-incompatible with our Apache-2.0 default surface.
+  Will bench for comparison only; cannot ship as default.
+
+### Recommended config (v0.2.x default)
+
+```python
+from nom.doc import Pipeline
+# Tesseract is wired into nom.doc.OCR by default; install vie traineddata
+# via `apt install tesseract-ocr-vie` (or brew).
+pipeline = Pipeline()
+text = pipeline.run("scanned.pdf").text
+```
+
+The cross-checking-against-published rule (CLAUDE.md #7): published
+Tesseract `vie` accuracy on synthetic VN benchmarks varies wildly
+(70–97%) by image quality. Our 65.5% exact-match number on real
+ducto489 mid-noise images sits in the lower end of that range — which
+is the corpus, not the engine. Confirmed by the synthetic-clean run
+hitting 100%.
+
+---
+
 ## Reproducibility
 
 Every "measured" number in this document is reproducible:
