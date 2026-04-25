@@ -198,16 +198,46 @@ class TestNormalizeStage:
         assert ctx.text == "preset text"
 
 
+class TestValidateStage:
+    """Real Validate stage — Pydantic v2 schema validation with VN coercions."""
+
+    def test_validates_with_coercion(self) -> None:
+        ctx = Context(
+            source="x.pdf",
+            schema={"so": str, "ngay": "date", "gia": "amount_vnd"},
+            output={
+                "so": "HD-001",
+                "ngay": "14/3/2025",
+                "gia": "1.500.000.000",
+            },
+        )
+        Validate().run(ctx)
+        from datetime import date
+
+        assert ctx.output["so"] == "HD-001"
+        assert ctx.output["ngay"] == date(2025, 3, 14)
+        assert ctx.output["gia"] == 1_500_000_000
+
+    def test_no_schema_raises(self) -> None:
+        ctx = Context(source="x.pdf", output={"a": 1})
+        with pytest.raises(RuntimeError, match=r"schema"):
+            Validate().run(ctx)
+
+    def test_no_output_raises(self) -> None:
+        ctx = Context(source="x.pdf", schema={"a": str})
+        with pytest.raises(RuntimeError, match=r"output"):
+            Validate().run(ctx)
+
+
 class TestPlaceholderStages:
-    """OCR / Extract / Validate still raise NotImplementedError."""
+    """OCR / Extract still raise NotImplementedError."""
 
     def test_each_stage_has_name(self) -> None:
         assert OCR().name == "OCR"
         assert Extract(llm=None).name == "Extract"
-        assert Validate().name == "Validate"
 
     def test_placeholders_raise_in_v0(self) -> None:
-        for stage in [OCR(), Extract(llm=None), Validate()]:
+        for stage in [OCR(), Extract(llm=None)]:
             with pytest.raises(NotImplementedError, match=r"v0\.1"):
                 stage.run(Context(source="x.pdf"))
 

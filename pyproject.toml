@@ -26,7 +26,11 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Artificial Intelligence",
   "Topic :: Text Processing :: Linguistic",
 ]
-dependencies = []
+dependencies = [
+  # Pydantic v2 powers nom.doc.schemas + Validate stage. Apache-licensed
+  # via pydantic-core (Rust). It's a small, well-audited core dep.
+  "pydantic>=2.5",
+]
 
 [project.optional-dependencies]
 # Stronger Vietnamese tokenization via underthesea (Apache 2.0).
@@ -51,6 +55,8 @@ doc = [
   "pytesseract>=0.3.10",
   "pdfplumber>=0.11",
   "pillow>=10",
+  # pydantic is a hard dep now (above) — listed here too for explicitness
+  # if a user installs only [doc] expecting full doc-extraction.
   "pydantic>=2.5",
 ]
 llm = [

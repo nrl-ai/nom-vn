@@ -329,11 +329,36 @@ class Extract(_PlaceholderStage):
         self.llm = llm
 
 
-class Validate(_PlaceholderStage):
+class Validate:
     """Validate the LLM's structured output against the user-provided schema.
 
-    Uses Pydantic v2. Coerces shorthand types defined in ``nom.doc.schemas``.
+    v0.0.3 real implementation: uses :class:`nom.doc.schemas.SchemaResolver`
+    to build a runtime Pydantic model from the user's schema dict, then
+    validates ``ctx.output`` against it.
+
+    Reads:
+        - ``ctx.output`` — raw dict from Extract stage
+        - ``ctx.schema`` — user-provided schema spec
+    Writes:
+        - ``ctx.output`` — validated + coerced dict (same keys, parsed values)
     """
 
-    def __init__(self) -> None:
-        super().__init__("Validate")
+    name = "Validate"
+
+    def run(self, ctx: Context) -> Context:
+        if not ctx.schema:
+            raise RuntimeError(
+                "Validate stage requires ctx.schema to be set. "
+                "Provide a schema when calling Pipeline.run(...)."
+            )
+        if not ctx.output:
+            raise RuntimeError(
+                "Validate stage requires ctx.output to be populated by Extract. "
+                "Did the Extract stage run?"
+            )
+
+        from nom.doc.schemas import SchemaResolver
+
+        resolver = SchemaResolver(ctx.schema)
+        ctx.output = resolver.validate(ctx.output)
+        return ctx
