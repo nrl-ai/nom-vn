@@ -391,13 +391,13 @@ timed=2, p50/p95 reported best-of-N.
 | Engine | License | CER | WER | diacritic-CER | exact match | p50 ms | p95 ms |
 |---|---|---:|---:|---:|---:|---:|---:|
 | **Tesseract 5** (`vie` traineddata) | Apache-2.0 | **0.0819** | **0.3771** | **0.1193** | **0.345** | 447 | 656 |
-| EasyOCR 1.7 (`vi`) | Apache-2.0 | TBD | TBD | TBD | TBD | TBD | TBD |
+| EasyOCR 1.7 (`vi`) | Apache-2.0 | 0.1176 | 0.5304 | 0.2052 | 0.218 | **183** | **431** |
 
-`TBD` rows are running in this session (long CPU run); JSON baselines
-under `benchmarks/results/ocr_vn_subset__*.json` and mirrored to
+JSON baselines under `benchmarks/results/ocr_vn_subset__*.json` and
+mirrored to
 [nrl-ai/vn-rag-bench](https://huggingface.co/datasets/nrl-ai/vn-rag-bench).
 
-### Findings (preliminary, Tesseract baseline only)
+### Findings
 
 1. **The synthetic fixture is not a benchmark.** `synthetic_ocr_vi/clean`
    gives Tesseract CER = 0.000 / exact = 1.000 — perfect. `synthetic/noisy`
@@ -412,6 +412,14 @@ under `benchmarks/results/ocr_vn_subset__*.json` and mirrored to
    under the hood and doesn't parallelise within a page; throughput
    improvements come from running multiple pages in parallel at the
    pipeline level, not from tuning Tesseract internals.
+4. **Tesseract beats EasyOCR on every quality metric for VN.** CER
+   8.19% vs 11.76%, diacritic-CER 11.93% vs 20.52%, exact-match 34.5%
+   vs 21.8%. EasyOCR is 2.4× faster (183 ms vs 447 ms p50) but the
+   accuracy gap dominates for document Q&A use cases — losing 13%
+   absolute exact-match for 264 ms of latency is a bad trade.
+   **Default stays Tesseract.** EasyOCR may be useful for high-throughput
+   bulk-indexing use cases where some accuracy can be traded; we
+   surface both options in `bench_ocr_real.py`.
 
 ### Engines surveyed but not yet measured
 
