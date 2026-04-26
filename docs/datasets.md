@@ -22,6 +22,7 @@ own `LICENSE` and per-file attribution.
 | `tatoeba_vi` | text (sentences) | conversational | 31,292 / 3,000 sample | CC-BY 2.0 FR | [`benchmarks/data/tatoeba_vi/`](../benchmarks/data/tatoeba_vi/) |
 | `synthetic_ocr_vi` | PNG images | OCR target | 40 images (clean+noisy) | CC0 | [`benchmarks/data/synthetic_ocr_vi/`](../benchmarks/data/synthetic_ocr_vi/) |
 | `flores_vi` | text (parallel) | news / mixed | gated, not committed | CC-BY-SA 4.0 | [`benchmarks/data/flores_vi/`](../benchmarks/data/flores_vi/) |
+| `ud_vi_vtb` | CoNLL-U (gold word-segmented) | literary | 800 test / 1,123 dev / 1,400 train sentences; 11,692 test gold tokens | CC-BY-SA-4.0 | [`benchmarks/data/ud_vi_vtb/`](../benchmarks/data/ud_vi_vtb/) |
 
 Total committed footprint: **~2.8 MB**.
 
@@ -30,6 +31,7 @@ Total committed footprint: **~2.8 MB**.
 | Module | Recommended datasets | Why |
 |---|---|---|
 | `nom.text` (normalize, fix_diacritics) | `diacritic_eval_v0`, `udhr_vi`, `wikisource_vi` | Multi-register sentences with rich diacritics |
+| `nom.text.word_tokenize` | `ud_vi_vtb` (test split) | Gold word-segmentation P/R/F1 vs underthesea |
 | `nom.chunking` | `wiki_vi`, `wikisource_vi`, `udhr_vi` | Long-form prose with paragraph structure |
 | `nom.embeddings` | `tatoeba_vi`, `flores_vi` (when available) | Sentence-level evaluation pairs |
 | `nom.retrieve` (BM25, dense, hybrid) | `wiki_vi` corpus + handcrafted queries | Diverse encyclopedia topics for IR |

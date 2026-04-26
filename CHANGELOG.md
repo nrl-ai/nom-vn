@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.9] — 2026-04-26
+
+### Word-segmentation gold-standard bench (UD_Vietnamese-VTB)
+
+`benchmarks/accuracy/bench_segment.py` was a Jaccard-only inter-tokenizer
+sniff test on the 55-sentence diacritic corpus. That doesn't tell users
+which tokenizer to pick for their pipeline. Replaced with a real bench
+against gold word segmentation.
+
+New corpus committed: **`benchmarks/data/ud_vi_vtb/`** —
+[UD_Vietnamese-VTB](https://github.com/UniversalDependencies/UD_Vietnamese-VTB)
+CoNLL-U files (CC-BY-SA-4.0), 800 test / 1,123 dev / 1,400 train sentences,
+11,692 gold word tokens in test. Fetched via `_fetch_all.py`.
+
+Bench now computes pooled-corpus precision / recall / F1 by matching
+predicted (start, end) char spans against gold spans extracted from the
+FORM column. Methodology: warmup 3 + best-of-5 throughput, version-pinned
+comparison target (`underthesea==9.4.0`).
+
+| Tokenizer | Precision | Recall | F1 | Throughput |
+|---|---:|---:|---:|---:|
+| `underthesea==9.4.0` | 95.94% | 95.46% | **95.70%** | 38,102 tok/s |
+| `nom.text` (rule) | 70.94% | 82.90% | 76.46% | **747,117 tok/s** |
+
+**Recommendation:**
+- For RAG indexing / BM25 / lightweight cleanup → `nom.text` (zero-dep,
+  20× faster; the 19 pp F1 gap doesn't matter when downstream is
+  bag-of-words).
+- For NER / dependency parsing / linguistic tasks →
+  `nom-vn[nlp]` → `underthesea`.
+
+Cross-checked against underthesea's own published VLSP 2013 numbers (~94%
+F1) — our 95.70% on UD-VTB is consistent (UD-VTB is a slightly easier
+register than VLSP). No methodology divergence to chase.
+
+PyVi remains auto-rejected per CLAUDE.md principle 11 (ships `.pkl`
+model files = arbitrary code execution on load).
+
+`bench_segment.py` gains `--corpus {diacritic_eval, ud_vtb}` and `--split`
+flags. Default still `diacritic_eval` for the cheap sniff test.
+
 ## [0.2.8] — 2026-04-26
 
 ### Local-LLM diacritic restoration — production-grade for user machines

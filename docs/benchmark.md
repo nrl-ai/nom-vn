@@ -150,6 +150,46 @@ Reproduce: `python benchmarks/perf/bench_text.py`
 - Both are excellent for tokenization/POS-tagging — out of scope for v0.0.1.
 - They'll appear as optional deps in `nom.text.tokenize` (v0.2+) for users who want them.
 
+### Word segmentation — *measured 2026-04-26*
+
+Two backends, real gold-standard corpus:
+
+- `nom.text.word_tokenize` — pure-Python rule + compound-table merge, zero deps
+- `underthesea.word_tokenize` — CRF model, Apache 2.0, opt-in via `nom-vn[nlp]`
+
+Corpus: **UD_Vietnamese-VTB test split** ([UniversalDependencies/UD_Vietnamese-VTB](https://github.com/UniversalDependencies/UD_Vietnamese-VTB), CC-BY-SA-4.0). 800 sentences, 11,692 gold word tokens. Methodology: warmup 3 + best-of-5 throughput; predicted token spans matched against gold spans by exact (start, end) char range.
+
+| Tokenizer | Precision | Recall | **F1** | Throughput | Notes |
+|---|---:|---:|---:|---:|---|
+| `underthesea==9.4.0` | 95.94% | 95.46% | **95.70%** | 38,102 tok/s | CRFsuite native binary; ~5 MB on disk |
+| `nom.text` (rule) | 70.94% | 82.90% | **76.46%** | **747,117 tok/s** | Pure-Python; zero deps; 0 model |
+
+**Findings:**
+
+1. **underthesea is +19.24 pp F1 above `nom.text`** — the CRF training data wins decisively on linguistic compound boundaries (multi-syllable proper names, fixed phrases like *mã số*, *địa chỉ*, *Nguyễn Thị Hương*).
+2. **`nom.text` is ~20× faster** (747 k vs 38 k tok/s). For RAG indexing, BM25 tokenization, lightweight cleanup — speed wins; the F1 gap doesn't matter when downstream is a bag-of-words retriever.
+3. **`nom.text` recall (82.9 %) > precision (70.9 %)** — it over-splits. The compound table catches some merges (398 hits across the corpus) but is far from CRF coverage.
+
+**Cross-check vs published numbers** (CLAUDE.md §7):
+
+- underthesea reports ~94 % F1 on the VLSP 2013 test set [1]; our 95.70 % on UD-VTB test is ~1.5 pp above that — plausibly because UD-VTB is a slightly easier register (literary prose) than VLSP 2013 (mixed news/business). Same order of magnitude — no methodology divergence to chase.
+- We do not separately bench PyVi: it's auto-rejected per CLAUDE.md principle 11 (ships `.pkl` model files = arbitrary code execution on load).
+
+**Recommendation for `nom-vn`:**
+
+| Use case | Pick |
+|---|---|
+| RAG indexing, BM25, tokenized search | `nom.text` — speed dominates |
+| NER / dependency parsing / linguistic analysis | `nom-vn[nlp]` → `underthesea` — F1 dominates |
+| OCR post-cleanup, diacritic restoration tokenization | `nom.text` — F1 gap is tolerable; zero deps wins |
+
+The two are complementary, not interchangeable — surface this in the API docs so users don't pick the wrong one and blame the F1 gap.
+
+Reproduce: `python benchmarks/accuracy/bench_segment.py --corpus ud_vtb --split test --json benchmarks/results/baseline_segment_ud_vtb_test.json`
+Baseline: `benchmarks/results/baseline_segment_ud_vtb_test.json`
+
+[1]: [Underthesea README](https://github.com/undertheseanlp/underthesea) — reported VLSP 2013 numbers.
+
 ---
 
 ## Module: `nom.doc.ocr` — *planned v0.1*

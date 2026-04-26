@@ -290,6 +290,37 @@ def build_legal_vi() -> None:
     )
 
 
+def build_ud_vi_vtb() -> None:
+    """UD_Vietnamese-VTB CoNLL-U files (CC-BY-SA-4.0).
+
+    Used for gold-standard word-segmentation evaluation
+    (`benchmarks/accuracy/bench_segment.py --corpus ud_vtb`).
+    """
+    out = ROOT / "ud_vi_vtb"
+    out.mkdir(exist_ok=True)
+    base = "https://raw.githubusercontent.com/UniversalDependencies/UD_Vietnamese-VTB/master"
+    for split in ("train", "dev", "test"):
+        url = f"{base}/vi_vtb-ud-{split}.conllu"
+        try:
+            data = http_get(url)
+            (out / f"{split}.conllu").write_bytes(data)
+            print(f"  {split}.conllu: {len(data)} bytes")
+        except Exception as e:
+            print(f"  ERR {split}: {e}")
+        time.sleep(0.3)
+    if not (out / "README.md").exists():
+        (out / "README.md").write_text(
+            "# `ud_vi_vtb/` — Universal Dependencies Vietnamese Treebank (CC-BY-SA-4.0)\n\n"
+            "Gold word segmentation (FORM column in CoNLL-U) for benchmarking VN\n"
+            "tokenizers against the VTB convention (multi-syllable compounds joined\n"
+            "with single spaces). 800 test sentences / ~11,700 gold tokens.\n\n"
+            "Source: https://github.com/UniversalDependencies/UD_Vietnamese-VTB\n"
+            "License: CC-BY-SA-4.0 — share-alike, attribution required.\n\n"
+            "Used by: `benchmarks/accuracy/bench_segment.py --corpus ud_vtb`.\n",
+            encoding="utf-8",
+        )
+
+
 def main() -> None:
     print("[udhr_vi]")
     build_udhr_vi()
@@ -303,6 +334,8 @@ def main() -> None:
     build_legal_vi()
     print("[udhr_vi pdf]")
     fetch_udhr_pdf()
+    print("[ud_vi_vtb]")
+    build_ud_vi_vtb()
 
 
 if __name__ == "__main__":
