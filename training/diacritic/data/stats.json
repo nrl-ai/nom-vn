@@ -1,0 +1,14 @@
+{
+  "train_pairs": 200000,
+  "val_pairs": 5000,
+  "articles_scanned": 30563,
+  "filtered_no_diacritic": 2683,
+  "filtered_length": 518205,
+  "filtered_high_ascii": 74232,
+  "filtered_blocked_eval_leak": 0,
+  "filtered_duplicate": 21599,
+  "stride": 7,
+  "min_chars": 30,
+  "max_chars": 300,
+  "source": "hirine/wikipedia-vietnamese-1M296K-dataset (CC-BY-SA-4.0)"
+}

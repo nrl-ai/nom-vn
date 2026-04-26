@@ -59,6 +59,11 @@ benchmarks/cache/
 # benchmarks/data/synthetic_pdf_vi/_generate.py.
 benchmarks/data/synthetic_pdf_vi/*.pdf
 
+# Training data + checkpoints — multi-GB; regeneratable via
+# training/diacritic/prep_data.py + train.py. Stats committed.
+training/diacritic/data/*.jsonl
+training/diacritic/checkpoints/
+
 # Local model / dataset caches (we don't ship these)
 models/
 data/raw/
