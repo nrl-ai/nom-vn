@@ -124,12 +124,17 @@ class CrossEncoderReranker:
         model_name: str | None = None,
         *,
         device: str = "cpu",
-        max_length: int = 512,
+        max_length: int | None = None,
         cache_folder: str | None = None,
         use_fp16: bool = True,
     ) -> None:
         self.model_name = model_name or self.DEFAULT_MODEL
         self.device = device
+        # max_length=None → auto-detect from the model's config on load.
+        # PhoBERT-base rerankers (PhoRanker) cap at 256; XLM-RoBERTa-large
+        # rerankers (bge-reranker-v2-m3, ViRanker) cap at 514. Without auto
+        # detect, we'd send 512-cap pairs to PhoRanker and trip the SDPA
+        # CUDA assert. Explicit override still wins when caller knows better.
         self.max_length = max_length
         self.cache_folder = cache_folder
         self.use_fp16 = use_fp16
@@ -197,14 +202,18 @@ class CrossEncoderReranker:
         except ImportError as exc:  # pragma: no cover - exercised by import-error path
             raise ImportError(_INSTALL_HINT) from exc
 
+        max_length = self.max_length or self._auto_detect_max_length()
         kwargs: dict[str, Any] = {
-            "max_length": self.max_length,
+            "max_length": max_length,
             "device": self.device,
         }
         if self.cache_folder is not None:
             kwargs["cache_folder"] = self.cache_folder
 
         self._model = CrossEncoder(self.model_name, **kwargs)
+        # Cache the resolved value back on the instance so callers can
+        # introspect what was actually used.
+        self.max_length = max_length
 
         # fp16 halves memory + ~2x speedup on GPU; on CPU it's a no-op
         # (PyTorch CPU paths run fp32 regardless), so we only attempt
@@ -213,6 +222,29 @@ class CrossEncoderReranker:
             inner = getattr(self._model, "model", None)
             if inner is not None and hasattr(inner, "half"):
                 inner.half()
+
+    def _auto_detect_max_length(self) -> int:
+        """Inspect the model's config.json to find a safe truncation cap.
+
+        PhoBERT-base reports max_position_embeddings=258, real cap 256
+        (the +2 is the offset for [CLS]/[SEP] padding ids). XLM-RoBERTa-large
+        reports 514, real cap 512. Without this auto-detect, downstream
+        callers have to know which family their reranker is and pass
+        ``max_length=`` explicitly — easy to forget and the failure mode
+        is a CUDA device-side assert deep in the SDPA attention path.
+        """
+        try:
+            from transformers import AutoConfig
+        except ImportError:
+            return 512  # safe-ish default if transformers isn't around
+        try:
+            cfg = AutoConfig.from_pretrained(self.model_name)
+            advertised = int(getattr(cfg, "max_position_embeddings", 514) or 514)
+            # XLM-RoBERTa et al. add +2 for the offset; subtract a small
+            # headroom and clamp to 512 to avoid surprises.
+            return max(64, min(advertised - 2, 512))
+        except (ValueError, OSError, AttributeError):
+            return 512
 
     def __repr__(self) -> str:
         loaded = "loaded" if self._model is not None else "lazy"

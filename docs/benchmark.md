@@ -160,12 +160,41 @@ issues" without the actual measurements. The 2026-04-26 audit found one
 that meets every constraint.
 
 **Cross-check:** Toshiiiii1's model card reports no metrics, so we have
-no upstream number to compare. Our 97.81 % on the small 55-sentence
-corpus is near the ceiling — there are only ~12 wrong-restored words
-out of 777, and several are register-rare or domain-specific (legal-VN
-abbreviations the training data may not cover well). For a sanity check,
-on the larger `wikisource_vi` prose we observed similar character-level
-accuracy in spot checks; a full multi-corpus bench is the v0.3 follow-up.
+no upstream number to compare. Our 97.81 % is on a 55-sentence corpus.
+
+**⚠️ Corpus-shift caveat (re-measured 2026-04-26 on UD_Vietnamese-VTB
+test, 800 sentences, classical-literary register):**
+
+| Eval corpus | Sentences | Register | Word acc | Sentence-exact |
+|---|---:|---|---:|---:|
+| `diacritic_eval_v0.txt` | 55 | business / contract / news / conv | **97.81 %** | not measured |
+| `ud_vi_vtb/test.conllu` | 800 | classical literary (VTB treebank) | **54.14 %** | **0.00 %** (0/800) |
+
+The Toshiiiii1 T5 fine-tune is overfit to its training distribution
+(modern business/news Vietnamese). On classical-literary VN (Truyện
+Kiều prefaces, dialogue-heavy sentences with old register) it falls
+to a word accuracy 13 pp *above* the rule baseline (54.14 % vs 41.06 %)
+and gets zero sentences exactly right out of 800.
+
+**Honest production guidance:** the model is fine for OCR cleanup,
+form/contract polishing, and modern register Vietnamese (where it'll
+hit ~97 %). It is NOT a general-purpose VN diacritic restorer —
+classical text, dialogue corpora, and minority registers will
+disappoint.
+
+The actual SOTA story is more honest as a **register-conditional**
+table:
+
+| Register | Best off-the-shelf | Word acc | Notes |
+|---|---|---:|---|
+| Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 97.81 % | Beats `gpt-4o-mini` 95.37 % in this register |
+| Classical literary | None of the open Apache models tested | 54-57 % | All fall well below cloud LLMs; cloud `gpt-4o-mini` likely much higher (not measured) |
+| General mixed | Cloud `gpt-4o-mini` or local `gemma4:e4b` | 87-95 % | More register coverage than register-specialized fine-tunes |
+
+The lesson per CLAUDE.md §12: small evaluation corpora hide
+register-shift weakness. Future "SOTA" claims for nom-vn diacritic
+restoration must report on at least two distinct registers
+(`diacritic_eval_v0.txt` + `ud_vi_vtb/test.conllu`) before we adopt.
 
 Reproduce: `python benchmarks/accuracy/bench_diacritic_hf.py
 Toshiiiii1/Vietnamese_diacritics_restoration_5th --json
@@ -485,6 +514,54 @@ reranking, optional HyDE / multi-query expansion, then an LLM call.
 
 Three lines from documents to answers — see `src/nom/rag/pipeline.py`
 docstring for the canonical example.
+
+### Reranker comparison on Zalo Legal QA 5 k — *measured 2026-04-26*
+
+Same fixture (5,061 docs / 80 questions), bkai-vietnamese-bi-encoder
+embedder, hybrid+rerank pipeline, RTX 3090. Apples-to-apples — only the
+reranker varies.
+
+| Reranker | License | Disk | Params | R@1 | R@10 | MRR@10 | p50 ms |
+|---|---|---:|---:|---:|---:|---:|---:|
+| **`BAAI/bge-reranker-v2-m3`** ⭐ default | Apache 2.0 | ~2.3 GB | 568 M | **86.3 %** | **100.0 %** | **0.929** | 583 |
+| `itdainb/PhoRanker` *(lite)* | Apache 2.0 | ~395 MB | **100 M** | 70.0 % | 97.5 % | 0.802 | **295** |
+
+**The reranker landscape, accurately framed.** The agent survey noted
+PhoRanker reportedly beats bge-reranker-v2-m3 on MMARCO-Vi (NDCG@3 0.6625
+vs 0.6087). On legal-VN, bge wins by 16.3 pp R@1 — different corpus,
+different winner. We report what's measured on *our* corpus.
+
+**Recommendation:**
+
+- **Default: bge-reranker-v2-m3.** Production-grade legal-VN.
+- **Lite tier: PhoRanker** when you need <500 MB disk, ~2× faster, can
+  tolerate -16 pp R@1. Right pick for laptops with 8 GB RAM where
+  bge-reranker-v2-m3 doesn't fit comfortably alongside the embedder + LLM.
+
+**Auto-detect max_length:** `CrossEncoderReranker(...)` now auto-detects
+each model's `max_position_embeddings` from `config.json` so you can
+swap rerankers without thinking. PhoRanker (PhoBERT-base, 256-cap) and
+bge-reranker-v2-m3 (XLM-R-large, 512-cap) both work via the same call:
+
+```python
+from nom.rag import CrossEncoderReranker
+
+# Both work — max_length is auto-detected
+default = CrossEncoderReranker()                         # bge-reranker-v2-m3
+lite    = CrossEncoderReranker("itdainb/PhoRanker")     # 256-cap, no manual flag
+```
+
+Override via `max_length=...` when the auto-detect heuristic is wrong
+for an exotic model.
+
+Reproduce: `python benchmarks/rag/bench_rag_vn.py --fixture
+benchmarks/rag/fixtures/vn_legal_zalo_5k.json --embedder bkai
+--retrievers hybrid+rerank --reranker itdainb/PhoRanker --json
+benchmarks/results/baseline_phoranker_zalo5k.json`
+
+Baselines:
+`benchmarks/results/baseline_phoranker_zalo5k.json` (PhoRanker),
+`benchmarks/results/baseline_bge_reranker_bkai_zalo5k.json` (bge-reranker-v2-m3).
 
 ### Embedder-only retrieval — *measured 2026-04-26*
 

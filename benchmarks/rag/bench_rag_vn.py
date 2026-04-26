@@ -434,7 +434,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument(
         "--embedder",
-        choices=("fake", "vietnamese", "aiteamvn"),
+        choices=("fake", "vietnamese", "aiteamvn", "bkai"),
         default="fake",
         help="Embedder backend. 'fake' is offline + deterministic; "
         "'vietnamese' = dangvantuan/vietnamese-embedding (~440 MB, dim 768); "
@@ -465,6 +465,13 @@ def main(argv: list[str] | None = None) -> int:
         default=30,
         help="Bi-encoder pool size sent to the reranker (production sweet spot 30-75).",
     )
+    p.add_argument(
+        "--reranker-max-length",
+        type=int,
+        default=None,
+        help="Override reranker max input length (default: auto-detect from "
+        "model config — 256 for PhoBERT-base rerankers, 512 for XLM-R-large).",
+    )
     p.add_argument("--top-k", type=int, default=10, help="Top-K for metrics.")
     p.add_argument(
         "--n-retrieve",
@@ -493,7 +500,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.reranker:
         from nom.rag import CrossEncoderReranker
 
-        reranker = CrossEncoderReranker(args.reranker, device=device)
+        # max_length=None → CrossEncoderReranker auto-detects the safe cap
+        # from the model's config.json. PhoRanker (256), bge-reranker-v2-m3
+        # (512), ViRanker (512). Override with --reranker-max-length if you
+        # need to clamp lower (saves memory) or test a different value.
+        reranker = CrossEncoderReranker(
+            args.reranker,
+            device=device,
+            max_length=args.reranker_max_length,
+        )
     retrievers = _make_retrievers(
         indexed,
         embedder,

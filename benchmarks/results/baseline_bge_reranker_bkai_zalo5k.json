@@ -1,0 +1,41 @@
+{
+  "config": {
+    "fixture": "vn_legal_zalo_5k",
+    "n_corpus_articles": 5061,
+    "n_chunks": 6833,
+    "n_questions": 80,
+    "embedder": "bkai-foundation-models/vietnamese-bi-encoder",
+    "embedder_dim": 768,
+    "embedder_device": "cuda",
+    "reranker": "BAAI/bge-reranker-v2-m3",
+    "reranker_device": "cuda",
+    "rerank_candidates": 30,
+    "chunk_max_tokens": 512,
+    "chunk_overlap": 64,
+    "fusion": "rrf",
+    "rrf_k": 60,
+    "n_retrieve": 20
+  },
+  "metrics": {
+    "hybrid+rerank": {
+      "recall@1": 0.8625,
+      "recall@3": 1.0,
+      "recall@5": 1.0,
+      "recall@10": 1.0,
+      "mrr@10": 0.9292
+    }
+  },
+  "latency_ms": {
+    "hybrid+rerank": {
+      "p50_ms": 582.757,
+      "p95_ms": 762.136
+    }
+  },
+  "meta": {
+    "ran_at": "2026-04-26T14:45:44+00:00",
+    "git_sha": "098b896dd8c0",
+    "n_warmup": 1,
+    "n_timed": 1,
+    "python": "3.13.9"
+  }
+}

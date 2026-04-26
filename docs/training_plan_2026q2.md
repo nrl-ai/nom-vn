@@ -41,19 +41,34 @@ Apache-licensed VN diacritic models on Hugging Face before making the
 recommendation. The 2026-04-26 audit found one that wins on every
 metric.
 
-**The off-the-shelf winner (measured 2026-04-26):**
+**The off-the-shelf finding — register-conditional (measured 2026-04-26):**
 
-| Model | License | Disk | Word acc | Mean s/sent |
+| Model | License | Disk | Word acc · 55-sent business | Word acc · 800-sent UD-VTB literary |
 |---|---|---:|---:|---:|
-| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** | Apache 2.0 | ~1 GB | **97.81 %** | **0.152** |
-| (cloud `gpt-4o-mini`) | proprietary | — | 95.37 % | 1.27 |
-| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18 % | 1.37 |
-| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 87.90 % | 1.10 |
-| (rule baseline) | — | 0 | 41.06 % | <0.001 |
+| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** | Apache 2.0 | ~1 GB | **97.81 %** | **54.14 %** |
+| (cloud `gpt-4o-mini`) | proprietary | — | 95.37 % | not measured (likely high) |
+| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18 % | not measured |
+| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 87.90 % | not measured |
+| (rule baseline) | — | 0 | 41.06 % | ~41 % (register-independent) |
 
-The Toshiiiii1 T5 fine-tune **beats cloud `gpt-4o-mini` by 2.44 pp** at
-**8× lower latency** and **9.6× lower on-disk footprint** vs the next
-best local option. Apache 2.0 + safetensors → fully shippable.
+**The Toshiiiii1 T5 fine-tune is overfit to modern business / news VN.**
+On its in-distribution register it beats cloud `gpt-4o-mini` by 2.44 pp.
+On classical-literary VN (UD_VTB test) it falls to 54.14 % word acc and
+gets zero of 800 sentences exactly right.
+
+**Register-conditional production guidance:**
+
+| You're processing... | Use |
+|---|---|
+| OCR output, modern contracts, news, conversational web text | `HFDiacriticModel(Toshiiiii1)` — wins outright |
+| Mixed register, classical, literary, or unknown distribution | Cloud `gpt-4o-mini` via `OpenAI()` adapter — most robust to register shift |
+| Throughput-bound, tolerable error rate | Rule path — register-independent floor at ~41 % |
+
+We should have spotted this earlier — running on `diacritic_eval_v0.txt`
+alone (55 sentences) was test-set overfitting. CLAUDE.md §12 only
+required warmup + best-of-N; for *quality* numbers it should also
+require multi-corpus measurement when the candidate model has unknown
+training distribution. Updated in the autonomous-loop §5.
 
 **No training run is required.** Adopt the public model as the
 production recommendation. Wired into `nom.text.fix_diacritics(model=...)`

@@ -65,6 +65,17 @@ def _segment_for_bkai(text: str) -> str:
     return " ".join(t.replace(" ", "_") for t in tokens)
 
 
+def _is_e5_family(model_id: str) -> bool:
+    """halong / multilingual-e5 / e5-* expect 'query:' and 'passage:' prefixes.
+
+    Without these prefixes the asymmetric retrieval head decays to STS-like
+    behavior and recall craters by 15-25 pp. See e5 model cards for the
+    canonical convention.
+    """
+    lid = model_id.lower()
+    return "halong" in lid or "/e5-" in lid or "multilingual-e5" in lid
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--fixture", type=Path, default=DEFAULT_FIXTURE)
@@ -130,6 +141,10 @@ def main(argv: list[str] | None = None) -> int:
         if is_bkai:
             doc_texts = [_segment_for_bkai(d["text"]) for d in corpus]
             q_texts = [_segment_for_bkai(q["q"]) for q in questions]
+        elif _is_e5_family(model_id):
+            print("  (e5-family — using 'query:' / 'passage:' prefixes)")
+            doc_texts = [f"passage: {d['text']}" for d in corpus]
+            q_texts = [f"query: {q['q']}" for q in questions]
         else:
             doc_texts = [d["text"] for d in corpus]
             q_texts = [q["q"] for q in questions]

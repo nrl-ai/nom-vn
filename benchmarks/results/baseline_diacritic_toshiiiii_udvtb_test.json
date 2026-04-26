@@ -1,0 +1,17 @@
+{
+  "model_id": "Toshiiiii1/Vietnamese_diacritics_restoration_5th",
+  "corpus": "benchmarks/data/ud_vi_vtb/test.conllu",
+  "device": "cuda",
+  "n_sentences": 800,
+  "n_words": 12486,
+  "n_words_with_diacritic": 10083,
+  "word_accuracy": 0.5414,
+  "diacritic_recall": 0.5612,
+  "sentence_exact_match": 0.0,
+  "elapsed_seconds": 190.2894,
+  "latency_per_sentence_mean": 0.2378,
+  "latency_per_sentence_p50": 0.2228,
+  "latency_per_sentence_p95": 0.4399,
+  "warmup_calls": 3,
+  "num_beams": 1
+}

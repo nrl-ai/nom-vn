@@ -5,6 +5,96 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.17] — 2026-04-26
+
+### Honest disclosure: Toshiiiii1 is register-overfit (97.81 % → 54.14 %)
+
+User direction: launch exhaustive search across all components for
+better lightweight Apache/MIT options. Three deep-research agents
+returned with surveys and a critical caveat: **the 97.81 % Toshiiiii1
+diacritic accuracy is overfit to a single 55-sentence eval corpus.**
+
+Re-measured on UD_Vietnamese-VTB test split (800 sentences, classical
+literary register from VN treebank):
+
+  Model                              Business 55-sent   Literary 800-sent
+  Toshiiiii1 T5 200M                       97.81 %             54.14 %
+  Sentence-exact match                  not measured         0.00 % (0/800)
+
+A 43 pp gap between corpora exposes the model is fitted to modern
+business / news Vietnamese — not the open VN diacritic SOTA we'd
+implied. Production guidance updated to register-conditional:
+
+  - Modern business / contracts / news → Toshiiiii1 wins
+  - Classical literary / mixed / unknown → cloud gpt-4o-mini, or
+    register-aware fallback
+
+CLAUDE.md autonomous-loop §5 gains a "multi-corpus measurement is
+mandatory for adoption claims" rule. README + recipes.md flagged
+with a register-caveat note. docs/training_plan_2026q2.md updated.
+
+### `CrossEncoderReranker` auto-detects max_length
+
+User direction: "make it flexible and configurable." We caught a
+hardcoded `"phoranker" in args.reranker.lower()` string match in the
+RAG bench that capped sequence length at 256. Replaced with an
+auto-detect on the model's `config.json max_position_embeddings`:
+
+  Model                          Auto-detected max_length
+  itdainb/PhoRanker (PhoBERT)            256
+  BAAI/bge-reranker-v2-m3 (XLM-R)        512
+  namdp-ptit/ViRanker (BGE-M3)           512
+
+Override via `max_length=...` constructor kwarg or
+`--reranker-max-length` CLI flag in `bench_rag_vn.py`. Default behavior
+is now correct without users having to know each reranker's family.
+
+### Cross-component candidate audit (3 agents, all returned)
+
+**Diacritic restoration (no swap).** No public Apache/MIT model with
+safetensors and a verified VN benchmark beats Toshiiiii1 on its own
+register. `peterhung/vietnamese-accent-marker-xlm-roberta` (Apache,
+2.24 GB) auto-rejected (size + .bin only). `saeliddp/distilbert-viet-
+diacritic-restoration` (172 MB, 96.10 % syllable acc) auto-rejected
+(CC-BY-NC). `yammdd/vietnamese-diacritic-restoration-v2` (MIT) is
+TF-only and reports below baseline.
+
+**Embedder (no swap).** `hiieu/halong_embedding` (Apache, 300 M
+mE5-base ft) reportedly hit Acc@1 0.8294 on author's Zalo Legal split.
+Re-measured on our 5k subset: **R@1 56.25 % with prefix tuning**, vs
+bkai 76.25 %. Author's published 82.94 % does not reproduce on a
+random 5k subset of the same corpus. bkai stays.
+
+**Reranker (added lite tier).** `itdainb/PhoRanker` (Apache, 100 M,
+395 MB) doesn't beat bge-reranker-v2-m3 on legal-VN (R@1 70.0 % vs
+86.3 %) but is 5.7× smaller and 2× faster. Earned a "lite" tier in
+docs/benchmark.md for memory-constrained deployments.
+
+**Sub-4B VN LLM (worth benching, deferred).** `arcee-ai/Arcee-VyLinh`
+(Apache, 3 B, claims 95.4 % win-rate vs PhoGPT-4B on m-ArenaHard-VN)
+not yet run through our diacritic harness — added to follow-up.
+
+New baselines in `benchmarks/results/`:
+- `baseline_diacritic_toshiiiii_udvtb_test.json` (the honest 54.14 %)
+- `baseline_embedder_compare_halong_vs_bkai.json` (halong loses)
+- `baseline_embedder_compare_halong_with_prefix.json` (halong loses with prefixes)
+- `baseline_phoranker_zalo5k.json` (PhoRanker numbers)
+- `baseline_bge_reranker_bkai_zalo5k.json` (bge-reranker direct comparison)
+
+### `BKaiEmbedder` plumbed into `bench_rag_vn.py`
+
+Added `bkai` to the `--embedder` choices. Required for the
+apples-to-apples reranker comparison above.
+
+### Documentation
+
+`docs/recipes.md` — new task-oriented cookbook (text utilities →
+docs → retrieval → RAG → chat → ops). Each recipe links to the
+docs/benchmark.md row that justifies the pick.
+
+README modernized: status badge to v0.2.17, "Recommended stack" table
+with measured numbers, register-shift caveat for diacritic restoration.
+
 ## [0.2.16] — 2026-04-26
 
 ### Diacritic backend grid: ONNX no win on small T5

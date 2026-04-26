@@ -129,6 +129,16 @@ operate in autonomous mode:
    on 2026-04-26: a "distil a 100M-param VN diacritic model" recommendation was
    shipped without first benching `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
    (Apache, safetensors, 200M) and similar. The user correctly flagged it.
+
+   **Multi-corpus measurement is mandatory for adoption claims.** A second
+   incident on 2026-04-26: Toshiiiii1 hit 97.81 % word acc on the 55-sentence
+   `diacritic_eval_v0.txt` (business/news register) but only 54.14 % on the
+   800-sentence `ud_vi_vtb/test.conllu` (classical literary). Same model, 43 pp
+   gap. Single-corpus claims hide register-shift weakness. Before adopting a
+   model as default, bench on **at least two distinct registers** drawn from
+   different sources (e.g. one business + one literary, or one in-domain + one
+   out-of-domain). If the spread is >10 pp, the model is register-overfit —
+   document that honestly and pick a register-conditional default.
 6. **Each item ends in a commit.** No long-running uncommitted state. After each
    improvement: lint, run tests, commit with a focused message. Bump the patch
    version when the change is user-visible (new bench numbers, new dep, new API).
