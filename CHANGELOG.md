@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] — 2026-04-26
+
+### `nom.retrieve.BM25Retriever` — bm25s backend swap
+
+The pure-Python BM25 implementation became the latency bottleneck on
+the full Zalo Legal QA corpus (430 ms p50 on 82,696 chunks). Swapped to
+[`bm25s`](https://github.com/xhluca/bm25s) (MIT, scipy.sparse, no
+pickle, no native binaries — passes CLAUDE.md principle 11).
+
+Verified on the full corpus (`benchmarks/results/bm25_compare__zalo_full.json`):
+
+| Metric | Pure-Python | bm25s | Delta |
+|---|---:|---:|---:|
+| recall@1 | 0.3947 | 0.3947 | identical |
+| recall@10 | 0.7805 | 0.7805 | identical |
+| mrr@10 | 0.5355 | 0.5360 | +0.0005 (rounding) |
+| index time (s) | 35.11 | 36.86 | +5% (one-shot) |
+| **search p50 (ms)** | **426.85** | **0.70** | **607× faster** |
+| search p95 (ms) | 713.79 | 1.31 | 545× faster |
+
+External `BM25Retriever` API is unchanged: `fit()`, `search()`,
+`score()`, `name == "bm25"`. All 336 existing tests pass.
+
+`bm25s` and `scipy>=1.10` added to core deps. Both are MIT/BSD,
+small footprint, well-audited.
+
+### Documented BM25 latency win at 5k corpus
+
+Re-ran RAG grid on `vn_legal_zalo_5k.json` with new backend
+(committed as `zalo_5k__dangvantuan__bge_v2_m3__bm25s.json`):
+BM25 latency 27 ms → 0.46 ms p50, hybrid 59 ms → 14 ms p50.
+Quality unchanged across the grid.
+
 ## [0.2.5] — 2026-04-25
 
 ### Cross-encoder reranker — opt-in, default `BAAI/bge-reranker-v2-m3`

@@ -6,22 +6,26 @@ Implementation notes:
   ``nom.text.word_tokenize`` so compound words (``"Hợp đồng"``,
   ``"thành phố Hồ Chí Minh"``) count as single terms — matches the
   way humans index VN docs.
-- **Standard Okapi formula.** k1 = 1.5, b = 0.75 are the de-facto
-  defaults (Robertson & Zaragoza, "The Probabilistic Relevance
-  Framework", FnTIR 2009). Configurable on construction.
-- **Numpy storage.** Term-document matrix as an ``object`` array of
-  per-doc Counter dicts; IDF + average doc length precomputed at
-  ``fit`` time. Enough for ~100k docs; sparse storage becomes opt-in
-  in v0.0.6 if benchmarks justify it.
+- **Backed by `bm25s`** (MIT, scipy.sparse) for the math. We measured
+  the swap on the full Zalo Legal QA corpus (82k chunks, 788 queries):
+  bit-identical recall@1/@10 vs the previous pure-Python implementation,
+  and **search latency dropped from 426 ms p50 to 0.7 ms p50, 607x
+  faster**. Index time is comparable (~35s for 82k chunks). See
+  ``benchmarks/results/bm25_compare__zalo_full.json``.
+- **No pickle on the wire.** bm25s ships pure Python + scipy.sparse;
+  no native binaries, no pickled artifacts. Passes CLAUDE.md
+  principle 11.
+- **Standard Okapi formula.** k1 = 1.5, b = 0.75 (Robertson & Zaragoza,
+  "The Probabilistic Relevance Framework", FnTIR 2009). Configurable
+  on construction. ``method="lucene"`` matches the IDF and tf-norm
+  conventions everyone else uses.
 - **Lowercased terms.** We lowercase tokens before indexing — VN
   capitalization isn't semantically meaningful for retrieval.
 """
 
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass, field
-from math import log
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -44,8 +48,6 @@ class BM25Retriever:
     Args:
         documents: original document strings (kept for ``Hit.text``).
         tokenized: per-document token lists (lowercased).
-        idf: term → IDF mapping. Computed in :meth:`fit`.
-        avg_dl: corpus-mean document length in tokens.
         k1: BM25 term-frequency saturation. Default 1.5.
         b: BM25 length-normalization. Default 0.75.
 
@@ -61,22 +63,24 @@ class BM25Retriever:
 
     documents: list[str]
     tokenized: list[list[str]]
-    idf: dict[str, float]
-    avg_dl: float
     k1: float = 1.5
     b: float = 0.75
     name: str = field(default="bm25", init=False)
-    _doc_counters: list[Counter[str]] = field(default_factory=list, init=False, repr=False)
-    _doc_lengths: NDArray[np.floating[Any]] = field(
-        default_factory=lambda: np.zeros(0, dtype="float32"),
-        init=False,
-        repr=False,
-    )
+    _index: Any = field(default=None, init=False, repr=False)
 
     def __post_init__(self) -> None:
-        # Precompute per-doc Counter and length array for fast scoring.
-        self._doc_counters = [Counter(toks) for toks in self.tokenized]
-        self._doc_lengths = np.asarray([len(toks) for toks in self.tokenized], dtype="float32")
+        # bm25s has a small footprint and lazy-imports cleanly. Build the
+        # sparse index once at construction so subsequent .search /
+        # .score calls are pure lookups.
+        try:
+            import bm25s
+        except ImportError as exc:  # pragma: no cover - exercised in test
+            raise ImportError(
+                "BM25Retriever requires bm25s. Install with: pip install nom-vn"
+            ) from exc
+
+        self._index = bm25s.BM25(method="lucene", k1=self.k1, b=self.b)
+        self._index.index(self.tokenized, show_progress=False)
 
     # ------------------------------------------------------------------
     # Construction
@@ -93,7 +97,7 @@ class BM25Retriever:
         """Build a BM25 index from a list of strings.
 
         Tokenizes each document via ``nom.text.word_tokenize``, lowercases,
-        computes IDF and average document length.
+        builds a sparse term-document matrix.
 
         Args:
             documents: list of document/chunk strings.
@@ -114,24 +118,9 @@ class BM25Retriever:
             assert isinstance(toks, list)  # fmt='list' default
             tokenized.append([t.lower() for t in toks if t.strip()])
 
-        n_docs = len(documents)
-        # Document frequency: how many docs contain each term?
-        doc_freq: Counter[str] = Counter()
-        for toks in tokenized:
-            for term in set(toks):
-                doc_freq[term] += 1
-
-        # Smoothed IDF (BM25 + 0.5 smoothing). Clamp to 0 to avoid
-        # negative IDF for terms in >50% of docs (Robertson recommends
-        # +1 in the log to keep it non-negative).
-        idf = {term: log((n_docs - df + 0.5) / (df + 0.5) + 1.0) for term, df in doc_freq.items()}
-        avg_dl = float(sum(len(t) for t in tokenized)) / n_docs
-
         return cls(
             documents=documents,
             tokenized=tokenized,
-            idf=idf,
-            avg_dl=avg_dl,
             k1=k1,
             b=b,
         )
@@ -140,56 +129,49 @@ class BM25Retriever:
     # Query
     # ------------------------------------------------------------------
 
+    def _query_tokens(self, query: str) -> list[str]:
+        """Tokenize + lowercase a query string."""
+        from nom.text import word_tokenize
+
+        toks = word_tokenize(query)
+        if not isinstance(toks, list):
+            toks = list(toks)
+        return [t.lower() for t in toks if t.strip()]
+
     def score(self, query: str) -> NDArray[np.floating[Any]]:
         """Return BM25 scores for every document in the corpus.
 
         Useful when you need full score arrays (e.g. for hybrid fusion
         or analysis). For top-k queries prefer :meth:`search`.
         """
-        from nom.text import word_tokenize
-
-        q_tokens = word_tokenize(query)
-        assert isinstance(q_tokens, list)
-        q_terms = [t.lower() for t in q_tokens if t.strip()]
-
-        scores = np.zeros(len(self.documents), dtype="float32")
+        q_terms = self._query_tokens(query)
         if not q_terms:
-            return scores
-
-        # Vectorized scoring: for each query term, accumulate contribution
-        # across all docs.
-        for term in q_terms:
-            term_idf = self.idf.get(term)
-            if term_idf is None:
-                continue  # OOV — contributes 0
-            # Per-doc tf for this term (zeros where absent)
-            tf = np.asarray(
-                [c.get(term, 0) for c in self._doc_counters],
-                dtype="float32",
-            )
-            # BM25 term contribution
-            denom = tf + self.k1 * (1.0 - self.b + self.b * (self._doc_lengths / self.avg_dl))
-            # Avoid divide-by-zero on empty docs (denom can be 0 only if
-            # k1*(1-b) == 0 AND tf == 0 AND b*L/avg_dl == 0; protect anyway).
-            np.maximum(denom, 1e-12, out=denom)
-            scores += term_idf * (tf * (self.k1 + 1.0)) / denom
-
-        return scores
+            return np.zeros(len(self.documents), dtype="float32")
+        # bm25s returns float64; cast to float32 for downstream parity.
+        scores: NDArray[np.floating[Any]] = self._index.get_scores(q_terms)
+        return scores.astype("float32", copy=False)
 
     def search(self, query: str, *, top_k: int = 10) -> list[Hit]:
-        """Return up to ``top_k`` highest-scoring docs for ``query``."""
+        """Return up to ``top_k`` highest-scoring docs for ``query``.
+
+        Out-of-vocabulary queries (no token matches the index) → empty
+        list. Zero-score results are filtered too — surfacing a document
+        with literally no overlap is rarely what callers want.
+        """
         if top_k < 1:
             raise ValueError(f"top_k must be >= 1, got {top_k}")
-        scores = self.score(query)
-        if not len(scores):
+        q_terms = self._query_tokens(query)
+        if not q_terms:
             return []
-        # argpartition gives unsorted top_k indices — faster than full sort.
-        k = min(top_k, len(scores))
-        partition_idx = np.argpartition(-scores, k - 1)[:k]
-        # Sort just the top_k by descending score
-        ordered = partition_idx[np.argsort(-scores[partition_idx])]
+
+        # bm25s.retrieve takes a list-of-queries; we pass one.
+        n_docs = len(self.documents)
+        k = min(top_k, n_docs)
+        results, scores = self._index.retrieve([q_terms], k=k, show_progress=False)
+        idxs = results[0].tolist()
+        s = scores[0].tolist()
         return [
-            Hit(idx=int(i), score=float(scores[i]), text=self.documents[i])
-            for i in ordered
-            if scores[i] > 0  # don't surface irrelevant docs
+            Hit(idx=int(i), score=float(sc), text=self.documents[i])
+            for i, sc in zip(idxs, s, strict=True)
+            if sc > 0
         ]

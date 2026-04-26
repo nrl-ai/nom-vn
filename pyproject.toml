@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.2.5"
+version = "0.2.6"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -30,6 +30,12 @@ dependencies = [
   # Pydantic v2 powers nom.doc.schemas + Validate stage. Apache-licensed
   # via pydantic-core (Rust). It's a small, well-audited core dep.
   "pydantic>=2.5",
+  # bm25s (MIT, scipy.sparse) is the BM25 backend for nom.retrieve.
+  # Verified 607x faster than the prior pure-Python implementation on
+  # the full Zalo Legal QA corpus with bit-identical recall@1/@10.
+  # See benchmarks/results/bm25_compare__zalo_full.json.
+  "bm25s>=0.2",
+  "scipy>=1.10",
 ]
 
 [project.optional-dependencies]

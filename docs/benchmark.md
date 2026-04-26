@@ -340,11 +340,13 @@ under `benchmarks/rag/baselines/zalo_5k__*.json` and mirrored to
    5k subset and 0.204 absolute on the full 61k corpus — proportionally
    a much bigger relative lift on the full corpus (+55% relative vs
    +33% relative).
-7. **Pure-Python BM25 is the new bottleneck at scale.** On the full
-   61k corpus BM25.search() runs at 430ms p50 — far slower than dense
-   on GPU (18ms). Open follow-up: swap to
-   [`bm25s`](https://github.com/xhluca/bm25s) (scipy-sparse, MIT) for
-   a 10-100× speedup at this scale.
+7. **Pure-Python BM25 was the bottleneck at scale.** On the full 61k
+   corpus our v0.2.5 BM25.search() ran at 430ms p50 — far slower than
+   dense on GPU (18ms). v0.2.6 swapped to
+   [`bm25s`](https://github.com/xhluca/bm25s) (MIT, scipy.sparse): same
+   bit-identical recall, **607× faster search** (0.7ms p50). See
+   `benchmarks/results/bm25_compare__zalo_full.json` for the full
+   table. The dense leg is now the per-query bottleneck.
 
 ### Cross-checking against published numbers (per CLAUDE.md rule #7)
 
