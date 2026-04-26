@@ -28,9 +28,10 @@ swappable:
 - ``namdp-ptit/ViRanker`` (Apache 2.0, BGE-M3 base, best NDCG@3 on
   MMARCO-VI per arXiv:2509.09131). No preprocessing needed.
 - ``itdainb/PhoRanker`` (Apache 2.0, 100M params, best NDCG@10 on
-  MMARCO-VI). **Requires VnCoreNLP word segmentation** (Java JVM
-  dependency) — use only if you've already wired that up; otherwise
-  the default or ViRanker is the safer pick.
+  MMARCO-VI). **Requires word segmentation** of query and doc before
+  scoring; pass ``word_segment=True`` to ``CrossEncoderReranker`` and
+  install ``nom-vn[nlp]`` (underthesea, pure-Python; the model card
+  shows VnCoreNLP/Java but underthesea segmentation works equivalently).
 
 Install: ``pip install nom-vn[embeddings]`` already pulls
 sentence-transformers, which provides ``CrossEncoder``. No new dep.
@@ -70,6 +71,28 @@ _INSTALL_HINT = (
     "CrossEncoderReranker requires sentence-transformers. "
     "Install with: pip install nom-vn[embeddings]"
 )
+
+_SEGMENT_INSTALL_HINT = (
+    "word_segment=True requires underthesea. " "Install with: pip install nom-vn[nlp]"
+)
+
+
+def _word_segment_vn(text: str) -> str:
+    """Apply VN word segmentation: multi-syllable words joined with ``_``.
+
+    Lazy-imports underthesea so the reranker module doesn't pull it as a hard
+    dep. Used only when ``CrossEncoderReranker(word_segment=True)`` —
+    PhoRanker / namdp-ptit/ViRanker need this format; XLM-R-based rerankers
+    do not.
+    """
+    if not text:
+        return text
+    try:
+        import underthesea
+    except ImportError as exc:  # pragma: no cover
+        raise ImportError(_SEGMENT_INSTALL_HINT) from exc
+    tokens = underthesea.word_tokenize(text)
+    return " ".join(t.replace(" ", "_") for t in tokens)
 
 
 @runtime_checkable
@@ -127,6 +150,7 @@ class CrossEncoderReranker:
         max_length: int | None = None,
         cache_folder: str | None = None,
         use_fp16: bool = True,
+        word_segment: bool = False,
     ) -> None:
         self.model_name = model_name or self.DEFAULT_MODEL
         self.device = device
@@ -138,6 +162,13 @@ class CrossEncoderReranker:
         self.max_length = max_length
         self.cache_folder = cache_folder
         self.use_fp16 = use_fp16
+        # word_segment=True applies underthesea-style word segmentation
+        # (multi-syllable VN words joined with underscores) to query and
+        # doc before encoding. PhoRanker, namdp-ptit/ViRanker (PhoBERT-base
+        # variants) require this — their model cards specify VnCoreNLP /
+        # underthesea preprocessing. XLM-R-based rerankers (bge-reranker-v2-m3)
+        # do NOT need it. Caller decides; we don't sniff model_name.
+        self.word_segment = word_segment
         self._model: Any | None = None  # lazy
 
     @property
@@ -174,7 +205,13 @@ class CrossEncoderReranker:
 
         self._ensure_loaded()
         assert self._model is not None
-        pairs = [(query, h.text or "") for h in scorable]
+
+        if self.word_segment:
+            seg_query = _word_segment_vn(query)
+            pairs = [(seg_query, _word_segment_vn(h.text or "")) for h in scorable]
+        else:
+            pairs = [(query, h.text or "") for h in scorable]
+
         scores = self._model.predict(
             pairs,
             convert_to_numpy=True,

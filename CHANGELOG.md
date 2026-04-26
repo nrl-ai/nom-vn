@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.20] — 2026-04-26
+
+### PhoRanker corrected: +13.8 pp R@1 with proper word segmentation
+
+ALWAYS DOUBLE-CHECK pass on PhoRanker per the new rule. The v0.2.17
+number (R@1 70.0 %) was wrong: we sent raw unsegmented text to a model
+whose card explicitly requires VnCoreNLP word-segmented input.
+Re-checking the model card caught it.
+
+Re-measured on Zalo Legal 5 k with proper preprocessing:
+
+  Reranker (bkai-vietnamese-bi-encoder embedder)         R@1     R@10    MRR@10  p50 ms
+  bge-reranker-v2-m3 (568 M, 2.3 GB)                    86.3 %  100.0 %  0.929   583
+  PhoRanker WITH word segmentation (100 M, 395 MB)      83.8 %   98.8 %  0.907   863
+  PhoRanker WITHOUT segmentation (BROKEN config)        70.0 %   97.5 %  0.802   295
+
+PhoRanker is now only 2.5 pp R@1 behind the default at **5.7× smaller
+disk** — a much better tradeoff than the broken-config 16 pp gap. The
+863 ms p50 includes per-query underthesea segmentation; in production
+you'd cache segmented corpus chunks at index time.
+
+**`CrossEncoderReranker` gains `word_segment` kwarg:**
+
+```python
+CrossEncoderReranker("itdainb/PhoRanker", word_segment=True)
+```
+
+`bench_rag_vn.py` gains `--reranker-word-segment`. No model-name
+sniffing — caller decides per CLAUDE.md best-practice rule.
+
 ## [0.2.19] — 2026-04-26
 
 ### Refactor: replace hardcoded model branches with declarative specs

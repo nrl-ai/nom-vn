@@ -528,22 +528,46 @@ Same fixture (5,061 docs / 80 questions), bkai-vietnamese-bi-encoder
 embedder, hybrid+rerank pipeline, RTX 3090. Apples-to-apples — only the
 reranker varies.
 
-| Reranker | License | Disk | Params | R@1 | R@10 | MRR@10 | p50 ms |
+| Reranker | License | Disk | Params | R@1 | R@10 | MRR@10 | p50 ms (incl. seg) |
 |---|---|---:|---:|---:|---:|---:|---:|
 | **`BAAI/bge-reranker-v2-m3`** ⭐ default | Apache 2.0 | ~2.3 GB | 568 M | **86.3 %** | **100.0 %** | **0.929** | 583 |
-| `itdainb/PhoRanker` *(lite)* | Apache 2.0 | ~395 MB | **100 M** | 70.0 % | 97.5 % | 0.802 | **295** |
+| `itdainb/PhoRanker` *(word-segmented)* | Apache 2.0 | **~395 MB** | **100 M** | **83.8 %** | 98.8 % | 0.907 | 863 |
+| `itdainb/PhoRanker` *(NO word-segment, BROKEN config)* | Apache 2.0 | ~395 MB | 100 M | 70.0 % | 97.5 % | 0.802 | 295 |
 
-**The reranker landscape, accurately framed.** The agent survey noted
-PhoRanker reportedly beats bge-reranker-v2-m3 on MMARCO-Vi (NDCG@3 0.6625
-vs 0.6087). On legal-VN, bge wins by 16.3 pp R@1 — different corpus,
-different winner. We report what's measured on *our* corpus.
+**The reranker landscape, accurately framed.** PhoRanker reportedly
+beats bge-reranker-v2-m3 on MMARCO-Vi (NDCG@3 0.6625 vs 0.6087). On
+our Zalo Legal 5 k bench, **PhoRanker is only 2.5 pp behind bge-reranker-v2-m3
+at 5.7× smaller disk.** This is a much better tradeoff than v0.2.17
+implied — the original 70.0 % R@1 number was a methodology bug
+(missing word segmentation; see ALWAYS DOUBLE-CHECK rule below).
 
 **Recommendation:**
 
-- **Default: bge-reranker-v2-m3.** Production-grade legal-VN.
-- **Lite tier: PhoRanker** when you need <500 MB disk, ~2× faster, can
-  tolerate -16 pp R@1. Right pick for laptops with 8 GB RAM where
-  bge-reranker-v2-m3 doesn't fit comfortably alongside the embedder + LLM.
+- **Default: bge-reranker-v2-m3.** Highest quality (R@1 86.3 %), simplest
+  to deploy (no preprocessing required).
+- **Light-weight tier: PhoRanker with word segmentation.** Within 2.5 pp
+  R@1 of the default at 5.7× smaller disk and faster cross-encoder
+  inference. Right pick for laptops where 2.3 GB of reranker doesn't
+  fit alongside embedder + LLM. **Requires `nom-vn[nlp]` for underthesea
+  word segmentation** — pass `word_segment=True` to `CrossEncoderReranker`
+  or `--reranker-word-segment` to the bench:
+
+  ```python
+  CrossEncoderReranker("itdainb/PhoRanker", word_segment=True)
+  ```
+
+  The 863 ms p50 includes per-query underthesea segmentation. In
+  production you'd cache segmented corpus chunks at index time, dropping
+  per-query cost back to ~300 ms.
+
+**An ALWAYS DOUBLE-CHECK lesson (CLAUDE.md autonomous-loop §8).** The
+v0.2.17 PhoRanker number (70.0 % R@1) was wrong because we sent raw
+unsegmented text to a model whose card explicitly requires VnCoreNLP
+segmented input. Re-checking the model card on 2026-04-26 caught it.
+Generalised the lesson: **for any new reranker, read the canonical
+usage example from the model card before benching.** Hardcoded
+preprocessing in the bench is now a `word_segment=` kwarg, not a
+hidden assumption.
 
 **Auto-detect max_length:** `CrossEncoderReranker(...)` now auto-detects
 each model's `max_position_embeddings` from `config.json` so you can

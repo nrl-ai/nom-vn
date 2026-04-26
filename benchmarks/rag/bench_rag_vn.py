@@ -472,6 +472,14 @@ def main(argv: list[str] | None = None) -> int:
         help="Override reranker max input length (default: auto-detect from "
         "model config — 256 for PhoBERT-base rerankers, 512 for XLM-R-large).",
     )
+    p.add_argument(
+        "--reranker-word-segment",
+        action="store_true",
+        help="Apply underthesea word segmentation to query+doc before scoring. "
+        "Required for PhoBERT-based rerankers (PhoRanker, ViRanker per their "
+        "model cards). XLM-R-based rerankers (bge-reranker-v2-m3) do NOT need "
+        "this.",
+    )
     p.add_argument("--top-k", type=int, default=10, help="Top-K for metrics.")
     p.add_argument(
         "--n-retrieve",
@@ -504,10 +512,12 @@ def main(argv: list[str] | None = None) -> int:
         # from the model's config.json. PhoRanker (256), bge-reranker-v2-m3
         # (512), ViRanker (512). Override with --reranker-max-length if you
         # need to clamp lower (saves memory) or test a different value.
+        # word_segment for PhoBERT-based rerankers (PhoRanker / ViRanker).
         reranker = CrossEncoderReranker(
             args.reranker,
             device=device,
             max_length=args.reranker_max_length,
+            word_segment=args.reranker_word_segment,
         )
     retrievers = _make_retrievers(
         indexed,
