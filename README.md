@@ -5,10 +5,13 @@
 > Named after *chữ Nôm* — the script Vietnam wrote in for a millennium.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.2.2-orange)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.2.16-orange)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
+[![Tests](https://img.shields.io/badge/tests-344%20passing-brightgreen)](tests/)
 
 A local-first toolkit. **No data leaves your machine.** Use any LLM (Ollama by default), any embedder, any document type — Nôm wires them into a Vietnamese-aware RAG pipeline you can ship as either a Python library or a deployable chat web app.
+
+**Every default is benched on real Vietnamese data.** Where a public Apache/MIT model beats a multilingual one, we use it. See [docs/benchmark.md](docs/benchmark.md) for the receipts.
 
 ---
 
@@ -26,17 +29,45 @@ The web app is built into the wheel — there's nothing else to install.
 
 ---
 
+## Recommended stack — *measured 2026-04-26*
+
+Every recommendation has a measured number from a script in
+[`benchmarks/`](benchmarks/) that runs on a clean clone. No projected
+numbers. No "based on the model card." Numbers came out of our hardware,
+on real Vietnamese corpora, this week.
+
+| Task | Pick | License | Disk | Measured | Beats |
+|---|---|---|---:|---|---|
+| **Diacritic restoration** | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc · 152 ms p50 GPU | cloud `gpt-4o-mini` (95.37 %) by +2.44 pp |
+| **Diacritic (zero-dep fallback)** | rule-based table (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
+| **Diacritic (local LLM)** | `gemma3:4b` Q4 via Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` is +5pp better but 3× larger |
+| **Word segmentation (speed)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |
+| **Word segmentation (quality)** | `underthesea` 9.4.0 (CRF, opt-in) | Apache 2.0 | <10 MB | F1 95.70 % · 38 k tok/s | matches its own published VLSP 2013 numbers |
+| **OCR (printed clean lines)** | Tesseract 5 + `vie` traineddata | Apache 2.0 | ~30 MB | CER 5.53 % · 80 ms p50 | EasyOCR (9.39 %), `qwen2.5vl:7b` (31.07 %) |
+| **PDF text extraction** | `pypdfium2` (BSD-3 wrap of PDFium Apache-2.0) | BSD-3 / Apache | <10 MB | 99.81 % char overlap · 2.35 M chars/s | `pdfplumber` (51 k chars/s), Docling (15 k chars/s) |
+| **Dense embedder (RAG retrieval)** | `bkai-foundation-models/vietnamese-bi-encoder` (opt-in) | Apache 2.0 | 383 MB | R@1 76.25 % · R@10 98.75 % on Zalo Legal QA 5 k | `dangvantuan/vietnamese-embedding` (35.00 % R@1) by +41.25 pp |
+| **Dense embedder (default, cache-stable)** | `dangvantuan/vietnamese-embedding` | Apache 2.0 | 440 MB | R@1 35.00 % on Zalo Legal QA 5 k | — |
+| **Reranker** | `BAAI/bge-reranker-v2-m3` | Apache 2.0 | ~2 GB | R@1 86.3 % paired w/ dense (Zalo Legal 5 k) | `namdp-ptit/ViRanker` (85.0 %) |
+| **BM25** | `bm25s` (Lucene-formula) | MIT | <10 MB | R@1 76.2 % on Zalo Legal 5 k · 0.7 ms/query | 607× faster than v0.2.5 pure-Python implementation |
+
+**The decision in plain English:**
+
+- *Want VN diacritics fixed?* Install `nom-vn[diacritic-hf]` and use the Toshiiiii1 T5. It beats cloud GPT-4o-mini.
+- *Want local RAG over Vietnamese documents?* Install `nom-vn[chat,embeddings,nlp]`, swap the default embedder to `BKaiEmbedder`. +41 pp R@1.
+- *Need OCR on Vietnamese scans?* Tesseract `vie` is the right call. Don't reach for VLM OCR — VLMs hallucinate on tight line crops.
+- *Need PDF text extraction in a license-clean way?* Use `pypdfium2` (we ship it). Skip PyMuPDF — its AGPL forces every downstream into AGPL.
+
 ## What ships today
 
 | Module | What it does | Status |
 |---|---|---|
-| `nom.text` | Vietnamese text utilities — NFC, diacritic restoration, word/sentence tokenization | ✅ |
+| `nom.text` | NFC normalize, rule diacritic restoration, word tokenization. Also: `HFDiacriticModel` (Toshiiiii1 T5, 97.81 %, opt-in) | ✅ |
 | `nom.chunking` | VN-aware document chunking | ✅ |
-| `nom.embeddings` | `Embedder` Protocol + `VietnameseEmbedder` (BGE-base ft) + `AITeamVNEmbedder` (BGE-M3 ft) | ✅ |
-| `nom.retrieve` | `BM25Retriever`, `DenseRetriever`, hybrid RRF fusion | ✅ |
-| `nom.doc` | Document pipeline: PDF / DOCX / XLSX / PPTX / HTML / JSON / image (OCR) → text | ✅ |
-| `nom.llm` | `LLM` Protocol + `Ollama` adapter (any model: Qwen3, Sailor2, Phi-4, …) | ✅ |
-| `nom.rag` | One-line RAG composition (`RAG.from_documents(...)`) | ✅ |
+| `nom.embeddings` | `Embedder` Protocol + `VietnameseEmbedder` (default) + `BKaiEmbedder` (recommended, retrieval-trained) + `AITeamVNEmbedder` (BGE-M3 ft) | ✅ |
+| `nom.retrieve` | `BM25Retriever` (bm25s, 607× faster than v0.2.5), `DenseRetriever`, hybrid RRF fusion | ✅ |
+| `nom.doc` | PDF (`pypdfium2` 46× faster than pdfplumber) / DOCX / XLSX / PPTX / HTML / image (Tesseract OCR) → text | ✅ |
+| `nom.llm` | `LLM` Protocol + `Ollama` adapter (default `think=False`) + `OpenAI` + `Anthropic` | ✅ |
+| `nom.rag` | One-line RAG composition + cross-encoder reranker (`BAAI/bge-reranker-v2-m3`) | ✅ |
 | `nom.chat` | FastAPI server + React/ShadCN UI, `MemoryStore` + `SqliteStore` + pluggable `EmbeddingsCache` | ✅ |
 
 ---
@@ -100,7 +131,21 @@ Text utilities without the rest:
 from nom.text import normalize, fix_diacritics, word_tokenize
 
 clean = normalize("Hợp đồng số 02/HĐ/2025")
-fixed = fix_diacritics("Hop dong nay duoc lap")  # → "Hợp đồng này được lập"
+
+# Three diacritic backends — pick by your accuracy / dependency budget:
+
+# (1) zero-dep rule path — 41 % word acc, < 1 ms
+fixed_rule = fix_diacritics("Hop dong nay duoc lap")
+
+# (2) public Apache T5 (recommended) — 97.81 % word acc, ~150 ms on GPU
+#     pip install "nom-vn[diacritic-hf]"
+from nom.text.diacritic_models import HFDiacriticModel
+fixed = fix_diacritics("Hop dong nay duoc lap", model=HFDiacriticModel())
+
+# (3) pass any LLM adapter — 87-95 % depending on model
+from nom.llm import Ollama
+fixed_llm = fix_diacritics("Hop dong nay duoc lap", llm=Ollama("gemma3:4b"))
+
 toks  = word_tokenize("Thành phố Hồ Chí Minh")    # ["Thành phố", "Hồ Chí Minh"]
 ```
 
@@ -144,7 +189,8 @@ See **[docs/architecture.md](docs/architecture.md)** for the full layered model,
 
 - **[docs/architecture.md](docs/architecture.md)** — the 7-layer model, Protocol seams, scaling path, anti-architecture rules
 - **[docs/pipeline.md](docs/pipeline.md)** — the document-extraction pipeline end-to-end with per-stage picks
-- **[docs/benchmark.md](docs/benchmark.md)** — measured numbers per module
+- **[docs/benchmark.md](docs/benchmark.md)** — measured numbers per module (the receipts behind every "Recommended stack" row above)
+- **[docs/training_plan_2026q2.md](docs/training_plan_2026q2.md)** — when to fine-tune vs adopt off-the-shelf, per component, with cost estimates
 - **[docs/sota_vn_2026q2.md](docs/sota_vn_2026q2.md)** — SOTA local LLM / embedding / OCR for Vietnamese (April 2026 snapshot, every claim cited)
 - **[docs/oss_landscape_2026q2.md](docs/oss_landscape_2026q2.md)** — OSS local-AI / RAG landscape: patterns to steal, traps to avoid
 - **[benchmarks/](benchmarks/)** — reproducible measurement scripts (perf + retrieval + accuracy)
