@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.2.9"
+version = "0.2.10"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -92,10 +92,17 @@ chat = [
   "python-pptx>=1.0",
 ]
 doc = [
-  # Core parser surface for nom.doc.Pipeline. All MIT/Apache 2.0,
+  # Core parser surface for nom.doc.Pipeline. All MIT/Apache 2.0/BSD-3,
   # safetensors/zip+xml/png — no pickled assets (CLAUDE.md principle 11).
   "pytesseract>=0.3.10",     # OCR via Tesseract
-  "pdfplumber>=0.11",        # PDF text extraction (MIT)
+  "pdfplumber>=0.11",        # PDF text + tables (MIT)
+  "pypdfium2>=4.30",         # fast PDF text extraction (BSD-3 wrapper over PDFium Apache-2.0).
+                             # 46x faster than pdfplumber on text-only paths
+                             # (benchmarks/perf/bench_pdf_extract.py); kept
+                             # alongside pdfplumber because pdfplumber is still
+                             # the better choice for table extraction. We do not
+                             # ship PyMuPDF — its AGPL license is incompatible
+                             # with our Apache-2.0 default.
   "pillow>=10",              # image I/O
   "python-docx>=1.1",        # .docx parser (MIT, pure Python over zip+xml)
   "openpyxl>=3.1",           # .xlsx parser (MIT, pure Python)

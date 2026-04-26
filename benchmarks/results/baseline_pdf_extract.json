@@ -1,0 +1,28 @@
+{
+  "pdf": "benchmarks/data/synthetic_pdf_vi/vn_legal.pdf",
+  "pdf_bytes": 46950,
+  "ground_truth_chars": 18877,
+  "canonical_ground_truth_chars": 18689,
+  "warmup_calls": 3,
+  "runs": 5,
+  "engines": [
+    {
+      "name": "pdfplumber",
+      "extracted_chars": 18653,
+      "canonical_chars": 18653,
+      "overlap_with_ground_truth": 0.9981,
+      "elapsed_best_of_5_seconds": 0.3654,
+      "throughput_chars_per_sec": 51052.0,
+      "pages": 7
+    },
+    {
+      "name": "pypdfium2",
+      "extracted_chars": 18943,
+      "canonical_chars": 18653,
+      "overlap_with_ground_truth": 0.9981,
+      "elapsed_best_of_5_seconds": 0.0079,
+      "throughput_chars_per_sec": 2350431.0,
+      "pages": 7
+    }
+  ]
+}

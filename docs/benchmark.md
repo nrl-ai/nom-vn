@@ -222,19 +222,48 @@ result = extract("scan.pdf", schema={...})
 result = extract("scan.pdf", schema={...}, ocr=PaddleOCR())
 ```
 
-### The PDF parsing layer underneath
+### The PDF parsing layer underneath — *measured 2026-04-26*
 
-For native (non-scanned) PDFs we use **PyMuPDF (fitz)** as the default text/layout extractor.
+We do **not** ship PyMuPDF. Its AGPL license is incompatible with our Apache-2.0 default. Instead we use **pypdfium2** (BSD-3 wrapper over Google's PDFium, Apache-2.0) as the fast text-extraction default and keep **pdfplumber** for table-rich documents.
 
-**Source: [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks)** — measured on a corpus of academic + business PDFs:
+Corpus: `benchmarks/data/synthetic_pdf_vi/vn_legal.pdf` — synthetic 7-page Vietnamese PDF built from real public-domain VN prose (UDHR + Wikisource Truyện Kiều prefaces) with a clean Unicode text layer (DejaVuSans embedded). Generator: `benchmarks/data/synthetic_pdf_vi/_generate.py`. Ground truth: 18,877 chars committed alongside.
+
+The shipped `udhr_vi/udhr_vie.pdf` cannot be used here — it embeds a custom font without a ToUnicode CMap, so every extractor (pdfplumber, pypdfium2, PyMuPDF) returns CIDs / garbled bytes. Documented in the bench script.
+
+Methodology: warmup 3 + best-of-5 (CLAUDE.md §12). Char-overlap fidelity uses NFC-normalised multiset intersection against the ground truth.
+
+| Library | License | Best-of-5 (s) | Throughput | Char overlap |
+|---|---|---:|---:|---:|
+| **`pypdfium2==5.7.1`** ⭐ default | BSD-3 / Apache-2.0 | **0.0079** | **2,350,431 chars/s** | **99.81%** |
+| `pdfplumber==0.11.9` | MIT | 0.3654 | 51,052 chars/s | 99.81% |
+
+**Findings:**
+
+1. **`pypdfium2` is 46× faster** than pdfplumber on text-only extraction with **identical fidelity** (99.81% — both miss the same ~36 chars, mostly Han glyphs DejaVuSans can't render).
+2. **License is the headline.** PyMuPDF's published 19× speedup on `py-pdf/benchmarks` is real — but its AGPL forces every downstream project to ship as AGPL too. PDFium under pypdfium2 gives us the same order-of-magnitude speedup with no license trap.
+3. **pdfplumber stays in `nom-vn[doc]`** — it's still the better choice when a document has tables. The `nom.doc` pipeline picks per-document at parse time.
+
+**Recommendation:**
+
+| Use case | Pick |
+|---|---|
+| Plain text extraction (RAG, search indexing) | `pypdfium2` — speed wins, license is clean |
+| Tables / forms / structured layout | `pdfplumber` — better cell detection |
+
+Reproduce: `python benchmarks/perf/bench_pdf_extract.py`
+Baseline: `benchmarks/results/baseline_pdf_extract.json`
+
+Build the corpus from a clean clone: `python benchmarks/data/synthetic_pdf_vi/_generate.py` (requires DejaVuSans — `apt install fonts-dejavu`).
+
+**Note on PyMuPDF / fitz** — we keep them out of dependencies entirely. Users who legitimately need PyMuPDF (e.g. internal AGPL-tolerant projects) can install it themselves and call it directly; we don't expose a wrapper that would muddy the license boundary.
+
+Earlier landscape table from [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) for context (academic + business mixed PDFs):
 
 | Library | Avg time per doc | Notes |
 |---|---:|---|
-| **PyMuPDF (fitz)** | **0.5 s** | Fastest, AGPL or commercial license |
+| PyMuPDF (fitz) | 0.5 s | Not shipped — AGPL |
 | pypdf | 4.2 s | MIT, basic ops |
-| pdfplumber | 9.5 s | Richest table extraction, slow |
-
-Trade-off: PyMuPDF's AGPL license is restrictive. We'll expose pdfplumber as a fallback option for AGPL-incompatible projects, accepting the 19× slowdown.
+| pdfplumber | 9.5 s | Richest table extraction |
 
 ### Sources
 - [1] [VietOCR / Tesseract VN test results](https://vietocr.sourceforge.net/)

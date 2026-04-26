@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.10] — 2026-04-26
+
+### PDF text extraction — `pypdfium2` 46x faster than `pdfplumber`, no AGPL trap
+
+The previous default for plain-PDF text extraction was `pdfplumber` (MIT,
+slow). The fastest option in the wild is PyMuPDF / `fitz` (~19× faster
+on `py-pdf/benchmarks`) — but it's AGPL-3.0, which forces every project
+that ships it to be AGPL. We will not ship that. Instead:
+
+- **Adopt `pypdfium2>=4.30`** — BSD-3 wrapper over Google's PDFium
+  (Apache-2.0). Same fidelity as `pdfplumber` on Unicode-clean PDFs,
+  46× faster on plain-text extraction.
+- **Keep `pdfplumber`** in `nom-vn[doc]` for the table-extraction path
+  (still better cell detection than pypdfium2's plain text-page API).
+- **Do not ship PyMuPDF.** Users who legitimately need it can install
+  it directly; we won't expose a wrapper that muddies the license.
+
+Measured 2026-04-26 on a synthetic 7-page VN PDF (47 KB, 18,877 GT
+chars), warmup 3 + best-of-5 (CLAUDE.md §12):
+
+| Library | License | Best (s) | Throughput | Char overlap |
+|---|---|---:|---:|---:|
+| `pypdfium2==5.7.1` | BSD-3 | **0.0079** | **2,350,431 chars/s** | **99.81%** |
+| `pdfplumber==0.11.9` | MIT | 0.3654 | 51,052 chars/s | 99.81% |
+
+The committed `udhr_vie.pdf` cannot be used here — it embeds a custom
+font without a ToUnicode CMap, so every extractor returns CIDs / garbled
+bytes. New generator `benchmarks/data/synthetic_pdf_vi/_generate.py`
+builds a Unicode-clean VN PDF from real public-domain prose using
+fpdf2 + DejaVuSans (`apt install fonts-dejavu`). The .pdf is gitignored;
+the `.gt.txt` ground truth is committed.
+
+New bench: `benchmarks/perf/bench_pdf_extract.py`. Baseline:
+`benchmarks/results/baseline_pdf_extract.json`.
+
+Docling (IBM, MIT, layout-aware tables/formulas/multi-column) is logged
+as a follow-up: ~1 GB of ML deps is too heavy for the default but could
+earn a place in `nom-vn[docling]` if it materially beats pdfplumber on
+tables. Not yet measured.
+
 ## [0.2.9] — 2026-04-26
 
 ### Word-segmentation gold-standard bench (UD_Vietnamese-VTB)

@@ -54,6 +54,11 @@ benchmarks/results/*.png
 !benchmarks/results/baseline_*.json
 benchmarks/cache/
 
+# Synthetic VN PDF — built from system DejaVuSans, regeneratable.
+# The .gt.txt ground truth is committed; the .pdf rebuilds via
+# benchmarks/data/synthetic_pdf_vi/_generate.py.
+benchmarks/data/synthetic_pdf_vi/*.pdf
+
 # Local model / dataset caches (we don't ship these)
 models/
 data/raw/
