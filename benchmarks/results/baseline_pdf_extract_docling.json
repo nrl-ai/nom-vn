@@ -1,0 +1,20 @@
+{
+  "pdf": "benchmarks/data/synthetic_pdf_vi/vn_legal.pdf",
+  "pdf_bytes": 46950,
+  "ground_truth_chars": 18877,
+  "canonical_ground_truth_chars": 18689,
+  "warmup_calls": 2,
+  "runs": 3,
+  "engines": [
+    {
+      "name": "docling",
+      "docling_version": "unknown",
+      "extracted_chars": 18857,
+      "canonical_chars": 18669,
+      "overlap_with_ground_truth": 0.9972,
+      "elapsed_best_of_3_seconds": 1.26,
+      "throughput_chars_per_sec": 14817.0,
+      "pages": 7
+    }
+  ]
+}

@@ -257,6 +257,18 @@ Build the corpus from a clean clone: `python benchmarks/data/synthetic_pdf_vi/_g
 
 **Note on PyMuPDF / fitz** — we keep them out of dependencies entirely. Users who legitimately need PyMuPDF (e.g. internal AGPL-tolerant projects) can install it themselves and call it directly; we don't expose a wrapper that would muddy the license boundary.
 
+**Docling (IBM, MIT) — measured 2026-04-26.** Same VN PDF, warmup 2 + best-of-3, default `DocumentConverter()`:
+
+| Library | Best (s) | Throughput | Char overlap | Disk |
+|---|---:|---:|---:|---:|
+| pypdfium2 | **0.0079** | 2,350,431 chars/s | 99.81% | <10 MB |
+| pdfplumber | 0.3654 | 51,052 chars/s | 99.81% | <5 MB |
+| docling | 1.1889 | 15,703 chars/s | 99.72% | ~1 GB (PyTorch + DocLayNet + TableFormer) |
+
+Docling is **150× slower than pypdfium2** on this Unicode-clean text PDF and slightly *worse* on fidelity (99.72% vs 99.81%) — the ML layout pipeline pays no dividends when the PDF already has a clean text layer. Docling earns its cost on **complex layouts** (multi-column, tables, formulas, mixed text+image) where pdfplumber's heuristics break. Not measured in-house yet on a table-rich VN PDF.
+
+**Recommendation for Docling:** keep it OUT of `nom-vn[doc]` for now. If a user-facing complex-layout corpus emerges (legal forms, government reports), we'll add a `nom-vn[docling]` extra and surface it as `nom.doc.layout_extract()`. Until then, the dependency weight (~1 GB ML stack + safetensors) is unjustified for plain-text PDFs.
+
 Earlier landscape table from [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) for context (academic + business mixed PDFs):
 
 | Library | Avg time per doc | Notes |

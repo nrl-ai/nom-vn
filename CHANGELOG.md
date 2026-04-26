@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.13] — 2026-04-26
+
+### Docling measured: 150x slower than pypdfium2, no fidelity edge
+
+Followed up on the Docling open question from v0.2.10. Same synthetic
+VN PDF (47 KB, 7 pages, 18,877 GT chars), warmup 2 + best-of-3:
+
+  Library     Best (s)  Throughput (chars/s)  Overlap  Disk
+  pypdfium2   0.0079    2,350,431             99.81%   <10 MB
+  pdfplumber  0.3654       51,052             99.81%    <5 MB
+  docling     1.1889       15,703             99.72%    ~1 GB
+
+Docling is 150x slower than pypdfium2 and slightly worse on fidelity
+(99.72% vs 99.81%) — the ML layout pipeline (DocLayNet + TableFormer)
+pays no dividends when the PDF already has a clean text layer.
+
+Keep Docling OUT of nom-vn[doc] for now. If a user-facing complex-
+layout corpus emerges (legal forms, government reports), surface it
+as a future nom-vn[docling] extra → nom.doc.layout_extract(). Until
+then, ~1 GB of ML deps is unjustified for plain-text PDFs.
+
+Baseline: benchmarks/results/baseline_pdf_extract_docling.json
+
 ## [0.2.12] — 2026-04-26
 
 ### Final report: training / fine-tuning recommendations
