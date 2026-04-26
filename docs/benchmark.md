@@ -83,6 +83,28 @@ Pick will be based on: dependency weight, CPU-only inference speed, license comp
 Reproduce: `python benchmarks/accuracy/bench_diacritics.py`
 Baseline tracked at: `benchmarks/results/baseline_v0.0.1.json`
 
+### Diacritic backend / hardware grid — *measured 2026-04-26*
+
+Same Toshiiiii1 T5 weights, three execution paths. All hit the identical
+97.81 % word accuracy — export is correct, the only thing that varies is
+latency.
+
+| Backend | Hardware | Word acc | Mean ms | p50 ms | Notes |
+|---|---|---:|---:|---:|---|
+| PyTorch | RTX 3090 (CUDA) | 97.81 % | **152** | 148 | Production target for GPU-equipped users |
+| PyTorch | CPU (8 cores) | 97.81 % | 377 | 357 | Acceptable for batch / overnight jobs |
+| ONNX Runtime | CPU (8 cores) | 97.81 % | 410 | 394 | Slightly slower than PyTorch CPU |
+
+**ONNX runtime adds no value here.** Modern PyTorch with MKL-DNN is
+already optimal for a 200 M T5 in eager mode. ONNX is worth re-visiting
+only with **INT8 quantization** (typical 2-3× CPU speedup at some
+accuracy cost) — not measured here; left as a follow-up.
+
+We do not ship an ONNX export step in `nom-vn[diacritic-hf]`. Users who
+genuinely need ONNX (cross-platform deployment without a Python+PyTorch
+stack) can `optimum-cli export onnx ...` themselves; the export is
+deterministic.
+
 ### Off-the-shelf VN diacritic seq2seq models — *measured 2026-04-26*
 
 Tracking principle: we did not bench public Apache-licensed VN diacritic

@@ -1,0 +1,43 @@
+{
+  "scope": "T5 Toshiiiii1 diacritic — backend comparison",
+  "corpus": "benchmarks/data/diacritic_eval_v0.txt",
+  "n_sentences": 55,
+  "model_id": "Toshiiiii1/Vietnamese_diacritics_restoration_5th",
+  "warmup_calls": 3,
+  "measured": "2026-04-26",
+  "results": [
+    {
+      "backend": "pytorch",
+      "device": "cuda",
+      "hardware": "RTX 3090",
+      "word_accuracy": 0.9781,
+      "diacritic_recall": 0.9746,
+      "mean_ms": 152,
+      "p50_ms": 148,
+      "p95_ms": 212,
+      "total_seconds": 8.38
+    },
+    {
+      "backend": "pytorch",
+      "device": "cpu",
+      "hardware": "CPU (8 cores)",
+      "word_accuracy": 0.9781,
+      "diacritic_recall": 0.9746,
+      "mean_ms": 377,
+      "p50_ms": 357,
+      "total_seconds": 20.73
+    },
+    {
+      "backend": "onnxruntime",
+      "device": "cpu",
+      "hardware": "CPU (8 cores)",
+      "word_accuracy": 0.9781,
+      "diacritic_recall": 0.9746,
+      "mean_ms": 410,
+      "p50_ms": 394,
+      "total_seconds": 22.57,
+      "notes": "Identical accuracy to PyTorch — export is correct. 8% slower than PyTorch CPU; PyTorch eager mode + MKL-DNN already optimal at this 200M scale. ONNX runtime adds no value here without INT8 quantization."
+    }
+  ],
+  "verdict": "Skip ONNX export as default. PyTorch CPU is fast enough (377ms p50 mean) and matches ONNX latency. INT8 quantization (potentially 2-3x speedup at unknown accuracy cost) is a follow-up."
+}

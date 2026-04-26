@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.16] — 2026-04-26
+
+### Diacritic backend grid: ONNX no win on small T5
+
+User direction: questioning lightweight inference (llama.cpp, ONNX,
+quantization). Audited the diacritic path.
+
+Same Toshiiiii1 T5 weights, three execution paths, identical 97.81 %
+word accuracy:
+
+  Backend       Hardware            Mean ms  p50 ms
+  PyTorch       RTX 3090 (CUDA)         152     148
+  PyTorch       CPU (8 cores)           377     357
+  ONNX Runtime  CPU (8 cores)           410     394
+
+ONNX is 8 % slower than PyTorch CPU. Modern PyTorch with MKL-DNN is
+already optimal for a 200 M T5 in eager mode; ONNX runtime kernel
+overhead doesn't pay off without INT8 quantization. Not shipping an
+ONNX export step in `nom-vn[diacritic-hf]`. Users who genuinely need
+ONNX (cross-platform deployment without Python+PyTorch) can run
+`optimum-cli export onnx ...` themselves.
+
+INT8 quantization (typical 2-3x CPU speedup at some accuracy cost)
+is a future follow-up.
+
+Reranker landscape audit: `BAAI/bge-reranker-v2-m3` (Apache, 568 M)
+remains the leader for VN. `namdp-ptit/ViRanker` (Apache, 600 M) is
+within 1.3 pp R@1 on legal-VN per the existing RAG grid; both stay
+shipped under `nom-vn[reranker]`. `jinaai/jina-reranker-v2-base-multilingual`
+(278 M, smaller) is CC-BY-NC blocked from shipping. No
+strictly-lighter Apache reranker beat `bge-reranker-v2-m3` in the
+audit.
+
+Baseline: benchmarks/results/baseline_diacritic_onnx_cpu.json
+
 ## [0.2.15] — 2026-04-26
 
 ### `BKaiEmbedder` — +41 pp R@1 over current default on Zalo Legal QA
