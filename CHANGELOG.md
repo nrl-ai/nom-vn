@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.12] — 2026-04-26
+
+### Final report: training / fine-tuning recommendations
+
+Closes the "improve current pipelines to maximum accuracy first, then
+suggest tuning" workstream from v0.2.5 → v0.2.11. New synthesis doc
+at `docs/research/2026-04-finetune-recommendations.md`.
+
+**Bottom line:** of 8 components benched, **6 stay off-the-shelf**.
+Two training runs are recommended:
+
+1. **Distil a 100M-param VN diacritic model** (~$10–30 cloud, 1 H100·6h).
+   Drives 87.9% → 92–95% acc at 250–500 MB on disk vs 9.6 GB for
+   gemma4:e4b. Critical for mobile / browser deployment where sub-2 GB
+   models all fall below the 41% rule baseline.
+2. **Fine-tune VietOCR on noisy VN scans** (~$80–150 cloud, 1 H100·24h).
+   Blocked on upstream Python 3.13 packaging fix; revisit once
+   `pip install vietocr` works on 3.13.
+
+**Do nothing for:**
+
+- OCR on clean printed text (Tesseract 5.5% CER beats VLM 31% by 25 pp
+  and is 10× faster; finetune offers no leverage).
+- Word segmentation (underthesea CRF F1 95.70% is at its ceiling;
+  19 pp gap to nom.text is the speed/accuracy tradeoff users want).
+- Dense embedder (`dangvantuan/vietnamese-embedding` is public SOTA at
+  440 MB).
+- Reranker (`BAAI/bge-reranker-v2-m3`).
+- BM25 (algorithm, not model).
+- General-purpose LLM (gemma3:4b / gemma4:e4b / qwen3:8b cover VN at
+  88–93% on tested tasks; task-specific small models or prompt
+  engineering give better $/pp than general-LLM finetuning).
+
+The doc includes per-component decision triggers — what would flip a
+"do nothing" recommendation back to "train". Avoids re-visiting any of
+these prematurely.
+
 ## [0.2.11] — 2026-04-26
 
 ### VLM OCR engine + measurement: VLMs lose decisively on line OCR
