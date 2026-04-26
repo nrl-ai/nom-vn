@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.14] — 2026-04-26
+
+### `Toshiiiii1` T5 wins diacritic restoration — distil recommendation retracted
+
+User correction: there are public Apache-licensed VN diacritic models we
+hadn't benched before recommending a 100 M distillation. Audited and
+re-measured.
+
+`Toshiiiii1/Vietnamese_diacritics_restoration_5th` (Apache 2.0, 200 M T5,
+safetensors) on the same 55-sentence corpus, RTX 3090, warmup 3:
+
+  Backend                              Word acc   Mean s/sent  Disk
+  Toshiiiii1 T5 (NEW)                   97.81 %    0.152       ~1 GB
+  cloud gpt-4o-mini                     95.37 %    1.27        —
+  local gemma4:e4b Q4                   93.18 %    1.37        9.6 GB
+  local gemma3:4b Q4                    87.90 %    1.10        3.3 GB
+  bmd1905/vietnamese-correction         15.57 %    0.30        ~1.6 GB
+  rule baseline                         41.06 %   <0.001       0
+
+Toshiiiii1 beats cloud by +2.44 pp at 8x lower latency and 9.6x smaller
+disk than the next-best local option. **No training needed.**
+
+New: `src/nom/text/diacritic_models.py` ships an `HFDiacriticModel`
+adapter. Default model_id is the Toshiiiii1 winner. Plumbed into
+`fix_diacritics(text, model=...)`:
+
+    from nom.text import fix_diacritics
+    from nom.text.diacritic_models import HFDiacriticModel
+
+    restorer = HFDiacriticModel()
+    fix_diacritics("Hop dong nay duoc lap", model=restorer)
+    # => 'Hợp đồng nay được lập'
+
+Install: `pip install "nom-vn[diacritic-hf]"` (transformers<5 + torch +
+sentencepiece). The transformers cap is required: 5.6+ has a slow-T5
+tokenizer regression that breaks Toshiiiii1's load.
+
+Distil recommendation in docs/training_plan_2026q2.md RETRACTED.
+
+CLAUDE.md gains an "Autonomous improvement loop" section codifying the
+"off-the-shelf before training" rule: exhaustively bench public
+Apache/MIT/safetensors candidates *before* recommending a fine-tune.
+This was the third time we'd missed this — saving it as a durable rule.
+
+3 new tests covering `model=` kwarg precedence, paragraph-break
+preservation, and the LLM-overrides path. 344 pass.
+
 ## [0.2.13] — 2026-04-26
 
 ### Docling measured: 150x slower than pypdfium2, no fidelity edge

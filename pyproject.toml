@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.2.13"
+version = "0.2.14"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -64,9 +64,24 @@ embeddings = [
 nlp = [
   "underthesea>=9.0",
 ]
-# Diacritic ML backend — deferred to v0.0.3.
+# Off-the-shelf VN diacritic-restoration model (HF seq2seq).
+# Default: Toshiiiii1/Vietnamese_diacritics_restoration_5th — Apache 2.0,
+# safetensors, 200 M T5. Measured 97.81 % word accuracy + 148 ms p50 on
+# our public 55-sentence corpus, beating cloud gpt-4o-mini (95.4 %) and
+# local gemma4:e4b (93.2 %). See docs/benchmark.md for the bench grid.
+#
+# transformers<5 pinned because >=5.6 has a slow-T5-tokenizer regression
+# that breaks the Toshiiiii1 model load. Revisit when upstream patches.
+"diacritic-hf" = [
+  "transformers<5",
+  "torch>=2.0",
+  "sentencepiece>=0.1.99",
+]
+# Backwards-compatible alias.
 diacritics = [
-  # See docs/benchmark.md for the shortlist.
+  "transformers<5",
+  "torch>=2.0",
+  "sentencepiece>=0.1.99",
 ]
 # The deployable web app (FastAPI + minimal HTML UI in v0.2.0; React +
 # ShadCN dist shipped pre-built in v0.2.1).

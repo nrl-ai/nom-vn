@@ -16,7 +16,7 @@ tried yet? If either answer is "yes", training is premature.
 
 | Component | Current best | Gap to ideal | Recommendation | Cost estimate |
 |---|---|---|---|---|
-| Diacritic restoration | gemma3:4b 87.9% (local) / gpt-4o-mini 95.4% (cloud) | small (~7pp local→cloud) | **Distil a 100M-param VN diacritic model** | ~$10–30, 100k synthetic pairs |
+| Diacritic restoration | **Toshiiiii1 T5 200M 97.81% (off-the-shelf) ⭐** | none (beats cloud by +2.44 pp) | **Adopt Toshiiiii1/Vietnamese_diacritics_restoration_5th.** Distil recommendation RETRACTED 2026-04-26. | $0 |
 | OCR (printed clean) | Tesseract `vie` 5.5% CER | none | **Do nothing.** Tesseract is 10× faster than VLM and 4× more accurate. | $0 |
 | OCR (scanned / noisy / handwriting) | not measured in-house | likely large | **Fine-tune VietOCR on real scan corpus** when fix is unblocked | ~$80–150 (H100, 24h) |
 | Word segmentation | underthesea CRF F1 95.7% | none | **Do nothing.** CRF is at its ceiling for this corpus. | $0 |
@@ -25,11 +25,57 @@ tried yet? If either answer is "yes", training is premature.
 | BM25 | bm25s (Lucene formula) | n/a — algorithm, not model | **Do nothing.** | $0 |
 | LLM for general VN tasks | gemma3:4b / gemma4:e4b / qwen3:8b | small | **Do nothing.** Multilingual base coverage is strong; fine-tuning cost ≫ marginal improvement. | $0 |
 
-**Two training runs are recommended; everything else stays off-the-shelf.**
+**Updated 2026-04-26:** previously two training runs were recommended;
+the diacritic distil was retracted after benching the off-the-shelf
+candidate `Toshiiiii1` (97.81 % word acc at 1 GB, beats cloud
+`gpt-4o-mini`). **Net: one training run remains** (VietOCR scan fine-tune,
+still blocked on upstream Python 3.13 packaging fix).
 
 ## Component-by-component analysis
 
-### 1. Diacritic restoration → **distil a small VN model** (recommended)
+### 1. Diacritic restoration → **adopt `Toshiiiii1/Vietnamese_diacritics_restoration_5th`** (RETRACTED distil recommendation, 2026-04-26)
+
+**The prior version of this section recommended distilling a 100 M-param
+VN diacritic model.** That was wrong. We had not benched the public
+Apache-licensed VN diacritic models on Hugging Face before making the
+recommendation. The 2026-04-26 audit found one that wins on every
+metric.
+
+**The off-the-shelf winner (measured 2026-04-26):**
+
+| Model | License | Disk | Word acc | Mean s/sent |
+|---|---|---:|---:|---:|
+| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** | Apache 2.0 | ~1 GB | **97.81 %** | **0.152** |
+| (cloud `gpt-4o-mini`) | proprietary | — | 95.37 % | 1.27 |
+| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18 % | 1.37 |
+| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 87.90 % | 1.10 |
+| (rule baseline) | — | 0 | 41.06 % | <0.001 |
+
+The Toshiiiii1 T5 fine-tune **beats cloud `gpt-4o-mini` by 2.44 pp** at
+**8× lower latency** and **9.6× lower on-disk footprint** vs the next
+best local option. Apache 2.0 + safetensors → fully shippable.
+
+**No training run is required.** Adopt the public model as the
+production recommendation. Wired into `nom.text.fix_diacritics(model=...)`
+via `HFDiacriticModel` adapter (v0.2.14). Install:
+`pip install "nom-vn[diacritic-hf]"`.
+
+**Process correction logged.** Per CLAUDE.md autonomous loop §5:
+"off-the-shelf before training" — exhaustively bench public candidates
+*before* recommending a fine-tune. We documented the user's catch and
+added a project rule.
+
+#### What we keep open as a future possibility
+
+A **smaller** model (e.g. `xlm-roberta-base` token-classification head,
+~280 MB on disk) could match Toshiiiii1's accuracy if it exists publicly
+or is distilled. Not a priority while the 1 GB Toshiiiii1 model fits
+the user-machine target. Re-review trigger: a public Apache/MIT diacritic
+model lands at <500 MB with comparable accuracy.
+
+(Original distil-recommendation rationale, kept for context:)
+
+
 
 **Measured:**
 

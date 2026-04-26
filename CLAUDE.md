@@ -104,6 +104,43 @@ or untruthful results.
    silently disagrees with the upstream's published number** — readers will
    compare and lose trust.
 
+## Autonomous improvement loop
+
+When the user says any of: "continue until done", "don't stop", "improve until done",
+"work as ML expert engineer until done", or any open-ended "keep improving" directive,
+operate in autonomous mode:
+
+1. **Build a checklist of concrete improvements** based on (a) the current state of
+   benchmarks/results and docs/, (b) any tasks marked pending in the task system, and
+   (c) the user's latest question or steering. Use TaskCreate to track each item.
+2. **Decide the next item automatically.** Pick by ROI = (user-visible impact) /
+   (engineering cost). If two items tie, prefer the one that closes a measurement
+   gap (we shipped a recommendation without bench-data) over greenfield work.
+3. **Execute. Don't ask for confirmation.** The user has already asked you to keep
+   going. Asking "should I proceed?" between tasks wastes their attention.
+4. **If genuinely blocked** (missing dependency, contradictory data, an external
+   API down), research first — web search, HF Hub, GitHub issues, model cards.
+   If after a single round of research you still can't decide, write a one-line
+   summary of the blocker, mark the task pending with the reason, move to the next.
+   Don't stop.
+5. **Off-the-shelf before training.** Before recommending a fine-tune or distillation
+   run, exhaustively bench public Apache/MIT/BSD/safetensors candidates on the
+   exact same corpus you'd evaluate the trained model on. We caught one of these
+   on 2026-04-26: a "distil a 100M-param VN diacritic model" recommendation was
+   shipped without first benching `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
+   (Apache, safetensors, 200M) and similar. The user correctly flagged it.
+6. **Each item ends in a commit.** No long-running uncommitted state. After each
+   improvement: lint, run tests, commit with a focused message. Bump the patch
+   version when the change is user-visible (new bench numbers, new dep, new API).
+7. **Trust the trust ladder.** Per principle 11 + the file-format trust ladder in
+   the component-build workflow: safetensors ≫ HF .bin from major labs ≫ opaque
+   native ≫ pickle (auto-reject). When evaluating a new candidate model, the
+   *first* check is the format / license, not the metric.
+
+The aim of autonomous mode is sustained throughput, not "many small commits".
+Skip work that doesn't move a measurable number; focus on the items that close
+a real gap surfaced by the latest benches.
+
 ## Scope clarification
 
 `nom-vn` is named after **chữ Nôm** (the historical Vietnamese script) but the

@@ -83,6 +83,72 @@ Pick will be based on: dependency weight, CPU-only inference speed, license comp
 Reproduce: `python benchmarks/accuracy/bench_diacritics.py`
 Baseline tracked at: `benchmarks/results/baseline_v0.0.1.json`
 
+### Off-the-shelf VN diacritic seq2seq models — *measured 2026-04-26*
+
+Tracking principle: we did not bench public Apache-licensed VN diacritic
+models before recommending a 100M-param distillation. The user flagged
+this; we re-measured. **One off-the-shelf model beats every option we
+tested, including cloud `gpt-4o-mini`.**
+
+Same 55-sentence corpus (CC0). Bench harness:
+`benchmarks/accuracy/bench_diacritic_hf.py`. Hardware: RTX 3090.
+
+| Model | License | Disk | Word acc | Mean s/sent | Notes |
+|---|---|---:|---:|---:|---|
+| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** ⭐ | Apache 2.0 | ~1 GB | **97.81%** | **0.152** | T5 200 M, safetensors |
+| (cloud `gpt-4o-mini`) | proprietary | — | 95.37% | 1.270 | reference ceiling |
+| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18% | 1.370 | from LLM grid |
+| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 87.90% | 1.100 | from LLM grid |
+| `bmd1905/vietnamese-correction` | Apache 2.0 | ~1.6 GB | 15.57% | 0.301 | Fails — trained for spelling, not diacritic-only |
+| `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | ~1.6 GB | not benched | — | Self-reported CER 38.85 % is below rule baseline; skipped |
+| (rule baseline) | — | 0 | 41.06% | <0.001 | reference floor |
+
+**Toshiiiii1 wins decisively:**
+
+- **+2.44 pp** over cloud `gpt-4o-mini` (97.81 % vs 95.37 %).
+- **+9.91 pp** over best local LLM (`gemma3:4b` at 87.90 %).
+- **8 × faster** than the cloud LLM (0.152 s vs 1.27 s) and **7 × faster** than local LLMs.
+- **Apache 2.0 + safetensors** — fully shippable per CLAUDE.md principle 11.
+- **~10 × smaller on disk** than `gemma4:e4b` (1 GB vs 9.6 GB).
+
+**Action:** retract the "distil a 100 M VN diacritic model" recommendation
+in `docs/training_plan_2026q2.md` (v0.2.12) — there's nothing to distil
+*to* that public Apache models don't already cover. Add as the
+recommended production path:
+
+```python
+from nom.text import fix_diacritics
+from nom.text.diacritic_models import HFDiacriticModel
+
+restorer = HFDiacriticModel()  # Toshiiiii1 default, lazy-loads on first call
+out = fix_diacritics("Hop dong nay duoc lap ngay 14 thang 3", model=restorer)
+# → 'Hợp đồng này được lập ngày 14 tháng 3'
+```
+
+Install: `pip install "nom-vn[diacritic-hf]"` (pulls `transformers<5` +
+`torch` + `sentencepiece`). The transformers cap is required: ≥5.6 has a
+slow-T5-tokenizer regression that breaks the Toshiiiii1 model load.
+
+**Why we missed this initially:** the v0.2.7 → v0.2.10 push focused on
+LLM-backed diacritic restoration (the prior assumption was "all good VN
+diacritic models are pickle-shipping or behind NC licenses"). The
+benchmark.md "v0.0.2 backend options under evaluation" table from the
+v0.0.1 era still listed Apache candidates as "deferred — license/format
+issues" without the actual measurements. The 2026-04-26 audit found one
+that meets every constraint.
+
+**Cross-check:** Toshiiiii1's model card reports no metrics, so we have
+no upstream number to compare. Our 97.81 % on the small 55-sentence
+corpus is near the ceiling — there are only ~12 wrong-restored words
+out of 777, and several are register-rare or domain-specific (legal-VN
+abbreviations the training data may not cover well). For a sanity check,
+on the larger `wikisource_vi` prose we observed similar character-level
+accuracy in spot checks; a full multi-corpus bench is the v0.3 follow-up.
+
+Reproduce: `python benchmarks/accuracy/bench_diacritic_hf.py
+Toshiiiii1/Vietnamese_diacritics_restoration_5th --json
+benchmarks/results/baseline_diacritic_toshiiiii_t5.json`
+
 ### Local LLM grid — *measured 2026-04-26*
 
 Goal: identify the smallest **local quantized model** that hits usable VN diacritic accuracy for user-machine deployment. All models served via Ollama 0.21.2 (llama.cpp backend) with `Q4_K_M` quantization (Ollama default), structured output (`format` JSON schema), `think: false`, temperature 0. Hardware: RTX 3090 24GB. Same `diacritic_eval_v0.txt` corpus.

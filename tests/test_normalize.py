@@ -176,6 +176,48 @@ class TestFixDiacriticsLLM:
         out = fix_diacritics("Hop dong so 02", llm=llm)
         assert out == "Hợp đồng số 02"
 
+    def test_model_path_replaces_llm_path(self) -> None:
+        # The model= kwarg accepts any callable mapping str -> str.
+        # Used by HFDiacriticModel (Toshiiiii1 T5) and any other
+        # off-the-shelf seq2seq diacritic model.
+        calls: list[str] = []
+
+        def fake_model(t: str) -> str:
+            calls.append(t)
+            return "Hợp đồng số 02"
+
+        out = fix_diacritics("Hop dong so 02", model=fake_model)
+        assert out == "Hợp đồng số 02"
+        assert calls == ["Hop dong so 02"]
+
+    def test_model_path_preserves_paragraph_breaks(self) -> None:
+        # Same blank-line splitting as the LLM path — fault isolation.
+        def fake_model(_: str) -> str:
+            return "đoạn"
+
+        out = fix_diacritics("doan\n\ndoan khac", model=fake_model)
+        assert "\n\n" in out
+
+    def test_model_takes_precedence_over_llm(self) -> None:
+        # If both kwargs are passed, model= wins. (The opposite would be
+        # confusing; users who set model= explicitly chose the seq2seq path.)
+        llm_calls: list[str] = []
+        model_calls: list[str] = []
+
+        class _LLM:
+            def complete(self, prompt: str, *, schema: object = None, max_tokens: int = 0) -> str:
+                llm_calls.append(prompt)
+                return "WRONG"
+
+        def fake_model(t: str) -> str:
+            model_calls.append(t)
+            return "đúng"
+
+        out = fix_diacritics("dung", llm=_LLM(), model=fake_model)
+        assert out == "đúng"
+        assert llm_calls == []
+        assert model_calls == ["dung"]
+
     def test_llm_passes_schema_to_complete(self) -> None:
         # The structured-output schema must reach the adapter so Ollama /
         # OpenAI / Anthropic can constrain decoding. Records the schema kwarg.

@@ -266,21 +266,25 @@ _RESTORE_TABLE: dict[str, str] = {
 }
 
 
-def fix_diacritics(text: str, *, llm: Any = None) -> str:
+def fix_diacritics(text: str, *, llm: Any = None, model: Any = None) -> str:
     """Restore Vietnamese diacritics on a diacritic-stripped string.
 
-    Two backends:
+    Three backends, in order of accuracy and cost:
 
-    - **Default (no LLM): rule-based table.** ~41% word accuracy on our
-      public corpus (`benchmarks/data/diacritic_eval_v0.txt`). Zero
-      dependencies, ~5ms per call. Use for offline/CI/throughput-bound
-      use cases where the wrong-mark rate is acceptable.
+    - **Default (no llm/model): rule-based table.** ~41% word accuracy on
+      our public corpus (`benchmarks/data/diacritic_eval_v0.txt`). Zero
+      dependencies, ~5 ms per call.
+    - **HF seq2seq (``model=...``): pass an** :class:`nom.text.diacritic_models.HFDiacriticModel`
+      (or anything callable with ``__call__(text) -> str``). The default
+      `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (Apache 2.0,
+      200 M T5, safetensors) hit **97.81 % word accuracy at 148 ms p50**
+      on this corpus on RTX 3090 — beating cloud `gpt-4o-mini` (95.4 %)
+      and local `gemma4:e4b` (93.2 %). The recommended path for production.
     - **LLM-backed (``llm=...``): pass any** :class:`nom.llm.LLM` adapter
-      and the function asks the model to restore diacritics. ~95%+
-      typical word accuracy depending on the model. ~100-500ms per call
-      but composable with batching at the caller level. The function
-      streams paragraph-by-paragraph so one bad block doesn't poison the
-      whole document.
+      and the function asks the model to restore diacritics. Useful when
+      you've already wired an LLM for other tasks. The function streams
+      paragraph-by-paragraph so one bad block doesn't poison the whole
+      document.
 
     The rule path uses single-word lookups against a curated high-frequency
     vocabulary. Words not in the table are returned unchanged. Preserves case
@@ -289,13 +293,24 @@ def fix_diacritics(text: str, *, llm: Any = None) -> str:
     Args:
         text: ASCII-or-mixed Vietnamese text.
         llm: optional :class:`nom.llm.LLM`. When provided, defers to the
-            model. When None, uses the rule table.
+            model via the structured-output prompt path.
+        model: optional callable ``(str) -> str`` (or
+            :class:`HFDiacriticModel`). When provided, called directly
+            on the input. Takes precedence over ``llm`` if both are passed.
 
     Returns:
         String with diacritics restored where confident.
 
     Example:
         >>> fix_diacritics("Hop dong nay duoc lap ngay 14 thang 3")
+        'Hợp đồng này được lập ngày 14 tháng 3'
+
+        >>> from nom.text.diacritic_models import HFDiacriticModel
+        >>> restorer = HFDiacriticModel()  # Toshiiiii1 default, lazy-loads
+        >>> fix_diacritics(
+        ...     "Hop dong nay duoc lap ngay 14 thang 3",
+        ...     model=restorer,
+        ... )
         'Hợp đồng này được lập ngày 14 tháng 3'
 
         >>> from nom.llm import Ollama
@@ -308,10 +323,35 @@ def fix_diacritics(text: str, *, llm: Any = None) -> str:
     if not text:
         return text
 
+    if model is not None:
+        # Direct callable path: paragraph-split then call. Same fault-isolation
+        # as the LLM path, no JSON wrapper because seq2seq models output text.
+        return _fix_diacritics_callable(text, model)
+
     if llm is not None:
         return _fix_diacritics_llm(text, llm)
 
     return _fix_diacritics_rule(text)
+
+
+def _fix_diacritics_callable(text: str, model: Any) -> str:
+    """Apply a ``model(str) -> str`` callable per paragraph; preserve breaks."""
+    import re
+
+    parts = re.split(r"(\n[ \t]*\n[ \t\n]*)", text)
+    if not parts:
+        return text
+
+    out: list[str] = []
+    for i, part in enumerate(parts):
+        if i % 2 == 1 or not part.strip():
+            out.append(part)
+            continue
+        restored = model(part)
+        # No JSON unwrap here — seq2seq models emit plain text. We do strip
+        # outer whitespace because some models add a leading space.
+        out.append(restored.strip() if isinstance(restored, str) else str(restored))
+    return normalize("".join(out))
 
 
 def _fix_diacritics_rule(text: str) -> str:
