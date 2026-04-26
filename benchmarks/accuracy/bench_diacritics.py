@@ -122,7 +122,7 @@ def _aggregate_by_register(results: Iterable[SentenceResult]) -> dict[str, dict[
     return out
 
 
-def run() -> tuple[list[SentenceResult], BenchSummary]:
+def run(llm: object | None = None) -> tuple[list[SentenceResult], BenchSummary]:
     if not DATA_PATH.exists():
         raise FileNotFoundError(f"Corpus not found at {DATA_PATH}")
 
@@ -132,7 +132,11 @@ def run() -> tuple[list[SentenceResult], BenchSummary]:
     start = time.perf_counter()
     for register, sentence in pairs:
         stripped = strip_diacritics(sentence)
-        restored = fix_diacritics(stripped)
+        # Pass through llm if provided — falls back to rule path otherwise.
+        if llm is not None:
+            restored = fix_diacritics(stripped, llm=llm)
+        else:
+            restored = fix_diacritics(stripped)
         total, correct, with_d, rec_d = _word_compare(sentence, restored)
         results.append(
             SentenceResult(
@@ -195,9 +199,35 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", type=Path, default=None, help="Write JSON results to this path")
     parser.add_argument("--examples", type=int, default=3, help="Show N example sentences")
+    parser.add_argument(
+        "--llm",
+        choices=("rule", "ollama", "openai", "anthropic"),
+        default="rule",
+        help="Restoration backend. 'rule' = built-in lookup table (default); "
+        "'ollama'/'openai'/'anthropic' = call the matching nom.llm adapter.",
+    )
+    parser.add_argument(
+        "--llm-model",
+        default=None,
+        help="Override the LLM model (e.g. qwen3:8b for ollama, gpt-4o-mini for openai).",
+    )
     args = parser.parse_args(argv)
 
-    results, summary = run()
+    llm: object | None = None
+    if args.llm == "ollama":
+        from nom.llm import Ollama
+
+        llm = Ollama(model=args.llm_model or "qwen3:8b")
+    elif args.llm == "openai":
+        from nom.llm import OpenAI
+
+        llm = OpenAI(model=args.llm_model or "gpt-4o-mini") if args.llm_model else OpenAI()
+    elif args.llm == "anthropic":
+        from nom.llm import Anthropic
+
+        llm = Anthropic(model=args.llm_model) if args.llm_model else Anthropic()
+
+    results, summary = run(llm=llm)
     _print_human(summary, results, args.examples)
 
     if args.json is not None:

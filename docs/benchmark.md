@@ -61,11 +61,11 @@ By register:
 
 This is the **honest v0.0.1 baseline** with the current ~120-entry curated vocabulary table. The rule-based path is a zero-dependency stopgap. The roadmap replaces it, not extends it:
 
-| Version | Approach | Dependencies | Expected accuracy |
+| Version | Approach | Dependencies | Measured accuracy |
 |---|---|---|---|
-| v0.0.1 (now) | Rule-based table lookup | none | **41% measured** |
-| v0.0.2 | Wrap PyVi or DistilBERT model | optional `nom-vn[diacritics]` | 90%+ (cited from upstream) |
-| v0.1 | LLM-backed via `nom.llm` | user-supplied LLM | best quality |
+| v0.0.1 (now default) | Rule-based table lookup | none | **40.59%** |
+| **v0.2.7 (NEW)** | LLM-backed (`fix_diacritics(..., llm=...)`) | any `nom.llm.LLM` | **95.37%** with `OpenAI(gpt-4o-mini)` |
+| v0.0.2 | Wrap PyVi or DistilBERT model | optional `nom-vn[diacritics]` | deferred — license/format issues |
 
 ### v0.0.2 backend options under evaluation
 

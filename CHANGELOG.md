@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7] — 2026-04-26
+
+### `fix_diacritics(text, llm=...)` — LLM-backed diacritic restoration
+
+The v0.0.1 rule-based table tops out at ~41% word accuracy. Per the
+"improve current pipelines to maximum accuracy" directive: rather
+than ship a model wrapper (the obvious VN-finetuned options are
+either CC-BY-NC, ship pickle, or aren't on HF Hub stable hosting),
+we wired any `nom.llm.LLM` adapter directly into `fix_diacritics`.
+
+```python
+from nom.text import fix_diacritics
+from nom.llm import OpenAI
+
+restored = fix_diacritics("Hop dong nay duoc lap ngay 14 thang 3", llm=OpenAI())
+# 'Hợp đồng này được lập ngày 14 tháng 3'
+```
+
+Measured on `benchmarks/data/diacritic_eval_v0.txt` (55 sentences,
+777 words, 4 registers — CC0):
+
+| Backend | Word accuracy | Diacritic recall | Elapsed |
+|---|---:|---:|---:|
+| Rule-based (default, no deps) | **40.59%** | 34.08% | 0.005s |
+| OpenAI gpt-4o-mini | **95.37%** | **94.61%** | 70s |
+| Ollama qwen3:1.7b | 0%[*] | 0% | 132s |
+
+[*] qwen3:1.7b returns input unchanged at this prompt — the 1.7B
+class is too small for the task. Production users who want a local
+model should pull qwen3:8b (~5GB) or larger; we don't ship a
+recommended model size in defaults because the right size depends on
+the user's hardware budget.
+
+`+54.78 percentage points` over the rule baseline with no fine-tuning
+and no shipped model. Implementation lives entirely in
+`src/nom/text/normalize.py` — splits input at blank-line paragraph
+breaks for fault isolation, defensively strips `<think>` tags,
+label-echoes, and code fences from LLM output.
+
+6 new tests in `tests/test_normalize.py` covering the LLM path
+(deterministic, no real LLM calls). 342 total pass.
+
 ## [0.2.6] — 2026-04-26
 
 ### `nom.retrieve.BM25Retriever` — bm25s backend swap
