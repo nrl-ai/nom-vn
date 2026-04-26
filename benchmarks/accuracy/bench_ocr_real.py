@@ -134,10 +134,89 @@ class EasyOCR:
         return " ".join(results).strip()
 
 
+class OllamaVLM:
+    """Vision-Language Model OCR via Ollama (e.g. qwen2.5vl, llava).
+
+    Sends each image to Ollama's ``/api/generate`` with a tight VN-OCR
+    prompt and returns the model's transcription. Quality and latency
+    depend heavily on the model — qwen2.5vl:3b / 7b are the strong
+    open-weight choices as of 2026-04-26.
+
+    Set ``base_url`` for a remote Ollama (e.g. SSH-tunneled GPU box).
+    """
+
+    name = "ollama_vlm"
+
+    def __init__(
+        self,
+        model: str = "qwen2.5vl:7b",
+        base_url: str = "http://localhost:11434",
+        prompt: str | None = None,
+        timeout: float = 120.0,
+        temperature: float = 0.0,
+    ) -> None:
+        self.model = model
+        self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+        self.temperature = temperature
+        # Tight prompt — VLMs love to add chatter ("Here is the text:") or
+        # explanations. We force a single line, no quoting, no labels.
+        self.prompt = prompt or (
+            "Trong ảnh có một đoạn văn bản tiếng Việt. "
+            "Hãy gõ lại CHÍNH XÁC nội dung văn bản, giữ nguyên dấu, viết hoa, "
+            "khoảng trắng. Chỉ trả về văn bản, không thêm tiêu đề, lời giải thích, "
+            "hay dấu ngoặc kép."
+        )
+        self._httpx: Any = None
+
+    def _ensure_loaded(self) -> None:
+        if self._httpx is not None:
+            return
+        try:
+            import httpx
+        except ImportError as exc:
+            raise ImportError("httpx not installed. Install with: pip install nom-vn[llm]") from exc
+        self._httpx = httpx
+
+    def predict(self, image_path: Path) -> str:
+        self._ensure_loaded()
+        import base64
+
+        b64 = base64.b64encode(image_path.read_bytes()).decode()
+        body = {
+            "model": self.model,
+            "prompt": self.prompt,
+            "images": [b64],
+            "stream": False,
+            "think": False,
+            "options": {
+                "temperature": self.temperature,
+                "num_predict": 512,
+            },
+        }
+        r = self._httpx.post(f"{self.base_url}/api/generate", json=body, timeout=self.timeout)
+        r.raise_for_status()
+        data = r.json()
+        text = str(data.get("response", "")).strip()
+        # Defensive trim — the same patterns as fix_diacritics: strip
+        # ```code-fences```, drop a leading "Văn bản:" label echo, drop a
+        # leading <think>...</think>.
+        if "</think>" in text:
+            text = text.split("</think>", 1)[1].lstrip()
+        if text.startswith("```"):
+            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
+            if text.endswith("```"):
+                text = text[:-3].rstrip()
+        if "\n" in text and text.split("\n", 1)[0].rstrip().endswith(":"):
+            text = text.split("\n", 1)[1]
+        return text.strip().strip('"')
+
+
 ENGINES: dict[str, Any] = {
     "tesseract": TesseractOCR,
     "vietocr": VietOCR,
     "easyocr": EasyOCR,
+    "ollama_vlm": OllamaVLM,
 }
 
 
@@ -321,9 +400,7 @@ def _git_sha() -> str | None:
 
 def _print_table(result: dict[str, Any]) -> None:
     cfg = result["config"]
-    print(
-        f"\nCorpus: {cfg['corpus']}  " f"(variant={cfg['variant']}, n={cfg['n_samples']} samples)"
-    )
+    print(f"\nCorpus: {cfg['corpus']}  (variant={cfg['variant']}, n={cfg['n_samples']} samples)")
     cols = ["cer", "wer", "diacritic_cer", "exact_match", "p50_ms", "p95_ms"]
     name_w = max(8, max(len(r) for r in result["engines"]))
     header = "Engine".ljust(name_w) + "  " + "  ".join(c.rjust(13) for c in cols)
@@ -360,6 +437,22 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--n-warmup", type=int, default=1)
     p.add_argument("--n-timed", type=int, default=2)
     p.add_argument("--json", type=Path, default=None)
+    p.add_argument(
+        "--ollama-base-url",
+        default="http://localhost:11434",
+        help="Ollama server URL for ollama_vlm engine.",
+    )
+    p.add_argument(
+        "--ollama-model",
+        default="qwen2.5vl:7b",
+        help="Ollama VLM model tag (qwen2.5vl:3b, qwen2.5vl:7b, llava, etc.)",
+    )
+    p.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Only run on the first N samples (useful for slow VLM benches).",
+    )
     args = p.parse_args(argv)
 
     selected = [e.strip() for e in args.engines.split(",") if e.strip()]
@@ -384,6 +477,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"device={device}")
     variant = None if args.variant == "none" else args.variant
     samples = load_corpus(args.corpus, variant=variant)
+    if args.limit is not None and args.limit > 0:
+        samples = samples[: args.limit]
     print(f"loaded {len(samples)} samples from {args.corpus} (variant={variant})")
 
     engines: dict[str, Any] = {}
@@ -393,6 +488,8 @@ def main(argv: list[str] | None = None) -> int:
             engines[name] = cls(device=device)
         elif name == "easyocr":
             engines[name] = cls(gpu=(device != "cpu"))
+        elif name == "ollama_vlm":
+            engines[name] = cls(model=args.ollama_model, base_url=args.ollama_base_url)
         else:
             engines[name] = cls()
 

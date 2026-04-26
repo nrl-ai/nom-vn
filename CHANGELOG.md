@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.11] — 2026-04-26
+
+### VLM OCR engine + measurement: VLMs lose decisively on line OCR
+
+Added an `OllamaVLM` engine to `benchmarks/accuracy/bench_ocr_real.py`
+so we could honestly answer "should we add a VLM as the default OCR
+backend for Vietnamese?". Result: **no, not on this corpus.**
+
+Measured 2026-04-26 on the first 50 images of `vn_ocr_subset`
+(ducto489 mid-noise mirror, single-line printed VN), all engines
+on the same images, RTX 3090 / Q4_K_M:
+
+  Engine             CER     Exact match   p50 ms
+  Tesseract 5 (vie)  5.53%   38.0%          80.6
+  EasyOCR (vi)       9.39%   18.0%          31.1
+  qwen2.5vl:7b      31.07%   18.0%         818.0
+  qwen2.5vl:3b      39.86%   15.0%       1,165.5
+
+VLM failure modes observed: token-loop repetition ("1892 92 92 92
+..."), confidently-wrong substitution ("XÃ CHIỀNG ƠN" -> "CHÍNH XÁC"),
+and "complete-the-sentence" hallucination ("churchill và tưởng giới
+thạch" -> "Churchill và tướng Eisenhower cùng được trao giải thưởng").
+The language prior dominates the visual signal on tight line crops
+without document context.
+
+Default stays Tesseract. VLM OCR will surface as a distinct
+`nom.doc.vlm_extract()` path in a future release, scoped to
+*understanding* documents (invoice fields, IDs, forms, handwriting),
+not transcribing them.
+
+`OllamaVLM` engine class is committed and gated behind `--engines
+ollama_vlm` so users can re-run the comparison on their own corpus.
+New CLI flags: `--ollama-base-url`, `--ollama-model`, `--limit`.
+
 ## [0.2.10] — 2026-04-26
 
 ### PDF text extraction — `pypdfium2` 46x faster than `pdfplumber`, no AGPL trap

@@ -1,0 +1,26 @@
+{
+  "config": {
+    "corpus": "benchmarks/data/vn_ocr_subset",
+    "variant": "none",
+    "n_samples": 50,
+    "device": "cuda"
+  },
+  "engines": {
+    "tesseract": {
+      "n_samples": 50,
+      "cer": 0.0553,
+      "wer": 0.2678,
+      "diacritic_cer": 0.0971,
+      "exact_match": 0.38,
+      "p50_ms": 80.57,
+      "p95_ms": 110.49
+    }
+  },
+  "meta": {
+    "ran_at": "2026-04-26T10:40:58+00:00",
+    "git_sha": "a7006c7abf15",
+    "n_warmup": 1,
+    "n_timed": 1,
+    "python": "3.13.9"
+  }
+}

@@ -566,14 +566,65 @@ mirrored to
   promising next candidate. Reported CER ~0.94 on OmniDocBench
   multilingual; not VN-specific but typically beats Tesseract on
   rendered text.
-- **Qwen2-VL-2B-Instruct** (Apache-2.0, 4 GB, GPU-recommended) —
-  generalist VLM with strong VN OCR per upstream model card. Defer
-  to its own bench session because (a) heavy download, (b) VLM-style
-  prompt-and-decode latency is a different metric category than
-  CTC-style OCR.
 - **Surya OCR** — code is **GPL-3.0**, models are open-RAIL-M.
   Both license-incompatible with our Apache-2.0 default surface.
   Will bench for comparison only; cannot ship as default.
+
+### VLM OCR — *measured 2026-04-26*
+
+Tested whether a general-purpose Vision-Language Model can match
+purpose-built OCR on Vietnamese line-image transcription.
+
+**Engine:** `qwen2.5vl:3b` and `qwen2.5vl:7b` (Apache-2.0) via Ollama
+0.21.2 on RTX 3090. Q4_K_M quantization. Prompt: tight Vietnamese
+"transcribe exactly, no chatter" (see `OllamaVLM` in
+`benchmarks/accuracy/bench_ocr_real.py`). Defensive output trim for
+think-tags, code-fences, and label echoes.
+
+**Corpus:** First 50 images from `vn_ocr_subset` (sampled from
+[ducto489/ocr_datasets](https://huggingface.co/datasets/ducto489/ocr_datasets),
+Apache-2.0). Single-line clean printed VN text — same images run on
+Tesseract and EasyOCR for direct comparison.
+
+| Engine | Q4 size | CER | WER | Diacritic CER | Exact match | p50 ms | p95 ms |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **Tesseract 5 (vie)** | ~30 MB | **5.53%** | 26.78% | 9.71% | **38.0%** | **80.6** | 110.5 |
+| EasyOCR (vi) | ~150 MB | 9.39% | 43.86% | 19.84% | 18.0% | 31.1 (GPU) | 68.3 |
+| qwen2.5vl:7b | 6.0 GB | 31.07% | 140.04% | 33.38% | 18.0% | 818.0 | 1332.2 |
+| qwen2.5vl:3b | 3.2 GB | 39.86% | 175.43% | 41.82% | 15.0% | 1165.5 | 3993.6 |
+
+**Findings:**
+
+1. **VLMs lose decisively on single-line clean OCR.** qwen2.5vl:7b
+   has CER 31% vs Tesseract's 5.53% — a 25-point gap. The model
+   hallucinates: "1892 - Tạp Chí Vogue..." → "1892 92 92 92 92..." (token
+   loop), "XÃ CHIỀNG ƠN" → "CHÍNH XÁC", "churchill và tưởng giới thạch"
+   → "Churchill và tướng Eisenhower cùng được trao giải thưởng" (whole
+   plausible-but-fabricated sentence).
+2. **The right tool stays the right tool.** VLMs are trained on full
+   pages; on tight line crops without document context, the language
+   prior dominates the visual signal and the model drifts into
+   "complete-the-sentence" mode. Tesseract's CTC head is purpose-built
+   for left-to-right glyph alignment and doesn't have this failure mode.
+3. **Latency: VLM is 10× slower** (818 ms vs 80 ms p50). For a 478-image
+   batch this is 6.5 min vs 39 s.
+4. **Use case for VLM in OCR is elsewhere.** Multi-field document
+   extraction (invoice fields, ID cards, forms with checkboxes), scanned
+   handwriting, and "OCR + understand the text" workflows are where
+   VLMs earn their cost. We've documented this so users don't reach for
+   `qwen2.5vl` expecting it to beat Tesseract on simple line images.
+
+**Recommendation:** **Default OCR stays Tesseract.** VLM OCR is
+appropriate when the downstream task is *understanding* the document,
+not transcribing it — surface as a separate `nom.doc.vlm_extract()`
+path in a future release, not a swap-in OCR backend.
+
+Reproduce: `python benchmarks/accuracy/bench_ocr_real.py --corpus
+benchmarks/data/vn_ocr_subset --variant none --engines ollama_vlm
+--ollama-model qwen2.5vl:7b --ollama-base-url http://localhost:11434
+--limit 50`
+Baselines: `benchmarks/results/baseline_ocr_vlm_qwen25vl_7b.json`,
+`baseline_ocr_tesseract_50.json`, `baseline_ocr_easyocr_50.json`.
 
 ### Recommended config (v0.2.x default)
 

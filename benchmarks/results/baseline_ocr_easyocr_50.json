@@ -1,0 +1,26 @@
+{
+  "config": {
+    "corpus": "benchmarks/data/vn_ocr_subset",
+    "variant": "none",
+    "n_samples": 50,
+    "device": "cuda"
+  },
+  "engines": {
+    "easyocr": {
+      "n_samples": 50,
+      "cer": 0.0939,
+      "wer": 0.4386,
+      "diacritic_cer": 0.1984,
+      "exact_match": 0.18,
+      "p50_ms": 31.15,
+      "p95_ms": 68.3
+    }
+  },
+  "meta": {
+    "ran_at": "2026-04-26T10:41:27+00:00",
+    "git_sha": "a7006c7abf15",
+    "n_warmup": 1,
+    "n_timed": 1,
+    "python": "3.13.9"
+  }
+}
