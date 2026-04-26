@@ -3,32 +3,76 @@
   "device": "cuda",
   "models": [
     {
-      "model_id": "dangvantuan/vietnamese-embedding",
-      "is_bkai_segmented": false,
+      "model_id": "hiieu/halong_embedding",
       "n_docs": 5061,
       "n_questions": 80,
-      "load_seconds": 7.27,
-      "encode_docs_seconds": 95.63,
-      "encode_questions_seconds": 0.44,
-      "docs_per_sec": 52.9,
-      "recall_at_1": 0.35,
-      "recall_at_10": 0.675,
-      "mrr_at_10": 0.4449,
-      "embedding_dim": 768
+      "embedding_dim": 768,
+      "max_seq_length": 512,
+      "word_segment": false,
+      "query_prefix": "",
+      "passage_prefix": "",
+      "load_seconds": 16.28,
+      "encode_docs_seconds": 115.79,
+      "encode_questions_seconds": 0.26,
+      "docs_per_sec": 43.7,
+      "recall_at_1": 0.6,
+      "recall_at_10": 0.95,
+      "mrr_at_10": 0.7288,
+      "notes": "mE5-base ft. Card explicitly states NO prefix needed (the fine-tune re-purposed the asymmetric head). Trained with 512 max_seq_length.",
+      "sample_predictions": [
+        {
+          "question": "Trình tự thỏa thuận thông số kỹ thuật xây dựng luồng đường thủy nội địa được quy định như thế nào?",
+          "gold_id": "08/2021/nđ-cp+8",
+          "gold_doc_first_200_chars": "1. Trước khi phê duyệt dự án đầu tư xây dựng luồng đường thủy nội địa chủ đầu tư phải thỏa thuận về thông số kỹ thuật của luồng với cơ quan có thẩm quyền quy định tại khoản 2 Điều này.\n2. Thẩm quyền t",
+          "predicted_id": "08/2021/nđ-cp+8",
+          "predicted_doc_first_200_chars": "1. Trước khi phê duyệt dự án đầu tư xây dựng luồng đường thủy nội địa chủ đầu tư phải thỏa thuận về thông số kỹ thuật của luồng với cơ quan có thẩm quyền quy định tại khoản 2 Điều này.\n2. Thẩm quyền t",
+          "correct": true
+        },
+        {
+          "question": "Kỷ niệm chương Vì sự nghiệp Tài chính Việt Nam là gì?",
+          "gold_id": "17/2019/tt-btc+3",
+          "gold_doc_first_200_chars": "1. Kỷ niệm chương “Vì sự nghiệp Tài chính Việt Nam” (sau đây gọi tắt là Kỷ niệm chương) là hình thức tặng thưởng của Bộ Tài chính để ghi nhận thành tích, sự cống hiến của các cá nhân đã có nhiều đóng ",
+          "predicted_id": "17/2019/tt-btc+3",
+          "predicted_doc_first_200_chars": "1. Kỷ niệm chương “Vì sự nghiệp Tài chính Việt Nam” (sau đây gọi tắt là Kỷ niệm chương) là hình thức tặng thưởng của Bộ Tài chính để ghi nhận thành tích, sự cống hiến của các cá nhân đã có nhiều đóng ",
+          "correct": true
+        }
+      ]
     },
     {
       "model_id": "bkai-foundation-models/vietnamese-bi-encoder",
-      "is_bkai_segmented": true,
       "n_docs": 5061,
       "n_questions": 80,
-      "load_seconds": 7.91,
-      "encode_docs_seconds": 84.64,
-      "encode_questions_seconds": 0.13,
-      "docs_per_sec": 59.8,
+      "embedding_dim": 768,
+      "max_seq_length": 256,
+      "word_segment": true,
+      "query_prefix": "",
+      "passage_prefix": "",
+      "load_seconds": 8.24,
+      "encode_docs_seconds": 85.53,
+      "encode_questions_seconds": 0.1,
+      "docs_per_sec": 59.2,
       "recall_at_1": 0.7625,
       "recall_at_10": 0.9875,
       "mrr_at_10": 0.8604,
-      "embedding_dim": 768
+      "notes": "PhoBERT-base-v2 ft. Card: https://huggingface.co/bkai-foundation-models/vietnamese-bi-encoder — requires word-segmented input, multi-syllable VN words joined with '_'. Position table cap 258.",
+      "sample_predictions": [
+        {
+          "question": "Trình tự thỏa thuận thông số kỹ thuật xây dựng luồng đường thủy nội địa được quy định như thế nào?",
+          "gold_id": "08/2021/nđ-cp+8",
+          "gold_doc_first_200_chars": "1. Trước khi phê duyệt dự án đầu tư xây dựng luồng đường thủy nội địa chủ đầu tư phải thỏa thuận về thông số kỹ thuật của luồng với cơ quan có thẩm quyền quy định tại khoản 2 Điều này.\n2. Thẩm quyền t",
+          "predicted_id": "08/2021/nđ-cp+8",
+          "predicted_doc_first_200_chars": "1. Trước khi phê duyệt dự án đầu tư xây dựng luồng đường thủy nội địa chủ đầu tư phải thỏa thuận về thông số kỹ thuật của luồng với cơ quan có thẩm quyền quy định tại khoản 2 Điều này.\n2. Thẩm quyền t",
+          "correct": true
+        },
+        {
+          "question": "Kỷ niệm chương Vì sự nghiệp Tài chính Việt Nam là gì?",
+          "gold_id": "17/2019/tt-btc+3",
+          "gold_doc_first_200_chars": "1. Kỷ niệm chương “Vì sự nghiệp Tài chính Việt Nam” (sau đây gọi tắt là Kỷ niệm chương) là hình thức tặng thưởng của Bộ Tài chính để ghi nhận thành tích, sự cống hiến của các cá nhân đã có nhiều đóng ",
+          "predicted_id": "17/2019/tt-btc+3",
+          "predicted_doc_first_200_chars": "1. Kỷ niệm chương “Vì sự nghiệp Tài chính Việt Nam” (sau đây gọi tắt là Kỷ niệm chương) là hình thức tặng thưởng của Bộ Tài chính để ghi nhận thành tích, sự cống hiến của các cá nhân đã có nhiều đóng ",
+          "correct": true
+        }
+      ]
     }
   ]
 }

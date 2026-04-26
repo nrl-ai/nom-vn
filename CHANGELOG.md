@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.19] — 2026-04-26
+
+### Refactor: replace hardcoded model branches with declarative specs
+
+User direction: "don't hardcode model names in code — prefer flexible
+configurations." The v0.2.17/.18 commits had three hardcodes that broke
+the rule:
+
+  - `per_model_cap = {"hiieu/halong_embedding": 512, ...}`
+  - `_is_e5_family()` with `if "halong" in lid or "/e5-" in lid`
+  - `if "phoranker" in args.reranker.lower()` (already removed in v0.2.17)
+
+Replaced with declarative `EmbedderSpec` dataclass per model in
+`benchmarks/rag/bench_embedder_compare.py`. Each entry owns:
+
+  - `model_id`: HuggingFace id
+  - `max_seq_length`: explicit cap
+  - `query_prefix`, `passage_prefix`: e5-style asymmetric prefixes
+  - `word_segment`: bkai-style underscore segmentation flag
+  - `notes`: model-card provenance for the JSON output
+
+Bench loop is now model-agnostic. Adding a new model = appending to
+`KNOWN_SPECS`; not editing branches.
+
+### Halong embedding — corrected to 60.00 % R@1 with proper config
+
+ALWAYS DOUBLE-CHECK on halong: the v0.2.17 number (55.00 %) was run
+at max_seq_length=256 with `query:` / `passage:` prefixes — both
+WRONG per the model card. halong is mE5-base ft trained at 512 with
+no prefixes (the fine-tune re-purposed the head). Re-measured with
+correct config:
+
+  hiieu/halong_embedding (max_seq=512, no prefix): 60.00 % R@1
+                                                  (was 55.00 % with wrong config)
+
+Still loses to bkai (76.25 %) by 16 pp. Author's published 82.94 % on
+their holdout doesn't reproduce on our 5k subset — likely a different
+question selection. bkai stays.
+
+### `--samples N` dumps raw I/O per model
+
+Per CLAUDE.md autonomous-loop §8 (ALWAYS DOUBLE-CHECK):
+`bench_embedder_compare.py --samples 3` dumps the first N (question,
+gold doc, top-1 predicted doc) tuples into the JSON output. Reading
+five raw samples is the cheapest way to catch broken metrics —
+costs 2 minutes, saves a wrong README claim.
+
 ## [0.2.18] — 2026-04-26
 
 ### Bench-methodology fix: 0/800 sentence-exact was a tokenization artifact
