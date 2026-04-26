@@ -464,6 +464,56 @@ reranking, optional HyDE / multi-query expansion, then an LLM call.
 Three lines from documents to answers — see `src/nom/rag/pipeline.py`
 docstring for the canonical example.
 
+### Embedder-only retrieval — *measured 2026-04-26*
+
+A direct two-tower comparison: encode every doc + every question, rank docs
+by cosine. No BM25, no fusion, no reranker — every quality difference is
+purely the embedder. This catches cases where an embedder's STS-tuned
+training distribution doesn't transfer to retrieval (the asymmetric Q→Doc
+task the RAG pipeline actually does).
+
+Corpus: `benchmarks/rag/fixtures/vn_legal_zalo_5k.json` (5,061 docs / 80
+questions, sampled from Zalo AI 2021 Legal QA, MIT). Hardware: RTX 3090.
+
+| Model | License | Disk | R@1 | R@10 | MRR@10 | docs/s |
+|---|---|---:|---:|---:|---:|---:|
+| **`bkai-foundation-models/vietnamese-bi-encoder`** ⭐ | Apache 2.0 | ~383 MB | **76.25 %** | **98.75 %** | **0.8604** | 60 |
+| `dangvantuan/vietnamese-embedding` (current default) | Apache 2.0 | ~440 MB | 35.00 % | 67.50 % | 0.4449 | 53 |
+
+bkai wins by **+41.25 pp R@1 and +31.25 pp R@10** in *smaller* on-disk size and
+similar throughput. The gap is structural, not tunable:
+
+- `dangvantuan` was fine-tuned on **STS** (symmetric similarity) — strong
+  on benchmarks like VN-STS but the asymmetric question→document
+  retrieval task is out of distribution.
+- `bkai` was trained with **MultipleNegativesRankingLoss** on Q→Doc pairs
+  from MS MARCO + SQuAD v2 + 80 % of Zalo Legal — exactly the task we run.
+
+**Catch:** bkai requires word-segmenter preprocessing
+(multi-syllable VN words joined with underscores). The
+`nom.embeddings.BKaiEmbedder` class wraps `underthesea` to do this
+automatically. Install: `pip install "nom-vn[embeddings,nlp]"`.
+
+**Cross-check:** bkai's published Zalo Legal full-corpus numbers
+([model card](https://huggingface.co/bkai-foundation-models/vietnamese-bi-encoder))
+report Acc@1 73.28, Acc@10 93.59, MRR 80.73. Our 5k subset (76.25, 98.75,
+0.8604) is slightly higher because the subset has fewer distractors —
+order of magnitude consistent. No methodology divergence.
+
+**Action for v0.2.x:** add `BKaiEmbedder` as opt-in, do NOT switch the
+default in `nom.rag` / `nom.retrieve` — that would invalidate every
+existing user's persisted embedding cache. The 0.3.x major release will
+flip the default; for now opt-in keeps cache compatibility.
+
+```python
+from nom.embeddings import BKaiEmbedder
+from nom.rag import RAG
+rag = RAG(embedder=BKaiEmbedder(device="cuda"))
+```
+
+Reproduce: `python benchmarks/rag/bench_embedder_compare.py
+--json benchmarks/results/baseline_embedder_compare_zalo5k.json`
+
 ### Vietnamese RAG model grid — *measured 2026-04-25*
 
 Two fixtures, both sampled from

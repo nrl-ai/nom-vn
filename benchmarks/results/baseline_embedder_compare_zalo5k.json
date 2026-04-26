@@ -1,0 +1,34 @@
+{
+  "fixture": "benchmarks/rag/fixtures/vn_legal_zalo_5k.json",
+  "device": "cuda",
+  "models": [
+    {
+      "model_id": "dangvantuan/vietnamese-embedding",
+      "is_bkai_segmented": false,
+      "n_docs": 5061,
+      "n_questions": 80,
+      "load_seconds": 7.27,
+      "encode_docs_seconds": 95.63,
+      "encode_questions_seconds": 0.44,
+      "docs_per_sec": 52.9,
+      "recall_at_1": 0.35,
+      "recall_at_10": 0.675,
+      "mrr_at_10": 0.4449,
+      "embedding_dim": 768
+    },
+    {
+      "model_id": "bkai-foundation-models/vietnamese-bi-encoder",
+      "is_bkai_segmented": true,
+      "n_docs": 5061,
+      "n_questions": 80,
+      "load_seconds": 7.91,
+      "encode_docs_seconds": 84.64,
+      "encode_questions_seconds": 0.13,
+      "docs_per_sec": 59.8,
+      "recall_at_1": 0.7625,
+      "recall_at_10": 0.9875,
+      "mrr_at_10": 0.8604,
+      "embedding_dim": 768
+    }
+  ]
+}

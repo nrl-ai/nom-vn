@@ -31,6 +31,7 @@ Install: ``pip install nom-vn[embeddings]`` (adds ``sentence-transformers``).
 
 from nom.embeddings.aiteamvn import AITeamVNEmbedder
 from nom.embeddings.base import Embedder
+from nom.embeddings.bkai import BKaiEmbedder
 from nom.embeddings.vietnamese import VietnameseEmbedder
 
-__all__ = ["AITeamVNEmbedder", "Embedder", "VietnameseEmbedder"]
+__all__ = ["AITeamVNEmbedder", "BKaiEmbedder", "Embedder", "VietnameseEmbedder"]

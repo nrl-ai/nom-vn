@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.15] — 2026-04-26
+
+### `BKaiEmbedder` — +41 pp R@1 over current default on Zalo Legal QA
+
+User direction: keep questioning whether better SOTA models exist for
+each component. Audited the embedder. Found one.
+
+`bkai-foundation-models/vietnamese-bi-encoder` (Apache 2.0, 383 MB,
+PhoBERT-base-v2, 768-dim) on Zalo Legal QA 5k (5,061 docs, 80
+questions), RTX 3090:
+
+  Model                                                R@1     R@10    MRR@10
+  bkai-foundation-models/vietnamese-bi-encoder  (NEW) 76.25%  98.75%  0.8604
+  dangvantuan/vietnamese-embedding (current default)  35.00%  67.50%  0.4449
+
+bkai wins by +41.25 pp R@1 and +31.25 pp R@10 in smaller disk size.
+The gap is structural: bkai was trained with MultipleNegativesRankingLoss
+on Q→Doc retrieval pairs from MS MARCO + SQuAD v2 + 80% Zalo Legal —
+exactly the task we run. dangvantuan was fine-tuned on STS (symmetric
+similarity), the wrong task distribution.
+
+New: src/nom/embeddings/bkai.py ships `BKaiEmbedder`. Wraps
+SentenceTransformer + auto-applies underthesea word segmentation
+(bkai requires multi-syllable VN words joined with underscores per
+its training format).
+
+Install: `pip install "nom-vn[embeddings,nlp]"`
+
+Default NOT switched in 0.2.x — would invalidate every existing user's
+persisted embedding cache. The 0.3.x major release flips the default.
+
+```python
+from nom.embeddings import BKaiEmbedder
+from nom.rag import RAG
+rag = RAG(embedder=BKaiEmbedder(device="cuda"))
+```
+
+Cross-checked against bkai's own published Zalo Legal numbers (Acc@1
+73.28, Acc@10 93.59) — our 5k subset is slightly easier (76.25, 98.75)
+which matches expected distractor-pool effect.
+
+`docs/training_plan_2026q2.md` retraction: prior version said "do
+nothing" for embedder. Replaced with "adopt bkai".
+
+New bench harness: benchmarks/rag/bench_embedder_compare.py
+Baseline: benchmarks/results/baseline_embedder_compare_zalo5k.json
+
 ## [0.2.14] — 2026-04-26
 
 ### `Toshiiiii1` T5 wins diacritic restoration — distil recommendation retracted

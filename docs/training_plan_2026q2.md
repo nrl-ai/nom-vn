@@ -20,7 +20,7 @@ tried yet? If either answer is "yes", training is premature.
 | OCR (printed clean) | Tesseract `vie` 5.5% CER | none | **Do nothing.** Tesseract is 10× faster than VLM and 4× more accurate. | $0 |
 | OCR (scanned / noisy / handwriting) | not measured in-house | likely large | **Fine-tune VietOCR on real scan corpus** when fix is unblocked | ~$80–150 (H100, 24h) |
 | Word segmentation | underthesea CRF F1 95.7% | none | **Do nothing.** CRF is at its ceiling for this corpus. | $0 |
-| Dense embedder | dangvantuan/vietnamese-embedding | none for general VN STS | **Do nothing.** Hits public SOTA at 440 MB. | $0 |
+| Dense embedder | bkai-foundation-models/vietnamese-bi-encoder ⭐ | none (public model wins by +41 pp R@1 over prior default) | **Adopt bkai** as the new default in 0.3.x. Available in 0.2.15 as opt-in `BKaiEmbedder`. | $0 |
 | Reranker | BAAI/bge-reranker-v2-m3 | none for general VN reranking | **Do nothing.** | $0 |
 | BM25 | bm25s (Lucene formula) | n/a — algorithm, not model | **Do nothing.** | $0 |
 | LLM for general VN tasks | gemma3:4b / gemma4:e4b / qwen3:8b | small | **Do nothing.** Multilingual base coverage is strong; fine-tuning cost ≫ marginal improvement. | $0 |
@@ -205,23 +205,42 @@ a fine-tuned XLM-R head would be 280 MB on disk for that gain.
 Document the tradeoff (already in `docs/benchmark.md` and on the
 landing page once we update it).
 
-### 5. Embedder → **do nothing**
+### 5. Embedder → **switch default to bkai-foundation-models/vietnamese-bi-encoder** (RETRACTED "do nothing", 2026-04-26)
 
-`dangvantuan/vietnamese-embedding` (Apache 2.0, 440 MB, 768-dim) is
-the current `nom.embeddings` default. It tops public VN STS leaderboards
-at its size class and fine-tuning it on our internal corpus would
-over-fit a small handful of registers without a measured benefit.
+The prior version of this section said "do nothing — `dangvantuan/
+vietnamese-embedding` is public SOTA at its size class". That was
+true *for STS*. We had not measured retrieval recall on the actual
+RAG task. The 2026-04-26 audit corrected this.
 
-If we ever need a domain-specific embedder (e.g. legal Vietnamese
-where we have a labelled dev set), the cheap path is:
+Measured on Zalo Legal QA (5,061 docs, 80 questions, RTX 3090):
 
-- Mine triplets from the labelled set (anchor / positive / hard
-  negative).
-- Continue training the public model with `MultipleNegativesRanking
-  Loss` for ~1 epoch.
+| Model | License | Disk | R@1 | R@10 | MRR@10 |
+|---|---|---:|---:|---:|---:|
+| **`bkai-foundation-models/vietnamese-bi-encoder`** | Apache 2.0 | 383 MB | **76.25 %** | **98.75 %** | **0.8604** |
+| `dangvantuan/vietnamese-embedding` (was default) | Apache 2.0 | 440 MB | 35.00 % | 67.50 % | 0.4449 |
 
-But that's hypothetical until a labelled VN domain dataset materialises
-internally. For v0.2.x: nothing to train.
+bkai wins by **+41.25 pp R@1, +31.25 pp R@10** in smaller disk size.
+Architectural: bkai trained with `MultipleNegativesRankingLoss` on
+Q→Doc retrieval pairs; dangvantuan trained on STS pairs (symmetric
+similarity). The training distribution mismatch is the headline.
+
+**Action:** v0.2.15 ships `nom.embeddings.BKaiEmbedder` as opt-in. The
+0.3.x major release will switch the default. Mid-version cache
+invalidation is bad UX — existing users' persisted vector indexes were
+built on dangvantuan and would silently drop in quality if we flipped
+the default mid-stream.
+
+**Catch:** bkai requires `underthesea` word-segmenter preprocessing
+(multi-syllable VN words joined with underscores). Already an opt-in
+extra in `nom-vn[nlp]`; the BKaiEmbedder class handles this internally.
+
+#### Still don't fine-tune
+
+The public bkai model already beats every alternative we benched.
+Domain-specific finetuning would target a marginal +2-5 pp gain on a
+specific corpus (legal-VN, medical-VN, etc.) at the cost of a labelled
+dev set + training run. Hypothetical until a labelled in-domain corpus
+materialises.
 
 ### 6. Reranker → **do nothing**
 

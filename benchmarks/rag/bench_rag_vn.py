@@ -107,7 +107,11 @@ def _build_embedder(name: str, device: str = "cpu") -> Any:
         from nom.embeddings import AITeamVNEmbedder
 
         return AITeamVNEmbedder(device=device)
-    raise SystemExit(f"unknown embedder: {name!r} (choices: fake, vietnamese, aiteamvn)")
+    if name == "bkai":
+        from nom.embeddings import BKaiEmbedder
+
+        return BKaiEmbedder(device=device)
+    raise SystemExit(f"unknown embedder: {name!r} (choices: fake, vietnamese, aiteamvn, bkai)")
 
 
 # ---------------------------------------------------------------------------
