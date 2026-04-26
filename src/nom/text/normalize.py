@@ -10,6 +10,7 @@ plans an LLM-backed ``fix_diacritics(..., llm=...)`` that handles ambiguity.
 
 from __future__ import annotations
 
+import json
 import unicodedata
 from typing import Any
 
@@ -361,6 +362,16 @@ _DIACRITIC_PROMPT = (
     "Văn bản đã khôi phục dấu:"
 )
 
+# JSON schema for structured output. Used when the LLM adapter advertises
+# support via ``llm.complete(prompt, schema=...)``. Constrained decoding
+# stops small models (qwen3:4b et al.) from emitting hidden CoT or label
+# prose in the content field; the model is forced to fill {"restored": "..."}.
+_DIACRITIC_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {"restored": {"type": "string"}},
+    "required": ["restored"],
+}
+
 
 def _fix_diacritics_llm(text: str, llm: Any) -> str:
     """LLM-backed restoration; one prompt per paragraph for fault isolation.
@@ -388,14 +399,33 @@ def _fix_diacritics_llm(text: str, llm: Any) -> str:
         prompt = _DIACRITIC_PROMPT.format(text=part)
         # max_tokens budget: VN-with-diacritics is ~1.0x ASCII length in chars,
         # but tokenisers vary. 4x the input character count is a safe ceiling
-        # for short paragraphs without truncating mid-sentence.
-        max_t = max(64, min(4096, len(part) * 4))
-        restored = llm.complete(prompt, max_tokens=max_t).strip()
-        # Defensive trim. Models in the wild do three annoying things:
+        # for short paragraphs without truncating mid-sentence. JSON wrapper
+        # adds ~30 bytes — bump headroom slightly when going through schema.
+        max_t = max(128, min(4096, len(part) * 4 + 64))
+        # Try structured output first when the adapter supports it (Ollama
+        # via ``format``, OpenAI via ``response_format``, Anthropic via tool
+        # use). Falls through to plain prompting on TypeError if the adapter
+        # doesn't accept ``schema=``.
+        raw: str
+        try:
+            raw = llm.complete(prompt, schema=_DIACRITIC_SCHEMA, max_tokens=max_t)
+            try:
+                payload = json.loads(raw)
+                if isinstance(payload, dict) and isinstance(payload.get("restored"), str):
+                    out.append(payload["restored"])
+                    continue
+            except json.JSONDecodeError:
+                # Schema-supporting adapter returned non-JSON anyway — fall
+                # through to defensive cleanup on the raw string.
+                pass
+        except TypeError:
+            raw = llm.complete(prompt, max_tokens=max_t)
+
+        restored = raw.strip()
+        # Defensive trim for adapters/models that can't honour the schema:
         #   1) Echo the label "Văn bản đã khôi phục dấu:" before the answer.
         #   2) Wrap the answer in code fences ```...```.
         #   3) Emit a `<think>...</think>` reasoning block (qwen3 etc.).
-        # Strip all three so the metric measures restoration, not formatting.
         if "</think>" in restored:
             restored = restored.split("</think>", 1)[1].lstrip()
         if "\n" in restored and restored.split("\n", 1)[0].endswith(":"):

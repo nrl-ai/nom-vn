@@ -40,6 +40,7 @@ class SentenceResult:
     word_correct: int
     word_with_diacritic: int
     word_diacritic_recovered: int
+    latency_seconds: float = 0.0
 
     @property
     def word_accuracy(self) -> float:
@@ -62,6 +63,10 @@ class BenchSummary:
     overall_diacritic_recall: float
     by_register: dict[str, dict[str, float | int]]
     elapsed_seconds: float
+    latency_per_sentence_mean: float = 0.0
+    latency_per_sentence_p50: float = 0.0
+    latency_per_sentence_p95: float = 0.0
+    warmup_calls: int = 0
 
 
 def _load_corpus(path: Path) -> list[tuple[str, str]]:
@@ -122,21 +127,39 @@ def _aggregate_by_register(results: Iterable[SentenceResult]) -> dict[str, dict[
     return out
 
 
-def run(llm: object | None = None) -> tuple[list[SentenceResult], BenchSummary]:
+def _percentile(values: list[float], p: float) -> float:
+    if not values:
+        return 0.0
+    s = sorted(values)
+    k = (len(s) - 1) * p
+    lo, hi = int(k), min(int(k) + 1, len(s) - 1)
+    return s[lo] + (s[hi] - s[lo]) * (k - lo)
+
+
+def run(llm: object | None = None, warmup: int = 0) -> tuple[list[SentenceResult], BenchSummary]:
     if not DATA_PATH.exists():
         raise FileNotFoundError(f"Corpus not found at {DATA_PATH}")
 
     pairs = _load_corpus(DATA_PATH)
 
+    # Warmup: throwaway calls to stabilize the LLM (model load, KV cache).
+    # CLAUDE.md §12: always warm up before timing — cold-start artifacts
+    # inflated a 135x throughput claim 2026-04-25 incident.
+    if warmup > 0 and llm is not None:
+        warm_text = strip_diacritics(pairs[0][1])
+        for _ in range(warmup):
+            fix_diacritics(warm_text, llm=llm)
+
     results: list[SentenceResult] = []
     start = time.perf_counter()
     for register, sentence in pairs:
         stripped = strip_diacritics(sentence)
-        # Pass through llm if provided — falls back to rule path otherwise.
+        call_start = time.perf_counter()
         if llm is not None:
             restored = fix_diacritics(stripped, llm=llm)
         else:
             restored = fix_diacritics(stripped)
+        call_elapsed = time.perf_counter() - call_start
         total, correct, with_d, rec_d = _word_compare(sentence, restored)
         results.append(
             SentenceResult(
@@ -148,6 +171,7 @@ def run(llm: object | None = None) -> tuple[list[SentenceResult], BenchSummary]:
                 word_correct=correct,
                 word_with_diacritic=with_d,
                 word_diacritic_recovered=rec_d,
+                latency_seconds=round(call_elapsed, 4),
             )
         )
     elapsed = time.perf_counter() - start
@@ -156,6 +180,8 @@ def run(llm: object | None = None) -> tuple[list[SentenceResult], BenchSummary]:
     n_correct = sum(r.word_correct for r in results)
     n_with_d = sum(r.word_with_diacritic for r in results)
     n_rec_d = sum(r.word_diacritic_recovered for r in results)
+    latencies = [r.latency_seconds for r in results]
+    mean_lat = sum(latencies) / len(latencies) if latencies else 0.0
 
     summary = BenchSummary(
         n_sentences=len(results),
@@ -165,19 +191,26 @@ def run(llm: object | None = None) -> tuple[list[SentenceResult], BenchSummary]:
         overall_diacritic_recall=round(n_rec_d / n_with_d, 4) if n_with_d else 0.0,
         by_register=_aggregate_by_register(results),
         elapsed_seconds=round(elapsed, 4),
+        latency_per_sentence_mean=round(mean_lat, 4),
+        latency_per_sentence_p50=round(_percentile(latencies, 0.50), 4),
+        latency_per_sentence_p95=round(_percentile(latencies, 0.95), 4),
+        warmup_calls=warmup,
     )
     return results, summary
 
 
 def _print_human(summary: BenchSummary, results: list[SentenceResult], show_examples: int) -> None:
     print(f"Corpus: {summary.n_sentences} sentences, {summary.n_words:,} words")
-    print(f"Elapsed: {summary.elapsed_seconds:.3f}s")
+    print(f"Warmup: {summary.warmup_calls} calls · Elapsed: {summary.elapsed_seconds:.3f}s")
     print()
     print(f"{'metric':>30}  {'value':>10}")
     print("-" * 44)
     print(f"{'Overall word accuracy':>30}  {summary.overall_word_accuracy:>10.2%}")
     print(f"{'Overall diacritic recall':>30}  {summary.overall_diacritic_recall:>10.2%}")
     print(f"{'Words with diacritics':>30}  {summary.n_words_with_diacritic:>10,}")
+    print(f"{'Latency mean (s/sent)':>30}  {summary.latency_per_sentence_mean:>10.3f}")
+    print(f"{'Latency p50 (s/sent)':>30}  {summary.latency_per_sentence_p50:>10.3f}")
+    print(f"{'Latency p95 (s/sent)':>30}  {summary.latency_per_sentence_p95:>10.3f}")
     print()
     print("By register:")
     for reg, agg in summary.by_register.items():
@@ -211,13 +244,27 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Override the LLM model (e.g. qwen3:8b for ollama, gpt-4o-mini for openai).",
     )
+    parser.add_argument(
+        "--ollama-base-url",
+        default=None,
+        help="Override Ollama server URL (e.g. http://localhost:11435 for an SSH tunnel).",
+    )
+    parser.add_argument(
+        "--warmup",
+        type=int,
+        default=3,
+        help="Number of warmup calls before timing (default 3, applies to LLM backends).",
+    )
     args = parser.parse_args(argv)
 
     llm: object | None = None
     if args.llm == "ollama":
         from nom.llm import Ollama
 
-        llm = Ollama(model=args.llm_model or "qwen3:8b")
+        kwargs: dict[str, str] = {"model": args.llm_model or "qwen3:8b"}
+        if args.ollama_base_url:
+            kwargs["base_url"] = args.ollama_base_url
+        llm = Ollama(**kwargs)
     elif args.llm == "openai":
         from nom.llm import OpenAI
 
@@ -227,7 +274,8 @@ def main(argv: list[str] | None = None) -> int:
 
         llm = Anthropic(model=args.llm_model) if args.llm_model else Anthropic()
 
-    results, summary = run(llm=llm)
+    warmup = args.warmup if llm is not None else 0
+    results, summary = run(llm=llm, warmup=warmup)
     _print_human(summary, results, args.examples)
 
     if args.json is not None:

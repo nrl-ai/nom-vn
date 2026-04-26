@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.8] — 2026-04-26
+
+### Local-LLM diacritic restoration — production-grade for user machines
+
+Two engineering fixes turned the LLM-backed `fix_diacritics` from "cloud
+only" into a real local option, plus a comprehensive measurement of
+quantized models on consumer-grade hardware.
+
+**Fixes** (`src/nom/llm/ollama.py` + `src/nom/text/normalize.py`):
+
+1. **`Ollama` adapter defaults to `think=False`.** Qwen3 / DeepSeek-R1
+   thinking-mode emit hidden CoT into a separate `thinking` field,
+   leaving `content` empty for terse extraction tasks. With the new
+   default, `qwen3:4b` on the diacritic bench went from `0.00%` →
+   `47.36%`. Users who want CoT can still opt in via
+   `Ollama(think=True)`.
+2. **`fix_diacritics(llm=...)` uses Ollama structured output.** The
+   helper now sends a JSON schema (`{"restored": "..."}`) via the
+   adapter's `schema=` kwarg. Constrained decoding stops small models
+   from rambling explanations into the response. Adapters that don't
+   accept `schema=` fall through to the existing defensive prompt path.
+
+**Local LLM grid — measured 2026-04-26 on RTX 3090, Q4_K_M, warmup 3,
+55-sentence corpus** (full table in `docs/benchmark.md`):
+
+| Model | Q4 size | Word acc | Mean s/sent |
+|---|---:|---:|---:|
+| **gemma4:e4b** | 9.6 GB | **93.18%** | 1.37s |
+| **gemma3:4b** ⭐ | **3.3 GB** | **87.90%** | 1.10s |
+| qwen3:8b | 5.2 GB | 87.26% | 0.93s |
+| gemma4:e2b | 7.2 GB | 85.33% | 1.23s |
+| qwen3:4b | 2.5 GB | 47.36% | 0.94s |
+| (rule baseline) | 0 | 41.06% | <1ms |
+| llama3.2:3b | 2.0 GB | 38.35% | 1.50s |
+| qwen3:1.7b | 1.4 GB | 18.15% | 0.63s |
+| gemma3:1b | 0.8 GB | 15.32% | 1.41s |
+| phi4-mini | 2.5 GB | 6.95% | 2.32s |
+| (cloud gpt-4o-mini) | — | 95.37% | 1.27s |
+
+**Recommended local default: `gemma3:4b`** — 3.3 GB fits 4-6 GB VRAM
+laptops, 87.9% accuracy at 1.1 s/sent. Within 7.5 pp of cloud quality.
+
+**Quality ceiling for local: `gemma4:e4b`** — 93.2%, only 2.2 pp shy of
+cloud, but needs 12 GB+ VRAM (multimodal weights inflate disk).
+
+**Mobile (sub-2 GB) is not viable yet** — quality cliff is sharp around
+3 B params for VN; gemma3:1b and qwen3:1.7b fall below the rule baseline.
+Llama 3.2 / phi4-mini disqualified entirely (tokenizer / hangs).
+
+Reproduce one model: `python benchmarks/accuracy/bench_diacritics.py
+--llm ollama --llm-model gemma3:4b --warmup 3`.
+Reproduce the full grid: `OLLAMA_BASE_URL=http://localhost:11434
+benchmarks/accuracy/run_diacritic_local_grid.sh`.
+Aggregate: `python benchmarks/accuracy/_summarize_diacritic_grid.py`.
+Per-model results: `benchmarks/results/local_diacritic_grid/`.
+
+4 new tests covering `think` parameter behaviour and the structured-output
+JSON path. 341 pass (348 collected; 5 OCR + 2 model-download integration
+deselected when those deps aren't installed).
+
 ## [0.2.7] — 2026-04-26
 
 ### `fix_diacritics(text, llm=...)` — LLM-backed diacritic restoration

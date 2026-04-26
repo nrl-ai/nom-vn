@@ -167,3 +167,32 @@ class TestFixDiacriticsLLM:
         llm = _FakeDiacriticLLM(response="should-not-appear")
         assert fix_diacritics("", llm=llm) == ""
         assert llm.prompts == []  # never called
+
+    def test_llm_uses_structured_output_when_response_is_json(self) -> None:
+        # Adapters that honour the schema kwarg return JSON matching
+        # {"restored": "..."}. The diacritic helper parses that and uses the
+        # "restored" field directly — no defensive trim required.
+        llm = _FakeDiacriticLLM(response='{"restored": "Hợp đồng số 02"}')
+        out = fix_diacritics("Hop dong so 02", llm=llm)
+        assert out == "Hợp đồng số 02"
+
+    def test_llm_passes_schema_to_complete(self) -> None:
+        # The structured-output schema must reach the adapter so Ollama /
+        # OpenAI / Anthropic can constrain decoding. Records the schema kwarg.
+        captured: dict[str, object] = {}
+
+        class _SchemaCapturingLLM:
+            name = "schema-capturing"
+
+            def complete(
+                self, prompt: str, *, schema: object = None, max_tokens: int = 2048
+            ) -> str:
+                captured["schema"] = schema
+                return '{"restored": "Hợp đồng"}'
+
+        out = fix_diacritics("Hop dong", llm=_SchemaCapturingLLM())
+        assert out == "Hợp đồng"
+        schema_obj = captured["schema"]
+        assert isinstance(schema_obj, dict)
+        assert schema_obj["type"] == "object"
+        assert schema_obj["required"] == ["restored"]

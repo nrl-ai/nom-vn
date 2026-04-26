@@ -96,6 +96,27 @@ class TestOllamaAdapter:
         llm = Ollama(model="llama3.1:8b")
         assert "llama3.1:8b" in repr(llm)
 
+    def test_think_false_by_default(self) -> None:
+        # Qwen3 / DeepSeek-R1 burn token budget on hidden CoT when think mode is
+        # on, leaving the content field empty for terse extraction tasks. We
+        # default the adapter to think=False so the model emits the answer
+        # straight into content; Ollama silently ignores think on non-thinking
+        # models.
+        llm = Ollama()
+        fake = self._patch_httpx(None, "ok")  # type: ignore[arg-type]
+        llm._httpx = fake  # type: ignore[assignment]
+        llm.complete("Hi")
+        body = fake.post.call_args.kwargs["json"]
+        assert body["think"] is False
+
+    def test_think_true_when_opted_in(self) -> None:
+        llm = Ollama(think=True)
+        fake = self._patch_httpx(None, "ok")  # type: ignore[arg-type]
+        llm._httpx = fake  # type: ignore[assignment]
+        llm.complete("Hi")
+        body = fake.post.call_args.kwargs["json"]
+        assert body["think"] is True
+
 
 class TestOpenAIAdapter:
     """OpenAI adapter — mocked HTTP, no live calls. Covers default OpenAI

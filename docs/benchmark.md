@@ -63,8 +63,10 @@ This is the **honest v0.0.1 baseline** with the current ~120-entry curated vocab
 
 | Version | Approach | Dependencies | Measured accuracy |
 |---|---|---|---|
-| v0.0.1 (now default) | Rule-based table lookup | none | **40.59%** |
-| **v0.2.7 (NEW)** | LLM-backed (`fix_diacritics(..., llm=...)`) | any `nom.llm.LLM` | **95.37%** with `OpenAI(gpt-4o-mini)` |
+| v0.0.1 (now default) | Rule-based table lookup | none | **41.06%** |
+| **v0.2.7 cloud** | LLM-backed (`fix_diacritics(..., llm=...)`) | any `nom.llm.LLM` | **95.37%** with `OpenAI(gpt-4o-mini)` |
+| **v0.2.7 local** | LLM-backed via Ollama | `nom-vn[llm]` + `ollama pull gemma3:4b` | **87.90%** with `Ollama("gemma3:4b")` |
+| **v0.2.7 local-max** | LLM-backed via Ollama | `nom-vn[llm]` + `ollama pull gemma4:e4b` | **93.18%** with `Ollama("gemma4:e4b")` |
 | v0.0.2 | Wrap PyVi or DistilBERT model | optional `nom-vn[diacritics]` | deferred — license/format issues |
 
 ### v0.0.2 backend options under evaluation
@@ -80,6 +82,45 @@ Pick will be based on: dependency weight, CPU-only inference speed, license comp
 
 Reproduce: `python benchmarks/accuracy/bench_diacritics.py`
 Baseline tracked at: `benchmarks/results/baseline_v0.0.1.json`
+
+### Local LLM grid — *measured 2026-04-26*
+
+Goal: identify the smallest **local quantized model** that hits usable VN diacritic accuracy for user-machine deployment. All models served via Ollama 0.21.2 (llama.cpp backend) with `Q4_K_M` quantization (Ollama default), structured output (`format` JSON schema), `think: false`, temperature 0. Hardware: RTX 3090 24GB. Same `diacritic_eval_v0.txt` corpus.
+
+Methodology per CLAUDE.md §12: 3 warmup calls, 55 timed sentences, per-call latency aggregated.
+
+| Model | Q4 size | Word acc | Diacritic recall | Mean s/sent | p95 s/sent |
+|---|---:|---:|---:|---:|---:|
+| **`gemma4:e4b`** | 9.6 GB | **93.18%** | 92.22% | 1.37 | 1.68 |
+| **`gemma3:4b`** ⭐ default | **3.3 GB** | **87.90%** | 87.50% | 1.10 | 1.22 |
+| `qwen3:8b` | 5.2 GB | 87.26% | 86.19% | 0.93 | 1.07 |
+| `gemma4:e2b` | 7.2 GB | 85.33% | 84.55% | 1.23 | 1.47 |
+| `qwen3:4b` | 2.5 GB | 47.36% | 40.48% | 0.94 | 1.06 |
+| (rule baseline) | 0 | 41.06% | 34.88% | <0.001 | — |
+| `llama3.2:3b` | 2.0 GB | 38.35% | 33.69% | 1.50 | 1.95 |
+| `qwen3:1.7b` | 1.4 GB | 18.15% | 6.92% | 0.63 | 0.73 |
+| `gemma3:1b` | 0.8 GB | 15.32% | 3.22% | 1.41 | 1.90 |
+| `phi4-mini` | 2.5 GB | 6.95% | 2.13% | 2.32 | 10.24 |
+| (cloud `gpt-4o-mini`) | — | 95.37% | 94.61% | 1.27 | — |
+
+**Findings:**
+
+1. **Gemma family wins the multilingual fight.** Both `gemma3:4b` and `gemma4:e4b` outperform Qwen3 and Llama at similar size — multilingual training pays off for VN.
+2. **3-4B params is the floor for usable VN diacritic.** Sub-2B models (gemma3:1b, qwen3:1.7b) all fall *below* the rule baseline. The quality cliff is sharp.
+3. **Gemma 4's "E2B/E4B" naming is about active params, not file size.** The multimodal weights (vision + audio encoders) inflate disk: `e2b` = 7.2 GB Q4, `e4b` = 9.6 GB Q4. For a text-only task like diacritic restoration, this is dead weight on download.
+4. **`gemma3:4b` is the best size/quality tradeoff for `nom-vn`.** 3.3 GB fits 4-6 GB VRAM laptops, 87.9% acc within 7.5pp of cloud at 1.1 s/sent. Recommended default for the local LLM path.
+5. **Llama 3.2 / phi4-mini disqualified.** Llama tokenizer not balanced for VN; phi4-mini hangs on hard sentences (p95=10s).
+6. **Cloud is +2pp over best local.** `gpt-4o-mini` at 95.37% only edges out `gemma4:e4b` (93.18%) by 2.2pp; both are above the practical-usability bar.
+
+**Two engineering fixes shipped to make this measurable** (see [#PR](https://github.com/nrl-ai/nom-vn) and `src/nom/llm/ollama.py` + `src/nom/text/normalize.py`):
+
+- Pass `think: false` to Ollama. Qwen3 thinking-mode emitted CoT to a separate `thinking` field, leaving `content` empty — `qwen3:4b` previously scored 0%.
+- Switch `fix_diacritics(llm=...)` to **structured output** via Ollama's `format` JSON schema. Forces `{"restored": "..."}` shape; small models (qwen3:4b, gemma3:4b) can no longer ramble explanations into the response. Quality jumped from <50% to 87-93% across the grid.
+
+Reproduce one model: `python benchmarks/accuracy/bench_diacritics.py --llm ollama --llm-model gemma3:4b --warmup 3`
+Reproduce the full grid: `OLLAMA_BASE_URL=http://localhost:11434 ./benchmarks/accuracy/run_diacritic_local_grid.sh`
+Aggregate JSONs: `python benchmarks/accuracy/_summarize_diacritic_grid.py`
+Per-model JSONs: `benchmarks/results/local_diacritic_grid/diacritics_*.json`
 
 ### Performance — measured 2026-04-25 on Python 3.13.9
 

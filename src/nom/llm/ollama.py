@@ -52,6 +52,7 @@ class Ollama:
         base_url: str = "http://localhost:11434",
         timeout: float = 120.0,
         temperature: float = 0.0,
+        think: bool = False,
     ) -> None:
         try:
             import httpx
@@ -64,6 +65,12 @@ class Ollama:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.temperature = temperature
+        # think=False disables Qwen3 / DeepSeek-R1 reasoning mode. Default off
+        # because extraction tasks (diacritic, classification, structured output)
+        # don't benefit from a hidden CoT and the silent token budget burn left
+        # qwen3:4b / qwen3:1.7b emitting empty content fields. Ollama 0.7+
+        # honours this on thinking models and ignores it for the rest.
+        self.think = think
 
     def complete(
         self,
@@ -88,6 +95,7 @@ class Ollama:
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
             "stream": False,
+            "think": self.think,
             "options": {
                 "temperature": self.temperature,
                 "num_predict": max_tokens,
