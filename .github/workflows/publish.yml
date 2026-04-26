@@ -1,0 +1,230 @@
+name: Publish to PyPI
+
+# Two paths to publish:
+#
+# 1. **Push a tag**: `git tag v0.2.21 && git push --tags`. The
+#    `tag-publish` job below builds + uploads automatically.
+# 2. **From the GitHub UI**: Releases → Draft a new release → choose
+#    a tag (`v0.2.21`) → Publish release. Same workflow runs.
+#
+# Either way:
+#   - Tag MUST match `v*.*.*` (semantic version with leading `v`).
+#   - Tag MUST match `pyproject.toml` `version` field; `validate-version`
+#     fails fast otherwise.
+#
+# Auth: PyPI Trusted Publishing (OIDC). No API token in secrets. Configure
+# the publisher once at https://pypi.org/manage/account/publishing/ —
+# project "nom-vn", workflow `publish.yml`, environment `pypi`.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  release:
+    types: [published]
+  # Manual dispatch for dry-run testing.
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "PyPI target"
+        required: true
+        default: "testpypi"
+        type: choice
+        options:
+          - testpypi
+          - pypi
+
+permissions:
+  contents: read
+
+jobs:
+  validate-version:
+    name: validate version + tag match
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.read.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read pyproject version
+        id: read
+        run: |
+          v=$(awk -F'"' '/^version = /{print $2; exit}' pyproject.toml)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "pyproject version: $v"
+
+      - name: Verify tag matches pyproject version (tag/release flow only)
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          tag="${GITHUB_REF#refs/tags/}"
+          v="${{ steps.read.outputs.version }}"
+          if [ "$tag" != "v$v" ]; then
+            echo "::error::Tag $tag does not match pyproject version v$v"
+            exit 1
+          fi
+
+  test-before-publish:
+    name: tests gate
+    runs-on: ubuntu-latest
+    needs: validate-version
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests (deselect OCR — Tesseract not on runner)
+        run: pytest tests/ --deselect tests/test_pipeline.py::TestOCRStage
+
+  build-ui:
+    name: build UI bundle (force-included in wheel)
+    runs-on: ubuntu-latest
+    needs: validate-version
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: pnpm install (frozen lockfile)
+        working-directory: ui
+        run: pnpm install --frozen-lockfile
+
+      - name: pnpm build
+        working-directory: ui
+        run: pnpm build
+
+      - name: Stage UI dist into wheel path
+        run: |
+          mkdir -p src/nom/chat/ui_dist
+          cp -r ui/dist/* src/nom/chat/ui_dist/
+          ls src/nom/chat/ui_dist/ | head
+
+      - name: Upload UI bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-dist-staged
+          path: src/nom/chat/ui_dist/
+          retention-days: 1
+
+  build:
+    name: build sdist + wheel
+    runs-on: ubuntu-latest
+    needs: [validate-version, test-before-publish, build-ui]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Download staged UI bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: ui-dist-staged
+          path: src/nom/chat/ui_dist/
+
+      - name: Verify UI bundle is in place (build will fail otherwise)
+        run: |
+          test -f src/nom/chat/ui_dist/index.html
+          ls src/nom/chat/ui_dist/ | head
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip build
+
+      - name: Build sdist + wheel
+        run: python -m build --sdist --wheel --outdir dist/
+
+      - name: Inspect dist (sanity check)
+        run: |
+          ls -la dist/
+          python -c "
+          import os, glob, zipfile
+          whl = glob.glob('dist/*.whl')[0]
+          with zipfile.ZipFile(whl) as z:
+              names = z.namelist()
+          # The wheel MUST include the staged UI bundle.
+          assert any('chat/ui_dist/index.html' in n for n in names), f'UI bundle missing from {whl}'
+          print(f'OK: {whl} includes the React UI bundle')
+          "
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  publish-testpypi:
+    # Dry-run path. Triggered by workflow_dispatch with target=testpypi
+    # so we can verify the publish flow before tagging the real release.
+    name: publish to TestPyPI (dry run)
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && inputs.target == 'testpypi'
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/p/nom-vn
+    permissions:
+      id-token: write  # OIDC for trusted publishing
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/
+          # skip-existing in case we re-run for the same version.
+          skip-existing: true
+
+  publish-pypi:
+    # Real publish. Triggered by tag push or release publish, OR by
+    # workflow_dispatch with target=pypi (escape hatch).
+    name: publish to PyPI
+    runs-on: ubuntu-latest
+    needs: build
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'release' ||
+      (github.event_name == 'workflow_dispatch' && inputs.target == 'pypi')
+    environment:
+      name: pypi
+      url: https://pypi.org/p/nom-vn
+    permissions:
+      id-token: write  # OIDC for trusted publishing
+    steps:
+      - name: Download dist
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          skip-existing: false

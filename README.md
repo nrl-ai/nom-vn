@@ -191,6 +191,7 @@ See **[docs/architecture.md](docs/architecture.md)** for the full layered model,
 - **[docs/pipeline.md](docs/pipeline.md)** — the document-extraction pipeline end-to-end with per-stage picks
 - **[docs/benchmark.md](docs/benchmark.md)** — measured numbers per module (the receipts behind every "Recommended stack" row above)
 - **[docs/recipes.md](docs/recipes.md)** — task-oriented "I want X, do Y" cookbook with copy-paste code
+- **[docs/release.md](docs/release.md)** — how to cut a PyPI release (Trusted Publishing via GitHub Actions, no tokens)
 - **[docs/training_plan_2026q2.md](docs/training_plan_2026q2.md)** — when to fine-tune vs adopt off-the-shelf, per component, with cost estimates
 - **[docs/sota_vn_2026q2.md](docs/sota_vn_2026q2.md)** — SOTA local LLM / embedding / OCR for Vietnamese (April 2026 snapshot, every claim cited)
 - **[docs/oss_landscape_2026q2.md](docs/oss_landscape_2026q2.md)** — OSS local-AI / RAG landscape: patterns to steal, traps to avoid
