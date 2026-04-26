@@ -38,14 +38,13 @@ out = fix_diacritics("Hop dong nay duoc lap ngay 14/3/2025", model=restorer)
 The default model is `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
 (Apache 2.0).
 
-**⚠️ Register caveat:** the model hits 97.81 % word acc on modern
-business/contract/news Vietnamese (the registers in our 55-sentence
-eval corpus, where it beats cloud `gpt-4o-mini` 95.37 %) but drops to
-**54.14 % on classical-literary register** (UD_Vietnamese-VTB test
-split, 800 sentences). Use it for OCR cleanup, form polishing, and
-modern Vietnamese — not for translating dialogue-heavy or pre-modern
-literary text. See [`docs/benchmark.md`](benchmark.md) for the
-corpus-shift discussion.
+**Register coverage:** the model hits **97.81 % word acc on modern
+business/contract/news** Vietnamese and **89.40 % on classical-literary**
+register (UD_Vietnamese-VTB test, 800 sentences) — both well above the
+41 % rule baseline. The 8 pp gap on literary is mostly proper-noun
+disambiguation (`Hùng` ↔ `Hưng` ↔ `Hứng`) and a few minor-register
+words. See [`docs/benchmark.md`](benchmark.md) for the multi-corpus
+table.
 
 #### Zero-deps (41 % word acc, < 1 ms)
 

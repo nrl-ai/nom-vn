@@ -162,39 +162,46 @@ that meets every constraint.
 **Cross-check:** Toshiiiii1's model card reports no metrics, so we have
 no upstream number to compare. Our 97.81 % is on a 55-sentence corpus.
 
-**⚠️ Corpus-shift caveat (re-measured 2026-04-26 on UD_Vietnamese-VTB
+**Multi-corpus measurement (re-measured 2026-04-26 on UD_Vietnamese-VTB
 test, 800 sentences, classical-literary register):**
 
 | Eval corpus | Sentences | Register | Word acc | Sentence-exact |
 |---|---:|---|---:|---:|
 | `diacritic_eval_v0.txt` | 55 | business / contract / news / conv | **97.81 %** | not measured |
-| `ud_vi_vtb/test.conllu` | 800 | classical literary (VTB treebank) | **54.14 %** | **0.00 %** (0/800) |
+| `ud_vi_vtb/test.conllu` | 800 | classical literary (VTB treebank) | **89.40 %** | 34.25 % (274/800) |
 
-The Toshiiiii1 T5 fine-tune is overfit to its training distribution
-(modern business/news Vietnamese). On classical-literary VN (Truyện
-Kiều prefaces, dialogue-heavy sentences with old register) it falls
-to a word accuracy 13 pp *above* the rule baseline (54.14 % vs 41.06 %)
-and gets zero sentences exactly right out of 800.
+**A bench-methodology bug we caught and fixed.** The first UD-VTB run
+reported 54.14 % word accuracy and 0/800 sentence-exact. The 0/800 was
+the giveaway — even a mediocre model would land *some* sentences. The
+issue: UD treebank ships sentences in their tokenized form
+(`nhỉ ? " .` with spaces around every punctuation mark, the convention
+parsing tools require), while seq2seq models output natural Vietnamese
+(`nhỉ?".`). Comparing raw `.split()` token lists between the two shifts
+the alignment at the first punctuation mark and downstream tokens
+compare wrong-vs-wrong.
 
-**Honest production guidance:** the model is fine for OCR cleanup,
-form/contract polishing, and modern register Vietnamese (where it'll
-hit ~97 %). It is NOT a general-purpose VN diacritic restorer —
-classical text, dialogue corpora, and minority registers will
-disappoint.
+We added a `normalize_punct()` step in
+`benchmarks/accuracy/bench_diacritic_hf_udvtb.py` that strips spaces
+before/after attaching punctuation on **both** sides before comparing.
+This isolates diacritic quality from punctuation-spacing convention.
+Numbers above are after normalization.
 
-The actual SOTA story is more honest as a **register-conditional**
-table:
+**Register-conditional production guidance:**
 
 | Register | Best off-the-shelf | Word acc | Notes |
 |---|---|---:|---|
-| Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 97.81 % | Beats `gpt-4o-mini` 95.37 % in this register |
-| Classical literary | None of the open Apache models tested | 54-57 % | All fall well below cloud LLMs; cloud `gpt-4o-mini` likely much higher (not measured) |
-| General mixed | Cloud `gpt-4o-mini` or local `gemma4:e4b` | 87-95 % | More register coverage than register-specialized fine-tunes |
+| Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register |
+| Classical literary (UD-VTB) | `Toshiiiii1/...` (still useful) | 89.40 % | Below business but well above rule baseline (41 %); failures are mostly proper-noun ambiguity (`Hùng` ↔ `Hưng`) and a few minor-register words |
+| General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8 pp gap between corpora is real but bounded |
 
-The lesson per CLAUDE.md §12: small evaluation corpora hide
-register-shift weakness. Future "SOTA" claims for nom-vn diacritic
-restoration must report on at least two distinct registers
-(`diacritic_eval_v0.txt` + `ud_vi_vtb/test.conllu`) before we adopt.
+**Two methodological lessons that landed in CLAUDE.md autonomous-loop §5:**
+
+1. **Multi-corpus measurement is mandatory** for adoption claims.
+   Single-corpus quality numbers hide register-shift weakness or
+   benchmark artifacts.
+2. **Implausible metrics demand investigation.** Anything pegged to
+   0 % or 100 % on a real model is almost certainly a bench bug, not
+   a true result. We caught one this way.
 
 Reproduce: `python benchmarks/accuracy/bench_diacritic_hf.py
 Toshiiiii1/Vietnamese_diacritics_restoration_5th --json

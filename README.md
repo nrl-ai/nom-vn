@@ -5,7 +5,7 @@
 > Named after *chữ Nôm* — the script Vietnam wrote in for a millennium.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.2.17-orange)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.2.18-orange)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
 [![Tests](https://img.shields.io/badge/tests-344%20passing-brightgreen)](tests/)
 
@@ -38,7 +38,7 @@ on real Vietnamese corpora, this week.
 
 | Task | Pick | License | Disk | Measured | Beats |
 |---|---|---|---:|---|---|
-| **Diacritic restoration (modern register)** | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc on business/contract VN · 152 ms p50 GPU. **⚠️ Drops to 54 % on classical-literary register** — see [benchmark.md corpus-shift caveat](docs/benchmark.md) | beats cloud `gpt-4o-mini` 95.37 % on its register |
+| **Diacritic restoration** | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc on business / **89.40 %** on classical-literary (UD-VTB), 152 ms p50 GPU | beats cloud `gpt-4o-mini` 95.37 % on business; -8 pp on literary register but well above rule baseline |
 | **Diacritic (zero-dep fallback)** | rule-based table (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
 | **Diacritic (local LLM)** | `gemma3:4b` Q4 via Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` is +5pp better but 3× larger |
 | **Word segmentation (speed)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |

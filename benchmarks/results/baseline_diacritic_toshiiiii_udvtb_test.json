@@ -3,15 +3,26 @@
   "corpus": "benchmarks/data/ud_vi_vtb/test.conllu",
   "device": "cuda",
   "n_sentences": 800,
-  "n_words": 12486,
-  "n_words_with_diacritic": 10083,
-  "word_accuracy": 0.5414,
-  "diacritic_recall": 0.5612,
-  "sentence_exact_match": 0.0,
-  "elapsed_seconds": 190.2894,
-  "latency_per_sentence_mean": 0.2378,
-  "latency_per_sentence_p50": 0.2228,
-  "latency_per_sentence_p95": 0.4399,
+  "normalized": {
+    "n_words": 12040,
+    "n_words_with_diacritic": 10398,
+    "word_accuracy": 0.894,
+    "diacritic_recall": 0.8897,
+    "sentence_exact_match": 0.3425
+  },
+  "raw_split": {
+    "n_words": 12486,
+    "n_words_with_diacritic": 10083,
+    "word_accuracy": 0.5414,
+    "diacritic_recall": 0.5612,
+    "sentence_exact_match": 0.0,
+    "note": "Pre-tokenized UD-VTB style (spaces around punctuation) shifts alignment vs natural seq2seq output. Use 'normalized' track for apples-to-apples model quality."
+  },
+  "elapsed_seconds": 192.8972,
+  "latency_per_sentence_mean": 0.241,
+  "latency_per_sentence_p50": 0.2316,
+  "latency_per_sentence_p95": 0.4152,
   "warmup_calls": 3,
-  "num_beams": 1
+  "num_beams": 1,
+  "comparison_normalization": "NFC + no space before/after attaching punctuation, collapse whitespace runs to single space."
 }

@@ -51,10 +51,24 @@ metric.
 | local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 87.90 % | not measured |
 | (rule baseline) | — | 0 | 41.06 % | ~41 % (register-independent) |
 
-**The Toshiiiii1 T5 fine-tune is overfit to modern business / news VN.**
-On its in-distribution register it beats cloud `gpt-4o-mini` by 2.44 pp.
-On classical-literary VN (UD_VTB test) it falls to 54.14 % word acc and
-gets zero of 800 sentences exactly right.
+**Toshiiiii1 T5 — 8 pp register-shift drop, not 43 pp** (corrected
+2026-04-26). The first UD-VTB run was confounded by a tokenization
+mismatch: UD ships sentences in treebank-tokenized form (spaces around
+every punctuation mark, the parsing-tool convention) while seq2seq
+models output natural Vietnamese. Comparing raw `.split()` lists
+shifted the alignment at the first punctuation and produced
+mathematically-impossible 0/800 sentence-exact. After
+`normalize_punct()` on both sides:
+
+  Business 55-sent corpus:    97.81 % word acc
+  UD-VTB literary 800-sent:   89.40 % word acc · 34.25 % sentence-exact
+
+The model is real-world useful on both registers; it's still register-
+sensitive (8 pp gap) but mostly because of proper-noun ambiguity
+(`Hùng` ↔ `Hưng` ↔ `Hứng`) and a few minor-register lexical choices,
+not architectural failure. Lesson logged in CLAUDE.md autonomous-loop
+§5: implausible metrics (anything pegged at 0 % or 100 %) demand
+investigation; multi-corpus measurement is mandatory for adoption.
 
 **Register-conditional production guidance:**
 

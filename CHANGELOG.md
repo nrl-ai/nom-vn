@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.18] — 2026-04-26
+
+### Bench-methodology fix: 0/800 sentence-exact was a tokenization artifact
+
+User caught the implausible 0/800 sentence-exact match in v0.2.17's
+UD-VTB diacritic bench and asked us to investigate. They were right —
+even a mediocre model would land *some* sentences exactly right. The
+0/800 was a comparison-time artifact, not real model failure.
+
+Root cause: UD treebank ships sentences in *tokenized* form (spaces
+around every punctuation mark — `nhỉ ? " .` not `nhỉ?".`), the
+parsing-tool convention. Modern seq2seq models output natural
+Vietnamese with attached punctuation. Comparing raw `.split()` lists
+shifts the alignment at the first punctuation; downstream tokens
+compare wrong-vs-wrong even when diacritics are perfect.
+
+Fixed by adding `normalize_punct()` to
+`benchmarks/accuracy/bench_diacritic_hf_udvtb.py`: NFC-normalize +
+strip whitespace before/after attaching punctuation on **both** sides
+before tokenizing for comparison. Both metric tracks (raw and
+normalized) are now reported in the JSON output for transparency.
+
+Corrected Toshiiiii1 numbers:
+
+  Corpus                       Word acc     Sentence-exact
+  diacritic_eval_v0 (55-sent)   97.81 %     not measured (raw)
+  ud_vi_vtb test (800-sent)     89.40 %     34.25 %   (was 54.14 % / 0.0 %)
+
+The model is **register-sensitive but not broken** on classical
+literary VN. The 8 pp gap between business and literary is mostly
+proper-noun ambiguity (Hùng / Hưng / Hứng) and a few minor-register
+words — not architectural failure.
+
+CLAUDE.md autonomous-loop §5 gains a second methodological lesson:
+**implausible metrics demand investigation.** Anything pegged at 0 %
+or 100 % on a real model is almost certainly a bench bug. We caught
+this exact failure mode here.
+
+README, recipes.md, training_plan, benchmark.md all updated with the
+corrected numbers.
+
 ## [0.2.17] — 2026-04-26
 
 ### Honest disclosure: Toshiiiii1 is register-overfit (97.81 % → 54.14 %)
