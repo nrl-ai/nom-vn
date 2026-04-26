@@ -151,6 +151,68 @@ The aim of autonomous mode is sustained throughput, not "many small commits".
 Skip work that doesn't move a measurable number; focus on the items that close
 a real gap surfaced by the latest benches.
 
+## Vietnamese language — gotchas we've hit, encoded so we don't hit them again
+
+This section documents real failure modes from working on Vietnamese
+NLP in this codebase. Read it before designing a benchmark, picking a
+model, or claiming a quality number. Most of these are subtle in
+ASCII but devastating in production.
+
+### Encoding & normalization
+
+- **NFC vs NFD.** Vietnamese diacritics decompose: "ề" (U+1EC1) ↔ "e" + combining-grave + combining-circumflex (U+0065 U+0300 U+0302). Two strings can be visually identical and byte-different. **Always NFC-normalize before comparing**. Our `nom.text.normalize` does this; tests assert it. Skipping NFC is the single most common cause of silent bench-metric noise.
+- **đ has a stroke, not a diacritic.** "đ" (U+0111) is a distinct codepoint, not "d" + combining stroke. `strip_diacritics` must replace it explicitly — character-class regexes won't.
+- **Stacked diacritics.** "ờ" stacks a tone mark on a vowel modifier (ơ + grave). Two precomposed forms exist, plus the decomposed forms. Our `normalize` function canonicalises all of them; do not roll your own without test coverage of every combination.
+- **Sự-class characters.** `ơ`, `ư`, `ă`, `â`, `ê`, `ô`, `đ` are *modifiers* (vowel/consonant variants) that combine with five *tone marks* (acute, grave, hook above, tilde, dot below). 6 vowels × 5 tones × 2 modifiers = ~60 vowel forms. A diacritic-restoration model has to predict modifier *and* tone correctly for each syllable.
+
+### Tokenization & word boundaries
+
+- **Vietnamese spaces between syllables, not words.** "thành phố Hồ Chí Minh" is one word in linguistic terms (a proper noun) but five space-separated tokens. The VN-MTEB / UD treebank conventions join multi-syllable words with single spaces inside the *FORM* column.
+- **bkai-vietnamese-bi-encoder needs underscored input.** "đường thủy" → "đường_thủy" before encoding. The model was trained on this format; raw text drops R@1 by 15-20 pp. We handle it in `BKaiEmbedder._segment` automatically — don't bypass.
+- **`.split()` is wrong for measuring quality.** UD treebank ships sentences with spaces around punctuation (`nhỉ ? " .` for parsing-tool conventions). Modern seq2seq models output natural VN with attached punctuation (`nhỉ?".`). Comparing raw `.split()` lists shifts the alignment at the first punctuation mark and produces 0 % sentence-exact match even on a perfect model. **Always `normalize_punct()` both sides before token-level comparison** — see `benchmarks/accuracy/bench_diacritic_hf_udvtb.py` for the canonical implementation.
+- **Sub-word vs character vs syllable tokenizers all have VN failure modes.** XLM-R's SentencePiece tokenizer handles VN well; PhoBERT's BPE tokenizer is VN-specific and tighter; ByT5's byte-level is robust to noise but slower. Pick by task: byte-level for typo tolerance, BPE for speed, SentencePiece for cross-lingual.
+
+### Datasets — registers, traps, and reproducibility
+
+- **Register-shift is the #1 hidden quality failure** for VN models. A model trained on modern business/news Vietnamese will collapse on classical-literary register and vice versa. We caught Toshiiiii1 T5 doing 97.81 % on `diacritic_eval_v0.txt` (business 55 sents) and 89.40 % on `ud_vi_vtb` (literary 800 sents) — same model, same task, 8 pp gap. Always bench on at least two distinct registers before adopting.
+- **Public VN evaluation datasets we trust** (license + format + register breakout):
+  - `diacritic_eval_v0.txt` — 55 hand-curated sentences, 4 registers, CC0. Tiny but deterministic.
+  - `UD_Vietnamese-VTB` test split — 800 literary sentences, gold word segmentation, CC-BY-SA-4.0.
+  - `Zalo Legal QA` (via GreenNode mirror) — 61k articles + 788 questions, MIT, legal register.
+  - `udhr_vi.txt` — UN human-rights declaration, 19 KB, formal register, public domain.
+- **Public VN datasets that fail our trust ladder** (DO NOT USE without explicit user opt-in):
+  - `VLSP 2013` segmentation — gated, requires registration. Cite reported numbers from papers; do not redistribute.
+  - `Surya OCR` corpora — code is GPL-3, models are open-RAIL-M. License-incompatible for default ship.
+  - `Vintern handwriting` — license unclear at top of HF page; verify verbatim.
+- **Cross-checking against the public number** is mandatory. Toshiiiii1's model card published no metric. bkai's 73.28 R@1 on Zalo Legal 20% reproduces (76.25 on our 5k subset — a tighter distractor pool, +3 pp expected). halong's claimed 82.94 R@1 did *not* reproduce (we measured 55.00). Always run on our corpus before adopting.
+
+### Metrics — what each one really measures
+
+- **Word accuracy** ≠ diacritic recall. A function word like "và" or "của" stays unchanged when stripped, so it's "correct" in any restoration metric without the model doing anything. Always also report **diacritic recall** (of words that *had* a diacritic in gold, how many did we restore?) — that's the meaningful signal.
+- **Sentence-exact match** is brutal: one missed proper noun fails the whole sentence. Include it as a stress test, not the headline.
+- **CER** (character error rate) for OCR — Levenshtein over normalised char sequences, NFC. **Diacritic-CER** computes CER on just the combining marks (after NFD decompose) — captures the failure mode VN readers feel most: base letter right, tone wrong.
+- **F1 for word segmentation** is calculated on token spans (start, end) char ranges, not on token strings. A 100 % token-string match is impossible if the segmenter joins multi-syllable tokens differently than gold; span-based F1 is invariant to that.
+- **Implausible metrics demand investigation.** 0 % or 100 % on a real model is almost always a bench bug. Sub-30 % accuracy on a published model whose card claims 90 %+ means we're missing a preprocessing step (see bkai underscore segmentation, e5 prefix conventions).
+
+### Model output traps
+
+- **Qwen3 thinking mode** silently emits CoT to a separate `thinking` field on Ollama 0.21+, leaving `content` empty. We default `Ollama(think=False)` for terse extraction tasks. Set `think=True` only when you actually want CoT.
+- **Generic LLMs ramble even when told not to.** "Restore diacritics: ..." gets explanations + headers + quotes. Use **structured output** (`{"restored": "..."}` JSON schema) on the Ollama `format` field to constrain the response.
+- **VLM OCR hallucinates on tight line crops.** `qwen2.5vl:7b` got 31 % CER on clean printed VN line images (vs Tesseract's 5 %) because the language prior dominates the visual signal in the absence of document context. VLMs are the right tool for *understanding* documents (forms, invoices, ID cards, handwriting); wrong tool for transcribing clean lines.
+- **mE5 family expects `query:` and `passage:` prefixes.** Without them, retrieval craters by 15-25 pp. Our `bench_embedder_compare.py` auto-detects the e5 family and prefixes accordingly.
+- **PhoBERT-base position table is 256 (not 514).** XLM-R-large is 512. Sending a 512-cap sequence to PhoBERT trips the SDPA CUDA assert. Our `CrossEncoderReranker` auto-detects from `config.json max_position_embeddings`; don't bypass without setting `max_length=` explicitly.
+
+### Proper nouns are hard
+
+Vietnamese proper nouns have multiple plausible diacritisations from the same ASCII form:
+- `Hung` → `Hùng` (hook), `Hưng` (modifier+grave), `Hứng` (modifier+acute)
+- `Thanh` → `Thanh`, `Thành`, `Thánh`
+- `Le` → `Le`, `Lê`, `Lễ`
+
+A diacritic-restoration model picks the most-frequent in training data; that's not always right for the input sentence. Most of Toshiiiii1's UD-VTB errors are this class. Don't claim a model is "broken" because it picked `Hưng` when gold says `Hùng` — they're both real names; the failure is disambiguation, not restoration.
+
+When a workflow really requires the gold proper noun (legal docs, forms with named entities), it's a separate **NER + lookup** problem, not a diacritic-restoration problem. Tag NEs first, restore the rest.
+
 ## Scope clarification
 
 `nom-vn` is named after **chữ Nôm** (the historical Vietnamese script) but the
