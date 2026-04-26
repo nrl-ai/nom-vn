@@ -154,11 +154,19 @@ class OllamaVLM:
         prompt: str | None = None,
         timeout: float = 120.0,
         temperature: float = 0.0,
+        upscale: int = 1,
     ) -> None:
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.temperature = temperature
+        # upscale=N resizes each image NxN before sending. VLMs are trained
+        # on full pages (224-336 px patch sizes); fed 64-px-tall line crops
+        # they downsample the text into illegibility and hallucinate from
+        # the language prior. 4x upscaling recovers most of the gap on
+        # tight line crops (sample-1 of vn_ocr_subset went from gibberish
+        # to near-perfect with upscale=4 on 2026-04-26).
+        self.upscale = max(1, int(upscale))
         # Tight prompt — VLMs love to add chatter ("Here is the text:") or
         # explanations. We force a single line, no quoting, no labels.
         self.prompt = prompt or (
@@ -182,7 +190,21 @@ class OllamaVLM:
         self._ensure_loaded()
         import base64
 
-        b64 = base64.b64encode(image_path.read_bytes()).decode()
+        if self.upscale > 1:
+            from io import BytesIO
+
+            from PIL import Image
+
+            img = Image.open(image_path).convert("RGB")
+            big = img.resize(
+                (img.width * self.upscale, img.height * self.upscale),
+                Image.LANCZOS,
+            )
+            buf = BytesIO()
+            big.save(buf, format="PNG")
+            b64 = base64.b64encode(buf.getvalue()).decode()
+        else:
+            b64 = base64.b64encode(image_path.read_bytes()).decode()
         body = {
             "model": self.model,
             "prompt": self.prompt,
@@ -191,7 +213,11 @@ class OllamaVLM:
             "think": False,
             "options": {
                 "temperature": self.temperature,
-                "num_predict": 512,
+                # Generous predict budget: 4x-upscaled line images can produce
+                # 800+ tokens of correct output that get truncated at 512.
+                # Raised to 2048 after observing "1892 - Tạp Chí Vogue Được
+                # Phát Hành Lần Đầu T..." truncation in the v0.2.20 bench.
+                "num_predict": 2048,
             },
         }
         r = self._httpx.post(f"{self.base_url}/api/generate", json=body, timeout=self.timeout)
@@ -448,6 +474,14 @@ def main(argv: list[str] | None = None) -> int:
         help="Ollama VLM model tag (qwen2.5vl:3b, qwen2.5vl:7b, llava, etc.)",
     )
     p.add_argument(
+        "--ollama-upscale",
+        type=int,
+        default=1,
+        help="Upscale image NxN before sending to VLM. Tiny line crops "
+        "(<100px tall) fool VLMs into hallucinating; 4x usually rescues "
+        "the alignment. Default 1 (no upscale).",
+    )
+    p.add_argument(
         "--limit",
         type=int,
         default=None,
@@ -489,7 +523,11 @@ def main(argv: list[str] | None = None) -> int:
         elif name == "easyocr":
             engines[name] = cls(gpu=(device != "cpu"))
         elif name == "ollama_vlm":
-            engines[name] = cls(model=args.ollama_model, base_url=args.ollama_base_url)
+            engines[name] = cls(
+                model=args.ollama_model,
+                base_url=args.ollama_base_url,
+                upscale=args.ollama_upscale,
+            )
         else:
             engines[name] = cls()
 

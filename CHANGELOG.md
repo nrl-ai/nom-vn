@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.21] — 2026-04-26
+
+### VLM OCR audit: image upscaling, raw I/O sampling
+
+ALWAYS DOUBLE-CHECK pass on VLM OCR per the new rule. Sampled raw VLM
+output on the first 5 vn_ocr_subset images and noticed all are
+**64-pixel-tall line crops** — way below the patch sizes Qwen2.5-VL was
+trained on (224/336 px). Hypothesis: tiny line images get downsampled
+into illegibility by the vision encoder, leaving the language prior
+to hallucinate from.
+
+Tested with 4x upscale (LANCZOS) before sending. Results on full 50:
+
+  Configuration                     CER     Exact   p50 ms
+  upscale=1 (original)            31.14 %   18.0 %    576
+  upscale=4                       46.27 %   14.0 %  2,250
+
+4x upscale **hurts** on this corpus despite making sample 1 nearly
+perfect ("1892 - Tạp Chí Vogue Được Phát Hành Lần Đầu Tiên"). The
+upscale gives more visual real estate for the language prior to
+hallucinate longer wrong answers. Confirmed: VLM on tight line crops
+is the wrong tool, regardless of preprocessing.
+
+`OllamaVLM` gains:
+- `upscale: int = 1` constructor kwarg + `--ollama-upscale` CLI flag
+- `num_predict` bumped from 512 to 2048 (some upscaled samples were
+  truncating at 512)
+
+Default behavior unchanged (upscale=1) — Tesseract remains the right
+tool for clean printed line OCR. VLMs earn their cost on document
+*understanding* (forms, IDs, handwriting), not line transcription.
+
 ## [0.2.20] — 2026-04-26
 
 ### PhoRanker corrected: +13.8 pp R@1 with proper word segmentation

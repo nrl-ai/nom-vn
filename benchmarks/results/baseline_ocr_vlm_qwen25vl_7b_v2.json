@@ -1,0 +1,26 @@
+{
+  "config": {
+    "corpus": "benchmarks/data/vn_ocr_subset",
+    "variant": "none",
+    "n_samples": 50,
+    "device": "cuda"
+  },
+  "engines": {
+    "ollama_vlm": {
+      "n_samples": 50,
+      "cer": 0.3114,
+      "wer": 1.4031,
+      "diacritic_cer": 0.3338,
+      "exact_match": 0.18,
+      "p50_ms": 575.91,
+      "p95_ms": 1022.41
+    }
+  },
+  "meta": {
+    "ran_at": "2026-04-26T16:18:34+00:00",
+    "git_sha": "de79bbdf0daf",
+    "n_warmup": 1,
+    "n_timed": 1,
+    "python": "3.13.9"
+  }
+}
