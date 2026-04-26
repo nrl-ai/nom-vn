@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.22] — 2026-04-27
+
+### Train experiment #1: mT5-small fine-tune — **does not adopt**
+
+First training run: `google/mt5-small` (Apache 2.0, 300 M params total /
+~60 M VN-active) fine-tuned on 200 K (stripped, target) pairs from VN
+Wikipedia (`hirine/wikipedia-vietnamese-1M296K-dataset`, CC-BY-SA-4.0)
+for 3 epochs on RTX 3090, bf16 + grad-checkpointing.
+
+Results vs Toshiiiii1 reference baseline:
+
+  Corpus               Toshiiiii1   mT5-small (ours)   Δ
+  business_55  word    97.81 %      89.58 %            -8.23 pp
+  business_55  sent    n/a          40.00 %            n/a
+  literary_udvtb word  89.40 %      84.14 %            -5.26 pp
+  literary_udvtb sent  34.25 %      16.38 %            -17.87 pp
+
+**Adoption gate NOT met** (need ≥ 96 % business AND > 89.40 % literary).
+Don't ship. mT5-small's shared-multilingual embedding table dilutes the
+VN-specific signal vs Toshiiiii1's VN-tuned T5.
+
+**Eval loss was still decreasing at end of training** (final 0.083
+vs initial 0.43). With more epochs / data the model would keep
+improving — the result is a floor, not a ceiling. Follow-up experiment
+launched (vit5-base, VN-specific 220 M from VietAI).
+
+The negative result is committed (training_summary.json) and a
+``training/diacritic/`` scaffold is published so anyone can reproduce
+the experiment from a clean clone:
+
+```bash
+python training/diacritic/prep_data.py --max-pairs 200000
+./training/diacritic/launch_genpc2.sh \
+    --model-id google/mt5-small \
+    --epochs 3 --batch-size 8 --gradient-accumulation-steps 4 \
+    --gradient-checkpointing --bf16
+```
+
 ## [0.2.21] — 2026-04-26
 
 ### VLM OCR audit: image upscaling, raw I/O sampling

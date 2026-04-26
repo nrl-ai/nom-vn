@@ -1,0 +1,22 @@
+{
+  "model_id": "google/mt5-small",
+  "epochs": 3,
+  "train_pairs": 200000,
+  "training_minutes": null,
+  "eval": {
+    "business_55": {
+      "n_sentences": 55,
+      "word_accuracy": 0.8958,
+      "sentence_exact": 0.4,
+      "mean_ms_per_sentence": 236.61
+    },
+    "literary_udvtb": {
+      "n_sentences": 800,
+      "word_accuracy": 0.8414,
+      "sentence_exact": 0.1638,
+      "mean_ms_per_sentence": 269.34
+    }
+  },
+  "device": "cuda",
+  "checkpoint": "training/diacritic/checkpoints/mt5-small-200k/final"
+}
