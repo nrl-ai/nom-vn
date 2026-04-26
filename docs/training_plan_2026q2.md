@@ -102,6 +102,53 @@ or is distilled. Not a priority while the 1 GB Toshiiiii1 model fits
 the user-machine target. Re-review trigger: a public Apache/MIT diacritic
 model lands at <500 MB with comparable accuracy.
 
+#### Training experiments we ran 2026-04-27 (negative results)
+
+Per the user's "publish if results look good" directive we tried two
+fine-tuning runs on a 200 K-pair VN Wikipedia corpus
+(`hirine/wikipedia-vietnamese-1M296K-dataset`, CC-BY-SA-4.0). Each ran
+3 epochs on RTX 3090, bf16 + grad-checkpointing. Multi-corpus eval at
+the end. Adoption gate: must beat Toshiiiii1 on at least one register
+without losing >2 pp on the other. Neither run passed.
+
+| Run | Base | Params | business_55 | literary_udvtb | Verdict |
+|---|---|---:|---:|---:|---|
+| Toshiiiii1 (off-the-shelf reference) | T5 (VN ft) | 200 M | **97.81 %** | 89.40 % | already adopted |
+| #1 mT5-small / 200 K / 3 ep | mT5-small | 300 M total / 60 M VN | 89.58 % | 84.14 % | -8.23 pp / -5.26 pp — DON'T SHIP |
+| #2 vit5-base / 200 K / 3 ep | VietAI/vit5-base | 220 M | 93.69 % | **89.47 %** | -4.12 pp / +0.07 pp — DON'T SHIP (gate not strict) |
+
+**The interesting non-adoption finding:** run #2 (vit5-base) produces
+the most **register-balanced** model — only **4.22 pp** business-literary
+gap vs Toshiiiii1's **8.41 pp**. For users whose VN data is
+mixed-register and who can tolerate sub-Toshiiiii1 absolute quality,
+vit5-base would be the right pick. We don't publish it as the default
+because the strict gate isn't met, but the methodology + training
+scaffold ships in `training/diacritic/` so users can re-train for their
+own register profile.
+
+**Why we under-perform vs Toshiiiii1:**
+
+1. **5× less training data** — Toshiiiii1 was likely trained on 1 M+
+   pairs; we used 200 K to keep iteration cheap. Eval loss was still
+   falling at end of training in both runs, indicating under-fit.
+2. **3 epochs** is the typical T5 fine-tune budget; some references
+   recommend 5-10 for diacritic restoration.
+3. **mT5-small is the wrong base** — its shared multilingual embedding
+   table dilutes VN-specific signal; vit5-base is purpose-built and
+   already +4 pp better.
+
+**Follow-up queue (deferred to v0.3.x):**
+
+- Train vit5-base on 1 M pairs for 5+ epochs.
+- Try `VietAI/vit5-large` (770 M) — bigger representation capacity.
+- Try `google/byt5-small` (300 M, char-level, robust to register noise
+  per [arXiv:2201.13242](https://arxiv.org/abs/2201.13242)).
+- Multi-task: diacritic + spelling correction in one head.
+
+None is a sure win; each costs 2-5 hours of GPU. Decision deferred
+because Toshiiiii1 covers v0.2.x production and the strategic value of
+"owning" a worse model is negative.
+
 (Original distil-recommendation rationale, kept for context:)
 
 

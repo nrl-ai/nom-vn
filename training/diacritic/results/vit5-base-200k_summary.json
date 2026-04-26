@@ -1,0 +1,22 @@
+{
+  "model_id": "VietAI/vit5-base",
+  "epochs": 3,
+  "train_pairs": 200000,
+  "training_minutes": null,
+  "eval": {
+    "business_55": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9369,
+      "sentence_exact": 0.4364,
+      "mean_ms_per_sentence": 148.09
+    },
+    "literary_udvtb": {
+      "n_sentences": 800,
+      "word_accuracy": 0.8947,
+      "sentence_exact": 0.3375,
+      "mean_ms_per_sentence": 157.61
+    }
+  },
+  "device": "cuda",
+  "checkpoint": "training/diacritic/checkpoints/vit5-base-200k/final"
+}

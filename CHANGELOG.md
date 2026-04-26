@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.23] — 2026-04-27
+
+### Train experiment #2: VietAI/vit5-base — register-balanced, doesn't beat Toshiiiii1
+
+Same 200K Wikipedia training pairs, 3 epochs, RTX 3090. Switched
+base to ``VietAI/vit5-base`` (MIT, 220 M params, VN-specific T5).
+
+Results vs Toshiiiii1 + the v0.2.22 mT5-small baseline:
+
+  Corpus               Toshiiiii1   mT5-small   vit5-base
+  business_55  word    97.81 %      89.58 %     93.69 %
+  literary_udvtb word  89.40 %      84.14 %     89.47 %
+  business-literary gap   8.41 pp      5.44 pp     4.22 pp ⭐
+
+**Adoption gate** (≥ 96 % business AND > 89.40 % literary): NOT met.
+vit5-base ties on literary (+0.07 pp) but loses 4.12 pp on business.
+**Don't publish.** Toshiiiii1 stays the default.
+
+**The interesting finding:** vit5-base produces the most
+**register-balanced** model — only 4.22 pp business-literary gap vs
+Toshiiiii1's 8.41 pp. For users whose corpus is mixed-register and
+who can tolerate sub-Toshiiiii1 absolute quality, vit5-base would be
+the right pick. But that's a niche, not the default.
+
+The negative result is committed at
+``training/diacritic/results/vit5-base-200k_summary.json``.
+
+### Training-experiment follow-up queue (deferred)
+
+Both experiments hit ~94 % business, ~89 % literary. To reach
+Toshiiiii1's 97.81 % business while keeping register balance, we'd
+need one of:
+
+1. **5 × more data**: 1 M pairs instead of 200 K. Cheapest experiment;
+   eval loss was still falling at end of training, suggesting under-fit.
+2. **5–10 epochs instead of 3**: same data, longer training.
+3. **vit5-large**: 770 M VN-specific T5; better representation capacity.
+4. **ByT5-small**: char-level, robust to register noise per arxiv 2201.13242.
+5. **Multi-task: diacritic + spelling correction**: more training signal.
+
+None of these is a sure win and each costs hours of GPU. Deferred to
+v0.3.x — Toshiiiii1 covers production for v0.2.x users.
+
 ## [0.2.22] — 2026-04-27
 
 ### Train experiment #1: mT5-small fine-tune — **does not adopt**
