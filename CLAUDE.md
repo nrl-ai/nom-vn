@@ -147,6 +147,31 @@ operate in autonomous mode:
    native ≫ pickle (auto-reject). When evaluating a new candidate model, the
    *first* check is the format / license, not the metric.
 
+8. **ALWAYS DOUBLE-CHECK before claiming a number.** Every benchmark result
+   needs three sanity checks before going into a doc, README, or commit
+   message:
+
+   - **Implausible metric check.** 0 % or 100 % on a real model is almost
+     always a bench bug. Sub-30 % on a model whose card claims 90 %+ means
+     a preprocessing step is wrong (input prefix, word segmentation, max
+     length). 99 % on a small eval is suspect of overfit-to-test.
+   - **Cross-reference upstream numbers.** Find the model card / paper.
+     If our number is materially different (>10 % relative on the same
+     metric), pause and investigate before shipping. Common causes are
+     listed in the component-build workflow §1.7. Document divergences
+     honestly in `docs/benchmark.md`.
+   - **Dump 5 raw I/O samples** from the benched model and read them.
+     If the predictions look obviously wrong but the metric looks fine,
+     the metric is broken. We caught a 0/800 sentence-exact bug this way
+     on 2026-04-26: the predictions were nearly perfect, the metric was
+     comparing pre-tokenized treebank punctuation against natural seq2seq
+     output and the alignment shifted at the first comma.
+
+   Skipping any of these is how silent quality regressions ship. The cost
+   of one extra console-print of `(input, prediction, gold)` for the first
+   five samples is two minutes; the cost of a wrong number in the README
+   is a week.
+
 The aim of autonomous mode is sustained throughput, not "many small commits".
 Skip work that doesn't move a measurable number; focus on the items that close
 a real gap surfaced by the latest benches.
