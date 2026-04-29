@@ -38,13 +38,38 @@ out = fix_diacritics("Hop dong nay duoc lap ngay 14/3/2025", model=restorer)
 The default model is `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
 (Apache 2.0).
 
-**Register coverage:** the model hits **97.81 % word acc on modern
-business/contract/news** Vietnamese and **89.40 % on classical-literary**
-register (UD_Vietnamese-VTB test, 800 sentences) — both well above the
-41 % rule baseline. The 8 pp gap on literary is mostly proper-noun
-disambiguation (`Hùng` ↔ `Hưng` ↔ `Hứng`) and a few minor-register
-words. See [`docs/benchmark.md`](benchmark.md) for the multi-corpus
-table.
+**Register coverage** (4-register matrix, measured 2026-04-29 — see
+[`docs/benchmark.md`](benchmark.md) for the full table):
+
+| Register | Word acc |
+|---|---:|
+| Formal / legal-prose (UDHR) | 98.14 % |
+| Business / news | 97.81 % |
+| Conversational (Tatoeba) | 93.77 % |
+| Classical literary (UD-VTB) | 89.40 % |
+
+8.7 pp spread, monotonic gradient. The model is register-overfit toward
+modern formal/business Vietnamese (matching its training data) but
+stays usable everywhere. Failures on literary are mostly proper-noun
+disambiguation (`Hùng` ↔ `Hưng` ↔ `Hứng`) and minor-register words.
+
+#### Batched inference for throughput (7.6× speedup on a 3080)
+
+For high-throughput pipelines (tens of thousands of sentences), use
+``predict_batch`` instead of looping ``predict``:
+
+```python
+restorer = HFDiacriticModel(device="cuda")
+sentences = ["Toi yeu Viet Nam", "Hop dong so 02", ...]  # 1000s
+restored = restorer.predict_batch(sentences, batch_size=16)
+```
+
+Measured **7.60× throughput** vs single-call predict() on the
+300-sentence Tatoeba corpus (RTX 3080 16 GB Mobile). Batch size 16 fits
+in ~4 GB VRAM at typical 256-token inputs; bump to 32+ on cards with
+more headroom, drop to 4–8 on smaller GPUs or for longer inputs.
+Output ordering is preserved; empty/blank inputs pass through without
+hitting the model.
 
 #### Zero-deps (41 % word acc, < 1 ms)
 
