@@ -163,7 +163,23 @@ CHANGELOG, and queue a follow-up:
 - **More data** (1 M+ pairs).
 - **Bigger arch** (`VietAI/vit5-large`, 770 M, MIT, safetensors).
 - **Char-level** (`google/byt5-small`, 300 M, robust to typos).
-- **Mixed-source corpus** (Wikipedia + open VN news + legal data).
+- **Mixed-source corpus** — verified license-clean candidates audited
+  2026-04-29 (the leading hypothesis if v0.2.25 lands close to v0.2.23
+  numbers, which would mean Wikipedia-only is the fundamental ceiling):
+
+  | Dataset | License | Size | Register |
+  |---|---|---|---|
+  | `BlossomsAI/vietnamese-corpus` | Apache-2.0 | ~13 M articles (news-heavy) | news |
+  | `tmnam20/Vietnamese-News-dedup` | CC-BY-4.0 | 10-100 M articles | news |
+  | `th1nhng0/vietnamese-legal-documents` | CC-BY-4.0 | 518 K docs | legal/formal |
+  | `HuggingFaceFW/fineweb-2 (vie_Latn)` | ODC-BY-1.0 | multi-GB | web-mixed (news/blog tilted) |
+  | `52100303-TranPhuocSang/vietnamese-legal-corpus-20k-raw` | MIT | 20 K docs | legal |
+
+  Recommended starting mix for register-balanced training: 60-70 %
+  Wikipedia (current corpus) + 20-25 % BlossomsAI news + 10-15 %
+  th1nhng0 legal. Extend `prep_data.py` to round-robin between sources
+  with explicit per-source quotas; keep eval-leak guards across all
+  inputs.
 
 ## Reproducibility
 
