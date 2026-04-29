@@ -22,9 +22,17 @@ Filtering rationale:
   - ASCII content of input ≥ 70 % — exclude URLs, tables, code blocks
     that survived the cleaning step.
 
-Eval-leak guards: drop any sentence that appears in ``diacritic_eval_v0.txt``
-(55 sents) or ``ud_vi_vtb/test.conllu`` (800 sents). Both are public so this
-is a hash-set check, not a paranoid one.
+Eval-leak guards: drop any sentence that appears in any of:
+
+  - ``diacritic_eval_v0.txt`` (55 sents, business)
+  - ``ud_vi_vtb/test.conllu`` (800 sents, literary)
+  - ``tatoeba_vi/diacritic_eval_300.txt`` (300 sents, conversational)
+  - ``udhr_vi/diacritic_eval_udhr.txt`` (72 sents, formal/legal)
+
+All four are public so this is a hash-set check, not a paranoid one.
+The 2026-04-29 audit on a 500K Wikipedia corpus measured 0 hits across
+all four sets, but the guard is here for defense-in-depth so future
+corpus changes don't silently leak.
 """
 
 from __future__ import annotations
@@ -65,14 +73,28 @@ def _split_sentences(article: str) -> list[str]:
 
 
 def _eval_leak_guards(repo: Path) -> set[str]:
-    """Sentences we MUST NOT include in training."""
+    """Sentences we MUST NOT include in training.
+
+    Reads every diacritic eval slice we ship plus the UD-VTB test split.
+    Adding a new eval corpus? Drop a one-line entry below.
+    """
     blocked: set[str] = set()
-    diacritic_eval = repo / "benchmarks" / "data" / "diacritic_eval_v0.txt"
-    if diacritic_eval.exists():
-        for line in diacritic_eval.read_text(encoding="utf-8").splitlines():
+
+    # Plain-text eval slices (one sentence per non-comment line).
+    txt_slices = [
+        repo / "benchmarks" / "data" / "diacritic_eval_v0.txt",
+        repo / "benchmarks" / "data" / "tatoeba_vi" / "diacritic_eval_300.txt",
+        repo / "benchmarks" / "data" / "udhr_vi" / "diacritic_eval_udhr.txt",
+    ]
+    for path in txt_slices:
+        if not path.exists():
+            continue
+        for line in path.read_text(encoding="utf-8").splitlines():
             line = line.strip()
             if line and not line.startswith("#"):
                 blocked.add(line)
+
+    # CoNLL-U treebank: extract `# text = ...` lines.
     udvtb = repo / "benchmarks" / "data" / "ud_vi_vtb" / "test.conllu"
     if udvtb.exists():
         for line in udvtb.read_text(encoding="utf-8").splitlines():
