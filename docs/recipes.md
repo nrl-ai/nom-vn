@@ -53,6 +53,29 @@ modern formal/business Vietnamese (matching its training data) but
 stays usable everywhere. Failures on literary are mostly proper-noun
 disambiguation (`Hùng` ↔ `Hưng` ↔ `Hứng`) and minor-register words.
 
+#### Register-balanced alternative — `nrl-ai/vn-diacritic-vit5-base`
+
+If your workload is heavy on **formal/legal-prose** or **conversational**
+Vietnamese, our in-house ViT5-base fine-tune wins on those registers:
+
+| Register | Toshiiiii1 | `nrl-ai/vn-diacritic-vit5-base` |
+|---|---:|---:|
+| Formal / legal-prose | 98.14 % | **99.57 %** ⭐ |
+| Business / news | **97.81 %** | 93.44 % |
+| Conversational | 93.77 % | **94.16 %** ⭐ |
+| Classical literary | **89.40 %** | 89.39 % |
+
+```python
+restorer = HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")
+```
+
+Same Apache-2.0 license, same ~900 MB safetensors checkpoint, same
+~150 ms/sent on a 3090. Trained on 500K Wikipedia pairs, 5 epochs
+cosine LR. Pick Toshiiiii1 for business-tilted corpora; pick this one
+for legal docs, government forms, or chat data. See
+[`docs/benchmark.md`](benchmark.md#vn-diacritic-vit5-base) for the
+full eval and training config.
+
 #### Batched inference for throughput (7.6× speedup on a 3080)
 
 For high-throughput pipelines (tens of thousands of sentences), use

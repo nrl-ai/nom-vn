@@ -201,11 +201,33 @@ Numbers above are after normalization.
 
 | Register | Best off-the-shelf | Word acc | Notes |
 |---|---|---:|---|
-| Formal / legal-prose (UDHR-like) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **98.14 %** | Highest — formulaic vocabulary in training data |
-| Modern business / contracts / news | `Toshiiiii1/...` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register |
-| Conversational (Tatoeba) | `Toshiiiii1/...` | 93.77 % | Errors split: real disambiguation (`chữ` ↔ `chứ`), rare-form misses |
+| Formal / legal-prose (UDHR-like) | **`nrl-ai/vn-diacritic-vit5-base`** | **99.57 %** | Our v0.2.25 ViT5-base fine-tune; +1.43 pp over Toshiiiii1 |
+| Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register; nrl-ai/vit5-base 4.4 pp behind |
+| Conversational (Tatoeba) | **`nrl-ai/vn-diacritic-vit5-base`** | **94.16 %** | +0.39 pp over Toshiiiii1 (93.77) |
 | Classical literary (UD-VTB) | `Toshiiiii1/...` (still useful) | 89.40 % | Below business but well above rule baseline (41 %); failures are mostly proper-noun ambiguity (`Hùng` ↔ `Hưng`) and minor-register words |
-| General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8.7 pp gap across registers is real but bounded |
+| General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8.7 pp gap across Toshiiiii1's registers is real but bounded |
+
+<a id="vn-diacritic-vit5-base"></a>
+
+**Our `nrl-ai/vn-diacritic-vit5-base` (published 2026-04-30):** ViT5-base
+fine-tune on 500K Wikipedia pairs, 5 epochs cosine LR, bf16, 185 min
+on RTX 3090. Apache-2.0, ~900 MB safetensors. Strict adoption gate
+(business >= 96 % AND literary > 89.40 %) **fails** on business
+(93.44 %), so it's NOT the canonical name `nrl-ai/vn-diacritic-restoration`
+(reserved for a future gate-passing model). But it's the **best
+register-balanced VN diacritic model** we've trained — SOTA on
+formal/legal Vietnamese (99.57 %, +1.43 pp over Toshiiiii1) and
+conversational (94.16 %, +0.39 pp).
+
+| Register | Toshiiiii1 | nrl-ai/vit5-base | Δ |
+|---|---:|---:|---:|
+| formal_udhr | 98.14 % | **99.57 %** | +1.43 |
+| business_55 | **97.81 %** | 93.44 % | -4.37 |
+| conversational_300 | 93.77 % | **94.16 %** | +0.39 |
+| literary_udvtb | **89.40 %** | 89.39 % | -0.01 |
+
+Use it via `HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")`.
+Full training config + reproducibility: see the [HF model card](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base).
 
 **Two methodological lessons that landed in CLAUDE.md autonomous-loop §5:**
 
