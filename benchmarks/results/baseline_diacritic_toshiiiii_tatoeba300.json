@@ -1,0 +1,15 @@
+{
+  "model_id": "Toshiiiii1/Vietnamese_diacritics_restoration_5th",
+  "device": "cuda",
+  "n_sentences": 300,
+  "n_words": 2795,
+  "word_accuracy": 0.9377,
+  "diacritic_recall": 0.9377,
+  "elapsed_seconds": 24.5652,
+  "latency_per_sentence_mean": 0.0819,
+  "latency_per_sentence_p50": 0.0758,
+  "latency_per_sentence_p95": 0.1332,
+  "warmup_calls": 3,
+  "prefix": "",
+  "num_beams": 1
+}

@@ -1,0 +1,304 @@
+# Tatoeba VI conversational register — diacritic restoration eval slice
+# Source: vie_sentences_sample_3k.tsv (CC-BY 2.0 FR, Tatoeba)
+# Filter: has_diacritics, 20 <= len <= 180, case-insensitive dedup
+# Sample size: 300
+Tôi từ trên núi xuống.
+Từ xưa đến giờ đả luôn luôn như vậy rồi.
+Có nhiều chữ tôi không hiểu.
+Tôi đã tìm ra cách, nhưng mà tìm ra nhanh thế này thì chắc hẳn đó không phải là cách hay rồi.
+Không biết là tôi còn không nữa.
+Ờ... cái đó sao rồi?
+Cần gì thì cứ việc nói với tôi.
+Rất là khó để nói chuyện với một người luôn luôn trả lời "Có" hay "Không".
+Đối mặt sự sống với một nụ cười!
+Bạn có thể gọi lại được không?
+Tôi đọc sách lúc ăn cơm.
+Tôi cần thêm thì giờ.
+Tim rất thích truyện cười mỉa mai.
+"Cám ơn." "Không có chi."
+Tôi không đợi được tới lúc nghỉ hè.
+Một, hai, ba, bốn, năm, sáu, bảy, tám, chín, mười.
+Bạn cần bao nhiêu tiếng đồng hồ để ngủ vậy?
+Không, tôi không cho bạn vào được. Đã nhiều người quá rồi.
+Nhanh nữa lên, không cậu sẽ bị muộn mất.
+Rất nhiều thực vật nở hoa vào mùa Xuân.
+Tôi định gọi cho cô ấy mà lại quên mất.
+Cô ấy đã cho tôi 1 chiếc đồng hồ.
+Cà phê này có vị khét.
+Cô gái đang vẽ tranh ở hàng đầu tiên là cháu gái của tôi.
+Nhìn anh ta như thể đã không ăn gì trong nhiều ngày.
+Một trận động đất lớn đã xảy ra khi tôi mới chỉ mười tuổi.
+"Bạn có thể đưa tôi một ít đường không?" "Đây này bạn".
+Vì vậy nhiều người đã qua đời.
+Cứ sáu giờ tôi phải uống thuốc một lần.
+Có phải Mary sống cạnh nhà tài xế xe buýt - người đã làm việc với Join không?
+Cuộc sống bắt đầu khi nào ta quyết định ta trông chờ gì ở cuộc đời.
+Chị ấy có đôi mắt xanh
+Anh ta hãnh diện chưa bao giờ đến trường muộn.
+Tôi định đến gặp anh, nhưng tuần này tôi rất bận.
+Bill luôn luôn lương thiện.
+Vào thế kỷ thứ mười chín nhiều người châu Phi bị bán làm nô lệ sang Hoa Kỳ.
+Phương tiện giao thông không thể thiếu đối với dân ngoại thành.
+Sức khỏe tối cần thiết cho hạnh phúc.
+Sự giúp đỡ của bạn rất cần thiết đối với chúng tôi.
+Bà ấy viết truyện ngắn.
+Nhà thờ ở ngay bên kia đường.
+Ra bãi biển đi lối nào?
+Làm ơn chở tôi tới khách sạn Hilton.
+Nhóm máu của ông là nhóm nào?
+Dịch vụ đầu tiên lúc mấy giờ?
+Xin bạn hãy nhận món quả nhỏ này.
+Chúc nghỉ hè tốt đẹp!
+Tôi sẽ cho anh một lời khuyên tốt.
+Cái đó không liên quan tới tôi.
+Cậu ấy rất trẻ. Cậu ấy trẻ hơn Tom nhiều.
+Khi nào phim bắt đầu?
+Hãy liên kết với những người đáng tin cậy.
+"Ai đó?" "Đó là mẹ của bạn."
+Hôm qua tôi mua trâu vẽ bóng.
+Anh ấy bỏ nhầm muối vào tách cà phê của mình.
+Anh tin hay không tin, điều đó ít quân trọng đối với tôi.
+Tôi gặp anh ấy hôm trước.
+Xe hơi của anh ấy thật tuyệt vời.
+Mẹ bây giờ chơi quần vợt.
+Anh ấy đi bằng xe đạp.
+Tai nạn gây ra tắc nghẽn giao thông.
+Chiều nay bạn có ở nhà không?
+Khổ nỗi là tôi không biết đã đậu xe ở đâu.
+Dân chủ đại diện là một hình thức của chính phủ.
+Bill là một cầu thủ bóng chày.
+Một chiếc nĩa rơi từ bàn.
+Kẻ cắp trà trộn vào đám đông.
+Chúng tôi cung cấp phụ tùng cho nhà sản xuất xe hơi
+Tôi xin ý kiến bố tôi và quyết định thay đổi nơi làm việc.
+Bạn có gì để nói về việc này không?
+Cám ơn về lời khuyên.
+Ngôn ngữ cầu nối trung lập hoặc ngôn ngữ quốc tế hỗ trợ ngày nay rất cần thiết.
+Christohe Colomb tìm ra châu Mỹ năm 1492.
+Bạn hãy thận trọng đừng bơi sau khi ăn.
+Đó là tất cả những gì mà tôi có.
+Tôi nghe nói sản phẩm này nổi tiếng trong giới sành cà phê.
+Tất cả các tên được xếp danh sách theo thứ tự a b c.
+Một vài sinh viên ngồi trên ghế băng ăn trưa.
+Họ đã định cư ở Canada.
+Tin đồn đã được xác nhận là không có cơ sở.
+Bạn đừng quen mang ô.
+Tôi xin giới thiệu với anh ông Tanaka.
+Xin chúc một ngày tốt lành.
+Anh ấy chờ tôi tới khi tôi đến.
+Ông ta chỉ là một doanh nhân.
+Tôi ưa màu sáng hơn.
+Những người lái xe phải thắt đai an toàn.
+Anh có hút thuốc không?
+Tôi đã bắt bướm bằng lưới.
+Máy vi tính luôn luôn được cải tiến.
+Tôi đau họng và xổ mũi.
+Bạn hãy ở bên tôi khi tôi cần.
+Hắn công khai chửi tôi.
+Người Nhật thích du lịch theo nhóm.
+Anh ấy đang đọc sách. Chúng ta hãy để anh ấy yên.
+Chúng tôi chờ khách đến thăm tối nay.
+Bạn đã đọc xong cuốn tiểu thuyết chưa?
+Ông ấy có không dưới 12 đứa con.
+Anh ấy sang Anh Quốc để tìm hiểu kỹ về văn hóa nước đó.
+Văn hóa vũng như mứt quả: ta càng có ít, ta càng phết nhiều.
+Có một máy thu thanh ở trên bàn.
+Ông có thể chỉ cho tôi lối đi tới ga?
+Tôi mới chỉ đi bộ một kilomet rưỡi thì bắt đầu có sấm.
+Tôi cũng thích màu này.
+Con người khác súc vật ở chỗ họ biết suy nghĩ và nói.
+Tôi biết người Đức có râu dài này.
+Bạn có biết Rie Miyazawa là ai không?
+Không có núi nào ở Nhật Bản lớn hơn núi Phú Sỹ.
+Tại công viên có rất nhiều người.
+Trường của bạn ở đâu?
+Bố anh ấy chết vì ung thư, mười năm trước đây.
+Anh ta đã trả lời tôi một cách mơ hồ.
+Chính phủ Trung Quốc kiểm soát Internet để ngăn cản người ta biết sự thật về vụ thảm sát tại quảng trường Thiên An Môn.
+Anh ấy sống ở Tokyo.
+Chúng tôi học tiếng Anh đã ba năm.
+Chị ấy hát bằng một giọng tuyệt vời.
+Ông tôi rất khỏe mạnh.
+Tôi biết viết các chương trình Visual Basic.
+Bạn có gặp người nào hay trong lễ hội không?
+Hẳn bà ấy đẹp khi còn trẻ.
+Bây giờ anh có quyền về nhà.
+Liệu chị ấy có chịu nổi chuyến đi xa không?
+Seiko nhận lời mời bữa cơm tối.
+Kể từ bây giờ bà ấy sẽ chăm sóc ông.
+Mọi nỗ lực của họ đều vô ích.
+Các vật thể ở xa có vẻ mờ mịt.
+Tôi cho anh vay tiền nếu anh trả tôi trong tuần.
+Anh ấy sống hòa hợp với tất cả các bạn.
+Hãy nhìn kỹ, thật là tươi!
+Không ai chạy trước anh ấy.
+Tôi có hai con chó, ba con mèo và sáu con gà.
+Ồ, ánh sáng tắt rồi.
+Chuyến tầu đi Cambridge khởi hành từ ke số 5.
+Mối quan hệ giữa thế giới Hồi giáo và phương Tây bao gồm nhiều thế kỷ chung sống và hợp tác, nhưng cũng có cả xung đột và chiến tranh tôn giáo.
+Anh ấy thích âm nhạc hiện đại hơn.
+"Phù thủy cải trang thành súc vật, ông ta đội một tấm da thú và dạo chơi trong xã. Bố tôi nói với tôi như vậy."
+Jane có năm túi xách tay.
+Tôi đang đọc một cuốn sách.
+Mọi người đều bình đăng trước pháp luật.
+Chúng tôi cho chó của chúng tôi ăn ba lần một ngày.
+Pepperberg hỏi: "Có bao nhiêu chìa khóa?"
+Không ai biết cô ấy ở đâu.
+Không dưới 40 phần trăm học sinh tiếp tục đến trường đại học.
+Chúng ta chỉ có thể hy vọng rằng chính phủ quyết định rút quân.
+Tôi cho ông thuốc gây tê tại chỗ.
+Anh ấy luôn luôn rời khỏi nhà vào lúc bảy giờ.
+Bạn hãy coi chừng, anh ta cáu ngay đấy.
+Naoko sống trong ngoi nhà trắng này.
+Anh muốn bao nhiêu quả táo?
+Chị ấy không có bằng lái xe.
+Chị ấy không thích sống ở thành phố.
+Bạn có học tiếng Anh không?
+Anh ấy yêu cầu tôi giữ bí mật.
+Anh ấy sống tại một ngôi nhà xa làng.
+Em gái tôi thích của ngọt.
+Tôi có một người anh em họ là luật sư.
+Vấn không phải là tôi không thích chiếc xe hơi, mà là tôi không thể tự cho phép tiêu số tiền.
+Chị ấy gọi tôi lúc chiều.
+Nói về ông Tanaka, anh có trông thấy ông ta gần đây không?
+Tôi đã thuyết phục anh ấy để được bác sĩ khám bệnh.
+Cả hai người đang ở trong phòng.
+Khi nào bạn từ Milan trở về?
+Tôi đã thuyết phục bố tôi ngừng hút thuốc.
+Đừng đánh giá con người qua vẻ bên ngoài của họ.
+Tình yêu phải có cánh để bay khỏi tình yêu, và lại bay trở lại.
+Vắng chủ nhà gà vọc niêu tôm.
+Nếu mọi việc thuận lợi, chúng ta mỗi ngày có thể làm 2-3 cái.
+Anh ta cuối cùng đã nói ra ngày sẽ đến.
+Bà ấy dường như cô đơn.
+Bạn đã đọc bài báo này chưa?
+Anh ấy không chấp nhận đề nghị của tôi.
+Nếu một nhà triết học trả lời, tôi không còn hiểu câu hỏi của tôi nữa.
+Tôi chẳng nhìn thấy gì cả.
+Một nghề thì sống, đống nghề thì chết.
+Họ tính chuyện cưới nhau vào ngày mai.
+Sông Seine chảy qua Paris.
+Tôi đã ở Paris hai lần.
+Bạn hãy ăn xong bữa trưa đi nào!
+Tất cả những ước muốn của bạn hãy trở thành hiện thực!
+Tôi vừa xem triển lãm ký họa về chiến tranh.
+Có vô kể những thiên thể trong vũ trụ.
+Nếu anh tôi ở đó, anh ấy sẽ biết phải làm gì.
+Đôi sinh đôi giống nhau thế, dường như không thể phân biệt được người này với người kia nữa.
+Tôi muốn biết nhiều về anh ấy hơn nữa.
+Bác sĩ bảo rằng chị ấy bị thấp khớp.
+Bạn không thể bơi ở đây được.
+Tôi đã nhìn thấy con chó chạy qua phố như thế nào.
+Anh ấy không thể nói tốt tiếng Pháp.
+Đoàn tầu khởi hành hồi chín giờ và tới đây hồi mười giờ.
+Bạn hãy tự rót nước, nếu bạn muốn uống!
+Tôi không bao giờ giết hay làm ai bị thương.
+Em gái tôi rất thích âm nhạc.
+Bạn có thể sẽ gặp anh ấy.
+Chúng tôi đã có bài kiểm tra nói.
+Chà! cậu là anh của cô ấy !
+Trong lãnh địa giáo dân chủ nhật là ngày lễ.
+Gà tây lớn hơn gà trống ta một chút.
+Người lạ mặt đi qua thành phố.
+Những người thợ mỏ bãi công lâu nhất.
+Trên thực tế, bài thuyết trình của ông ta gây chán ngán.
+Mục đích của họ là gì?
+Ông già thử bơi được 5 ki lô mét.
+Chúng tôi cưới cách đây 7 năm.
+Tha lỗi cho tôi đã làm phiền anh.
+Tôi đã đến Australio ba lần.
+Anh ấy thường ăn sáng ở chỗ này.
+Ann có nhiều bạn bè.
+Ông ta luôn chê bai công việc của người thư ký của mình.
+Hãy vui vẻ! Hãy thêm dấu chấm than vào tất cả các câu của bạn!
+Trái Đất khác các hành tinh khác vì nó có nước.
+Anh ấy trách tôi vì sơ ý.
+Tôi quen anh ấy khi tôi là sinh viên.
+Tôi có thể giúp gì , thưa ông?
+Không, đó không phải là nhà ga.
+Hôm qua là kỷ niệm ngày sinh của tôi.
+Chị ấy tính chuyện theo vài khóa học tại một trường dạy nấu ăn.
+Anh ta trở thành ca sĩ ngược với mong muốn của bố mẹ mình.
+Tôi chăng phải là người Athen, chẳng phải là người Hy Lạp.
+Bạn bơi giỏi, có phải không?
+Chim là kẻ thù tự nhiên của côn trùng.
+Tôi thích trà hơn cà phê.
+Tôi qua anh lúc năm giờ để cùng đi với anh.
+Vì tôi rất bận, bạn đừng trông cậy vào tôi.
+Nhiệt độ tối thiểu hôm nay lên tới +3 độ C.
+Mỗi lần tôi đến Paris, tôi tới Sacré-coeur ngồi tại các bậc thềm để nghe thiên hạ đàn hát.
+Chương trình Appolo đã mang lại nhiều tiến bộ lớn về kiến thức của chúng ta về không gian.
+Điều ấy vượt qua sự hiểu biết của tôi.
+Thầy thuốc cấm tôi tham gia chạy việt dã.
+Cô ấy nói rằng cô ấy đi ở trong rừng để tìm kiếm hoa dại.
+Thỉnh thoảng toi nhận được tin của mẹ tôi.
+Việc làm kiếm tiền tốt, nhưng mặt khác tôi phải làm việc mỗi ngày mười hai giờ.
+Cuộc sống không có tình yêu chẳng có ý nghĩa gì.
+Tôi có người anh em họ là luật sư.
+Ông Ito dạy lịch sử phải không?
+Ông Ito kiểm tra có mặt.
+Tiếc là tôi không giỏi tiếng Anh lắm.
+Không cần thiết chị ấy phải vội vàng.
+Các bà này là cô của tôi.
+Những bài hát dân ca ấy tôi không thích.
+Tôi phải đến đồn cảnh sát.
+Anh có hay bị ợ chua không?
+Khi hoàn thành công việc của mình, nó về nhà.
+Bạn đã sẵn sàng bắt đầu chưa?
+Bà ấy mua sách trong cứa hàng.
+Người ta càng đi lên cao, không khí càng trở nên lạnh.
+Kẻ ngốc thường là nhà tiên tri.
+Anh ta cao giọng nói.
+Tôi như là người khác ấy.
+Nhà thờ đã được trang trí nhiều hoa cho đám cưới.
+Ông Potter giữ cơ thể mình trong tình trạng khỏe mạnh bằng cách chạy bộ mỗi ngày.
+Giữ được bình tĩnh khi có chuyện khẩn cấp là rất quan trọng.
+Hai người có ngưng ngay tiếng ồn ầm ĩ đó không? Tôi đang cố ngủ.
+Nguyên bịch luôn mà nó bán có mười ngàn đồng!
+Tôi cảm thấy rất lạnh.
+Mấy cuốn từ điển này đang bán (trên thị trường).
+Cô ấy mặc thử váy mới.
+Bà ta ồn ào đóng cửa.
+Bạn có thể mở cửa ra không?
+Tôi xin lỗi việc này.
+John không có ở đây.
+Bạn học tiếng Hung từ khi nào?
+Tôi đang làm việc ở ngân hàng.
+Tôi đã thuyết phục em trai cố gắn học hơn nữa.
+Anh ta tinh thộng giới nghệ sĩ.
+Cảnh sát Mỹ mặc đồng phục màu xanh da trời.
+Theo báo chí thì anh ta đã tự sát.
+Tôi đã trông thấy người đàn ông đó vào phòng.
+Không được nói chuyện ở phòng đọc sách ở thư viện.
+Tôi đã khá tốn tiền học cho bọn trẻ.
+Chương này dài quá, học không kịp rồi.
+Hình như báo chí bớt đưa tin rồi.
+Zê rô điểm mày ơi, buồn quá.
+Để làm được việc này, bạn phải có ý chí mới được.
+Cây Ý Dĩ trị được rất nhiều bệnh.
+Tay giám đốc đó có ý đồ lớn trong việc bành trướng thế lực.
+Quan tòa đang trao đổi ý kiến với nhau về vụ án giết người man rợ đó.
+Tao vừa nảy ra một ý nghĩ hay lắm mày ơi.
+Câu nói của ông ấy ẩn chứa nhiều ý nghĩa.
+Mày giúp tao dò la ý tứ của cô ấy thế nào nha.
+Anh ta ngồi vắt vẻo trên yên ngựa.
+Yên xe đạp quá cao so với thân hình thấp bé của cô ấy.
+Cứ yên trí đi, đâu lại vào đấy thôi.
+Mọi người hãy yên vị vào chỗ của mình nhé.
+Phải tổ chức yên tiệc thật linh đình để đón chào tân giám đốc mới được.
+Yểng là chim cùng họ với sáo.
+Yết hầu là đoạn ống tiêu hóa ở động vật có xương sống.
+Yêu em nhất trên đời, hỡi người yêu dấu của lòng anh.
+Hắn ta có nhiều yêu thuật hại người.
+Đừng tỏ ra yếu hèn như thế, mạnh mẽ lên.
+Giọng nói của ông ấy yếu ớt lắm rồi.
+Anh ta bị yếu thế và đành chịu thua đối phương.
+Anh yêu thương em nhiều hơn ai hết.
+Ra khỏi phòng học ngay.
+Có thể anh ấy đang đi dạo quanh công viên.
+Cũng được hòm hòm rồi.
+Tình yêu tôi dành cho em không gì có thể thay thế được
+Em gái của cô ấy trông còn trẻ.
+bạn làm gì ở đây thế ?
+hôm qua gió thổi mạnh (một cơn gió thổi mạnh hồi hôm qua)
+Một cơn bão sắp đến.

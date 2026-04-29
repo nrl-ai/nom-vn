@@ -162,13 +162,24 @@ that meets every constraint.
 **Cross-check:** Toshiiiii1's model card reports no metrics, so we have
 no upstream number to compare. Our 97.81 % is on a 55-sentence corpus.
 
-**Multi-corpus measurement (re-measured 2026-04-26 on UD_Vietnamese-VTB
-test, 800 sentences, classical-literary register):**
+**Multi-corpus measurement — 4-register matrix.** First measured
+2026-04-26 (business + literary), extended 2026-04-29 (conversational +
+formal/legal):
 
-| Eval corpus | Sentences | Register | Word acc | Sentence-exact |
+| Eval corpus | Sentences | Register | Word acc | Mean ms/sent |
 |---|---:|---|---:|---:|
-| `diacritic_eval_v0.txt` | 55 | business / contract / news / conv | **97.81 %** | not measured |
-| `ud_vi_vtb/test.conllu` | 800 | classical literary (VTB treebank) | **89.40 %** | 34.25 % (274/800) |
+| `udhr_vi/diacritic_eval_udhr.txt` | 72 | formal / legal-prose (UDHR) | **98.14 %** | 221 |
+| `diacritic_eval_v0.txt` | 55 | business / contract / news | **97.81 %** | 152 |
+| `tatoeba_vi/diacritic_eval_300.txt` | 300 | conversational (Tatoeba) | **93.77 %** | 82 |
+| `ud_vi_vtb/test.conllu` | 800 | classical literary (VTB treebank) | **89.40 %** | 269 |
+
+Spread = 8.74 pp (98.14 − 89.40). The drop is monotonic from formal to
+literary, which is what register-shift looks like in practice — not a
+single failure mode but a gradient. Conversational sits ~4 pp below
+business, literary another ~4 pp below conversational. The model is
+register-overfit toward modern formal/business Vietnamese, as expected
+from its training data; it stays usable everywhere but the absolute peak
+is in the registers it was trained on.
 
 **A bench-methodology bug we caught and fixed.** The first UD-VTB run
 reported 54.14 % word accuracy and 0/800 sentence-exact. The 0/800 was
@@ -190,9 +201,11 @@ Numbers above are after normalization.
 
 | Register | Best off-the-shelf | Word acc | Notes |
 |---|---|---:|---|
-| Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register |
-| Classical literary (UD-VTB) | `Toshiiiii1/...` (still useful) | 89.40 % | Below business but well above rule baseline (41 %); failures are mostly proper-noun ambiguity (`Hùng` ↔ `Hưng`) and a few minor-register words |
-| General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8 pp gap between corpora is real but bounded |
+| Formal / legal-prose (UDHR-like) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **98.14 %** | Highest — formulaic vocabulary in training data |
+| Modern business / contracts / news | `Toshiiiii1/...` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register |
+| Conversational (Tatoeba) | `Toshiiiii1/...` | 93.77 % | Errors split: real disambiguation (`chữ` ↔ `chứ`), rare-form misses |
+| Classical literary (UD-VTB) | `Toshiiiii1/...` (still useful) | 89.40 % | Below business but well above rule baseline (41 %); failures are mostly proper-noun ambiguity (`Hùng` ↔ `Hưng`) and minor-register words |
+| General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8.7 pp gap across registers is real but bounded |
 
 **Two methodological lessons that landed in CLAUDE.md autonomous-loop §5:**
 
@@ -203,9 +216,28 @@ Numbers above are after normalization.
    0 % or 100 % on a real model is almost certainly a bench bug, not
    a true result. We caught one this way.
 
-Reproduce: `python benchmarks/accuracy/bench_diacritic_hf.py
-Toshiiiii1/Vietnamese_diacritics_restoration_5th --json
-benchmarks/results/baseline_diacritic_toshiiiii_t5.json`
+Reproduce:
+
+```bash
+# Build the per-register eval slices (deterministic, no network).
+python benchmarks/data/tatoeba_vi/build_diacritic_eval.py
+python benchmarks/data/udhr_vi/build_diacritic_eval.py
+
+# Bench Toshiiiii1 across the 4 registers.
+python benchmarks/accuracy/bench_diacritic_hf.py \
+    Toshiiiii1/Vietnamese_diacritics_restoration_5th \
+    --json benchmarks/results/baseline_diacritic_toshiiiii_t5.json
+python benchmarks/accuracy/bench_diacritic_hf.py \
+    Toshiiiii1/Vietnamese_diacritics_restoration_5th \
+    --corpus benchmarks/data/tatoeba_vi/diacritic_eval_300.txt \
+    --json benchmarks/results/baseline_diacritic_toshiiiii_tatoeba300.json
+python benchmarks/accuracy/bench_diacritic_hf.py \
+    Toshiiiii1/Vietnamese_diacritics_restoration_5th \
+    --corpus benchmarks/data/udhr_vi/diacritic_eval_udhr.txt \
+    --json benchmarks/results/baseline_diacritic_toshiiiii_udhr72.json
+python benchmarks/accuracy/bench_diacritic_hf_udvtb.py \
+    --json benchmarks/results/baseline_diacritic_toshiiiii_udvtb_test.json
+```
 
 ### Local LLM grid — *measured 2026-04-26*
 

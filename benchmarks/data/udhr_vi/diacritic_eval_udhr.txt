@@ -1,0 +1,76 @@
+# UDHR Vietnamese — formal/legal-prose register diacritic eval slice
+# Source: udhr_vi.txt (public domain, Wikisource translation)
+# Filter: has_diacritics, 30 <= len <= 300, case-insensitive dedup
+# Sample size: 72
+Xét thấy sự công nhận phẩm giá vốn có và những quyền lợi bình đẳng và không thể nhân nhượng của mọi thành viên trong gia đình nhân loại là nền tảng của sự tự do, công bằng và hòa bình trên thế giới,
+Xét thấy rằng cần thiết phải bảo vệ quyền con người bằng pháp quyền để con người không bị buộc phải phản kháng chống lại sự chuyên chế và áp bức như một biện pháp cuối cùng,
+Xét thấy rằng cần thiết phải khuyến khích sự phát triển mối quan hệ hữu nghị giữa các quốc gia,
+Xét thấy các Quốc gia thành viên đã cam kết, cùng với Liên Hiệp Quốc, đẩy mạnh sự tôn trọng phổ quát và tuân thủ những quyền và quyền tự do cơ bản của con người,
+Xét thấy việc đạt được một sự hiểu biết chung về những quyền và quyền tự do này là điều quan trọng nhất để có thể hiện thực được cam kết,
+Mọi con người sinh ra đều tự do và bình đẳng về nhân phẩm và quyền lợi.
+Họ được tạo hóa ban cho lý trí và lương tâm và phải đối xử với nhau với tinh thần huynh đệ.
+Tất cả mọi người đều được hưởng mọi quyền lợi và quyền tự do được ghi trong Tuyên ngôn này, bất kể mọi sự khác biêt, về chủng tộc, màu da, giới tính, ngôn ngữ, tôn giáo, chính kiến, nguồn gốc quốc gia hoặc xã hội, tài sản, địa vị khi sinh ra hoặc địa vị khác.
+Ngoài ra, không có bất kỳ sự phân biệt nào đối với nền tảng về tình trạng chính trị, tài phán hoặc quốc tế của đất nước hoặc lãnh thổ của một người, dù nó là lãnh thổ độc lập, ủy thác, không có tự chủ hoặc bị các hạn chế về chủ quyền khác.
+Tất cả mọi người đều có quyền sống, quyền tự chủ và quyền an toàn cho cá nhân.
+Không ai có thể bị bắt làm nô lệ hoặc nô dịch; chế độ nô lệ và việc buôn bán nô lệ bị cấm dưới mọi hình thức.
+Không ai có thể bị tra tấn hoặc bạo hành, hoặc phải nhận sự đối xử hoặc trừng phạt một cách vô nhân tính và hèn hạ.
+Tất cả mọi người đều có quyền được luôn luôn công nhận như một con người trước pháp luật.
+Mọi người đều bình đẳng trước pháp luật và đều có quyền được hưởng sự bảo vệ bình đẳng của pháp luật mà không có bất kỳ sự phân biệt đối xử nào.
+Mọi người đều có quyền được hưởng sự bảo vệ bình đẳng chống lại bất kỳ sự phân biệt đối xử nào vi phạm Tuyên ngôn này và chống lại bất kỳ sự kích động nào dẫn tới sự phân biệt đối xử đó.
+Tất cả mọi người đều có quyền thực hiện một biện pháp khắc phục hiệu quả do tòa án quốc gia có thẩm quyền quyết định vì những hành vi vi phạm những quyền cơ bản mà hiến pháp hoặc pháp luật đã trao cho người đó.
+Không ai có thể bị bắt giữ, giam giữ hoặc lưu đày một cách tùy tiện.
+Tất cả mọi người đều có quyền, với sự bình đẳng hoàn toàn, được hưởng một phiên tòa công bằng và công khai bởi một tòa án độc lập và công tâm, nhằm định đoạt những quyền và nghĩa vụ của người đó hoặc định đoạt các cáo buộc phạm tội chống lại người đó.
+Tất cả mọi người khi bị buộc tội hình sự đều được giả định vô tội trước khi bị chứng minh là có tội theo pháp luật trong một phiên tòa công khai nơi người đó có được mọi sự đảm bảo cần thiết để bào chữa cho mình.
+Không ai có thể bị tuyên bố phạm tội hình sự vì bất kỳ hành vi hoặc thiếu sót nào, vào thời điểm diễn ra, không cấu thành tội hình sự theo luật pháp quốc gia hoặc quốc tế.
+Tương tự, không ai phải nhận một hình phạt nặng hơn hình phạt được áp dụng vào thời điểm diễn ra hành vi phạm tội.
+Không ai có thể bị xâm phạm tùy tiện quyền riêng tư, gia đình, nhà cửa hoặc thư từ của mình, cũng như bị tấn công vào danh sự và uy tín của mình.
+Tất cả mọi người đều có quyền được pháp luật bảo vệ trước hành vi xâm phạm hoặc tấn công như vậy.
+Tất cả mọi người đều có quyền tự do đi lại và cư trú trong phạm vi biên giới của mỗi Quốc gia.
+Tất cả mọi người đều có quyền rời khỏi đất nước, bao gồm cả đất nước của chính người đó, và trở lại đất nước của mình.
+Tất cả mọi người đều có quyền mưu cầu và hưởng thụ sự tị nạn khỏi bị bức hại tại các quốc gia khác.
+Quyền này có thể không được áp dụng trong trường hợp sự khởi tố thực sự xuất phát từ những tội ác phi chính trị hoặc từ những hành vi đi ngược với mục đích và nguyên tắc của Liên Hiệp Quốc.
+Tất cả mọi người đều có quyền có quốc tịch.
+Không ai có thể bị tùy tiện tước quốc tịch hoặc bị từ chối quyền thay đổi quốc tịch của mình.
+Người nam và người nữ, khi đã đủ tuổi, có quyền kết hôn và lập gia đình, mà không có bất kỳ hạn chế nào do chủng tộc, quốc tịch hoặc tôn giáo.
+Họ có quyền được hưởng những quyền bình đẳng khi tiến hành kết hôn, khi đang kết hôn và khi ly dị.
+Kết hôn chỉ được diễn ra khi có sự đồng ý tự do và đầy đủ của các bên phối ngẫu.
+Gia đình là yếu tố cấu thành tự nhiên và cơ bản của xã hội và được quyền hưởng sự bảo vệ của xã hội và Quốc gia.
+Tất cả mọi người đều có quyền sở hữu tài sản một mình hoặc cùng chung với người khác.
+Không ai có thể bị tùy tiện tước đoạt tài sản.
+Tất cả mọi người đều có quyền tự do ý kiến và bày tỏ; quyền này bao gồm quyền tự do giữ ý kiến mà không bị cản trở hoặc quyền tìm kiếm, tiếp nhận và lan truyền thông tin và ý tưởng thông qua bất kỳ phương tiện biểu đạt và bất chấp biên giới nào.
+Tất cả mọi người đều có quyền tự do tụ họp hòa bình và lập hội.
+Không ai có thể bị cưỡng bách tham gia hội nhóm nào.
+Tất cả mọi người đều có quyền tham gia vào chính quyền của đất nước của mình, một cách trực tiếp hoặc thông qua những đại diện được lựa chọn một cách tự do.
+Tất cả mọi người đều có quyền tiếp cận một cách bình đẳng đến các dịch vụ công cộng trong đất nước của mình.
+Ý chí của người dân là nền tảng quyền hành của chính quyền; điều này sẽ được thể hiện trong những cuộc bầu cử định kỳ và thực chất bằng phương pháp phổ thông đầu phiếu và bỏ phiếu kín hoặc bằng các quy trình bỏ phiếu tự do tương đương.
+Tất cả mọi người đều có quyền làm việc, được tự do lựa chọn việc làm, được hưởng các điều kiện làm việc chính đáng và thuận lợi và được bảo vệ chống thất nghiệp.
+Tất cả mọi người đều có quyền được trả lương bằng nhau khi làm công việc như nhau mà không có bất kỳ sự phân biệt nào.
+Tất cả mọi người khi làm việc đều có quyền được trả thù lao một cách chính đáng và thuận lợi nhằm đảm bảo sự tồn tại của bản thân và gia đình một cách xứng đáng với nhân phẩm, và được bù đắp bằng các hình thức bảo hộ xã hội khác, khi cần.
+Tất cả mọi người đều có quyền tạo lập và gia nhập công đoàn để bảo vệ quyền lợi của họ.
+Tất cả mọi người đều có quyền nghỉ ngơi và an dưỡng, bao gồm việc giới hạn giờ làm một cách hợp lý và những ngày nghỉ định kỳ được trả lương.
+Bà mẹ và trẻ em có quyền được hưởng sự chăm sóc và trợ giúp đặc biệt.
+Tất cả mọi trẻ em, dù được sinh ra trong giá thú hay ngoài giá thú, đều được hưởng sự bảo vệ xã hội như nhau.
+Tất cả mọi người đều có quyền học tập.
+Giáo dục phải miễn phí, tối thiểu là ở bậc tiểu học và cơ bản.
+Giáo dục tiểu học là bắt buộc.
+Giáo dục kỹ thuật và dạy nghề phải luôn sẵn có và giáo dục bậc cao phải được mở một cách công bằng cho mọi người trên nền tảng thành tích.
+Giáo dục phải hướng đến sự phát triển toàn diện nhân cách và tăng cường tôn trọng quyền con người và các quyền tự do cơ bản.
+Nó phải thúc đẩy sự hiểu biết, khoan dung và hữu nghị giữa các quốc gia, các nhóm chủng tộc hoặc tôn giáo, cũng như sự phát triển các hoạt động gìn giữ hòa bình của Liên Hiệp Quốc.
+Cha mẹ có quyền ưu tiên lựa chọn hình thức giáo dục cho con cái.
+Tất cả mọi người đều có quyền tự do tham gia vào cuộc sống văn hóa của cộng đồng, được thưởng thức nghệ thuật và được chia sẻ các tiến bộ khoa học và những lợi ích của nó.
+Tất cả mọi người đều có quyền nhận được sự bảo vệ các lợi ích nhân thân và vật chất từ những sản phẩm khoa học, văn học hoặc nghệ thuật mà người đó là tác giả.
+Tất cả mọi người đều có quyền hưởng một trật tự xã hội và quốc tế trong đó các quyền và quyền tự do được quy định trong Tuyên ngôn này được thực hiện đầy đủ.
+Tất cả mọi người phải có nghĩa vụ với cộng đồng, nơi bản thân người đó có thể được phát triển tính cách một cách tự do và đầy đủ.
+Những quyền và quyền tự do này, trong bất cứ trường hợp nào, không bao giờ được thực thi trái với mục đích và nguyên tắc của Liên Hiệp Quốc.
+Không có điều gì trong Tuyên ngôn này có thể được diễn dịch với ngụ ý cho phép bất kỳ Quốc gia, nhóm hoặc cá nhân nào, quyền tham gia vào bất kỳ hoạt động hoặc thực hiện bất cứ hành vi nào nhằm phá hoại các quyền và quyền tự do quy định tại đây.
+Phiên họp toàn thể thứ một trăm tám mươi ba.
+Tác phẩm này là một bản dịch và có thông tin cấp phép khác so với bản quyền của nội dung gốc.
+Tác phẩm này được lấy từ một tài liệu chính thức của Liên Hiệp Quốc.
+Chính sách của tổ chức này quy định hầu hết các văn bản đều thuộc phạm vi công cộng nhằm mục đích phổ biến "ngày càng rộng rãi các ý tưởng (nếu có) trong các ấn phẩm của Liên Hiệp Quốc".
+Căn cứ vào văn bản Administrative Instruction ST/AI/189/Add.9/Rev.2 của Liên Hiệp Quốc bằng tiếng Anh, các tác phẩm sau đây thuộc phạm vi công cộng trên toàn thế giới:
+Các giấy phép chuẩn của Wikisource đối với tác phẩm do chính các biên tập viên tự viết.
+Tác phẩm này được phát hành theo các điều khoản của Giấy phép Tài liệu Tự do GNU.
+Điều khoản sử dụng của Wikimedia Foundation yêu cầu văn bản được cấp phép theo GFDL được nhập sau tháng 11 năm 2008 cũng phải cấp phép kép với một giấy phép tương thích khác.
+"Nội dung chỉ khả dụng trong GFDL không được phép" (§7.4).
+Điều này không áp dụng cho phương tiện phi văn bản.
+Tác phẩm này được phát hành theo Giấy phép Creative Commons Ghi công-Chia sẻ tương tự 3.0 Chưa chuyển đổi, cho phép sử dụng, phân phối, và tạo tác phẩm phái sinh một cách tự do, miễn là không được thay đổi giấy phép và ghi chú rõ ràng, cùng với việc ghi công tác giả gốc.

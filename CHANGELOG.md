@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.24] — 2026-04-29
+
+### Toshiiiii1 register matrix extended to 4 corpora
+
+Two new diacritic eval slices and a re-bench of Toshiiiii1 to fill out
+the register grid that was previously only business + literary.
+
+New corpora:
+
+- ``benchmarks/data/tatoeba_vi/diacritic_eval_300.txt`` — 300 sentences,
+  conversational register (Tatoeba CC-BY 2.0 FR sample, deterministic
+  filter via ``build_diacritic_eval.py``).
+- ``benchmarks/data/udhr_vi/diacritic_eval_udhr.txt`` — 72 sentences,
+  formal/legal-prose register (UDHR Wikisource, public domain,
+  sentence-split via ``build_diacritic_eval.py``).
+
+Toshiiiii1 results (RTX 3080 16 GB Mobile, CUDA, num_beams=1, 3 warmup
+calls):
+
+  Register                Sents   Word acc   Mean ms/sent
+  formal/legal (UDHR)        72   98.14 %    221
+  business/news              55   97.81 %    152
+  conversational (Tatoeba)  300   93.77 %     82
+  literary (UD-VTB)         800   89.40 %    269
+
+Spread = 8.74 pp. Drop is **monotonic** from formal → literary, which
+is what register-shift looks like in practice — a gradient, not a
+cliff. Conversational sits ~4 pp below business; literary another
+~4 pp below conversational. Confirms the model is register-overfit
+toward modern formal/business Vietnamese (matching its training
+data) without being unusable elsewhere.
+
+Sample inspection (first-5 raw I/O dump per CLAUDE.md DOUBLECHECK
+rule): UDHR errors are real disambiguation (``nhân nhượng`` →
+``nhận nhượng``, ``mọi`` → ``mỗi``); Tatoeba errors include
+``chữ`` (letter) → ``chứ`` (rather/but). Metric matches eyeballed
+quality; no methodology bug.
+
+Updated ``docs/benchmark.md`` register-conditional production table
+to four rows; updated ``CLAUDE.md`` register-shift gotcha with the
+new gradient and dataset entries.
+
+JSON baselines:
+``benchmarks/results/baseline_diacritic_toshiiiii_tatoeba300.json``,
+``benchmarks/results/baseline_diacritic_toshiiiii_udhr72.json``.
+
 ## [0.2.23] — 2026-04-27
 
 ### Train experiment #2: VietAI/vit5-base — register-balanced, doesn't beat Toshiiiii1

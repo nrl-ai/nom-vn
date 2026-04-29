@@ -199,12 +199,13 @@ ASCII but devastating in production.
 
 ### Datasets — registers, traps, and reproducibility
 
-- **Register-shift is the #1 hidden quality failure** for VN models. A model trained on modern business/news Vietnamese will collapse on classical-literary register and vice versa. We caught Toshiiiii1 T5 doing 97.81 % on `diacritic_eval_v0.txt` (business 55 sents) and 89.40 % on `ud_vi_vtb` (literary 800 sents) — same model, same task, 8 pp gap. Always bench on at least two distinct registers before adopting.
+- **Register-shift is the #1 hidden quality failure** for VN models. A model trained on modern business/news Vietnamese will collapse on classical-literary register and vice versa. The 4-register Toshiiiii1 matrix (measured 2026-04-26 → 2026-04-29) shows a *gradient*, not a cliff: UDHR formal/legal 98.14 % (72) → business/news 97.81 % (55) → conversational/Tatoeba 93.77 % (300) → literary/UD-VTB 89.40 % (800). 8.7 pp spread. Two registers is the floor; three or four cornering distinct genres gives the gradient and is what you want before adopting.
 - **Public VN evaluation datasets we trust** (license + format + register breakout):
   - `diacritic_eval_v0.txt` — 55 hand-curated sentences, 4 registers, CC0. Tiny but deterministic.
   - `UD_Vietnamese-VTB` test split — 800 literary sentences, gold word segmentation, CC-BY-SA-4.0.
   - `Zalo Legal QA` (via GreenNode mirror) — 61k articles + 788 questions, MIT, legal register.
-  - `udhr_vi.txt` — UN human-rights declaration, 19 KB, formal register, public domain.
+  - `udhr_vi.txt` — UN human-rights declaration, 19 KB, formal register, public domain. Use `benchmarks/data/udhr_vi/build_diacritic_eval.py` to extract the 72-sentence diacritic eval slice.
+  - `tatoeba_vi/vie_sentences_sample_3k.tsv` — 3 k conversational sentences, CC-BY 2.0 FR. Use `benchmarks/data/tatoeba_vi/build_diacritic_eval.py` to extract the 300-sentence diacritic eval slice.
 - **Public VN datasets that fail our trust ladder** (DO NOT USE without explicit user opt-in):
   - `VLSP 2013` segmentation — gated, requires registration. Cite reported numbers from papers; do not redistribute.
   - `Surya OCR` corpora — code is GPL-3, models are open-RAIL-M. License-incompatible for default ship.
