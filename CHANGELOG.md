@@ -5,6 +5,112 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.25] — 2026-04-30
+
+### Train experiments #3 and #4: register-balanced ViT5 fine-tune published
+
+Two training runs on RTX 3090 / genpc2:
+
+**Run #3 (failed gate, archived):** ViT5-base, 500K Wiki, 5 epochs cosine,
+patience=3 early stopping, eval_samples=200. Stopped at epoch 0.96
+(15K of 78K planned steps). Patience triggered on noisy 200-sample
+eval_loss before the model converged. 92.54 / 86.19 — worse than
+v0.2.23.
+
+  Lesson: eval_loss on a small held-out is noisy; either bump
+  eval_samples or disable early stopping for a full-budget run.
+  Codified `--early-stopping-patience 0` and `--eval-samples 1000`
+  recommendations in train.py docs.
+
+**Run #4 (published):** ViT5-base, 500K Wiki, **5 epochs** (full),
+cosine LR, NO early stop, eval_samples=1000. 185 min on RTX 3090.
+
+  Register             Toshiiiii1   v0.2.23   v0.2.25
+  formal_udhr          98.14 %      —         99.57 % ⭐
+  business_55          97.81 %      93.69 %   93.44 %
+  conversational_300   93.77 %      —         94.16 % ⭐
+  literary_udvtb       89.40 %      89.47 %   89.39 %
+
+Strict gate fails on business (-4.37 pp). But this is **the best
+register-balanced VN diacritic model we've trained**: SOTA on
+formal/legal Vietnamese (99.57 %) and conversational (94.16 %),
+beats Toshiiiii1 on those registers.
+
+**Published as `nrl-ai/vn-diacritic-vit5-base`** with an honest model
+card flagging the gate-fail at the top, the full 4-register Δ table,
+and "when to use" guidance pointing users to Toshiiiii1 for
+business-heavy corpora. NOT the canonical name `vn-diacritic-restoration`
+— reserved for a future model that clears the gate.
+
+  pip install transformers torch
+  from nom.text.diacritic_models import HFDiacriticModel
+  restorer = HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")
+
+### Why we plateaued and what's next
+
+Wikipedia training is hitting a ceiling:
+- v0.2.23 (200K @ 3 epochs): 93.69 / 89.47
+- v0.2.25 (500K @ 5 epochs): 93.44 / 89.39
+
+2.5× data + cosine LR + 5 full epochs ≈ no improvement on the
+Wikipedia-only ceiling. The fundamental issue: Wikipedia is
+encyclopedic-tilted and underrepresents modern business/news
+register where Toshiiiii1's training data lives.
+
+Queued for v0.2.26: **mixed-source corpus** experiment.
+
+  - 350K subsampled Wikipedia (existing) + 150K news from
+    `tmnam20/Vietnamese-News-dedup` (CC-BY-4.0, 10-100 M deduped
+    Vietnamese articles).
+  - Same arch / hyperparams as v0.2.25.
+  - Hypothesis: news data closes the 4 pp business gap without
+    regressing the literary/formal/conversational wins.
+
+### New training infrastructure
+
+  - `training/diacritic/eval_checkpoint.py` — standalone re-eval of any
+    HF seq2seq diacritic model (local dir or Hub repo id) on the
+    full 4-register matrix.
+  - `training/diacritic/publish_hf.py` — gate-checked HF Hub publishing
+    with auto-generated model card, license attribution, BibTeX
+    citation, "when to use" trade-off summary.
+  - `training/diacritic/post_train.sh` — end-to-end after-training
+    pipeline: rsync from genpc2 → local re-eval (>0.5 pp divergence
+    fails) → publish_hf.py --dry-run.
+  - `training/diacritic/prep_data_news.py` — VN news ingestor for the
+    upcoming mixed-source experiment.
+
+### HFDiacriticModel.predict_batch — 7.60× throughput
+
+CUDA kernel-launch overhead dominates per-call cost on short Vietnamese
+inputs. Padding-batched inference gives **7.60× throughput** on a
+3080 16 GB Mobile (11.9 → 90.5 sent/s) on the 300-sentence Tatoeba
+corpus, with 120/120 quality match against single-call predict().
+
+  restorer = HFDiacriticModel()
+  restorer.predict_batch(sentences, batch_size=16)
+
+Default batch_size=16 sized for ~4 GB VRAM at 256-token inputs.
+Empty/blank inputs pass through untouched; output ordering preserved.
+
+### Off-the-shelf audit (2026-04-29)
+
+Benched two unmeasured Apache/MIT VN diacritic candidates on the
+55-sent business eval:
+
+  - `qthuan2604/ViT5_Restore_Diacritics_Vietnamese`: 90.59 %
+  - `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese`: 83.92 %
+
+Both lose to Toshiiiii1 (97.81 %) and to our v0.2.23 vit5-base
+(93.69 %). Toshiiiii1 remains public SOTA — training is justified.
+
+### Eval-leak guard expanded
+
+`prep_data._eval_leak_guards` now blocks all 4 diacritic eval slices
+(business + literary + conversational + formal). Audited 500K Wiki
+corpus measured 0 hits across all 4 — defense-in-depth, not a bug
+fix.
+
 ## [0.2.24] — 2026-04-29
 
 ### Toshiiiii1 register matrix extended to 4 corpora
