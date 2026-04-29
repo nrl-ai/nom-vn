@@ -1,0 +1,24 @@
+{
+  "model_id": "Toshiiiii1/Vietnamese_diacritics_restoration_5th",
+  "corpus": "benchmarks/data/tatoeba_vi/diacritic_eval_300.txt",
+  "n_sentences": 120,
+  "batch_size": 16,
+  "repeats": 3,
+  "single_seconds": [
+    9.9888,
+    10.0808,
+    10.1653
+  ],
+  "batched_seconds": [
+    1.3435,
+    1.3265,
+    1.3196
+  ],
+  "single_median_seconds": 10.0808,
+  "batched_median_seconds": 1.3265,
+  "single_throughput_sent_s": 11.9,
+  "batched_throughput_sent_s": 90.46,
+  "speedup": 7.6,
+  "quality_match_rate": 1.0,
+  "warmup_calls": 3
+}
