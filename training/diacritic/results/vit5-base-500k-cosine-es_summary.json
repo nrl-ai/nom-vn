@@ -1,0 +1,49 @@
+{
+  "model_id": "VietAI/vit5-base",
+  "epochs": 5,
+  "train_pairs": 500000,
+  "val_pairs": 5000,
+  "training_minutes": 35.7,
+  "hyperparameters": {
+    "batch_size": 32,
+    "gradient_accumulation_steps": 1,
+    "effective_batch_size": 32,
+    "lr": 0.0005,
+    "lr_scheduler": "cosine",
+    "warmup_steps": 500,
+    "max_input_length": 256,
+    "max_target_length": 256,
+    "early_stopping_patience": 3,
+    "bf16": true,
+    "fp16": false,
+    "gradient_checkpointing": false
+  },
+  "eval": {
+    "business_55": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9254,
+      "sentence_exact": 0.3818,
+      "mean_ms_per_sentence": 146.95
+    },
+    "literary_udvtb": {
+      "n_sentences": 800,
+      "word_accuracy": 0.8619,
+      "sentence_exact": 0.25,
+      "mean_ms_per_sentence": 156.83
+    },
+    "conversational_300": {
+      "n_sentences": 300,
+      "word_accuracy": 0.8971,
+      "sentence_exact": 0.4833,
+      "mean_ms_per_sentence": 101.55
+    },
+    "formal_udhr": {
+      "n_sentences": 72,
+      "word_accuracy": 0.9762,
+      "sentence_exact": 0.5972,
+      "mean_ms_per_sentence": 272.2
+    }
+  },
+  "device": "cuda",
+  "checkpoint": "training/diacritic/checkpoints/vit5-base-500k-cosine/final"
+}
