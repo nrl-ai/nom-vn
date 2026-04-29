@@ -1,0 +1,42 @@
+{
+  "checkpoint": "Toshiiiii1/Vietnamese_diacritics_restoration_5th",
+  "device": "cuda",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "max_input_length": 256,
+  "max_target_length": 256,
+  "eval": {
+    "business_55": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9781,
+      "sentence_exact": 0.6909,
+      "mean_ms_per_sentence": 119.25,
+      "p50_ms": 112.77,
+      "p95_ms": 160.28
+    },
+    "literary_udvtb": {
+      "n_sentences": 800,
+      "word_accuracy": 0.894,
+      "sentence_exact": 0.3425,
+      "mean_ms_per_sentence": 135.72,
+      "p50_ms": 134.71,
+      "p95_ms": 217.49
+    },
+    "conversational_300": {
+      "n_sentences": 300,
+      "word_accuracy": 0.9394,
+      "sentence_exact": 0.6733,
+      "mean_ms_per_sentence": 91.42,
+      "p50_ms": 85.77,
+      "p95_ms": 144.48
+    },
+    "formal_udhr": {
+      "n_sentences": 72,
+      "word_accuracy": 0.9814,
+      "sentence_exact": 0.7083,
+      "mean_ms_per_sentence": 245.38,
+      "p50_ms": 230.07,
+      "p95_ms": 450.19
+    }
+  }
+}
