@@ -41,6 +41,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import unicodedata
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -125,8 +126,15 @@ def main() -> int:
                 n_filtered_empty_row += 1
                 continue
             for sent in _split_sentences(text):
-                # Newscorpora often contain timestamps / image captions / boilerplate.
-                # Strip leading/trailing punctuation that survives the splitter.
+                # NFC-normalize. tmnam20 news ships ~79 % NFD-decomposed text,
+                # which silently broke v0.2.26 (caught 2026-04-30 — see
+                # CLAUDE.md gotcha #1: NFC vs NFD). The base ViT5 SentencePiece
+                # tokenizer is NFC; training on NFD targets makes the model
+                # emit decomposed forms that don't byte-match NFC-normalized
+                # eval targets.
+                sent = unicodedata.normalize("NFC", sent)
+                # News corpora often contain timestamps / image captions /
+                # boilerplate. Strip whitespace + bullet/separator characters.
                 sent = sent.strip().strip("|>:")
                 if not (args.min_chars <= len(sent) <= args.max_chars):
                     n_filtered_length += 1

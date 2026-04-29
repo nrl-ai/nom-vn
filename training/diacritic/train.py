@@ -216,14 +216,21 @@ def main() -> int:
     print(f"  train: {len(raw['train']):,} pairs · val: {len(raw['validation']):,} pairs")
 
     def preprocess(batch: dict[str, list[str]]) -> dict[str, list]:
+        # NFC-normalize at the training-time boundary too. The prep scripts
+        # also normalize, but this is defense-in-depth: a future
+        # mixed-source training experiment that pulls from a NFD-shipping
+        # corpus shouldn't silently regress because someone forgot the
+        # filter (caught 2026-04-30 — see CLAUDE.md gotcha #1).
+        inputs = [unicodedata.normalize("NFC", s) for s in batch["input"]]
+        targets = [unicodedata.normalize("NFC", s) for s in batch["target"]]
         model_inputs = tokenizer(
-            batch["input"],
+            inputs,
             max_length=args.max_input_length,
             truncation=True,
             padding=False,
         )
         labels = tokenizer(
-            batch["target"],
+            targets,
             max_length=args.max_target_length,
             truncation=True,
             padding=False,

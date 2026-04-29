@@ -41,6 +41,7 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -161,6 +162,11 @@ def main() -> int:
             n_articles_seen += 1
             text = row.get("text", "") or ""
             for sent in _split_sentences(text):
+                # NFC-normalize defensively. Wikipedia is already NFC, but the
+                # parallel prep_data_news.py path discovered tmnam20 ships ~79 %
+                # NFD-decomposed text — both inputs and the eval set must agree
+                # on form or the metric silently breaks (CLAUDE.md gotcha #1).
+                sent = unicodedata.normalize("NFC", sent)
                 if not (args.min_chars <= len(sent) <= args.max_chars):
                     n_filtered_length += 1
                     continue
