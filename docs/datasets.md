@@ -19,7 +19,8 @@ own `LICENSE` and per-file attribution.
 | `udhr_vi` (PDF) | PDF (text-layer) | formal | ~113 KB | public domain | [`benchmarks/data/udhr_vi/udhr_vie.pdf`](../benchmarks/data/udhr_vi/) |
 | `wikisource_vi` | text (prose) | classical literary | ~14 KB across 3 files | CC-BY-SA 4.0 (PD content) | [`benchmarks/data/wikisource_vi/`](../benchmarks/data/wikisource_vi/) |
 | `wiki_vi` | text (articles) | encyclopedia | 28 articles, ~1.16M chars | CC-BY-SA 4.0 | [`benchmarks/data/wiki_vi/articles.jsonl`](../benchmarks/data/wiki_vi/) |
-| `tatoeba_vi` | text (sentences) | conversational | 31,292 / 3,000 sample | CC-BY 2.0 FR | [`benchmarks/data/tatoeba_vi/`](../benchmarks/data/tatoeba_vi/) |
+| `tatoeba_vi` | text (sentences) | conversational | 31,292 / 3,000 sample / 300 diacritic | CC-BY 2.0 FR | [`benchmarks/data/tatoeba_vi/`](../benchmarks/data/tatoeba_vi/) |
+| `udhr_vi` (diacritic 72) | text (sentences) | formal/legal-prose | 72 sentences | public domain | [`benchmarks/data/udhr_vi/diacritic_eval_udhr.txt`](../benchmarks/data/udhr_vi/) |
 | `synthetic_ocr_vi` | PNG images | OCR target | 40 images (clean+noisy) | CC0 | [`benchmarks/data/synthetic_ocr_vi/`](../benchmarks/data/synthetic_ocr_vi/) |
 | `flores_vi` | text (parallel) | news / mixed | gated, not committed | CC-BY-SA 4.0 | [`benchmarks/data/flores_vi/`](../benchmarks/data/flores_vi/) |
 | `ud_vi_vtb` | CoNLL-U (gold word-segmented) | literary | 800 test / 1,123 dev / 1,400 train sentences; 11,692 test gold tokens | CC-BY-SA-4.0 | [`benchmarks/data/ud_vi_vtb/`](../benchmarks/data/ud_vi_vtb/) |
@@ -30,7 +31,7 @@ Total committed footprint: **~2.8 MB**.
 
 | Module | Recommended datasets | Why |
 |---|---|---|
-| `nom.text` (normalize, fix_diacritics) | `diacritic_eval_v0`, `udhr_vi`, `wikisource_vi` | Multi-register sentences with rich diacritics |
+| `nom.text` (normalize, fix_diacritics) | `diacritic_eval_v0`, `udhr_vi/diacritic_eval_udhr.txt`, `tatoeba_vi/diacritic_eval_300.txt`, `ud_vi_vtb/test.conllu` | 4-register matrix (formal / business / conversational / literary) |
 | `nom.text.word_tokenize` | `ud_vi_vtb` (test split) | Gold word-segmentation P/R/F1 vs underthesea |
 | `nom.chunking` | `wiki_vi`, `wikisource_vi`, `udhr_vi` | Long-form prose with paragraph structure |
 | `nom.embeddings` | `tatoeba_vi`, `flores_vi` (when available) | Sentence-level evaluation pairs |
@@ -44,6 +45,10 @@ Total committed footprint: **~2.8 MB**.
 ```bash
 # Text + PDF — all idempotent
 python benchmarks/data/_fetch_all.py
+
+# Diacritic eval slices (300 conversational, 72 formal/legal)
+python benchmarks/data/tatoeba_vi/build_diacritic_eval.py
+python benchmarks/data/udhr_vi/build_diacritic_eval.py
 
 # Synthetic OCR images — deterministic via seeded RNG
 python benchmarks/data/synthetic_ocr_vi/render.py
