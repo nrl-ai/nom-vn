@@ -1,0 +1,15 @@
+{
+  "model_id": "qthuan2604/ViT5_Restore_Diacritics_Vietnamese",
+  "device": "cuda",
+  "n_sentences": 55,
+  "n_words": 776,
+  "word_accuracy": 0.9059,
+  "diacritic_recall": 0.8951,
+  "elapsed_seconds": 6.884,
+  "latency_per_sentence_mean": 0.1251,
+  "latency_per_sentence_p50": 0.119,
+  "latency_per_sentence_p95": 0.1671,
+  "warmup_calls": 3,
+  "prefix": "",
+  "num_beams": 1
+}

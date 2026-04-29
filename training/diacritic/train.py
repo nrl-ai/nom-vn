@@ -73,26 +73,38 @@ def _word_accuracy(preds: list[str], targets: list[str]) -> tuple[float, float]:
     return word_acc, sent_exact
 
 
+def _load_txt_corpus(path: Path) -> list[str]:
+    """Read a plain-text corpus file (one sentence per line, # = comment)."""
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.startswith("#")
+    ]
+
+
 def load_eval_corpora(repo: Path) -> dict[str, list[tuple[str, str]]]:
-    """Load both eval corpora as lists of (stripped, target) pairs."""
+    """Load all 4-register eval corpora as lists of (stripped, target) pairs.
+
+    Registers (per CLAUDE.md autonomous-loop §5 register-coverage rule):
+      - business_55       — modern business / contracts / news (CC0)
+      - literary_udvtb    — classical literary, UD-VTB test (CC-BY-SA-4.0)
+      - conversational_300 — Tatoeba sample (CC-BY 2.0 FR)
+      - formal_udhr       — UDHR formal/legal-prose (public domain)
+
+    Each corpus is optional — if its file is absent the key is omitted (so the
+    eval still runs against whatever the genpc2 box has rsynced).
+    """
     from nom.text import strip_diacritics
 
     out: dict[str, list[tuple[str, str]]] = {}
 
-    # 55-sent business corpus
     p1 = repo / "benchmarks" / "data" / "diacritic_eval_v0.txt"
     if p1.exists():
-        sents = [
-            line.strip()
-            for line in p1.read_text(encoding="utf-8").splitlines()
-            if line.strip() and not line.startswith("#")
-        ]
-        out["business_55"] = [(strip_diacritics(s), s) for s in sents]
+        out["business_55"] = [(strip_diacritics(s), s) for s in _load_txt_corpus(p1)]
 
-    # 800-sent UD-VTB literary corpus
     p2 = repo / "benchmarks" / "data" / "ud_vi_vtb" / "test.conllu"
     if p2.exists():
-        sents = []
+        sents: list[str] = []
         for line in p2.read_text(encoding="utf-8").splitlines():
             if line.startswith("# text"):
                 _, _, val = line.partition("=")
@@ -100,6 +112,14 @@ def load_eval_corpora(repo: Path) -> dict[str, list[tuple[str, str]]]:
                 if v:
                     sents.append(v)
         out["literary_udvtb"] = [(strip_diacritics(s), s) for s in sents]
+
+    p3 = repo / "benchmarks" / "data" / "tatoeba_vi" / "diacritic_eval_300.txt"
+    if p3.exists():
+        out["conversational_300"] = [(strip_diacritics(s), s) for s in _load_txt_corpus(p3)]
+
+    p4 = repo / "benchmarks" / "data" / "udhr_vi" / "diacritic_eval_udhr.txt"
+    if p4.exists():
+        out["formal_udhr"] = [(strip_diacritics(s), s) for s in _load_txt_corpus(p4)]
 
     return out
 
@@ -139,9 +159,24 @@ def main() -> int:
         "Needed on cards <24 GB for full batch_size at seq 256.",
     )
     p.add_argument("--lr", type=float, default=5e-4)
+    p.add_argument(
+        "--lr-scheduler",
+        choices=("linear", "cosine", "constant", "constant_with_warmup"),
+        default="cosine",
+        help="LR schedule. cosine recommended for >1 epoch — gives a smooth "
+        "decay vs linear's abrupt drop. Default changed from linear to cosine "
+        "in v0.2.24 after the v0.2.23 vit5-base run plateaued early.",
+    )
     p.add_argument("--max-input-length", type=int, default=256)
     p.add_argument("--max-target-length", type=int, default=256)
     p.add_argument("--warmup-steps", type=int, default=500)
+    p.add_argument(
+        "--early-stopping-patience",
+        type=int,
+        default=3,
+        help="Stop training if eval_loss hasn't improved in N consecutive evals. "
+        "Set to 0 to disable. Saves compute on a model that's plateaued.",
+    )
     p.add_argument("--max-steps", type=int, default=-1, help="Cap total steps for smoke run.")
     p.add_argument("--eval-steps", type=int, default=500)
     p.add_argument("--save-steps", type=int, default=500)
@@ -216,6 +251,7 @@ def main() -> int:
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         gradient_checkpointing=args.gradient_checkpointing,
         learning_rate=args.lr,
+        lr_scheduler_type=args.lr_scheduler,
         warmup_steps=args.warmup_steps,
         max_steps=args.max_steps,
         logging_steps=args.logging_steps,
@@ -235,6 +271,17 @@ def main() -> int:
         seed=42,
     )
 
+    callbacks = []
+    if args.early_stopping_patience > 0:
+        from transformers import EarlyStoppingCallback
+
+        callbacks.append(
+            EarlyStoppingCallback(
+                early_stopping_patience=args.early_stopping_patience,
+                early_stopping_threshold=0.0,
+            )
+        )
+
     trainer = Seq2SeqTrainer(
         model=model,
         args=training_args,
@@ -244,12 +291,14 @@ def main() -> int:
         ),
         tokenizer=tokenizer,
         data_collator=data_collator,
+        callbacks=callbacks,
     )
 
     print("Training...")
-    t0 = time.perf_counter()
+    t_train_start = time.perf_counter()
     trainer.train()
-    print(f"Training time: {(time.perf_counter() - t0) / 60:.1f} min")
+    training_minutes = round((time.perf_counter() - t_train_start) / 60, 1)
+    print(f"Training time: {training_minutes:.1f} min")
 
     # Save best model + tokenizer for later inference / eval / publication
     final_dir = args.output_dir / "final"
@@ -273,7 +322,7 @@ def main() -> int:
         print(f"\n--- {name} ({len(pairs)} sentences) ---")
         preds: list[str] = []
         targets: list[str] = []
-        t0 = time.perf_counter()
+        t_eval = time.perf_counter()
         for stripped, target in pairs:
             x = tokenizer(
                 stripped,
@@ -286,7 +335,7 @@ def main() -> int:
             pred = tokenizer.decode(out[0], skip_special_tokens=True)
             preds.append(pred)
             targets.append(target)
-        elapsed = time.perf_counter() - t0
+        elapsed = time.perf_counter() - t_eval
         wa, se = _word_accuracy(preds, targets)
         per_sent_ms = elapsed / len(pairs) * 1000
         eval_summary[name] = {
@@ -310,7 +359,22 @@ def main() -> int:
         "model_id": args.model_id,
         "epochs": args.epochs,
         "train_pairs": len(tokenized["train"]),
-        "training_minutes": round((time.perf_counter() - t0) / 60, 1) if False else None,
+        "val_pairs": len(tokenized["validation"]),
+        "training_minutes": training_minutes,
+        "hyperparameters": {
+            "batch_size": args.batch_size,
+            "gradient_accumulation_steps": args.gradient_accumulation_steps,
+            "effective_batch_size": args.batch_size * args.gradient_accumulation_steps,
+            "lr": args.lr,
+            "lr_scheduler": args.lr_scheduler,
+            "warmup_steps": args.warmup_steps,
+            "max_input_length": args.max_input_length,
+            "max_target_length": args.max_target_length,
+            "early_stopping_patience": args.early_stopping_patience,
+            "bf16": args.bf16,
+            "fp16": args.fp16,
+            "gradient_checkpointing": args.gradient_checkpointing,
+        },
         "eval": eval_summary,
         "device": device,
         "checkpoint": str(final_dir),

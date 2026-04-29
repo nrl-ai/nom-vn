@@ -25,6 +25,10 @@ echo "rsync -> genpc2..."
 rsync -a training/diacritic/ genpc2:nom-vn-train/training/diacritic/
 rsync -a benchmarks/data/diacritic_eval_v0.txt genpc2:nom-vn-train/benchmarks/data/
 rsync -a benchmarks/data/ud_vi_vtb/test.conllu genpc2:nom-vn-train/benchmarks/data/ud_vi_vtb/
+rsync -a benchmarks/data/tatoeba_vi/diacritic_eval_300.txt \
+    genpc2:nom-vn-train/benchmarks/data/tatoeba_vi/
+rsync -a benchmarks/data/udhr_vi/diacritic_eval_udhr.txt \
+    genpc2:nom-vn-train/benchmarks/data/udhr_vi/
 rsync -a src/nom genpc2:nom-vn-train/src/
 
 # Kick off via nohup so SSH disconnect doesn't kill it.
