@@ -20,11 +20,14 @@ literary while not regressing on business is the goal.
 
 ## Experiment history
 
-| Run | Base | Pairs | Epochs | LR sched | Business | Literary | Verdict |
-|---|---|---|---|---|---:|---:|---|
-| v0.2.22 | google/mt5-small (300 M) | 200 K | 3 | linear | 89.58 | 84.14 | failed gate by wide margin |
-| v0.2.23 | VietAI/vit5-base (220 M) | 200 K | 3 | linear | 93.69 | 89.47 | most register-balanced, sub-gate on business |
-| **v0.2.24 (running)** | VietAI/vit5-base | **500 K** | **5** | **cosine** | TBD | TBD | data + schedule scaled |
+| Run | Base | Pairs | Epochs | Notes | Business | Literary | Conv | Formal | Verdict |
+|---|---|---|---|---|---:|---:|---:|---:|---|
+| v0.2.22 | mt5-small (300 M) | 200 K wiki | 3 | linear | 89.58 | 84.14 | — | — | failed gate by wide margin |
+| v0.2.23 | vit5-base (220 M) | 200 K wiki | 3 | linear | 93.69 | 89.47 | — | — | most register-balanced of its time, sub-gate on business |
+| v0.2.24 #1 | vit5-base | 500 K wiki | 5 (early-stopped at 0.96) | cosine, ES patience=3 | 92.54 | 86.19 | 89.71 | 97.62 | regression; ES fired too early on noisy 200-sample eval |
+| **v0.2.25 #2 published** | vit5-base | 500 K wiki | 5 | cosine, ES off, eval_samples=1000 | 93.44 | 89.39 | 94.16 | 99.57 | best register-balanced, sub-gate on business; published as `nrl-ai/vn-diacritic-vit5-base` |
+| v0.2.25 #3 | vit5-base | 350 K wiki + 150 K **news** (NFD-poisoned) | 5 | same | **77.99** | 89.22 | 89.42 | 98.28 | catastrophic business regression — tmnam20 ships NFD; v6 fixes |
+| **v0.2.26 (running)** | vit5-base | 350 K wiki + 150 K news (NFC-fixed) | 5 | same | TBD | TBD | TBD | TBD | targeting the business-register gap with clean news data |
 
 Adoption gate (both required):
 
