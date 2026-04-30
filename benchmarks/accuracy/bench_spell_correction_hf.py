@@ -74,6 +74,13 @@ def main() -> int:
     p.add_argument("--warmup", type=int, default=3)
     p.add_argument("--json", type=Path, default=None)
     p.add_argument("--examples", type=int, default=2)
+    p.add_argument(
+        "--use-slow-tokenizer",
+        action="store_true",
+        help="Force the slow Python tokenizer. Some HF cards (e.g. those built "
+        "on older bartpho releases) need this when the fast-tokenizer "
+        "conversion fails on `add_prefix_space`.",
+    )
     args = p.parse_args()
 
     import torch
@@ -83,7 +90,7 @@ def main() -> int:
     print(f"device: {device}")
     print(f"loading {args.model_id}...")
     t0 = time.perf_counter()
-    tok = AutoTokenizer.from_pretrained(args.model_id)
+    tok = AutoTokenizer.from_pretrained(args.model_id, use_fast=not args.use_slow_tokenizer)
     model = AutoModelForSeq2SeqLM.from_pretrained(args.model_id).to(device).eval()
     print(f"  loaded in {time.perf_counter() - t0:.1f}s")
 

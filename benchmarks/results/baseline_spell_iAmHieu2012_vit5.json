@@ -1,0 +1,73 @@
+{
+  "model_id": "iAmHieu2012/vit5-vietnamese-spelling-correction",
+  "device": "cuda",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "prefix": "",
+  "eval": {
+    "business_55_light": {
+      "n_sentences": 44,
+      "word_accuracy": 0.9022,
+      "sentence_exact": 0.7273,
+      "mean_ms_per_sentence": 135.51,
+      "p50_ms": 130.7,
+      "p95_ms": 184.12
+    },
+    "business_55_heavy": {
+      "n_sentences": 55,
+      "word_accuracy": 0.6898,
+      "sentence_exact": 0.2727,
+      "mean_ms_per_sentence": 129.25,
+      "p50_ms": 124.26,
+      "p95_ms": 188.54
+    },
+    "formal_72_light": {
+      "n_sentences": 65,
+      "word_accuracy": 0.8538,
+      "sentence_exact": 0.6154,
+      "mean_ms_per_sentence": 306.95,
+      "p50_ms": 250.02,
+      "p95_ms": 503.81
+    },
+    "formal_72_heavy": {
+      "n_sentences": 72,
+      "word_accuracy": 0.5133,
+      "sentence_exact": 0.0833,
+      "mean_ms_per_sentence": 337.77,
+      "p50_ms": 249.08,
+      "p95_ms": 542.39
+    },
+    "conversational_300_light": {
+      "n_sentences": 179,
+      "word_accuracy": 0.8545,
+      "sentence_exact": 0.5251,
+      "mean_ms_per_sentence": 107.93,
+      "p50_ms": 98.74,
+      "p95_ms": 190.1
+    },
+    "conversational_300_heavy": {
+      "n_sentences": 287,
+      "word_accuracy": 0.6377,
+      "sentence_exact": 0.2056,
+      "mean_ms_per_sentence": 109.17,
+      "p50_ms": 100.98,
+      "p95_ms": 176.76
+    },
+    "literary_800_light": {
+      "n_sentences": 608,
+      "word_accuracy": 0.6181,
+      "sentence_exact": 0.3174,
+      "mean_ms_per_sentence": 154.18,
+      "p50_ms": 154.49,
+      "p95_ms": 248.19
+    },
+    "literary_800_heavy": {
+      "n_sentences": 788,
+      "word_accuracy": 0.4211,
+      "sentence_exact": 0.0685,
+      "mean_ms_per_sentence": 174.33,
+      "p50_ms": 158.15,
+      "p95_ms": 289.82
+    }
+  }
+}
