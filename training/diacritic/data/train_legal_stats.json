@@ -1,0 +1,17 @@
+{
+  "source": "GreenNode/zalo-ai-legal-text-retrieval-vn",
+  "config": "corpus",
+  "split": "test",
+  "license": "MIT (Zalo AI Legal Text Retrieval challenge)",
+  "pairs": 100000,
+  "docs_scanned": 27913,
+  "filtered_empty_doc": 0,
+  "filtered_no_diacritic": 4,
+  "filtered_length": 168422,
+  "filtered_high_ascii": 41,
+  "filtered_blocked_eval_leak": 0,
+  "filtered_duplicate": 18587,
+  "stride": 2,
+  "min_chars": 30,
+  "max_chars": 300
+}

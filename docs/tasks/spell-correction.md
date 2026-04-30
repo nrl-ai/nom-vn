@@ -191,14 +191,52 @@ print(gen.noisify("Tôi yêu Việt Nam và đất nước này tuyệt vời.")
 # 'Toi yêu Viet Nam và đất nước này tuyệt vời.'
 ```
 
-Six noise functions (diacritic strip / partial / confusion / char swap /
-insert / delete / OCR) and three calibrated presets
-(`light_noise`, `heavy_noise`, `telex_typo_noise`). Deterministic via
-seed; NFC-normalized output (the silent-killer NFD trap that poisoned an
-earlier mixed-source diacritic run is locked out at every layer); edit
-budget capped so high-probability configs don't mangle inputs beyond
-recoverability. See [`docs/recipes.md`](../recipes.md#synthesize-noisy-vietnamese-text-for-spell-correction-training-data)
+Ten noise dimensions and seven calibrated presets:
+
+| Preset | Models |
+|---|---|
+| `light_noise()` | Casual desktop typing; ~5 % edit distance. |
+| `heavy_noise()` | Mid-quality OCR; ~15-20 % edit distance. |
+| `telex_typo_noise()` | Surface effects of Telex/VNI input slips. |
+| `telex_grammar_noise()` | Real Telex-keystroke errors (drop / wrong / doubled tone letters). |
+| `mobile_noise()` | Phone thumbs typing: adjacent-key slips + teen-code abbreviations + segmentation. |
+| `ocr_realistic_noise()` | Scanned-document OCR: heavy diacritic loss + char confusion + segmentation. |
+| `comprehensive_noise()` | All ten dimensions at moderate probabilities. Used as the default for v2 corpora where the model needs to generalize across many typo classes. |
+
+Deterministic via seed; NFC-normalized output (the silent-killer NFD
+trap that poisoned an earlier mixed-source diacritic run is locked out
+at every layer); edit budget capped so high-probability configs don't
+mangle inputs beyond recoverability. See
+[`docs/recipes.md`](../recipes.md#synthesize-noisy-vietnamese-text-for-spell-correction-training-data)
 for the full recipe.
+
+### v2 multi-source training corpus (queued for v0.2.29)
+
+The v1 corpus pulls only from Wiki + news; the v2 corpus
+(`training/spell_correction/prep_data_v2.py`) adds a legal-register
+slice from `GreenNode/zalo-ai-legal-text-retrieval-vn` (MIT) and
+applies all seven presets via round-robin plus a `comprehensive_noise`
+slot. Default mix at 600K pairs:
+
+| Slot | Source | Quota | Noise |
+|---|---|---:|---|
+| mixed | Wiki+news (v1 base, NFC) | 65 % | round-robin over 6 presets |
+| legal | Zalo Legal QA corpus, MIT | 25 % | round-robin over 6 presets |
+| comprehensive_only | Wiki+news (NFC) | 10 % | always `comprehensive_noise` |
+
+This widens register coverage (legal Vietnamese has distinct vocabulary
+the v1 corpus underexposed) and trains the model on more failure
+modes per pair. Re-run via:
+
+```bash
+# 1. Build legal corpus (~1 min stream from HF, 100K pairs)
+python training/diacritic/prep_data_legal.py --max-pairs 100_000
+cp training/diacritic/data/train_legal.jsonl \
+   training/diacritic/data/train_legal_nfc.jsonl
+
+# 2. Build the v2 spell-correction corpus
+python training/spell_correction/prep_data_v2.py --max-pairs 600_000
+```
 
 ## References
 

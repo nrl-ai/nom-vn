@@ -1,0 +1,26 @@
+{
+  "version": "v2",
+  "sources": {
+    "mixed": "training/diacritic/data/train_mixed_nfc.jsonl",
+    "legal": "training/diacritic/data/train_legal_nfc.jsonl"
+  },
+  "train_pairs": 545000,
+  "val_pairs": 5000,
+  "quotas": {
+    "mixed": 0.65,
+    "legal": 0.25,
+    "comprehensive_only": 0.1
+  },
+  "preset_counts": {
+    "light_noise": 74124,
+    "telex_typo_noise": 81314,
+    "telex_grammar_noise": 80046,
+    "mobile_noise": 82857,
+    "ocr_realistic_noise": 85989,
+    "heavy_noise": 85670,
+    "comprehensive_noise": 60000
+  },
+  "skipped_no_change": 28452,
+  "noisy_per_clean": 1,
+  "seed": 42
+}
