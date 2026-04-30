@@ -5,6 +5,91 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] — 0.2.29 work in flight (v2 corpus retraining)
+
+### v0.2.29 retraining chain — spell-base + spell-small + diacritic-base on v2 corpus
+
+A multi-source v2 training corpus is built and the v0.2.29 retraining
+chain is running on the remote GPU box (RTX 3090). Three stages
+back-to-back, ~7-8 hours total:
+
+- **Stage A** — `vn-spell-correction-base` (ViT5 220 M) on v2.
+- **Stage B** — `vn-spell-correction-small` (BARTpho-syllable 115 M) on v2.
+- **Stage C** — `vn-diacritic-vit5-base` (ViT5 220 M) on v2 diacritic corpus.
+
+The v2 corpus closes specific weaknesses surfaced by the OOD eval:
+
+- **Multi-register source mix**: 65% Wiki+news + 25% Zalo Legal QA
+  corpus + 10% comprehensive_noise on mixed.
+- **6 noise presets round-robin**: `light_noise` / `telex_typo_noise` /
+  `telex_grammar_noise` / `mobile_noise` / `ocr_realistic_noise` /
+  `heavy_noise`. The `_grammar` and `mobile` presets are new and target
+  the Telex / forum slang weaknesses.
+- **Per-source quotas + dedup**: 545K (noisy, clean) pairs for spell;
+  595K (stripped, clean) pairs for diacritic.
+
+### Hand-curated OOD eval — 150 sentences, 6 registers, bootstrap CI + error breakdown
+
+`benchmarks/data/spell_correction_eval_real/` is the load-bearing answer
+to the synthetic-eval-overfit concern. Each pair has a real Vietnamese
+error pattern (NOT generated from `nom.text.noise`):
+
+- `forum_25.jsonl` — Vietnamese forum / social-media teen-code.
+- `mobile_25.jsonl` — phone-typing autocorrect mishaps.
+- `telex_real_25.jsonl` — real Telex/VNI keystroke artefacts.
+- `ocr_25.jsonl` — Tesseract / EasyOCR engine output.
+- `legal_real_25.jsonl` — formal-register typos in real legal documents.
+- `news_real_25.jsonl` — modern news headlines + body.
+
+`benchmarks/accuracy/bench_spell_correction_real.py` reports word
+accuracy, sentence exact match, bootstrap 95% CI (n=1000 resamples),
+and per-error-type breakdown (missed_diacritic / wrong_tone / base_char
+/ extra_word / missing_word).
+
+5 models benched, n=150 aggregate:
+
+      Model                            Word acc   95% CI
+      ----------------------------------------------------
+      vn-spell-correction-base (ours)  77.43 %    [73-82]
+      Toshiiiii1 (public)              77.40 %    [73-82]
+      vn-spell-correction-small (ours) 75.92 %    [71-81]
+      vn-diacritic-vit5-base (ours)    71.50 %    [66-77]
+      bmd1905 (public)                 49.21 %    [44-55]
+
+**Surprise: we tie Toshiiiii1 on OOD.** The synthetic-eval lead our
+model has (3-7 pp on the 8-split grid) does not carry over to real
+noise. v0.2.29 retraining target is explicit: beat Toshiiiii1 on OOD,
+not just synthetic.
+
+### Pipeline integration — `nrl-ai/vn-diacritic-vit5-base` is now the default
+
+`HFDiacriticModel`'s `model_id` default flipped from
+`Toshiiiii1/Vietnamese_diacritics_restoration_5th` to
+`nrl-ai/vn-diacritic-vit5-base`. The recommended-stack tables in
+`README.md` and `README.vi.md` reordered to match. Toshiiiii1 stays in
+the table as the "business / news only" alternative — it has a 2.83 pp
+edge on business-register text but loses 8.7 pp on literary, so the
+register-balanced ours is the safer default.
+
+### Documentation site at https://nom-vn.nrl.ai (VitePress + edgevox theme)
+
+VitePress scaffold under `docs/.vitepress/`, theme cloned from
+`nrl-ai/edgevox`, Vietnamese as primary language with English
+scaffolded under `/en/` for incremental backfill. Deploy workflow
+`.github/workflows/docs.yml` builds and pushes to GitHub Pages on
+every change to `docs/`.
+
+### CI / repo hygiene
+
+- Gitleaks secrets-scan job wired into CI alongside the existing
+  pre-commit hook. The repo has been scanned end-to-end (100 commits
+  + working dir): zero leaks.
+- All `genpc2` references scrubbed from user-facing surfaces (scripts,
+  docs, README); literal survives only in `CLAUDE.md` and operator
+  shell rcs (`~/.zshrc`, `~/.bashrc`).
+- Renamed `training/{diacritic,spell_correction}/launch_genpc2.sh` →
+  `launch_remote_train.sh`; `TRAIN_HOST` is required (`:?` syntax).
+
 ## [0.2.28] — 2026-04-30
 
 ### Spell-correction track: base tier shipped, decisively beats public landscape
