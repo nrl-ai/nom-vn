@@ -259,5 +259,11 @@ module = [
   "docx.*",
   "pptx.*",
   "opentelemetry.*",
+  # Heavy ML deps (lazy-imported under try/except in the modules that use
+  # them). Not in [dev] extra to keep CI fast — the modules raise a
+  # clear ImportError at runtime if missing.
+  "torch.*",
+  "transformers.*",
+  "bm25s.*",
 ]
 ignore_missing_imports = true

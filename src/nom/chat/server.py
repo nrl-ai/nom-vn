@@ -378,7 +378,7 @@ def _register_static_file(app: Any, path: Path) -> None:
 
     route = f"/{path.name}"
 
-    @app.get(route, include_in_schema=False)  # type: ignore[misc]
+    @app.get(route, include_in_schema=False)  # type: ignore
     def _serve() -> Any:
         return FileResponse(path)
 
