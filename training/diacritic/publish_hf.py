@@ -100,9 +100,9 @@ language:
 tags:
   - vietnamese
   - diacritic-restoration
-  - text2text-generation
+  - seq2seq
   - vit5
-pipeline_tag: text2text-generation
+pipeline_tag: text-generation
 datasets:
   - hirine/wikipedia-vietnamese-1M296K-dataset
 metrics:
