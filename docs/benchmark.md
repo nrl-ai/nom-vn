@@ -267,6 +267,47 @@ python benchmarks/accuracy/bench_diacritic_hf_udvtb.py \
     --json benchmarks/results/baseline_diacritic_toshiiiii_udvtb_test.json
 ```
 
+### Out-of-distribution real-world bench — *measured 2026-04-30*
+
+`benchmarks/data/spell_correction_eval_real/` is a 150-sentence
+hand-curated set whose noise patterns come from real Vietnamese error
+sources (forum slang, mobile autocorrect, real Telex/VNI keystrokes,
+Tesseract+EasyOCR engine output, formal-register stripped legal text,
+news headlines), NOT from `nom.text.noise`. Same harness applies to
+both diacritic and spell-correction models — spell correction is a
+strict superset of diacritic restoration.
+
+Aggregate word accuracy on n=150 (bootstrap 95 % CI):
+
+| Model | Aggregate | Telex | Forum | Legal | News |
+|---|---:|---:|---:|---:|---:|
+| `nrl-ai/vn-spell-correction-base` | **77.43** [73-82] | 17.38 | 59.45 | 95.09 | 96.54 |
+| `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 77.40 [73-82] | 18.54 | 60.11 | 93.80 | 94.07 |
+| `nrl-ai/vn-spell-correction-small` | 75.92 [71-81] | 9.51 | 58.73 | 93.56 | 91.58 |
+| `nrl-ai/vn-diacritic-vit5-base` | 71.50 [66-77] | 14.89 | 49.31 | 88.05 | 95.80 |
+| `nrl-ai/vn-diacritic-small` | 70.27 [65-76] | 9.33 | 46.28 | 89.15 | 90.35 |
+| `bmd1905/vietnamese-correction-v2` | 49.21 [44-55] | 11.58 | 59.02 | 54.90 | 30.62 |
+
+Reproduce:
+```bash
+python benchmarks/accuracy/bench_spell_correction_real.py <model_id> \
+    --json benchmarks/results/baseline_real_<short>.json
+python scripts/summarize_ood_bench.py --format markdown --ci
+```
+
+Two findings worth noting:
+
+1. **Our spell-base ties Toshiiiii1 on OOD aggregate** (77.43 vs 77.40,
+   well within bootstrap CI overlap). Synthetic 8-split shows a 3-7 pp
+   lead, but real-world noise washes that out. v0.2.29 retraining
+   targets a clear OOD lead, not just a synthetic one.
+2. **bmd1905 collapses on OOD** (49.21 % aggregate) — it trained on a
+   different noise distribution that didn't expose enough strip-diacritic
+   patterns. Cautionary tale: a model winning its own synthetic eval
+   isn't guaranteed to win on real text.
+
+JSON baselines committed under `benchmarks/results/baseline_real_*.json`.
+
 ### Local LLM grid — *measured 2026-04-26*
 
 Goal: identify the smallest **local quantized model** that hits usable VN diacritic accuracy for user-machine deployment. All models served via Ollama 0.21.2 (llama.cpp backend) with `Q4_K_M` quantization (Ollama default), structured output (`format` JSON schema), `think: false`, temperature 0. Hardware: RTX 3090 24GB. Same `diacritic_eval_v0.txt` corpus.
