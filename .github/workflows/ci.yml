@@ -23,6 +23,12 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Stub ui_dist (real bundle is built in ui-build / publish jobs)
+        run: |
+          mkdir -p src/nom/chat/ui_dist
+          echo '<!doctype html><meta charset="utf-8"><title>nom-vn UI placeholder</title>' \
+            > src/nom/chat/ui_dist/index.html
+
       - name: Install
         run: |
           python -m pip install --upgrade pip
@@ -54,6 +60,12 @@ jobs:
           python-version: ${{ matrix.python }}
           cache: pip
 
+      - name: Stub ui_dist (real bundle is built in ui-build / publish jobs)
+        run: |
+          mkdir -p src/nom/chat/ui_dist
+          echo '<!doctype html><meta charset="utf-8"><title>nom-vn UI placeholder</title>' \
+            > src/nom/chat/ui_dist/index.html
+
       - name: Install
         run: |
           python -m pip install --upgrade pip
@@ -74,6 +86,12 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+
+      - name: Stub ui_dist (real bundle is built in ui-build / publish jobs)
+        run: |
+          mkdir -p src/nom/chat/ui_dist
+          echo '<!doctype html><meta charset="utf-8"><title>nom-vn UI placeholder</title>' \
+            > src/nom/chat/ui_dist/index.html
 
       - name: Install
         run: |
