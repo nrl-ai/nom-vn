@@ -148,6 +148,49 @@ bench dưới `benchmarks/accuracy/` và `training/diacritic/eval_checkpoint.py`
 Latency bị decoder ViT5 220 M chi phối; cả hai mô hình cùng họ arch.
 Để được 7.6× throughput trên cả hai, dùng `predict_batch`.
 
+### Bench thực tế ngoài-phân-phối (OOD, đo ngày 2026-04-30)
+
+`benchmarks/data/spell_correction_eval_real/` là tập 150 câu hand-curate
+mà nhiễu lấy từ nguồn lỗi VN thực tế (forum / mobile / Telex thật / OCR
+engine / pháp lý / tin tức) — KHÔNG phải `nom.text.noise`. Cùng eval
+áp dụng cho cả khôi phục dấu và sửa chính tả vì sửa chính tả là siêu
+tập của khôi phục dấu.
+
+Cả hai tier khôi phục dấu của chúng tôi vs Toshiiiii1 trên OOD:
+
+| Slice | ours `vn-diacritic-vit5-base` | ours `vn-diacritic-small` | Toshiiiii1 |
+|---|---:|---:|---:|
+| `forum_25` | 49.31 | 46.28 | **60.11** |
+| `mobile_25` | 79.66 | 81.51 | **96.95** |
+| `telex_real_25` | 14.89 | 9.33 | **18.54** |
+| `ocr_25` | **94.53** | 93.29 | 94.22 |
+| `legal_real_25` | 88.05 | 89.15 | **93.80** |
+| `news_real_25` | **95.80** | 90.35 | 94.07 |
+| **Tổng hợp** (n=150) | 71.50 [66-77] | 70.27 [65-76] | **77.40** [73-82] |
+
+**Phát hiện quan trọng**: trên OOD, Toshiiiii1 vượt cả hai tier diacritic
+của chúng tôi với khoảng cách rõ rệt — +5.9 pp so với base, +7.1 pp so
+với small. Hai lý do:
+
+1. Toshiiiii1 được huấn luyện trên một mix nhiễu rộng hơn (đa dạng
+   typing real-world, không chỉ strip-dấu thuần).
+2. Mô hình diacritic-only của chúng tôi học đảo ngược phép strip
+   determinis, nên gặp các lỗi không phải strip (Telex grammar, teen
+   code, OCR substitution) thì không có đủ tín hiệu.
+
+**Hệ quả thực tế**: nếu input của bạn là văn bản đã strip-dấu sạch (ví
+dụ ASCII pipe đầu ra của một hệ thống cũ), dùng `vn-diacritic-vit5-base`.
+Nếu input là nhiễu thực tế (OCR, người gõ tay, social media), dùng
+`vn-spell-correction-base` — model đó vượt diacritic-only của chúng tôi
++5.93 pp tổng hợp trên cùng OOD eval. v0.2.29 retrain (đang chạy) sẽ
+thử khép khoảng cách diacritic vs Toshiiiii1 bằng cách huấn luyện lại
+trên corpus v2 (Wiki + news + legal) thay vì chỉ Wiki.
+
+JSON nguồn:
+[diacritic-vit5-base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_diacritic_vit5_base.json) /
+[diacritic-small](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_diacritic_small.json) /
+[Toshiiiii1](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_toshiiiii1.json).
+
 JSON baseline:
 
 - `benchmarks/results/baseline_diacritic_toshiiiii_4register.json` (Toshiiiii1)
