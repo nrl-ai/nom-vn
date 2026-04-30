@@ -352,28 +352,30 @@ The two averaged columns:
 ## Limitations
 
 - **In-distribution metric, real-world is harder — measured.** Training
-  and eval both use `nom.text.noise` with the same three presets —
-  different seeds, but the same statistical noise distribution. The
-  model has implicitly learned the inverse of *our* noise generator.
-  We measured the OOD gap on a 100-sentence hand-curated real-world
-  eval (forum slang / mobile autocorrect / real Telex / Tesseract+EasyOCR):
+  and eval both use `nom.text.noise`. The synthetic 8-split numbers
+  above measure how well we invert *our* noise generator. We also
+  benchmark on a 150-sentence hand-curated OOD eval ([6 registers](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks/data/spell_correction_eval_real),
+  bootstrap 95 % CI):
 
-  | Slice | Word acc | Sent. exact |
-  |---|---:|---:|
-  | OCR engine output | 93.62 % | 60.0 % |
-  | Mobile autocorrect | 95.01 % | 40.0 % |
-  | Forum/social slang | 59.45 % | 0.0 % |
-  | Real Telex keystrokes | 17.38 % | 0.0 % |
-  | **Aggregate (n=100)** | **66.88 %** | 25.0 % |
+  | Slice | this model | Toshiiiii1 (public) | bmd1905 (public) |
+  |---|---:|---:|---:|
+  | forum_25 | 59.45 % | 60.11 % | 59.02 % |
+  | mobile_25 | 95.01 % | 96.95 % | 88.09 % |
+  | telex_real_25 | 17.38 % | 18.54 % | 11.58 % |
+  | ocr_25 | 93.62 % | 94.22 % | 47.42 % |
+  | legal_real_25 | 95.09 % | 93.80 % | 54.90 % |
+  | news_real_25 | 96.54 % | 94.07 % | 30.62 % |
+  | **Aggregate (n=150)** | **77.43 %** | 77.40 % | 49.21 % |
 
-  Synthetic light_avg is 98.58 %; real-world aggregate is 66.88 %. The
-  32 pp gap is the cost of training only on `light/telex_typo/heavy`
+  Synthetic light_avg is 98.58 %, real-world aggregate is 77.43 %. The
+  21 pp gap is the cost of training only on `light/telex_typo/heavy`
   noise — those capture the *surface* of typos but not real Telex
-  keystroke artefacts (`dduwojc` for `được`) or forum-style abbreviation
-  syntax (`ko bt` for `không biết`). v0.2.29 retraining on the v2
-  multi-source corpus + `comprehensive_noise()` (which adds
-  `telex_grammar_noise()` and `mobile_noise()`) is queued and should
-  close most of this gap.
+  keystroke artefacts (`dduwojc` for `được`) or forum-style
+  abbreviations (`ko bt` for `không biết`). On OOD this model **ties**
+  with `Toshiiiii1` (77.43 vs 77.40, within bootstrap CI). v0.2.29
+  retraining on the v2 multi-source corpus + `comprehensive_noise()`
+  (which adds `telex_grammar_noise()` + `mobile_noise()`) is queued
+  and targets a clear OOD lead, not just a synthetic one.
 - **Heavy-noise corner cases.** OCR outputs that drop entire words or
   add hallucinated text are out-of-scope; the noise generator we
   trained on caps edits per sentence (max 25 % edit ratio).
