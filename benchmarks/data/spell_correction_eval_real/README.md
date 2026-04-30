@@ -15,11 +15,12 @@ our generator doesn't model (or models with different statistics):
 | `mobile_25.jsonl` | Phone-typing autocorrect mishaps | 25 | Wrong word substitutions, adjacent-key slips, capitalisation drift |
 | `telex_real_25.jsonl` | Real Telex/VNI keystroke artefacts | 25 | Stray `s`/`f`/`r`/`x`/`j`/`w`/`a`/`e`/`o` from missed escape |
 | `ocr_25.jsonl` | Tesseract / EasyOCR output on scanned VN text | 25 | Engine-specific char confusions (`m`↔`rn`, `cl`↔`d`, `0`↔`o`) |
+| `legal_real_25.jsonl` | Stripped-diacritic VN legal documents | 25 | Formal-register vocab (căn cứ, điều, khoản), proper nouns |
+| `news_real_25.jsonl` | Stripped-diacritic VN news headlines/body | 25 | Modern formal Vietnamese, place names, current-affairs terminology |
 
-**Total: 100 sentences.** The set is intentionally small — the value is
-authenticity, not size. Each pair was hand-checked against a real
-source-of-noise example. Sources cited per-line via `# source:` comments
-in the JSONL files where applicable.
+**Total: 150 sentences.** Six distinct registers covering the realistic
+range of Vietnamese error sources a deployed model will see. Each pair
+was hand-checked against a real source-of-noise example.
 
 The clean side is canonical Vietnamese (NFC). The noisy side preserves
 the exact byte sequence of the source error pattern.

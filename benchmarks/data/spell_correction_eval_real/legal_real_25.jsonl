@@ -1,0 +1,25 @@
+{"input": "Căn cứ Luat Doanh nghiep so 59/2020/QH14 ngay 17 thang 6 nam 2020", "target": "Căn cứ Luật Doanh nghiệp số 59/2020/QH14 ngày 17 tháng 6 năm 2020"}
+{"input": "Theo quy đinh tai khoản 1 Đieu 5 cua Bo luat Dan su 2015", "target": "Theo quy định tại khoản 1 Điều 5 của Bộ luật Dân sự 2015"}
+{"input": "Hợp đông kinh tế nay đươc lập thành 02 bản có giá trị pháp lý như nhau", "target": "Hợp đồng kinh tế này được lập thành 02 bản có giá trị pháp lý như nhau"}
+{"input": "Bên A có nghia vu thanh toan đung han và day du theo điều khoản đã thoả thuận", "target": "Bên A có nghĩa vụ thanh toán đúng hạn và đầy đủ theo điều khoản đã thoả thuận"}
+{"input": "Quyết định số 123/QD-UBND ngày 15/03/2025 cua Uy ban nhan dan tinh Lam Dong", "target": "Quyết định số 123/QĐ-UBND ngày 15/03/2025 của Uỷ ban nhân dân tỉnh Lâm Đồng"}
+{"input": "Về việc phê duyet du an dau tu xay dung Khu cong nghiep Phu My giai đoạn 2", "target": "Về việc phê duyệt dự án đầu tư xây dựng Khu công nghiệp Phú Mỹ giai đoạn 2"}
+{"input": "Người đại diện theo pháp luật: Nguyễn Văn A, chuc vu Tổng Giam doc, sinh năm 1975", "target": "Người đại diện theo pháp luật: Nguyễn Văn A, chức vụ Tổng Giám đốc, sinh năm 1975"}
+{"input": "Mã số doanh nghiep: 0312345678 do Sở Kế hoạch va Đầu tư cap ngay 01/01/2020", "target": "Mã số doanh nghiệp: 0312345678 do Sở Kế hoạch và Đầu tư cấp ngày 01/01/2020"}
+{"input": "Tổng giá tri hop đong: 5.000.000.000 đông (Năm tỉ đông chăn)", "target": "Tổng giá trị hợp đồng: 5.000.000.000 đồng (Năm tỉ đồng chẵn)"}
+{"input": "Hai ben thoa thuan các điều khoản như sau: Đieu 1 — Pham vi hop đong", "target": "Hai bên thoả thuận các điều khoản như sau: Điều 1 — Phạm vi hợp đồng"}
+{"input": "Điều 12. Trach nhiem cua Ben B trong viec bao mat thong tin khach hang", "target": "Điều 12. Trách nhiệm của Bên B trong việc bảo mật thông tin khách hàng"}
+{"input": "Trong trường hợp bat kha khang, hai ben se thuong luong de gia han hop đong", "target": "Trong trường hợp bất khả kháng, hai bên sẽ thương lượng để gia hạn hợp đồng"}
+{"input": "Hợp đong nay co hieu luc tu ngay ky va keo dai trong vong 24 thang", "target": "Hợp đồng này có hiệu lực từ ngày ký và kéo dài trong vòng 24 tháng"}
+{"input": "Cac ben cam ket thuc hien đung va day du moi đieu khoan trong hop đong nay", "target": "Các bên cam kết thực hiện đúng và đầy đủ mọi điều khoản trong hợp đồng này"}
+{"input": "Mọi tranh chap phat sinh se đuoc giai quyet theo quy đinh phap luat Viet Nam", "target": "Mọi tranh chấp phát sinh sẽ được giải quyết theo quy định pháp luật Việt Nam"}
+{"input": "Phieu thu so 0001 ngay 14/03/2025 So tien: 5.000.000 đong (Nam trieu đong chan)", "target": "Phiếu thu số 0001 ngày 14/03/2025 Số tiền: 5.000.000 đồng (Năm triệu đồng chẵn)"}
+{"input": "Người nộp tiền: Nguyen Thi Hong Lý do nộp: Tien hoc phi hoc ki 1 nam 2025", "target": "Người nộp tiền: Nguyễn Thị Hồng Lý do nộp: Tiền học phí học kỳ 1 năm 2025"}
+{"input": "Bang luong thang 03 nam 2025 cua Cong ty TNHH ABC, tong cong 25 nhan vien", "target": "Bảng lương tháng 03 năm 2025 của Công ty TNHH ABC, tổng cộng 25 nhân viên"}
+{"input": "Đơn xin nghỉ phép cua Nguyễn Văn Hùng, Phong Ke toan, lý do: viec gia đinh", "target": "Đơn xin nghỉ phép của Nguyễn Văn Hùng, Phòng Kế toán, lý do: việc gia đình"}
+{"input": "Thời gian nghi: tu ngay 15/04 đen ngay 17/04/2025 (3 ngay lam viec)", "target": "Thời gian nghỉ: từ ngày 15/04 đến ngày 17/04/2025 (3 ngày làm việc)"}
+{"input": "Biên ban nghiem thu hang hoa số 023/BB-NTH ngay 28 thang 03 nam 2025", "target": "Biên bản nghiệm thu hàng hoá số 023/BB-NTH ngày 28 tháng 03 năm 2025"}
+{"input": "Bên giao hang đa giao đu so luong 100 thung hang theo phieu xuat kho 0567", "target": "Bên giao hàng đã giao đủ số lượng 100 thùng hàng theo phiếu xuất kho 0567"}
+{"input": "Bên nhan đa kiem tra chat luong va xac nhan hang hoa đat yeu cau ky thuat", "target": "Bên nhận đã kiểm tra chất lượng và xác nhận hàng hoá đạt yêu cầu kỹ thuật"}
+{"input": "Giay chung nhan đang ky kinh doanh so 0309876543 do So KHĐT TP HCM cap", "target": "Giấy chứng nhận đăng ký kinh doanh số 0309876543 do Sở KHĐT TP HCM cấp"}
+{"input": "Đia chi tru so chinh: 456 Nguyen Hue, Phuong Ben Nghe, Quan 1, TP Ho Chi Minh", "target": "Địa chỉ trụ sở chính: 456 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP Hồ Chí Minh"}
