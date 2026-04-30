@@ -104,39 +104,56 @@ big mix).
 
 `benchmarks/data/spell_correction_eval_real/` is a 100-sentence
 hand-curated set whose noise patterns come from real VN error sources,
-NOT `nom.text.noise`. v0.2.28 base measured against it:
+NOT `nom.text.noise`. Three of our shipped models measured on it side
+by side:
 
-| Slice | Source of noise | Word acc | Sent. exact |
-|---|---|---:|---:|
-| `forum_25` | Forum/social-media teen-code | 59.45 % | 0.0 % |
-| `mobile_25` | Phone autocorrect mishaps | 95.01 % | 40.0 % |
-| `telex_real_25` | Real Telex/VNI keystrokes | **17.38 %** | 0.0 % |
-| `ocr_25` | Tesseract/EasyOCR engine output | 93.62 % | 60.0 % |
-| **aggregate** | n=100 | **66.88 %** | 25.0 % |
+| Slice | Source | spell-correction-base (220 M) | spell-correction-small (115 M) | diacritic-vit5-base (220 M) |
+|---|---|---:|---:|---:|
+| `forum_25` | Forum / teen-code | **59.45 %** | 58.73 % | 49.31 % |
+| `mobile_25` | Phone autocorrect | **95.01 %** | 95.01 % | 79.66 % |
+| `telex_real_25` | Real Telex/VNI | **17.38 %** | 9.51 % | 14.89 % |
+| `ocr_25` | Tesseract / EasyOCR | **93.62 %** | 91.16 % | 94.53 % |
+| **Aggregate** | n=100 | **66.88 %** | 66.04 % | 59.71 % |
 
-The synthetic eval shows 98.58 % (light avg). The real-world OOD eval
-shows 66.88 % aggregate. **The 32 pp gap is the overfit cost** — the
-v1 corpus trained the model to invert `light_noise` /
-`telex_typo_noise` / `heavy_noise`, which capture the *surface* of
-Vietnamese typos but not the keystroke artefacts of real Telex (`dduwojc`
-for `được`) or the abbreviation-heavy syntax of forum slang (`ko bt`
-for `không biết`). On those, the model has near-zero training signal
-and collapses.
+Numbers are word accuracy. Source JSONs:
+[base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_base.json) /
+[small](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_small.json) /
+[diacritic-vit5-base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_diacritic_vit5_base.json).
 
-OCR and mobile-autocorrect slices stay close to in-distribution (94 %
-and 95 %), because those error patterns are well-represented by
+Three observations:
+
+1. **The synthetic vs OOD gap is real.** The same `vn-spell-correction-base`
+   that scores 98.58 % light avg on the synthetic 8-split grid drops to
+   66.88 % aggregate on real-world noise. **The 32 pp gap is the overfit
+   cost** — the v1 corpus trained the model to invert `light_noise` /
+   `telex_typo_noise` / `heavy_noise`, which capture the *surface* of
+   Vietnamese typos but not the keystroke artefacts of real Telex
+   (`dduwojc` for `được`) or the abbreviation-heavy syntax of forum
+   slang (`ko bt` for `không biết`).
+2. **Spell correction beats diacritic-only on real text.** Aggregate
+   66.88 % vs 59.71 % — the spell model recovers letter-level errors
+   the diacritic-only model can't. Most of the gap is on `forum_25`
+   (+10.14 pp), where teen-code abbreviations dominate.
+3. **The fast tier holds up surprisingly well on aggregate**
+   (66.04 % vs 66.88 %, -0.84 pp) but **regresses on Telex specifically**
+   (9.51 % vs 17.38 %, -7.87 pp). For Telex-heavy production traffic
+   (anything coming from a VN IME), the base model is the safer pick.
+
+OCR and mobile-autocorrect slices stay close to in-distribution
+(91-95 %), because those error patterns are well-represented by
 `heavy_noise` and the diacritic-strip distribution.
 
 **This is exactly what the v2 corpus + `comprehensive_noise()` fixes**
 — adding `telex_grammar_noise()` (real keystroke errors) and
 `mobile_noise()` (teen-code + adjacent-key) to the training mix should
-close most of this gap. v0.2.29 retraining on the v2 corpus is queued.
+close most of this gap. v0.2.29 retraining on the v2 corpus is in
+progress (currently ~25 % through 5 epochs on a single RTX 3090).
 
 Reproduce:
 ```bash
 python benchmarks/accuracy/bench_spell_correction_real.py \
     nrl-ai/vn-spell-correction-base \
-    --json benchmarks/results/real_spell_correction_base.json
+    --json benchmarks/results/baseline_real_spell_correction_base.json
 ```
 
 Confidence intervals on the smaller splits (business_55, formal_72) are

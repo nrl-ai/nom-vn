@@ -1,0 +1,47 @@
+{
+  "model_id": "nrl-ai/vn-diacritic-vit5-base",
+  "device": "cuda",
+  "eval_dir": "spell_correction_eval_real",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "prefix": "",
+  "eval": {
+    "forum_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.4931,
+      "sentence_exact": 0.0,
+      "mean_ms_per_sentence": 134.67,
+      "p50_ms": 134.76,
+      "p95_ms": 152.85
+    },
+    "mobile_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.7966,
+      "sentence_exact": 0.08,
+      "mean_ms_per_sentence": 114.15,
+      "p50_ms": 114.52,
+      "p95_ms": 132.35
+    },
+    "telex_real_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.1489,
+      "sentence_exact": 0.0,
+      "mean_ms_per_sentence": 215.75,
+      "p50_ms": 219.6,
+      "p95_ms": 261.2
+    },
+    "ocr_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.9453,
+      "sentence_exact": 0.68,
+      "mean_ms_per_sentence": 143.83,
+      "p50_ms": 130.55,
+      "p95_ms": 206.76
+    },
+    "__all_real__": {
+      "n_sentences": 100,
+      "word_accuracy": 0.5971,
+      "sentence_exact": 0.19
+    }
+  }
+}
