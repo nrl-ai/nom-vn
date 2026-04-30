@@ -13,7 +13,7 @@ page after learning one.
 | Task | Status | Page |
 |---|---|---|
 | Diacritic restoration | shipped | [`tasks/diacritic-restoration.md`](tasks/diacritic-restoration.md) |
-| Spell correction | in progress | _coming — alongside the spell-correction training track_ |
+| Spell correction | shipped | [`tasks/spell-correction.md`](tasks/spell-correction.md) |
 | Word segmentation | shipped | _to migrate_ |
 | Embedding | shipped | _to migrate_ |
 | Retrieval (BM25 + dense) | shipped | _to migrate_ |
