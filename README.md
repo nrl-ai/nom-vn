@@ -4,14 +4,14 @@
 
 > Named after *chữ Nôm* — the script Vietnam wrote in for a millennium.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.2.18-orange)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/nrl-ai/nom-vn/blob/main/LICENSE)
+[![Status](https://img.shields.io/badge/status-v0.2.25-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
-[![Tests](https://img.shields.io/badge/tests-344%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-354%20passing-brightgreen)](https://github.com/nrl-ai/nom-vn/tree/main/tests)
 
 A local-first toolkit. **No data leaves your machine.** Use any LLM (Ollama by default), any embedder, any document type — Nôm wires them into a Vietnamese-aware RAG pipeline you can ship as either a Python library or a deployable chat web app.
 
-**Every default is benched on real Vietnamese data.** Where a public Apache/MIT model beats a multilingual one, we use it. See [docs/benchmark.md](docs/benchmark.md) for the receipts.
+**Every default is benched on real Vietnamese data.** Where a public Apache/MIT model beats a multilingual one, we use it. See [docs/benchmark.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/benchmark.md) for the receipts.
 
 ---
 
@@ -23,7 +23,7 @@ nom serve                       # opens http://localhost:8080
 # upload PDFs/Word/Excel/PowerPoint/images, ask questions in Vietnamese
 ```
 
-![Nôm — chat with citations grounded in indexed Vietnamese documents](docs/screenshots/02-chat-with-answer.png)
+![Nôm — chat with citations grounded in indexed Vietnamese documents](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/02-chat-with-answer.png)
 
 The web app is built into the wheel — there's nothing else to install.
 
@@ -32,7 +32,7 @@ The web app is built into the wheel — there's nothing else to install.
 ## Recommended stack — *measured 2026-04-26*
 
 Every recommendation has a measured number from a script in
-[`benchmarks/`](benchmarks/) that runs on a clean clone. No projected
+[`benchmarks/`](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks) that runs on a clean clone. No projected
 numbers. No "based on the model card." Numbers came out of our hardware,
 on real Vietnamese corpora, this week.
 
@@ -78,11 +78,11 @@ Three-pane editorial layout: spaces sidebar / chat thread / sources + studio. Da
 
 Three-pane editorial layout (1920×1080 desktop):
 
-![Default chat view — space selected, materials indexed, suggested questions](docs/screenshots/01-welcome.png)
+![Default chat view — space selected, materials indexed, suggested questions](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
 
 Citations are first-class. Every chunk number is a chip you can click to see the source passage:
 
-![Citations expanded — Vietnamese chunks shown inline](docs/screenshots/03-citations-expanded.png)
+![Citations expanded — Vietnamese chunks shown inline](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/03-citations-expanded.png)
 
 ---
 
@@ -92,7 +92,7 @@ Click any material in the right panel — **Original** tab renders the file nati
 
 | DOCX → editorial paragraphs | PPTX → 16:10 slide cards | XLSX → HTML tables with sheet picker |
 |---|---|---|
-| ![DOCX viewer](docs/screenshots/04-viewer-docx.png) | ![PPTX viewer](docs/screenshots/05-viewer-pptx.png) | ![XLSX viewer](docs/screenshots/06-viewer-xlsx.png) |
+| ![DOCX viewer](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/04-viewer-docx.png) | ![PPTX viewer](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/05-viewer-pptx.png) | ![XLSX viewer](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/06-viewer-xlsx.png) |
 
 ---
 
@@ -181,23 +181,23 @@ brew install tesseract tesseract-lang
 
 7 layers (Primitives / Models / Retrieval / RAG / Storage / Application / Deployment), every meaningful boundary is a `typing.Protocol`. Local single-process today; the cloud path replaces three Protocol implementations and changes nothing in the application layer.
 
-See **[docs/architecture.md](docs/architecture.md)** for the full layered model, Protocol seam table, and scaling-path reference.
+See **[docs/architecture.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/architecture.md)** for the full layered model, Protocol seam table, and scaling-path reference.
 
 ---
 
 ## Documentation
 
-- **[docs/architecture.md](docs/architecture.md)** — the 7-layer model, Protocol seams, scaling path, anti-architecture rules
-- **[docs/pipeline.md](docs/pipeline.md)** — the document-extraction pipeline end-to-end with per-stage picks
-- **[docs/benchmark.md](docs/benchmark.md)** — measured numbers per module (the receipts behind every "Recommended stack" row above)
-- **[docs/recipes.md](docs/recipes.md)** — task-oriented "I want X, do Y" cookbook with copy-paste code
-- **[docs/release.md](docs/release.md)** — how to cut a PyPI release (Trusted Publishing via GitHub Actions, no tokens)
-- **[docs/training_plan_2026q2.md](docs/training_plan_2026q2.md)** — when to fine-tune vs adopt off-the-shelf, per component, with cost estimates
-- **[docs/sota_vn_2026q2.md](docs/sota_vn_2026q2.md)** — SOTA local LLM / embedding / OCR for Vietnamese (April 2026 snapshot, every claim cited)
-- **[docs/oss_landscape_2026q2.md](docs/oss_landscape_2026q2.md)** — OSS local-AI / RAG landscape: patterns to steal, traps to avoid
-- **[benchmarks/](benchmarks/)** — reproducible measurement scripts (perf + retrieval + accuracy)
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** — dev setup, PR rules
-- **[CHANGELOG.md](CHANGELOG.md)** — version history
+- **[docs/architecture.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/architecture.md)** — the 7-layer model, Protocol seams, scaling path, anti-architecture rules
+- **[docs/pipeline.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/pipeline.md)** — the document-extraction pipeline end-to-end with per-stage picks
+- **[docs/benchmark.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/benchmark.md)** — measured numbers per module (the receipts behind every "Recommended stack" row above)
+- **[docs/recipes.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/recipes.md)** — task-oriented "I want X, do Y" cookbook with copy-paste code
+- **[docs/release.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/release.md)** — how to cut a PyPI release (Trusted Publishing via GitHub Actions, no tokens)
+- **[docs/training_plan_2026q2.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/training_plan_2026q2.md)** — when to fine-tune vs adopt off-the-shelf, per component, with cost estimates
+- **[docs/sota_vn_2026q2.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/sota_vn_2026q2.md)** — SOTA local LLM / embedding / OCR for Vietnamese (April 2026 snapshot, every claim cited)
+- **[docs/oss_landscape_2026q2.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/oss_landscape_2026q2.md)** — OSS local-AI / RAG landscape: patterns to steal, traps to avoid
+- **[benchmarks/](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks)** — reproducible measurement scripts (perf + retrieval + accuracy)
+- **[CONTRIBUTING.md](https://github.com/nrl-ai/nom-vn/blob/main/CONTRIBUTING.md)** — dev setup, PR rules
+- **[CHANGELOG.md](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)** — version history
 
 ---
 
