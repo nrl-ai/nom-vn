@@ -1,0 +1,15 @@
+{
+  "source": "training/diacritic/data/train_mixed_nfc.jsonl",
+  "train_pairs": 459478,
+  "val_pairs": 5000,
+  "source_lines_seen": 500000,
+  "skipped_blocked_eval": 0,
+  "skipped_duplicate": 0,
+  "noisy_per_clean": 1,
+  "noise_presets_round_robin": [
+    "light_noise",
+    "telex_typo_noise",
+    "heavy_noise"
+  ],
+  "seed": 42
+}

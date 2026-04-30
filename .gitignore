@@ -62,7 +62,8 @@ benchmarks/data/synthetic_pdf_vi/*.pdf
 # Training data + checkpoints — multi-GB; regeneratable via
 # training/diacritic/prep_data.py + train.py. Stats committed.
 training/diacritic/data/*.jsonl
-training/diacritic/checkpoints/
+training/spell_correction/data/*.jsonl
+training/*/checkpoints/
 
 # Local model / dataset caches (we don't ship these)
 models/

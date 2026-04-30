@@ -1,0 +1,608 @@
+{"input": "Thanh bắt chuyện với Hùng va nói:\"Tôi trông ông quen quen?\".", "target": "Thanh bắt chuyện với Hùng và nói:\"Tôi trông ông quen quen?\"."}
+{"input": "Thanh quay sang Hùng:\"ông quê đâu nhi?", "target": "Thanh quay sang Hùng:\"ông quê đâu nhỉ?"}
+{"input": "À, tôi con có adnh sách lớp day này\".", "target": "À, tôi còn có danh sách lớp đây này\"."}
+{"input": "Nói rồi Thanh giở adnh sách lớp đọc vanh vách tên tuổi, địa chỉ, điện thoại của Hùng.", "target": "Nói rồi Thanh giở danh sách lớp đọc vanh vách tên tuổi, địa chỉ, điện thoại của Hùng."}
+{"input": "Co lẽ vì lịch sự Hùng cũng nói:\"Tôi cũng thấy hình như gặp ông o đâu\".", "target": "Có lẽ vì lịch sự Hùng cũng nói:\"Tôi cũng thấy hình như gặp ông ở đâu\"."}
+{"input": "Như du đoán của Thanh, mấy hôm sau Hùng gặp bà Loan htưa chuyện.", "target": "Như dự đoán của Thanh, mấy hôm sau Hùng gặp bà Loan thưa chuyện."}
+{"input": "Theo chân cửu vạn, chúng tôi đã chứng kiến con duong van chuyển hàng lậu đầy sôi động và cũng không kém phần tinh vi, phứct ạp.", "target": "Theo chân cửu vạn, chúng tôi đã chứng kiến con đường vận chuyển hàng lậu đầy sôi động và cũng không kém phần tinh vi, phức tạp."}
+{"input": "Thanh vo dui đánh đét rồi hô váng nhà:\"Thôi chết rồi!", "target": "Thanh vỗ đùi đánh đét rồi hô váng nhà:\"Thôi chết rồi!"}
+{"input": "Thanh đập vai Hùng het to:\"co ơi, hóa ra con re tương lai cũa cô đang hoc cùng lớp tại chức với cháu.", "target": "Thanh đập vai Hùng hét to:\"cô ơi, hóa ra con rể tương lai của cô đang học cùng lớp tại chức với cháu."}
+{"input": "Cổng trang, Thác Ném, quốc lộ 1 cũ... - những địa danh đã trở nên qua quen thuộc trên ban đồ hàng lậu đi về Lạng Sơn.", "target": "Cổng trắng, Thác Ném, quốc lộ 1 cũ... - những địa danh đã trở nên quá quen thuộc trên bản đồ hàng lậu đi về Lạng Sơn."}
+{"input": "Bên kia núi, chỉ cách vài kilômet là những kho hang lậu đang chờ mang đi.", "target": "Bên kia núi, chỉ cách vài kilômet là những kho hàng lậu đang chờ mang đi."}
+{"input": "Đoạn nào khó đi thì đã có người đứng chờ từ truoc để lấy.", "target": "Đoạn nào khó đi thì đã có người đứng chờ từ trước để lấy."}
+{"input": "Nếu mu trẻ con thì bán như cho.", "target": "Nếu mũ trẻ con thì bán như cho."}
+{"input": "Đợt hàng này giá tri không cao bởi giá khá bèo, hon nua lại cồng kềnh.", "target": "Đợt hàng này giá trị không cao bởi giá khá bèo, hơn nữa lại cồng kềnh."}
+{"input": "Những chiếc đầu đĩa CD, VCD... chất cao 5 - 6 m, trải rộng hàng trăm met vuong.", "target": "Những chiếc đầu đĩa CD, VCD... chất cao 5 - 6 m, trải rộng hàng trăm mét vuông."}
+{"input": "Riêng việc học đại học tuy thiếu chính xác một chút (vi đang học chu không phải đã tốt nghiệp), nhưng co thể thông cảm.", "target": "Riêng việc học đại học tuy thiếu chính xác một chút (vì đang học chứ không phải đã tốt nghiệp), nhưng có thể thông cảm."}
+{"input": "Tuy nhiên, với 253 km đường biên, chúng tôi không thể chặn het dược...", "target": "Tuy nhiên, với 253 km đường biên, chúng tôi không thể chặn hết được..."}
+{"input": "Người uma thì không quan tâ mhàng nhap lậu hay nội địa.", "target": "Người mua thì không quan tâm hàng nhập lậu hay nội địa."}
+{"input": "Đem ra vườn cắt thử, thấy sướng tay, anh ở ngoài vườn cắt tỉa suot ngày quên cả cơm nước.", "target": "Đem ra vườn cắt thử, thấy sướng tay, anh ở ngoài vườn cắt tỉa suốt ngày quên cả cơm nước."}
+{"input": "Hải ý tứ nói: là thằng con trai muốn thể hiện ứsc mạnh thì cần tránh bị coi thường, nhất là về đầu óc.", "target": "Hải ý tứ nói: là thằng con trai muốn thể hiện sức mạnh thì cần tránh bị coi thường, nhất là về đầu óc."}
+{"input": "Mấy lần đi qua Bưởi vào nhà tim nhưng bố mẹ mày nó imày đi lam xa...", "target": "Mấy lần đi qua Bưởi vào nhà tìm nhưng bố mẹ mày nói mày đi làm xa..."}
+{"input": "Tùng nói không nên vội vàng mà mẹ phiả âm thầm tìm hiểu.", "target": "Tùng nói không nên vội vàng mà mẹ phải âm thầm tìm hiểu."}
+{"input": "Những tuyến đường không có nàh dân thì cửu vạn khẩn trương nhay lên xe máy lao về điểm tập kết.", "target": "Những tuyến đường không có nhà dân thì cửu vạn khẩn trương nhảy lên xe máy lao về điểm tập kết."}
+{"input": "Ai mua vài trăm chiếc chỉ có cách mua lại củ acác chủ hàng VN.", "target": "Ai mua vài trăm chiếc chỉ có cách mua lại của các chủ hàng VN."}
+{"input": "Không biết chu hang Trung Quốc lãi bao nhiêu, chỉ biết qua đến Lang Sơn giá trị của chiếc mũ đã tăng lên gấp rưỡi.", "target": "Không biết chủ hàng Trung Quốc lãi bao nhiêu, chỉ biết qua đến Lạng Sơn giá trị của chiếc mũ đã tăng lên gấp rưỡi."}
+{"input": "Cứ từng đoạn một như vậy, hàng dần dần được đưa về thành phố Lang Sơn để tieu thụ.", "target": "Cứ từng đoạn một như vậy, hàng dần dần được đưa về thành phố Lạng Sơn để tiêu thụ."}
+{"input": "Thậm chí thịt lon, thịt bò còn được xẻ sẵn từ bên kia mang sang đây bán\".", "target": "Thậm chí thịt lợn, thịt bò còn được xẻ sẵn từ bên kia mang sang đây bán\"."}
+{"input": "Hải và bố mẹ ngày trước ở chung với ông ba trên duong Bưởi và người bạn nọ quen biết Hải trogn thoi ky Hải ở đó.", "target": "Hải và bố mẹ ngày trước ở chung với ông bà trên đường Bưởi và người bạn nọ quen biết Hải trong thời kỳ Hải ở đó."}
+{"input": "Lá thứ nhất cho biết đã quay lai gặp bố mẹ Hai, biết được nhà ông bà Hải vẫn ở Bưởi.", "target": "Lá thứ nhất cho biết đã quay lại gặp bố mẹ Hải, biết được nhà ông bà Hải vẫn ở Bưởi."}
+{"input": "Anh Tư bảo ở xứ\"khỉ ho cò gáy\"nay tới mùa thu hoạch tim nhan công khó như hai sao trên trời vay.", "target": "Anh Tư bảo ở xứ\"khỉ ho cò gáy\"này tới mùa thu hoạch tìm nhân công khó như hái sao trên trời vậy."}
+{"input": "Nhưng điều nay cung dạy cho Phạm biết: muốn giúp trẻ lang thang không gì bằng cho chúng một cái nghề.", "target": "Nhưng điều này cũng dạy cho Phạm biết: muốn giúp trẻ lang thang không gì bằng cho chúng một cái nghề."}
+{"input": "Chưa bao giờ mẹ con bà Loan lại tranh luan với hnau gay gắt như gần đây.", "target": "Chưa bao giờ mẹ con bà Loan lại tranh luận với nhau gay gắt như gần đây."}
+{"input": "Tất cả có thể đổ xuong sông, thậm chí còn tồ itệ hơn khi chưa thực hien.", "target": "Tất cả có thể đổ xuống sông, thậm chí còn tồi tệ hơn khi chưa thực hiện."}
+{"input": "Tuy nhiên, chẳng thấy một ai thuc thi nhiệm vụ này.", "target": "Tuy nhiên, chẳng thấy một ai thực thi nhiệm vụ này."}
+{"input": "Ong Trường nói vui:\"Chỉ khi lợn gà nói được ngoại ngữ thì chúng tôi mới biết do không hpải hàng nội địa\".", "target": "Ông Trường nói vui:\"Chỉ khi lợn gà nói được ngoại ngữ thì chúng tôi mới biết đó không phải hàng nội địa\"."}
+{"input": "Thay vào đó là những bức ảnh noi về chính những đứa trẻ lnag thang.", "target": "Thay vào đó là những bức ảnh nói về chính những đứa trẻ lang thang."}
+{"input": "Theo dõi tiếp hai lan, Thanh kết luận Hùng đang học Đại học Thương mại chu chưa tốt gnhiệp như bà Loan biet.", "target": "Theo dõi tiếp hai lần, Thanh kết luận Hùng đang học Đại học Thương mại chứ chưa tốt nghiệp như bà Loan biết."}
+{"input": "Thanh quyết định khai thác ở chính anh ta qua mot kịch bản: Hùng đến choi, điện thoại nhà bà Loan đổ chuông.", "target": "Thanh quyết định khai thác ở chính anh ta qua một kịch bản: Hùng đến chơi, điện thoại nhà bà Loan đổ chuông."}
+{"input": "Cụ ke:\"Nó còn trói, đánh tôi để lay tiền\".", "target": "Cụ kể:\"Nó còn trói, đánh tôi để lấy tiền\"."}
+{"input": "Nói chuyện một lúc, bà quay sang Hung và bảo:\"bạn cô (thám tử Thanh) có con trai đang ở Đức.", "target": "Nói chuyện một lúc, bà quay sang Hùng và bảo:\"bạn cô (thám tử Thanh) có con trai đang ở Đức."}
+{"input": "Với việc bỏ vốn một, lời gấp đôi, tư thuong nào mà chẳng muốn làm.", "target": "Với việc bỏ vốn một, lời gấp đôi, tư thương nào mà chẳng muốn làm."}
+{"input": "Dem máy cho vợ, tiện tay Thọ bấm đọc.", "target": "Đem máy cho vợ, tiện tay Thọ bấm đọc."}
+{"input": "Người bán hàng thi cứ khang định mua từ các làng bản của người dan tộc nên rất an toàn.", "target": "Người bán hàng thì cứ khẳng định mua từ các làng bản của người dân tộc nên rất an toàn."}
+{"input": "Tuy nhiên, nhiều người dan đi chợ cho biết phần lớn đều là nông sản, thực phẩm Trung Quốc.", "target": "Tuy nhiên, nhiều người dân đi chợ cho biết phần lớn đều là nông sản, thực phẩm Trung Quốc."}
+{"input": "Khủng bố bnằg đinệ thoại: thả mồi.", "target": "Khủng bố bằng điện thoại: thả mồi."}
+{"input": "Thọ đọc: Sao em bỏ hẹn mà không báo gì cho anh, làm anh chờ cả buoi.", "target": "Thọ đọc: Sao em bỏ hẹn mà không báo gì cho anh, làm anh chờ cả buổi."}
+{"input": "Thu đi nghỉ, con Thọ thở dài roi am thầm ra box điện thoại công cộng gọi vào số máy bí ẩn kia.", "target": "Thu đi nghỉ, còn Thọ thở dài rồi âm thầm ra box điện thoại công cộng gọi vào số máy bí ẩn kia."}
+{"input": "Hải học giỏi nhưng không hiểu sao thi đại hoc trong nước không đỗ.", "target": "Hải học giỏi nhưng không hiểu sao thi đại học trong nước không đỗ."}
+{"input": "Ngyà chủ nhật đẹp trời, hai vợ chồng thu - Thọ ríu rít sửa soạn cho bữa tiệc cuối tuần.", "target": "Ngày chủ nhật đẹp trời, hai vợ chồng thu - Thọ ríu rít sửa soạn cho bữa tiệc cuối tuần."}
+{"input": "Thu một lần nua hốt hoảng. boi rối và chị lại nói không biết.", "target": "Thu một lần nữa hốt hoảng. bối rối và chị lại nói không biết."}
+{"input": "Mặt Thọ sa sầm, giọng lạnh như băng: Em làm gi qua đáng mà để người yêu giận này!\".", "target": "Mặt Thọ sa sầm, giọng lạnh như băng: Em làm gì quá đáng mà để người yêu giận này!\"."}
+{"input": "Hai vợ chồng lờiq ua tiếng lại khá căng thẳng.", "target": "Hai vợ chồng lời qua tiếng lại khá căng thẳng."}
+{"input": "Chị cũng nghi chẳng nên cho chồng biết, chi tổ buc mình và khó chịu...", "target": "Chị cũng nghĩ chẳng nên cho chồng biết, chỉ tổ bực mình và khó chịu..."}
+{"input": "Nhiều lan Thu đã nhờ người gọi vào số máy do nhưng van không có người nghe...", "target": "Nhiều lần Thu đã nhờ người gọi vào số máy đó nhưng vẫn không có người nghe..."}
+{"input": "Tin viết:\"em thật quá đáng, du chúng mình không còn gì với nhau nữa thì cũng phai nói một lời ro ràng.", "target": "Tin viết:\"em thật quá đáng, dù chúng mình không còn gì với nhau nữa thì cũng phải nói một lời rõ ràng."}
+{"input": "Hai vợ chồng quyết định sát cnáh chống\"tin tặc\".", "target": "Hai vợ chồng quyết định sát cánh chống\"tin tặc\"."}
+{"input": "Anh bấm may, chuông đổ nhưng không có nguoi nhận.", "target": "Anh bấm máy, chuông đổ nhưng không có người nhận."}
+{"input": "Bo con cá làm dở, Thu đọc mẩu tin, mặt tái mét, tay run như người cảm lạnh.", "target": "Bỏ con cá làm dở, Thu đọc mẩu tin, mặt tái mét, tay run như người cảm lạnh."}
+{"input": "K ẻnhắn tin đó lại còn luôn theo sát vợ Thọ hằng ngày.", "target": "Kẻ nhắn tin đó lại còn luôn theo sát vợ Thọ hằng ngày."}
+{"input": "Họ cho biết: Thọ làm ở cong ty nhà nuớc voi chức vụ nhân viên bình thường, làm công ăn lương và không mâu thuẫn voi ai.", "target": "Họ cho biết: Thọ làm ở công ty nhà nước với chức vụ nhân viên bình thường, làm công ăn lương và không mâu thuẫn với ai."}
+{"input": "Điều này tuy thuan lợi trong việc nắm bắt Tùng song cũng hết sức nguy hiểm ìv dễ sơ suất.", "target": "Điều này tuy thuận lợi trong việc nắm bắt Tùng song cũng hết sức nguy hiểm vì dễ sơ suất."}
+{"input": "Và thứ tư, thủ phạm thuộc mối quan hệ caủ người chong.", "target": "Và thứ tư, thủ phạm thuộc mối quan hệ của người chồng."}
+{"input": "Thọ hỏi Thu có nghi ai thì Thu noi khống ai có dấu hiệu khả nghi.", "target": "Thọ hỏi Thu có nghi ai thì Thu nói không ai có dấu hiệu khả nghi."}
+{"input": "Họ khảo sát từ giuong nằm, bếp ăn đến trình do y tá.", "target": "Họ khảo sát từ giường nằm, bếp ăn đến trình độ y tá."}
+{"input": "Đứng bàn bạc mot lúc họ mới quay về phòng giám đốc.", "target": "Đứng bàn bạc một lúc họ mới quay về phòng giám đốc."}
+{"input": "Không biết ho ở đâu.", "target": "Không biết họ ở đâu."}
+{"input": "Tùng như vén mây thay mặt trời.", "target": "Tùng như vén mây thấy mặt trời."}
+{"input": "Có tay cửu vạn một mình lam hai vác chạy phămp hăm rađ ường.", "target": "Có tay cửu vạn một mình làm hai vác chạy phăm phăm ra đường."}
+{"input": "Đổi hnững giọt nước mắt lấy một nụ cười.", "target": "Đổi những giọt nước mắt lấy một nụ cười."}
+{"input": "Thu hãy nói với chồng, với đồng nghiệp ở cơ quan và một số bạn bè thân là mình mat điện thoại.", "target": "Thu hãy nói với chồng, với đồng nghiệp ở cơ quan và một số bạn bè thân là mình mất điện thoại."}
+{"input": "Hai gia đình nội ngoại của họ đều không có tranh giành thua kế hay chuyện gì khác...", "target": "Hai gia đình nội ngoại của họ đều không có tranh giành thừa kế hay chuyện gì khác..."}
+{"input": "Nhưng chuyện cung chỉ dừng ở đó và Thọ cũng không nghi ngờ thêm đối tượng nào nữa.", "target": "Nhưng chuyện cũng chỉ dừng ở đó và Thọ cũng không nghi ngờ thêm đối tượng nào nữa."}
+{"input": "Thu chỉ nói một câu:\"nham số rồi!\"và cúp máy.", "target": "Thu chỉ nói một câu:\"nhầm số rồi!\"và cúp máy."}
+{"input": "Thọ nghin gờ số điện thoại này va đề nghị đặt máy ghi am nghe trộm cac cuoc thoại trong nhà...", "target": "Thọ nghi ngờ số điện thoại này và đề nghị đặt máy ghi âm nghe trộm các cuộc thoại trong nhà..."}
+{"input": "Cường kết luan: Thọ là người đáng tin.", "target": "Cường kết luận: Thọ là người đáng tin."}
+{"input": "Cuong nói Thọ hãy kể địa chỉ hnà một so người cung cong ty Thu.", "target": "Cường nói Thọ hãy kể địa chỉ nhà một số người cùng công ty Thu."}
+{"input": "Cường áp dụng mưu kế theo binh phap là\"xua hổ nuốt sói\".", "target": "Cường áp dụng mưu kế theo binh pháp là\"xua hổ nuốt sói\"."}
+{"input": "Nhưng Thu đã vội vang dập máy và không bao gì.", "target": "Nhưng Thu đã vội vàng dập máy và không báo gì."}
+{"input": "Vi công lý, vưot qua moi bien giới, mỗi người đã cất lên tiếng nói của mình.", "target": "Vì công lý, vượt qua mọi biên giới, mỗi người đã cất lên tiếng nói của mình."}
+{"input": "Do vậy một ky sư điện, một kỹ sư hóa nếu làm công tác khám nghiệm, giám định sẽ không đáhn giá hết một đám cháy.", "target": "Do vậy một kỹ sư điện, một kỹ sư hóa nếu làm công tác khám nghiệm, giám định sẽ không đánh giá hết một đám cháy."}
+{"input": "Qua thuc tế, ông Vinh kết luận gan 90 % các vụ cháy do sự cố về điện.", "target": "Qua thực tế, ông Vinh kết luận gần 90 % các vụ cháy do sự cố về điện."}
+{"input": "Có một người yeu nghe rồi quyết sống chết với ngh ềquả cũng khó.", "target": "Có một người yêu nghề rồi quyết sống chết với nghề quả cũng khó."}
+{"input": "Bởi đôi khi họ không đủ sáng suốt, thiếu khách quan, thậm chí khong trung thực...", "target": "Bởi đôi khi họ không đủ sáng suốt, thiếu khách quan, thậm chí không trung thực..."}
+{"input": "Mai co gương mặt nghị lực với nụ cười e lệ, duy có đôi mắt ngay từ lúc mới sinh ra đã...", "target": "Mai có gương mặt nghị lực với nụ cười e lệ, duy có đôi mắt ngay từ lúc mới sinh ra đã..."}
+{"input": "Những tấm lòng người My.", "target": "Những tấm lòng người Mỹ."}
+{"input": "Roi cô tiế ptục thi cấp thành pho.", "target": "Rồi cô tiếp tục thi cấp thành phố."}
+{"input": "\"bà John, bà Susan là nhung ông Bụt đến với đời tôi...", "target": "\"bà John, bà Susan là những ông Bụt đến với đời tôi..."}
+{"input": "Đang hùng hổ thì không ngờ do là bọn du đãng toàn thnằg to như con tượng, xăm trổ den người, ùa ra xâu xé.", "target": "Đang hùng hổ thì không ngờ đó là bọn du đãng toàn thằng to như con tượng, xăm trổ đen người, ùa ra xâu xé."}
+{"input": "T ừđó cái kéo độc đáo dài hai ba thước mà chỉ nặng 1, 2 - 1, 4 kg mang nhãn hiệu Phuoc Lộc cứ đi vào nhiều nhà vuon.", "target": "Từ đó cái kéo độc đáo dài hai ba thước mà chỉ nặng 1, 2 - 1, 4 kg mang nhãn hiệu Phước Lộc cứ đi vào nhiều nhà vườn."}
+{"input": "Nhà Hải không nghèo nhưng sao khong mắc đinệ thoại?", "target": "Nhà Hải không nghèo nhưng sao không mắc điện thoại?"}
+{"input": "Ra trờưng đã đi làm nhưng có ngưiờ nhà ở nước ngoài tài trợ nay du học...", "target": "Ra trường đã đi làm nhưng có người nhà ở nước ngoài tài trợ nay du học..."}
+{"input": "Nụ còn cho rằng cô yêu Hùng vì anh ấy có bản lĩnh vượt kho khan, song ở nhiều môi truong mà vẫn giữ duoc mình...", "target": "Nụ còn cho rằng cô yêu Hùng vì anh ấy có bản lĩnh vượt khó khăn, sống ở nhiều môi trường mà vẫn giữ được mình..."}
+{"input": "Thọ nghi mãi nhưng không ra.", "target": "Thọ nghĩ mãi nhưng không ra."}
+{"input": "Thôi được, ba không muốn ép duyên con nhung cũng không thể mặc nó nhắm mắt đưa chân đến chỗ không biết thiên đường hay địa ngục.", "target": "Thôi được, bà không muốn ép duyên con nhưng cũng không thể mặc nó nhắm mắt đưa chân đến chỗ không biết thiên đường hay địa ngục."}
+{"input": "Đ ãcách 10 năm về trước, hơn nữa không biết Hùng ở thanh phố nào, đi diện gi và ở bao lâu.", "target": "Đã cách 10 năm về trước, hơn nữa không biết Hùng ở thành phố nào, đi diện gì và ở bao lâu."}
+{"input": "Cau chuyện đến đây cần hết sức tinh te.", "target": "Câu chuyện đến đây cần hết sức tinh tế."}
+{"input": "Mục đích ong ta là chia rẽ vợ chồng Thọ để dễ bề noi lai quan hệ với Thu.", "target": "Mục đích ông ta là chia rẽ vợ chồng Thọ để dễ bề nối lại quan hệ với Thu."}
+{"input": "Tao là mạnh\"Quảng Ninh\"ở berlin với may đây mà...\".", "target": "Tao là mạnh\"Quảng Ninh\"ở berlin với mày đây mà...\"."}
+{"input": "Hùng nói năng rất cảnh giác và cuoi cùng anh ta hỏi:\"thế sao mày biết tên thật của tao?\".", "target": "Hùng nói năng rất cảnh giác và cuối cùng anh ta hỏi:\"thế sao mày biết tên thật của tao?\"."}
+{"input": "Như vậy là Hùng có ở Đức nhưng bằng mot cái tên khác.", "target": "Như vậy là Hùng có ở Đức nhưng bằng một cái tên khác."}
+{"input": "Rất nhiều người Việt đã có mat ở Đức bằng thứ giấy có tên người khác, dán ảnh minh nhu vậy.", "target": "Rất nhiều người Việt đã có mặt ở Đức bằng thứ giấy có tên người khác, dán ảnh mình như vậy."}
+{"input": "Thương con, năm 1990 ông đưa cô ve Hà Nộ ixin vào trường Nguyễn Đình Chiểu học chữ nổi.", "target": "Thương con, năm 1990 ông đưa cô về Hà Nội xin vào trường Nguyễn Đình Chiểu học chữ nổi."}
+{"input": "Hơn nữa bà cũng cần phải hợp lý hóa viec vi sao bà biet những thông tin Hùng nói dối.", "target": "Hơn nữa bà cũng cần phải hợp lý hóa việc vì sao bà biết những thông tin Hùng nói dối."}
+{"input": "Ong đã biết hôm qua lớp trưởng đọ cdanh sách những đứa hay nghỉ học cót hể không được thi chưa?", "target": "Ông đã biết hôm qua lớp trưởng đọc danh sách những đứa hay nghỉ học có thể không được thi chưa?"}
+{"input": "Han là ai va muốn gì?", "target": "Hắn là ai và muốn gì?"}
+{"input": "Cuối cùng Thọ nói:\"Nếu do nhầm hay dua nao treu chọc thì từ mai hai vợ chong sẽ đổi điện thoại cho nhau...\".", "target": "Cuối cùng Thọ nói:\"Nếu do nhầm hay đứa nào trêu chọc thì từ mai hai vợ chồng sẽ đổi điện thoại cho nhau...\"."}
+{"input": "Khủng bố bằng điện thoại:\"tnặg phẩm\"cho thủ phạm.", "target": "Khủng bố bằng điện thoại:\"tặng phẩm\"cho thủ phạm."}
+{"input": "\"Thì cả ông lẫn tôi cùng chuyen bỏ học nên sao ông biết được tôi!\".", "target": "\"Thì cả ông lẫn tôi cùng chuyên bỏ học nên sao ông biết được tôi!\"."}
+{"input": "Tóm liạ khôgn có gi đáng nghi.", "target": "Tóm lại không có gì đáng nghi."}
+{"input": "Anh em vừa nhận nhau, còn hẹn hôm nào đến xin thầy cho thi lai đây này!\".", "target": "Anh em vừa nhận nhau, còn hẹn hôm nào đến xin thầy cho thi lại đây này!\"."}
+{"input": "Mé phải dọc dường từ Đồng Đăng lên Tân Thanh có vô số con đường mòn lầy đất.", "target": "Mé phải dọc đường từ Đồng Đăng lên Tân Thanh có vô số con đường mòn lầy đất."}
+{"input": "Người gọi đến xin gặp ong và cũng chỉ nói một câu:\"Myà phái cút khỏi Hà Nội ngay\".", "target": "Người gọi đến xin gặp ông và cũng chỉ nói một câu:\"Mày phải cút khỏi Hà Nội ngay\"."}
+{"input": "Gọi là kho hàng nhung thực te chúng là bãi chứa hàng được che phủ tạm bợ bằng những tấm bat.", "target": "Gọi là kho hàng nhưng thực tế chúng là bãi chứa hàng được che phủ tạm bợ bằng những tấm bạt."}
+{"input": "Cửu vạn. cho biết:\"Chỉ sang VN hàng moi được nâng niu chứ ở bên đó họ quăng quật ghê lắm\".", "target": "Cửu vạn. cho biết:\"Chỉ sang VN hàng mới được nâng niu chứ ở bên đó họ quăng quật ghê lắm\"."}
+{"input": "Một cửu van thì thầm: co những hom người ta còn ném cả vác hang xuống mà chẳng việc gì.", "target": "Một cửu vạn thì thầm: có những hôm người ta còn ném cả vác hàng xuống mà chẳng việc gì."}
+{"input": "Bọc ngoài có rách lai nhét gấp vào bao tải rồi vứt lên xe Minsk phóng di\".", "target": "Bọc ngoài có rách lại nhét gấp vào bao tải rồi vứt lên xe Minsk phóng đi\"."}
+{"input": "Trong khi các thành phố lớn đang rối tung chuyen kiểm tra,k iểm định chất lượng mũ bảo hiểm thì tại Lạng Sơn, mũ kém chất lượng ồ ạt tran về.", "target": "Trong khi các thành phố lớn đang rối tung chuyện kiểm tra, kiểm định chất lượng mũ bảo hiểm thì tại Lạng Sơn, mũ kém chất lượng ồ ạt tràn về."}
+{"input": "Chính vi giá rẻ nên ai muốn mua hàng phải mua với số luong vài ngàn chiếc mới bán.", "target": "Chính vì giá rẻ nên ai muốn mua hàng phải mua với số lượng vài ngàn chiếc mới bán."}
+{"input": "Hai nhà kín cổng cao tường và khong chun gđụng thứ gì.", "target": "Hai nhà kín cổng cao tường và không chung đụng thứ gì."}
+{"input": "Ông chán ngan Hà Nội lắm rồi...", "target": "Ông chán ngán Hà Nội lắm rồi..."}
+{"input": "Ôngc hồng thì không nói gì.", "target": "Ông chồng thì không nói gì."}
+{"input": "Chị Nông Thị Hương, một người dân, khẳng định:\"Chỉ mấy ong bảo vệ chợ không biết chứ người đi chợ biet hết.", "target": "Chị Nông Thị Hương, một người dân, khẳng định:\"Chỉ mấy ông bảo vệ chợ không biết chứ người đi chợ biết hết."}
+{"input": "Ông Chương chỉ có mot người hàng xóm sát vách, thỉnh thoảng chao hỏi xã giao.", "target": "Ông Chương chỉ có một người hàng xóm sát vách, thỉnh thoảng chào hỏi xã giao."}
+{"input": "Nhung, mất tất cả!", "target": "Nhưng, mất tất cả!"}
+{"input": "Chúng toi chôn ho bà ay...\".", "target": "Chúng tôi chôn hộ bà ấy...\"."}
+{"input": "Bài viết mà cuoc thi cho đợi chua đến.", "target": "Bài viết mà cuộc thi chờ đợi chưa đến."}
+{"input": "Tại chợ cua khẩu Tân Thanh, giá một chiếc mũ giả hiệu Amroo được bá n28. 00 0- 35. 1000 đ.", "target": "Tại chợ cửa khẩu Tân Thanh, giá một chiếc mũ giả hiệu Amoro được bán 28. 000 - 35. 1000 đ."}
+{"input": "Điều dagn noi hơn, tất cả các loại mũ nhập lậu đều vi phạm nghiêm trọng quyền sở hữu trí tue.", "target": "Điều đáng nói hơn, tất cả các loại mũ nhập lậu đều vi phạm nghiêm trọng quyền sở hữu trí tuệ."}
+{"input": "Ngay cả khi đã có lót xốp, người ta cung có thể bóp méo ma không phải mất nhieu sức.", "target": "Ngay cả khi đã có lót xốp, người ta cũng có thể bóp méo mà không phải mất nhiều sức."}
+{"input": "Phức tap không kém là tình trạng nhập lậu nông sản thực phẩm.", "target": "Phức tạp không kém là tình trạng nhập lậu nông sản thực phẩm."}
+{"input": "Gà, lợn... cac loại được nhập về tràn lan và bán công khai tại các chợ mà khong gap bất kỳ cản trở nào.", "target": "Gà, lợn... các loại được nhập về tràn lan và bán công khai tại các chợ mà không gặp bất kỳ cản trở nào."}
+{"input": "Ngay cả khi phía Trung Quoc công bố phát hiện virus H5N1 trên lợn, ìtnh hình thịt lợn tại Lạng Sơn cũng không bị ảnh hưởng gi.", "target": "Ngay cả khi phía Trung Quốc công bố phát hiện virus H5N1 trên lợn, tình hình thịt lợn tại Lạng Sơn cũng không bị ảnh hưởng gì."}
+{"input": "Khó khăn nhất đối với cơ quan chức năng chính la viec xác định thế nào là hàng nông sản, thực phẩm nhập lậu.", "target": "Khó khăn nhất đối với cơ quan chức năng chính là việc xác định thế nào là hàng nông sản, thực phẩm nhập lậu."}
+{"input": "Như các mặt hàng nông sản thực phẩm nói chung, chưa có căn cứ phap lý để chứng minh thực phẩm nhập lậu vào tỉnh Lạng Sơn.", "target": "Như các mặt hàng nông sản thực phẩm nói chung, chưa có căn cứ pháp lý để chứng minh thực phẩm nhập lậu vào tỉnh Lạng Sơn."}
+{"input": "Ba lần thay số gọi nhưng máy di động kia văn im lặng.", "target": "Ba lần thay số gọi nhưng máy di động kia vẫn im lặng."}
+{"input": "Nhưng thật tai ác, hkoảng hai tháng sau cũng đúng lúc đang ăn cơm thì điện thoại của Thu lại có tin nhắn.", "target": "Nhưng thật tai ác, khoảng hai tháng sau cũng đúng lúc đang ăn cơm thì điện thoại của Thu lại có tin nhắn."}
+{"input": "Thọ hai tay nâgn điện thoại gí sát mặt vợ hỏi\"đứa nào lại nhầm máy nữa I\".", "target": "Thọ hai tay nâng điện thoại gí sát mặt vợ hỏi\"đứa nào lại nhầm máy nữa I\"."}
+{"input": "Lúc nay Tho mới nhớ ra: Tại sao những lúc o nhà cô thường tắtm áy?", "target": "Lúc này Thọ mới nhớ ra: Tại sao những lúc ở nhà cô thường tắt máy?"}
+{"input": "Như vậy lý do phá hoại hạnh phúc, quấy rối cuộcs ống vì thù hằn tiền bạc hay dia vị là thiếu căn cứ.", "target": "Như vậy lý do phá hoại hạnh phúc, quấy rối cuộc sống vì thù hằn tiền bạc hay địa vị là thiếu căn cứ."}
+{"input": "Trước những câu hỏi của chồng, Thu không óc lời giải thích thuyết phục.", "target": "Trước những câu hỏi của chồng, Thu không có lời giải thích thuyết phục."}
+{"input": "Truoc mắt là bất cứ tin nhắn nào kiểu ấy thì hTu phải giữ cho Thọ xem đệ cùng có kế hoạch...", "target": "Trước mắt là bất cứ tin nhắn nào kiểu ấy thì Thu phải giữ cho Thọ xem để cùng có kế hoạch..."}
+{"input": "Đến nước này thì khôngt hể chịu dung hơn được nữa.", "target": "Đến nước này thì không thể chịu đựng hơn được nữa."}
+{"input": "Tại sao địa chỉ hắn nhắn tin là vợ Thọ chứ không là người kahc?", "target": "Tại sao địa chỉ hắn nhắn tin là vợ Thọ chứ không là người khác?"}
+{"input": "Qua nghiên cứu nội dung những mẩu tin và thong tin từ hai vợ chồng Thọ, Cường nhận định: vấn đề này thuộc quan hệ tình cảm.", "target": "Qua nghiên cứu nội dung những mẩu tin và thông tin từ hai vợ chồng Thọ, Cường nhận định: vấn đề này thuộc quan hệ tình cảm."}
+{"input": "Cường hỏi\":thâm tâm anh có nghi ngờ vợ anh không?\".", "target": "Cường hỏi:\"thâm tâm anh có nghi ngờ vợ anh không?\"."}
+{"input": "Có lần Thọ thấy khó cịhu bởi sự quan tâm khác thuong của ông giám đốc tới vợ mình.", "target": "Có lần Thọ thấy khó chịu bởi sự quan tâm khác thường của ông giám đốc tới vợ mình."}
+{"input": "Tuy vẫn nho bưu điện giữ lại số máy cũ nhưng hiện chưa biết nên mua loại điện thoại nào.", "target": "Tuy vẫn nhờ bưu điện giữ lại số máy cũ nhưng hiện chưa biết nên mua loại điện thoại nào."}
+{"input": "Ngày mai cái mồi nào củ aCường sẽ dính cá?", "target": "Ngày mai cái mồi nào của Cường sẽ dính cá?"}
+{"input": "Cường giao cho Thu và Thọ mỗi người một\"chiếcc ần câu\"để buông mồi và canh giữ nó.", "target": "Cường giao cho Thu và Thọ mỗi người một\"chiếc cần câu\"để buông mồi và canh giữ nó."}
+{"input": "Mấy hôms au Tọh đến bao: vợ anh mất điện thoại, liệu có liên quan den thu phạm?", "target": "Mấy hôm sau Thọ đến báo: vợ anh mất điện thoại, liệu có liên quan đến thủ phạm?"}
+{"input": "Người giấu mặt trong buồng điện thoại cong cộng?", "target": "Người giấu mặt trong buồng điện thoại công cộng?"}
+{"input": "Số này là ở một buồng điện thoại công cộng trên đường Nguyen Chí Thanh.", "target": "Số này là ở một buồng điện thoại công cộng trên đường Nguyễn Chí Thanh."}
+{"input": "Cường suy đoán: có lẽ sau khi không thể nhnắ tin vào máy di động caủ Thu, kẻ quay rối đã quay snag tấn công điện thoại cố định.", "target": "Cường suy đoán: có lẽ sau khi không thể nhắn tin vào máy di động của Thu, kẻ quấy rối đã quay sang tấn công điện thoại cố định."}
+{"input": "Kết luan theo hướng nay thì Thu có biết kẻ quấy rối là ai...", "target": "Kết luận theo hướng này thì Thu có biết kẻ quấy rối là ai..."}
+{"input": "Riêng về đe nghị đặt máy ghi âm điện thoai gia đình, Cường khuyên thôi.", "target": "Riêng về đề nghị đặt máy ghi âm điện thoại gia đình, Cường khuyên thôi."}
+{"input": "Boi như thế anh sẽ rất khó kiểm soát tình hình, nhất là khi Thọ phát hiện điều gì đó của vo...", "target": "Bởi như thế anh sẽ rất khó kiểm soát tình hình, nhất là khi Thọ phát hiện điều gì đó của vợ..."}
+{"input": "Vì nếu anh ta dựng nên chuyện này thì thế nào cung đưa ra một số nhân vật để đánh lạc hướng Cuong.", "target": "Vì nếu anh ta dựng nên chuyện này thì thế nào cũng đưa ra một số nhân vật để đánh lạc hướng Cường."}
+{"input": "Và cuối cùng là ông ta phó thác cho mot kẻ khác.", "target": "Và cuối cùng là ông ta phó thác cho một kẻ khác."}
+{"input": "Cộng với sự phân tích tâml ý Thu thì giả thiet này có khả năng nhiều hơn.", "target": "Cộng với sự phân tích tâm lý Thu thì giả thiết này có khả năng nhiều hơn."}
+{"input": "Cường loại bỏ phương án một là sẽ phục ở các buồng điện thoại khả nghi trong những giờ cao điểm để\"bắt\"ngài giám doc nọ.", "target": "Cường loại bỏ phương án một là sẽ phục ở các buồng điện thoại khả nghi trong những giờ cao điểm để\"bắt\"ngài giám đốc nọ."}
+{"input": "Tức àl mình không cần ra tay mà dắt đường cho kẻ khác xử lý ke thù của mình.", "target": "Tức là mình không cần ra tay mà dắt đường cho kẻ khác xử lý kẻ thù của mình."}
+{"input": "Trung thành với kế hoạch, Thọ thường xuyên ngồi bên điện thoai trong những giờ\"cao điểm\".", "target": "Trung thành với kế hoạch, Thọ thường xuyên ngồi bên điện thoại trong những giờ\"cao điểm\"."}
+{"input": "Như phán đoán, bà vợ nói ôn gvừa đi bộ ra ngoài.", "target": "Như phán đoán, bà vợ nói ông vừa đi bộ ra ngoài."}
+{"input": "Để chắc chắn hơn, Thọ đợi lần sau đúng lúc số điện thoại lạ hiện trên may co đnịh, anh lại gọi về nhà giám đốc.", "target": "Để chắc chắn hơn, Thọ đợi lần sau đúng lúc số điện thoại lạ hiện trên máy cố định, anh lại gọi về nhà giám đốc."}
+{"input": "Lần này Thọ xưng rõ danh tính voi bà (vì la chỗ htân tình (và tâm su chuyện gia đình dang có rắc roi.", "target": "Lần này Thọ xưng rõ danh tính với bà (vì là chỗ thân tình (và tâm sự chuyện gia đình đang có rắc rối."}
+{"input": "Thọ hẹn ngày mai đến cơ quan ba nhờ tư vấn, chỉ bảo.", "target": "Thọ hẹn ngày mai đến cơ quan bà nhờ tư vấn, chỉ bảo."}
+{"input": "Sáng hôm sau, nhu một người em gặp nạn đang bế tắc, Thọ kể hết tình đầu âcu chuyen với bà vợ giám đốc.", "target": "Sáng hôm sau, như một người em gặp nạn đang bế tắc, Thọ kể hết tình đầu câu chuyện với bà vợ giám đốc."}
+{"input": "Anh cũng nói rat có thể đối tượng đó là người cùng công ty Thu.", "target": "Anh cũng nói rất có thể đối tượng đó là người cùng công ty Thu."}
+{"input": "Anh tin bà bếit rõ nội tình công ty chồng, cộng với kinh nghiệm thì bà có thể giúp anh tìm ra thủ pham", "target": "Anh tin bà biết rõ nội tình công ty chồng, cộng với kinh nghiệm thì bà có thể giúp anh tìm ra thủ phạm."}
+{"input": "Và cho dù xảy ra tình huống nào thì ông giá mdoc cung chột dạ.", "target": "Và cho dù xảy ra tình huống nào thì ông giám đốc cũng chột dạ."}
+{"input": "Anh nghĩ: hạnh phúc đôi khi phải sống trne những điều không quá tỏ tường...", "target": "Anh nghĩ: hạnh phúc đôi khi phải sống trên những điều không quá tỏ tường..."}
+{"input": "V àcho den lúc này ca hai cũng chỉ biết một nửa câu chuyện của chính nhà mình.", "target": "Và cho đến lúc này cả hai cũng chỉ biết một nửa câu chuyện của chính nhà mình."}
+{"input": "Dẫu vậy, cuối cùng, những người theo dõi cuoc thi vẫn thấy một điều tiếc.", "target": "Dẫu vậy, cuối cùng, những người theo dõi cuộc thi vẫn thấy một điều tiếc."}
+{"input": "Nguyễn tiến đạt da chọn viết về gia đình ấy (cái học cua một gia dinh người Cil), đọc thấy ấm lòng...", "target": "Nguyễn tiến đạt đã chọn viết về gia đình ấy (cái học của một gia đình người Cil), đọc thấy ấm lòng..."}
+{"input": "Noi đau sau cuoc chiến.", "target": "Nỗi đau sau cuộc chiến."}
+{"input": "Vo mình sợ quá, ngất lịm đi.", "target": "Vợ mình sợ quá, ngất lịm đi."}
+{"input": "Rồi ông bắt đầu kể vền ồi đau cua mình.", "target": "Rồi ông bắt đầu kể về nỗi đau của mình."}
+{"input": "Hnơ một năm sau minh lại đưa vợ đi đẻ.", "target": "Hơn một năm sau mình lại đưa vợ đi đẻ."}
+{"input": "Hồi đó, mặc du trường không bắt buộc học sinh mu học tiếng Anh nhưng cô vẫn tha thiet xin c ôgiáo Nguyễn Thị Loan cho học.", "target": "Hồi đó, mặc dù trường không bắt buộc học sinh mù học tiếng Anh nhưng cô vẫn tha thiết xin cô giáo Nguyễn Thị Loan cho học."}
+{"input": "Trong khi đó, vì lòng cam phục cô gái, ong dem chuyện c ôthuật coh một phóng viên tờ Olympian Newspaper cua thành phố.", "target": "Trong khi đó, vì lòng cảm phục cô gái, ông đem chuyện cô thuật cho một phóng viên tờ Olympian Newspaper của thành phố."}
+{"input": "Sau đó, chính bà Susan đả đưa Mai lên học đại học, mỗi năm chu cpấ cho cô 30. 000 usd.", "target": "Sau đó, chính bà Susan đã đưa Mai lên học đại học, mỗi năm chu cấp cho cô 30. 000 usd."}
+{"input": "Và hằng năm cứ tới kỳ hè, bà lại mua vé khu hồi để Mai được rtở về sống với gia đinh ở Sơn Tây.", "target": "Và hằng năm cứ tới kỳ hè, bà lại mua vé khứ hồi để Mai được trở về sống với gia đình ở Sơn Tây."}
+{"input": "Chỉ còn một kỳ học nữa cô sinh viên mù VN sẽ tốt nghiệp đại học My.", "target": "Chỉ còn một kỳ học nữa cô sinh viên mù VN sẽ tốt nghiệp đại học Mỹ."}
+{"input": "Sự chnọ lựa của cô that bình dị: học văn khoa để sau này trở thành cô giáo hoa cngười nghiên cứu van học nước ngoài.", "target": "Sự chọn lựa của cô thật bình dị: học văn khoa để sau này trở thành cô giáo hoặc người nghiên cứu văn học nước ngoài."}
+{"input": "\"khi sang Mỹ tôi gặp rất nhiều khó khăn, nhất là trong giao tiếp và đi lại\"- co kể.", "target": "\"khi sang Mỹ tôi gặp rất nhiều khó khăn, nhất là trong giao tiếp và đi lại\"- cô kể."}
+{"input": "Trước, ngay nào cô cũng tự ra bến đón xe buýt tới trường.", "target": "Trước, ngày nào cô cũng tự ra bến đón xe buýt tới trường."}
+{"input": "\"khi chuyển lên đại học tôi rất kho vì cả trường toàn sinh viên sáng mắt, chỉ riêng tôi sinh viên mù.", "target": "\"khi chuyển lên đại học tôi rất khổ vì cả trường toàn sinh viên sáng mắt, chỉ riêng tôi sinh viên mù."}
+{"input": "Sự khiếm khuyet nặng nề trên gương mặt cô gái trẻ chính là hậu quả của những độc tố mà lính Mỹ đã rải xuống VN thuo trước.", "target": "Sự khiếm khuyết nặng nề trên gương mặt cô gái trẻ chính là hậu quả của những độc tố mà lính Mỹ đã rải xuống VN thuở trước."}
+{"input": "Trong giảng duong tat cả sinh viên đeu ghi ghi, chép chép, chỉ trừ một cô gái mù ngồi lặng le thu các tri thức vao băng.", "target": "Trong giảng đường tất cả sinh viên đều ghi ghi, chép chép, chỉ trừ một cô gái mù ngồi lặng lẽ thu các tri thức vào băng."}
+{"input": "\"hiếm nhấ tlà sach văn học chữ nổi vì sinh viên hỏng mắt theo văn khoa không nhiều nên họ không thể in loại sách ấy hàng loạt.", "target": "\"hiếm nhất là sách văn học chữ nổi vì sinh viên hỏng mắt theo văn khoa không nhiều nên họ không thể in loại sách ấy hàng loạt."}
+{"input": "Cuộc đời dưới vành mũ thám tu", "target": "Cuộc đời dưới vành mũ thám tử."}
+{"input": "Thủ phạm đằng sau thủ phạm: ham muốn cua nguoi hàng xóm.", "target": "Thủ phạm đằng sau thủ phạm: ham muốn của người hàng xóm."}
+{"input": "Đến văn hpòngc ông ty thám tử hôm nay là người đàn ong tầm thước, tuổi ngoại tứ tuần nói giong Nam bộ với vẻ lo âu hằn trên nét mặt.", "target": "Đến văn phòng công ty thám tử hôm nay là người đàn ông tầm thước, tuổi ngoại tứ tuần nói giọng Nam bộ với vẻ lo âu hằn trên nét mặt."}
+{"input": "Ông nói đang bị khủng bố, đe dọa và theo dõi ráo riết tu ba tháng nay.", "target": "Ông nói đang bị khủng bố, đe dọa và theo dõi ráo riết từ ba tháng nay."}
+{"input": "Kẻ khủng bố trực tiếp gặp mặt, gọi dien, viết giấy nem vào nhà và gửi thư qua bưu điện đe dọa ong.", "target": "Kẻ khủng bố trực tiếp gặp mặt, gọi điện, viết giấy ném vào nhà và gửi thư qua bưu điện đe dọa ông."}
+{"input": "Hung nhận định: kẻ khủng bố ngày một khôn ngoan, kín đáo hơn trong hành vi của mình.", "target": "Hùng nhận định: kẻ khủng bố ngày một khôn ngoan, kín đáo hơn trong hành vi của mình."}
+{"input": "Sau ba lần nhét giấy qua khe cửa cung một nội dung như vậy thì kẻ khủng bố chuểyn sang gửi thư qua bưu điện.", "target": "Sau ba lần nhét giấy qua khe cửa cũng một nội dung như vậy thì kẻ khủng bố chuyển sang gửi thư qua bưu điện."}
+{"input": "Hon nữa neu khủng bố đệ ông Chương\"cút kohi Ha Nội\"thì lại có người khác lên thay.", "target": "Hơn nữa nếu khủng bố để ông Chương\"cút khỏi Hà Nội\"thì lại có người khác lên thay."}
+{"input": "Mặt khác, nếu vì canh tranh kinh doanh thì hình thức này rất kém hiệu quả.", "target": "Mặt khác, nếu vì cạnh tranh kinh doanh thì hình thức này rất kém hiệu quả."}
+{"input": "Hùng giật mình:\"Nhưng đó là nhà ong thuê cơ mà?\".", "target": "Hùng giật mình:\"Nhưng đó là nhà ông thuê cơ mà?\"."}
+{"input": "Ông Chưnơg lnúg túng:\"À, xin lỗi anh, thật ra đó là nhà tôi mua từ khi muốn ở riêng với cô Kim\".", "target": "Ông Chương lúng túng:\"À, xin lỗi anh, thật ra đó là nhà tôi mua từ khi muốn ở riêng với cô Kim\"."}
+{"input": "Ông Chương nhớ có một lần bà vo hàng xóm nói rất thích că nnhà ông...", "target": "Ông Chương nhớ có một lần bà vợ hàng xóm nói rất thích căn nhà ông..."}
+{"input": "\"Vậy ông đã nói gì với ọh?\".", "target": "\"Vậy ông đã nói gì với họ?\"."}
+{"input": "Nhà hàng xóm cũng biết tôi ra hà nội cong tác một thời gian rồi sẽ về nên họ dặn neu bán nhà thì ưu tiên cho họ\".", "target": "Nhà hàng xóm cũng biết tôi ra hà nội công tác một thời gian rồi sẽ về nên họ dặn nếu bán nhà thì ưu tiên cho họ\"."}
+{"input": "Ngoài ra, tất cả các mối quan he xã hội khác của ông Chương đều đơn thuần vì công việc.", "target": "Ngoài ra, tất cả các mối quan hệ xã hội khác của ông Chương đều đơn thuần vì công việc."}
+{"input": "Sau lần trao đổi đó, nhà hàng xom khong co vẻ gì san đón ông Chương.", "target": "Sau lần trao đổi đó, nhà hàng xóm không có vẻ gì săn đón ông Chương."}
+{"input": "Nhà họ trông vào nguồn thu chủ yếu từ quán ca phê, giải khát mở tại nhà.", "target": "Nhà họ trông vào nguồn thu chủ yếu từ quán cà phê, giải khát mở tại nhà."}
+{"input": "Ông rất muốn ve nhưng họ chua thuc hiện kế hoạch này nên ông chán nản và sốt ruột...", "target": "Ông rất muốn về nhưng họ chưa thực hiện kế hoạch này nên ông chán nản và sốt ruột..."}
+{"input": "Công ty của ôn gcũng có kế hoạch rút ông về tu lâu nhưng không biết họ còn chờ gì nữa mà chưa thuc hiện.", "target": "Công ty của ông cũng có kế hoạch rút ông về từ lâu nhưng không biết họ còn chờ gì nữa mà chưa thực hiện."}
+{"input": "O đây ong còn một người bạn thâ ntên Học đang làm phó văn phòn gvà cung từ miền Nam ra.", "target": "Ở đây ông còn một người bạn thân tên Học đang làm phó văn phòng và cũng từ miền Nam ra."}
+{"input": "Cô bé lớn lên dưới mái lều tranh rách nát, trong một gia đình có bont hế hệ phải xách bị gậy đi ăn xin.", "target": "Cô bé lớn lên dưới mái lều tranh rách nát, trong một gia đình có bốn thế hệ phải xách bị gậy đi ăn xin."}
+{"input": "Các đối tác phần lon không ở Hà Nội và số còn lại không có khả năng xung đột quyền lợi...", "target": "Các đối tác phần lớn không ở Hà Nội và số còn lại không có khả năng xung đột quyền lợi..."}
+{"input": "Chúng em thường gọi đùa hiên la nang tiên nhỏ...\".", "target": "Chúng em thường gọi đùa hiên là nàng tiên nhỏ...\"."}
+{"input": "\"Tôi cũng chỉ hứa chung chung rằng neu có nhu cầu đó, tôi sẽ nhớ đến họ.", "target": "\"Tôi cũng chỉ hứa chung chung rằng nếu có nhu cầu đó, tôi sẽ nhớ đến họ."}
+{"input": "Nhưng vì lý do hkách quan ông chưa di được.", "target": "Nhưng vì lý do khách quan ông chưa đi được."}
+{"input": "Chúng cung là người, chúng phải được sống.", "target": "Chúng cũng là người, chúng phải được sống."}
+{"input": "Hoàn cảnh đã biến ông thàn hngười thân thiết của Kim.", "target": "Hoàn cảnh đã biến ông thành người thân thiết của Kim."}
+{"input": "Thế nhưng sự khung bố, de dọa ngày một gia tăng cả về tần số lẫn mức độ gay gắt...", "target": "Thế nhưng sự khủng bố, đe dọa ngày một gia tăng cả về tần số lẫn mức độ gay gắt..."}
+{"input": "Không có cơ sở để phán đoán kẻ khủng bố qaun h ệvới ông Chương ở lĩnh vực gì, Hùng tập trung nghiên cứu hành vi, cách thức khủng bố của ho.", "target": "Không có cơ sở để phán đoán kẻ khủng bố quan hệ với ông Chương ở lĩnh vực gì, Hùng tập trung nghiên cứu hành vi, cách thức khủng bố của họ."}
+{"input": "Tuy nhiên vướng mắc do rất có hy vọng thao gỡ.", "target": "Tuy nhiên vướng mắc đó rất có hy vọng tháo gỡ."}
+{"input": "Từ đó đến nay thong điệp của kẻ khủng bo đều là gửi thư qua buu dien, nội dung không khác những lan trước...", "target": "Từ đó đến nay thông điệp của kẻ khủng bố đều là gửi thư qua bưu điện, nội dung không khác những lần trước..."}
+{"input": "Vợ chồng chủ quán thấy người hàng xóm có tâm trạng cũng den bat chuyện chia sẻ.", "target": "Vợ chồng chủ quán thấy người hàng xóm có tâm trạng cũng đến bắt chuyện chia sẻ."}
+{"input": "Tinế hành: một buổi sáng chủ nhật, ông Chương dậy muộn va sang quán cà phê nhà hàng xom uống nước.", "target": "Tiến hành: một buổi sáng chủ nhật, ông Chương dậy muộn và sang quán cà phê nhà hàng xóm uống nước."}
+{"input": "Hoac ít ra Hùng có thể đo được phản ứng nào đó của gia đinh này.", "target": "Hoặc ít ra Hùng có thể đo được phản ứng nào đó của gia đình này."}
+{"input": "Gia đình hàng xóm gồm hai vợ chong tuổi ngoài 50 và hai con gái đang học phổ thông.", "target": "Gia đình hàng xóm gồm hai vợ chồng tuổi ngoài 50 và hai con gái đang học phổ thông."}
+{"input": "Câu chuyện đó được nhắc đến hai lần, ngắn gọn trong những lúc chao nhau xã giao...\".", "target": "Câu chuyện đó được nhắc đến hai lần, ngắn gọn trong những lúc chào nhau xã giao...\"."}
+{"input": "Nếu xet theo nhận định ban đầu về nội dung và cách thức khủng bố thì suy đoán này cũng có logic.", "target": "Nếu xét theo nhận định ban đầu về nội dung và cách thức khủng bố thì suy đoán này cũng có logic."}
+{"input": "Đây cũng rất khó la chuyện mâu thuẫn trong kihn doanh vi những chiến lược phát triển là do lãnh đạo công ty quyết định.", "target": "Đây cũng rất khó là chuyện mâu thuẫn trong kinh doanh vì những chiến lược phát triển là do lãnh đạo công ty quyết định."}
+{"input": "Vậy ôn gChương đang có những gì và có the mất gi?", "target": "Vậy ông Chương đang có những gì và có thể mất gì?"}
+{"input": "Tổng kết cuộc thi viết phóng sự - ký sự 2004: dam nét cái đẹp trong cuoc snốg.", "target": "Tổng kết cuộc thi viết phóng sự - ký sự 2004: đậm nét cái đẹp trong cuộc sống."}
+{"input": "Neu cuộc thi năm 2003 chỉ nhận được 181 bài thì cuộc thi năm 2004 đã nhận duoc den 527 bài du thi.", "target": "Nếu cuộc thi năm 2003 chỉ nhận được 181 bài thì cuộc thi năm 2004 đã nhận được đến 527 bài dự thi."}
+{"input": "Nghe lại băng ghi âm và qua mô tả của ông Chương thì Hùng thấy thái độ gia đình này rat bình thường, không thể hệing ì lạ.", "target": "Nghe lại băng ghi âm và qua mô tả của ông Chương thì Hùng thấy thái độ gia đình này rất bình thường, không thể hiện gì lạ."}
+{"input": "Kế hoạch là ông Chương sẽ cho hàng xóm biết tin: công ty trong Nam có kế hoạch urt ông về.", "target": "Kế hoạch là ông Chương sẽ cho hàng xóm biết tin: công ty trong Nam có kế hoạch rút ông về."}
+{"input": "Từ khi có tin mở ngõ mới đã có một so người hỏi mua nha ông Chương, trong đó có gia đình hàng xóm...", "target": "Từ khi có tin mở ngõ mới đã có một số người hỏi mua nhà ông Chương, trong đó có gia đình hàng xóm..."}
+{"input": "Và học giỏi: cô bé la học sinh giỏi cap huyện, cấp tỉnh...", "target": "Và học giỏi: cô bé là học sinh giỏi cấp huyện, cấp tỉnh..."}
+{"input": "Kế hoạch này tinh tế ở chỗ ông Chương chung nguyện vọng với nhà hàng xom là: đi khỏi Hà Nội.", "target": "Kế hoạch này tinh tế ở chỗ ông Chương chung nguyện vọng với nhà hàng xóm là: đi khỏi Hà Nội."}
+{"input": "Xúc động và không ít bạn đọc đã động viên, góp phan chia sẻ với\"nàng tiên nhỏ\".", "target": "Xúc động và không ít bạn đọc đã động viên, góp phần chia sẻ với\"nàng tiên nhỏ\"."}
+{"input": "Đặc biệt là những lá thư khủng bốv ẫn gửi đến đều đều và noi dung không thay dổi.", "target": "Đặc biệt là những lá thư khủng bố vẫn gửi đến đều đều và nội dung không thay đổi."}
+{"input": "Sau một vài câu chuyện xã giao không dinh dáng tới nhà cửa hay công tác, chọn lúc vắng khách nhất thì điện thoại di động cua ông Chuong đổ chuông.", "target": "Sau một vài câu chuyện xã giao không dính dáng tới nhà cửa hay công tác, chọn lúc vắng khách nhất thì điện thoại di động của ông Chương đổ chuông."}
+{"input": "Tuy nhiên, điều hnùg rất mừng lá với thông điệp này có thể hiểu kẻ khủng bố không có ý định đe dọa tính mạng ông Chương.", "target": "Tuy nhiên, điều hùng rất mừng là với thông điệp này có thể hiểu kẻ khủng bố không có ý định đe dọa tính mạng ông Chương."}
+{"input": "\"Bạn đọc biết viết phóng sự và viết phóng sự khá tốt\", nhiều người theo dõi cuộc thi đã nói the.", "target": "\"Bạn đọc biết viết phóng sự và viết phóng sự khá tốt\", nhiều người theo dõi cuộc thi đã nói thế."}
+{"input": "\"nàng tinê nhỏ\"trong gia đình\"cái bang\"(của Tiến Dũng) là một trường hợp.", "target": "\"nàng tiên nhỏ\"trong gia đình\"cái bang\"(của Tiến Dũng) là một trường hợp."}
+{"input": "Ấy vậy nhưng khi len 7 tuổi cô bé không chịu theo mẹ đi an xin nữa, đòi đi học.", "target": "Ấy vậy nhưng khi lên 7 tuổi cô bé không chịu theo mẹ đi ăn xin nữa, đòi đi học."}
+{"input": "Có nhiều bài dự thi đã chọn đề tài ve ma túy va HIV, nhưng tường trình từ... đọc cứ nghe rờn rợn.", "target": "Có nhiều bài dự thi đã chọn đề tài về ma túy và HIV, nhưng tường trình từ... đọc cứ nghe rờn rợn."}
+{"input": "Từ thuở mới lọt lòng, co bé đã phải quặt quẹo sau lưng người mẹ địu đi xin ăn khắp đầu đường xó chợ.", "target": "Từ thuở mới lọt lòng, cô bé đã phải quặt quẹo sau lưng người mẹ địu đi xin ăn khắp đầu đường xó chợ."}
+{"input": "Tỉ lệ ấy chua phải là cao nhưng cũng cho thay bản lĩnh của bạn đọc trong việc chọn đề tài và htể hiện đề tài.", "target": "Tỉ lệ ấy chưa phải là cao nhưng cũng cho thấy bản lĩnh của bạn đọc trong việc chọn đề tài và thể hiện đề tài."}
+{"input": "Cả nhà sống trên thuyền ở Sa Tô không còn cái gì đáng giá nổi 10. 000 dong.", "target": "Cả nhà sống trên thuyền ở Sa Tô không còn cái gì đáng giá nổi 10. 000 đồng."}
+{"input": "Không có giải nhat nhưng cuộc thi gặt hái được nhiều thành quả: đưa đến người đọc nhiều bài viết thú vị.", "target": "Không có giải nhất nhưng cuộc thi gặt hái được nhiều thành quả: đưa đến người đọc nhiều bài viết thú vị."}
+{"input": "Cu thế người và ngựa ùa ra quốc lo 7...\".", "target": "Cứ thế người và ngựa ùa ra quốc lộ 7...\"."}
+{"input": "Bà khoc ít bởi làm gì còn nuoc mắt nữa ma khóc.", "target": "Bà khóc ít bởi làm gì còn nước mắt nữa mà khóc."}
+{"input": "Hàng trăm mai lều như vậy đã duoc dựng lên giữa núi rừng, quanh ngôi trường nơi vùng biên giới ở Thanh Hóa.", "target": "Hàng trăm mái lều như vậy đã được dựng lên giữa núi rừng, quanh ngôi trường nơi vùng biên giới ở Thanh Hóa."}
+{"input": "Một người chạy bộ phía trước để dẹp duon,g đàn ngựa chạy giữa, hai người đi xe Minsk áp giải phía sau.", "target": "Một người chạy bộ phía trước để dẹp đường, đàn ngựa chạy giữa, hai người đi xe Minsk áp giải phía sau."}
+{"input": "Ở Huế, tác giả Chí Tượgn voi sự trân trọng, cảm phục, đã viết nhà chuyên cứu người gửi dự thi.", "target": "Ở Huế, tác giả Chí Tượng với sự trân trọng, cảm phục, đã viết nhà chuyên cứu người gửi dự thi."}
+{"input": "Chín đứa con trong nhà hiến máu cuu người và các cháu tôi cũng đang nối tiếp...\".", "target": "Chín đứa con trong nhà hiến máu cứu người và các cháu tôi cũng đang nối tiếp...\"."}
+{"input": "Đó la nhà\"không giàu tiền của nhưng được cái ai cũng coi trọng việc thiện.", "target": "Đó là nhà\"không giàu tiền của nhưng được cái ai cũng coi trọng việc thiện."}
+{"input": "Hằng ngày chăm bẵm, nhìn ngắm hai đứa con ngna ngơ, câm, điếc, bại liet, nỗi đau trong ông càn glớn hơn.", "target": "Hằng ngày chăm bẵm, nhìn ngắm hai đứa con ngẩn ngơ, câm, điếc, bại liệt, nỗi đau trong ông càng lớn hơn."}
+{"input": "May thay người nhà phat hiện, bi kịch đó đã không xay ra.", "target": "May thay người nhà phát hiện, bi kịch đó đã không xảy ra."}
+{"input": "Bnệh tật cua chúng nó chuyển hết sang mình, mình chết cung được, chẳng dá moán thán ai.", "target": "Bệnh tật của chúng nó chuyển hết sang mình, mình chết cũng được, chẳng dám oán thán ai."}
+{"input": "\"bé Nga cũng chập chững đi lại đuoc, lông lá trên người rụng gần hết.", "target": "\"bé Nga cũng chập chững đi lại được, lông lá trên người rụng gần hết."}
+{"input": "Nhưng kho cái vẫn câm điếc không bitế gì.", "target": "Nhưng khổ cái vẫn câm điếc không biết gì."}
+{"input": "Thnag anh thì vẫn liệt, vẫn câm diec\".", "target": "Thằng anh thì vẫn liệt, vẫn câm điếc\"."}
+{"input": "Cách an táng này người ta thường gọi bằng từ\"xoc cheo\".", "target": "Cách an táng này người ta thường gọi bằng từ\"xóc chéo\"."}
+{"input": "Vợ, con và ông bà, các anh các chị nhà vợ đã khổ sở vì mấy đứa con nhà mnih lam rồi.", "target": "Vợ, con và ông bà, các anh các chị nhà vợ đã khổ sở vì mấy đứa con nhà mình lắm rồi."}
+{"input": "Một cựu chiến binh như ông, một người cha như ông co bốn đứa con ở huynệ An Lão (Hải Phòng).", "target": "Một cựu chiến binh như ông, một người cha như ông có bốn đứa con ở huyện An Lão (Hải Phòng)."}
+{"input": "\"lúc đầu dau mình không nói với ai, cứ âm thầm chịu thoi.", "target": "\"lúc đầu đau mình không nói với ai, cứ âm thầm chịu thôi."}
+{"input": "Nhưng cái chứng ung thư thi đau lắm, no hanh hạ suốt cả ngày lẫn đêm.", "target": "Nhưng cái chứng ung thư thì đau lắm, nó hành hạ suốt cả ngày lẫn đêm."}
+{"input": "Ông bắt đầu câu chuyện về nỗi đau da cam khong phải từ mình mà từ một người khác.", "target": "Ông bắt đầu câu chuyện về nỗi đau da cam không phải từ mình mà từ một người khác."}
+{"input": "Khi vợ biet, đưa lên viện 108 quan độit hì ung thư dạ dày của mình đã chạy sang gan.", "target": "Khi vợ biết, đưa lên viện 108 quân đội thì ung thư dạ dày của mình đã chạy sang gan."}
+{"input": "Bệnh này cũng chẳng bếit sống chết luc nào\".", "target": "Bệnh này cũng chẳng biết sống chết lúc nào\"."}
+{"input": "Đau lắm, tui lắm...\".", "target": "Đau lắm, tủi lắm...\"."}
+{"input": "Mới 16 tuổi (năm 1971) Nguyễn Văn Quí tình nguyen nhập ngũ.", "target": "Mới 16 tuổi (năm 1971) Nguyễn Văn Quí tình nguyện nhập ngũ."}
+{"input": "Giải phóng rồi, qui cung đồng đội vẫn ở lại them hai năm để gỡ bom mìn ở quảng nam - Đà Nẵng.", "target": "Giải phóng rồi, quí cùng đồng đội vẫn ở lại thêm hai năm để gỡ bom mìn ở quảng nam - Đà Nẵng."}
+{"input": "Sức khỏe yếu, lại cảnh nghèo túng nên phảiđ ến tháng 9 - 1987 (33 tuoi) ông miớ lấy được vợ.", "target": "Sức khỏe yếu, lại cảnh nghèo túng nên phải đến tháng 9 - 1987 (33 tuổi) ông mới lấy được vợ."}
+{"input": "\"hồi ấy, mình và đồng doi là những thanh niên khỏe mạnh, ăn uống vào có nhiều lúc thấy hơi choáng váng, nhức đầu.", "target": "\"hồi ấy, mình và đồng đội là những thanh niên khỏe mạnh, ăn uống vào có nhiều lúc thấy hơi choáng váng, nhức đầu."}
+{"input": "Cai tên Nguyễn Quang Trung minh đặt cho nó là cũng mong nó khỏe mạnh, giỏi giang như tuong quân Ta ySơn năm nào.", "target": "Cái tên Nguyễn Quang Trung mình đặt cho nó là cũng mong nó khỏe mạnh, giỏi giang như tướng quân Tây Sơn năm nào."}
+{"input": "Cứ nghĩ đẻ con ra có đầu có duoi nuôi lâu cũng lớn.", "target": "Cứ nghĩ đẻ con ra có đầu có đuôi nuôi lâu cũng lớn."}
+{"input": "Nhưng có hoi hận cũng chẳng được, giờ nỗi đau trong ong, trong hai đứa con cứ sờ sờ ra đó.", "target": "Nhưng có hối hận cũng chẳng được, giờ nỗi đau trong ông, trong hai đứa con cứ sờ sờ ra đó."}
+{"input": "\"phải sống, no cũng àlc on người được mang nặng đẻ đau, cũng có tên có tuoi như mọi người...\".", "target": "\"phải sống, nó cũng là con người được mang nặng đẻ đau, cũng có tên có tuổi như mọi người...\"."}
+{"input": "Ông bà thì cứ nghi nhà mình động chạm làm sao cứ cúng bái, lễ lat suốt.", "target": "Ông bà thì cứ nghĩ nhà mình động chạm làm sao cứ cúng bái, lễ lạt suốt."}
+{"input": "\"Minh làm cai gì khôngb ao giờ hối hận, trừ một lần duy nhat là chuyện lấy vợ đẻ con...\".", "target": "\"Mình làm cái gì không bao giờ hối hận, trừ một lần duy nhất là chuyện lấy vợ đẻ con...\"."}
+{"input": "Không được ăn nó đập phá hết, ném gạch, vứt rác khắp nhà rồi némq ua cả nhà người khác.", "target": "Không được ăn nó đập phá hết, ném gạch, vứt rác khắp nhà rồi ném qua cả nhà người khác."}
+{"input": "Với căn bệnh ung thư, vo rồi cá canh chị chạy vạy vay mượn, thế chấp cả đất o quê để có trên 200 triệu đồng cho ông chạy chữa.", "target": "Với căn bệnh ung thư, vợ rồi các anh chị chạy vạy vay mượn, thế chấp cả đất ở quê để có trên 200 triệu đồng cho ông chạy chữa."}
+{"input": "Nhung giấu mãi sao nổi, vợ chong đầu gối tay ap, nhiều đêm đau không ngủ được, cứ chổng mông lên, cắm đầu xuong gối...", "target": "Nhưng giấu mãi sao nổi, vợ chồng đầu gối tay ấp, nhiều đêm đau không ngủ được, cứ chổng mông lên, cắm đầu xuống gối..."}
+{"input": "Vậy mà quyền được sống của chúng cũng chẳng ra song vì đau đớn, bệnh tat.", "target": "Vậy mà quyền được sống của chúng cũng chẳng ra sống vì đau đớn, bệnh tật."}
+{"input": "Hai đua trẻ tật nguyền vẫn quều quào, phá phach trong suốt câuc huyện của bố.", "target": "Hai đứa trẻ tật nguyền vẫn quều quào, phá phách trong suốt câu chuyện của bố."}
+{"input": "Tôi chot nhận ra hai đứa trẻ muốn nói gì đó voi nguoi cha tội nghiep của chúng...", "target": "Tôi chợt nhận ra hai đứa trẻ muốn nói gì đó với người cha tội nghiệp của chúng..."}
+{"input": "Già làng Pơloong Zơra, 68 tuổi, cười mom mém nói:\"Trên cho dân mình cái văn minh, văn hóa, phải làm theo.", "target": "Già làng Pơloong Zơra, 68 tuổi, cười móm mém nói:\"Trên cho dân mình cái văn minh, văn hóa, phải làm theo."}
+{"input": "Cái đầu người Kơtu mình luc mô cũng học theo cái tốt nhanh lắm...\".", "target": "Cái đầu người Kơtu mình lúc mô cũng học theo cái tốt nhanh lắm...\"."}
+{"input": "Nhưng dang nói nhất là làng đã hình thành một đội thợ mộc.", "target": "Nhưng đáng nói nhất là làng đã hình thành một đội thợ mộc."}
+{"input": "Khi ưxa 16 tuổi mình còn dám tình nguyện nhập ngũ để đi đánh Mỹ, giờ có gì phai sợ chứ.", "target": "Khi xưa 16 tuổi mình còn dám tình nguyện nhập ngũ để đi đánh Mỹ, giờ có gì phải sợ chứ."}
+{"input": "Xong bài thể dục, các thanh thiuế nien số về quet dọn nhà riêng, số ở lại quét dọn sân gươl và duong vao làng.", "target": "Xong bài thể dục, các thanh thiếu niên số về quét dọn nhà riêng, số ở lại quét dọn sân gươl và đường vào làng."}
+{"input": "Và già làng Bhling Chrlâng đã bỏ hơn một năm miệt mài theo học cái nghề của những người tho miền xuôi.", "target": "Và già làng Bhling Chrlâng đã bỏ hơn một năm miệt mài theo học cái nghề của những người thợ miền xuôi."}
+{"input": "Đi lên với\"lu anhà nước\".", "target": "Đi lên với\"lúa nhà nước\"."}
+{"input": "Thấy cảnh mẹ con ngờưi ta ríu rít đưa nhau đến truong mà them.", "target": "Thấy cảnh mẹ con người ta ríu rít đưa nhau đến trường mà thèm."}
+{"input": "Cuộc đời dưới vànhm ũ thám tử.", "target": "Cuộc đời dưới vành mũ thám tử."}
+{"input": "Tắm xong nếu thấy chưa xê dịch bì thư thì ông phai kiem cớ dắt xe đi mua sắm, nhậu nhẹt với bạn bè...", "target": "Tắm xong nếu thấy chưa xê dịch bì thư thì ông phải kiếm cớ dắt xe đi mua sắm, nhậu nhẹt với bạn bè..."}
+{"input": "Kết quả là bì thư vẫn nằm nguyên chỗ cu, không có dấu hiệu đã bị động đến!", "target": "Kết quả là bì thư vẫn nằm nguyên chỗ cũ, không có dấu hiệu đã bị động đến!"}
+{"input": "Đến lúc Kim phải hỏi vì sao thì ông Chương lại nói: không c óchuyện gì quan trọng.", "target": "Đến lúc Kim phải hỏi vì sao thì ông Chương lại nói: không có chuyện gì quan trọng."}
+{"input": "Đợi khi Kim không thể chịu được và hỏi nua thì ong Chương đưa bi thư đựng công văn công ty cho cô xem...", "target": "Đợi khi Kim không thể chịu được và hỏi nữa thì ông Chương đưa bì thư đựng công văn công ty cho cô xem..."}
+{"input": "Ông Chương k:ể kim rất buồn.", "target": "Ông Chương kể: kim rất buồn."}
+{"input": "Ong hỏi Kim:\"Em muốn về Nam ớvi anh không?\".", "target": "Ông hỏi Kim:\"Em muốn về Nam với anh không?\"."}
+{"input": "Em còn họ hang, quê quán.", "target": "Em còn họ hàng, quê quán."}
+{"input": "Như con người ta cũng đã thi cử vào đại học, bố mẹ có thể ngồi một chỗ sai bao chúng.", "target": "Như con người ta cũng đã thi cử vào đại học, bố mẹ có thể ngồi một chỗ sai bảo chúng."}
+{"input": "Ông Chương lại co thêm dieu không trung thực với Hùng.", "target": "Ông Chương lại có thêm điều không trung thực với Hùng."}
+{"input": "Điều không trung thực đó là gì, Hùng lại phải cho.", "target": "Điều không trung thực đó là gì, Hùng lại phải chờ."}
+{"input": "Khách từ mien Nam ra.", "target": "Khách từ miền Nam ra."}
+{"input": "Bà khách nói:\"Nếu các anh làm tốt việc tôi nhờ, tôi sẽ giới thiệu với các anh một khách hang nữa.", "target": "Bà khách nói:\"Nếu các anh làm tốt việc tôi nhờ, tôi sẽ giới thiệu với các anh một khách hàng nữa."}
+{"input": "Không ai nghĩ thôn làng người Kơtu nơi Trường Son biên địa nay lai gồm toàn những ngôi nha đẹp, kiên cố thế này.", "target": "Không ai nghĩ thôn làng người Kơtu nơi Trường Sơn biên địa nay lại gồm toàn những ngôi nhà đẹp, kiên cố thế này."}
+{"input": "Chồng bà ay cùng làm ở cơ quan chồng tôi và gần đây lao ta cũng có dấu hiệu bồ bịch\".", "target": "Chồng bà ấy cùng làm ở cơ quan chồng tôi và gần đây lão ta cũng có dấu hiệu bồ bịch\"."}
+{"input": "Hùng sửng sốt nha nra: ông Chương đang có vợ con!", "target": "Hùng sửng sốt nhận ra: ông Chương đang có vợ con!"}
+{"input": "Chồng bà làm ở Hà Nội tại văn phong đại diện của một doanh nghiệp miền Nam.", "target": "Chồng bà làm ở Hà Nội tại văn phòng đại diện của một doanh nghiệp miền Nam."}
+{"input": "Vì vậy khi nhập dữ lieu mới mà có sự trùng hợp thì máy tính sẽ báo ngay.", "target": "Vì vậy khi nhập dữ liệu mới mà có sự trùng hợp thì máy tính sẽ báo ngay."}
+{"input": "Có ý kiến cho rằng: lợi dụng thông tin của bà khách de tìm hieu ợv chồng ông Chưnơg và lợi dụng ông Chương để tìm hiểu ông Học.", "target": "Có ý kiến cho rằng: lợi dụng thông tin của bà khách để tìm hiểu vợ chồng ông Chương và lợi dụng ông Chương để tìm hiểu ông Học."}
+{"input": "Cuối cùng ban giám đoc đã phê duyệt ý kiến của Hùng va của đa số anh em", "target": "Cuối cùng ban giám đốc đã phê duyệt ý kiến của Hùng và của đa số anh em."}
+{"input": "Tuy nhiên đyâ cũng là lúc nỗi bộ công ty thám tử xảy ra một cuộc tranh luận.", "target": "Tuy nhiên đây cũng là lúc nội bộ công ty thám tử xảy ra một cuộc tranh luận."}
+{"input": "Ông Chương giật thót mình và hơi bối roi rồi chống chế:\"Thì toi đã khai từ đầu roi còn gì?\".", "target": "Ông Chương giật thót mình và hơi bối rối rồi chống chế:\"Thì tôi đã khai từ đầu rồi còn gì?\"."}
+{"input": "Ông da từng có rồi đúng không?\".", "target": "Ông đã từng có rồi đúng không?\"."}
+{"input": "Vì ông Chương và Kim yêu nhau bằng tình cảm thật, vượt uqa bao khó khan, nghĩan ặng tình sâu và không dieu gì ngăn cản họ.", "target": "Vì ông Chương và Kim yêu nhau bằng tình cảm thật, vượt qua bao khó khăn, nghĩa nặng tình sâu và không điều gì ngăn cản họ."}
+{"input": "\"Nhưng chắc con ông thì van không bỏ ông chứ?\".", "target": "\"Nhưng chắc con ông thì vẫn không bỏ ông chứ?\"."}
+{"input": "Bởi rứa mình bàn với đám trai tre: hay là dân mình phải học cho được cai nghề ni?", "target": "Bởi rứa mình bàn với đám trai trẻ: hay là dân mình phải học cho được cái nghề ni?"}
+{"input": "\"có, thỉnh thoảng nó văn gọi điện vào số nhà tôi mà\".", "target": "\"có, thỉnh thoảng nó vẫn gọi điện vào số nhà tôi mà\"."}
+{"input": "Xem lại tên, tuổi, anh thì ông này không phải ông Chương mà là ông Học, phó văn phong của ông Chương.", "target": "Xem lại tên, tuổi, ảnh thì ông này không phải ông Chương mà là ông Học, phó văn phòng của ông Chương."}
+{"input": "\"Ờ, ở voi mẹ...\".", "target": "\"Ờ, ở với mẹ...\"."}
+{"input": "Sau một hồi chống chế, ông Chưnơg hỏi: Thế ông nghi ngờ vợ tôi à?\".", "target": "Sau một hồi chống chế, ông Chương hỏi: Thế ông nghi ngờ vợ tôi à?\"."}
+{"input": "Cuộc đời dưới vành mu thám tử.", "target": "Cuộc đời dưới vành mũ thám tử."}
+{"input": "Theo đánh giá cùa ông Chương, ông Hoc là người nhu mì hiền lanh.", "target": "Theo đánh giá của ông Chương, ông Học là người nhu mì hiền lành."}
+{"input": "Nhưng mình khuyên anh em đừng nản, với cái rựa cái dao mà dân mình chạm khắc được trên cái gơưl, cái hnà mồ.", "target": "Nhưng mình khuyên anh em đừng nản, với cái rựa cái dao mà dân mình chạm khắc được trên cái gươl, cái nhà mồ."}
+{"input": "Ông Chương bị khủng bố ngày một căng nhưng Hùng thi vẫn chua biết phải làm gì tiếp.", "target": "Ông Chương bị khủng bố ngày một căng nhưng Hùng thì vẫn chưa biết phải làm gì tiếp."}
+{"input": "Hùng rap nối các tính chất, dữ kiện: nếu thông tin cua bà vợ ông Học là đúng thì ông Chương và vợ con văn đoàn tụ bình thường.", "target": "Hùng ráp nối các tính chất, dữ kiện: nếu thông tin của bà vợ ông Học là đúng thì ông Chương và vợ con vẫn đoàn tụ bình thường."}
+{"input": "Muốn hết nghi thì phai lam ro xem vợ ông có đúng thủ phạm không\".", "target": "Muốn hết nghi thì phải làm rõ xem vợ ông có đúng thủ phạm không\"."}
+{"input": "Những thủ phạm đằng sau thủ phạm: người tình bí an.", "target": "Những thủ phạm đằng sau thủ phạm: người tình bí ẩn."}
+{"input": "Hơn nữa, trong ôcng ty tư nhân, việc thăng chuc ph ólên trưởng không thay đổi nhiều về quyen vàl ợi.", "target": "Hơn nữa, trong công ty tư nhân, việc thăng chức phó lên trưởng không thay đổi nhiều về quyền và lợi."}
+{"input": "Qua nhung thông tin này, Hùng cho rằng khả năng ông Học là thủ phạm rất mơ hồ.", "target": "Qua những thông tin này, Hùng cho rằng khả năng ông Học là thủ phạm rất mơ hồ."}
+{"input": "Thế nhưng cũng không thể chờ doi, Hùng nói:\"Đã điều tra thì ai tôi cũng co quyền nghi.", "target": "Thế nhưng cũng không thể chờ đợi, Hùng nói:\"Đã điều tra thì ai tôi cũng có quyền nghi."}
+{"input": "Kim (tên cô) về quê mai táng bố rồi quay lại Hà Nội giải quyết vụ tai nạn giao thong.", "target": "Kim (tên cô) về quê mai táng bố rồi quay lại Hà Nội giải quyết vụ tai nạn giao thông."}
+{"input": "Kim được minh oan, giấy tờ, xe máy của ông Chương lúc đó moi được trả.", "target": "Kim được minh oan, giấy tờ, xe máy của ông Chương lúc đó mới được trả."}
+{"input": "Thật ra lần trước khi thử nha hàng xóm, Hùng đã dặn ông Chương giấu Kim vì đó cũng đồng thời là thử cả kim.", "target": "Thật ra lần trước khi thử nhà hàng xóm, Hùng đã dặn ông Chương giấu Kim vì đó cũng đồng thời là thử cả kim."}
+{"input": "Ông Chuong kể năm đầu tiên từ Sài Gòn ra Hà Nội, ông bơ vơ trong xa lạ và boun tẻ", "target": "Ông Chương kể năm đầu tiên từ Sài Gòn ra Hà Nội, ông bơ vơ trong xa lạ và buồn tẻ."}
+{"input": "Đám đông cho biết mot em nhỏ đang đi trên đường bị xe xô ngã bất tỉnh.", "target": "Đám đông cho biết một em nhỏ đang đi trên đường bị xe xô ngã bất tỉnh."}
+{"input": "Người gan đó nhìn thấy cô gái này đang đỡ em bé đó dậy.", "target": "Người gần đó nhìn thấy cô gái này đang đỡ em bé đó dậy."}
+{"input": "Nhìn cô gái xinh xắn, yeu đuối va tội nghiệp, ông Chương khong đành dời bướ.c", "target": "Nhìn cô gái xinh xắn, yếu đuối và tội nghiệp, ông Chương không đành dời bước."}
+{"input": "Ông gọi taxi va cùng cô gái đến bệnh viện.", "target": "Ông gọi taxi và cùng cô gái đến bệnh viện."}
+{"input": "Làm cái nhà như người xuôi mình cố học miết thì được thoi\".", "target": "Làm cái nhà như người xuôi mình cố học miết thì được thôi\"."}
+{"input": "Người đáng nói còn lại là tình nhân của ông Chuong.", "target": "Người đáng nói còn lại là tình nhân của ông Chương."}
+{"input": "Cúi gương mặt xanh rớt, Kim lí nhí lời cảm on và rụt rè biếu ân nhân một boc trứng gà.", "target": "Cúi gương mặt xanh rớt, Kim lí nhí lời cảm ơn và rụt rè biếu ân nhân một bọc trứng gà."}
+{"input": "Ngồi bên nhau trong hàng nuoc, Kim cho biết quê ở lục ngạn, Bắc Giang.", "target": "Ngồi bên nhau trong hàng nước, Kim cho biết quê ở lục ngạn, Bắc Giang."}
+{"input": "Nay bố mất, ông chủ ãđ cho Kim nghỉ việc.", "target": "Nay bố mất, ông chủ đã cho Kim nghỉ việc."}
+{"input": "Ông Chương hứa sẽ tim cho Kim một việc làm và một căn nhà trọ o Hà Nội.", "target": "Ông Chương hứa sẽ tìm cho Kim một việc làm và một căn nhà trọ ở Hà Nội."}
+{"input": "Di làm được mấy buổi thì Kim ốm.", "target": "Đi làm được mấy buổi thì Kim ốm."}
+{"input": "Để đánh gia chính xác hon, Hùng cần biết tường tậnt hái độ của Kim trước chuyện ông Chuong bị khủng bố, đe dọa.", "target": "Để đánh giá chính xác hơn, Hùng cần biết tường tận thái độ của Kim trước chuyện ông Chương bị khủng bố, đe dọa."}
+{"input": "Người đẹp trước nhung cuộc khủng bố.", "target": "Người đẹp trước những cuộc khủng bố."}
+{"input": "Dành khai thác tiếp.", "target": "Đành khai thác tiếp."}
+{"input": "Lan thứ hai ông Chương bị khủng bố là chiều chủ nhật, ông và Kim cùng ở nhà.", "target": "Lần thứ hai ông Chương bị khủng bố là chiều chủ nhật, ông và Kim cùng ở nhà."}
+{"input": "Ông Chương quyết địn hmua căn nhà đang ở hiện nay, dọn khỏi văn phòng và đưa Kim đến sống cùng.", "target": "Ông Chương quyết định mua căn nhà đang ở hiện nay, dọn khỏi văn phòng và đưa Kim đến sống cùng."}
+{"input": "Có chuyện gì vay ahn?\"", "target": "Có chuyện gì vậy anh?\"."}
+{"input": "\"Không co gì.", "target": "\"Không có gì."}
+{"input": "Anh chi ngại bạn hàng không biết số di động của anh nên gọi về đây.", "target": "Anh chỉ ngại bạn hàng không biết số di động của anh nên gọi về đây."}
+{"input": "Kim óc vẻ rất lo lắng cho ông.", "target": "Kim có vẻ rất lo lắng cho ông."}
+{"input": "Cau chuyện lần nay lại cho Hùng thấy khac lần trước.", "target": "Câu chuyện lần này lại cho Hùng thấy khác lần trước."}
+{"input": "Nếu Kim là nguoi đạo diễn chuyện khủng bố thì chắc chắn cô ta không chủ động nhấc điện thoại mà để ông Chưong nhấc.", "target": "Nếu Kim là người đạo diễn chuyện khủng bố thì chắc chắn cô ta không chủ động nhấc điện thoại mà để ông Chương nhấc."}
+{"input": "Lần đầu tiên bọn chúng gửi qua bưu điện thì thưđ ến đúng lúc ông và Kim cùng o nhà.", "target": "Lần đầu tiên bọn chúng gửi qua bưu điện thì thư đến đúng lúc ông và Kim cùng ở nhà."}
+{"input": "Tình cảm hai người nảy sinh nhanh chóng và thành đô itình nhân lúc nào chẳng ibết.", "target": "Tình cảm hai người nảy sinh nhanh chóng và thành đôi tình nhân lúc nào chẳng biết."}
+{"input": "Chuông điện thoại cố định reo, Ki mnhấc máy, sau đó kêu ông có người cần gặp.", "target": "Chuông điện thoại cố định reo, Kim nhấc máy, sau đó kêu ông có người cần gặp."}
+{"input": "Thai độ không thể là đóng kịch duợc.", "target": "Thái độ không thể là đóng kịch được."}
+{"input": "Sau đó thì liên tục có thư khủng bố gửi về nha.", "target": "Sau đó thì liên tục có thư khủng bố gửi về nhà."}
+{"input": "Ông Chương cung không giấu Kim nữa...", "target": "Ông Chương cũng không giấu Kim nữa..."}
+{"input": "Kỷ niệm 59 năm cách mạng tháng Tam và quốc khán h2 - 9.", "target": "Kỷ niệm 59 năm cách mạng tháng Tám và quốc khánh 2 - 9."}
+{"input": "Kỳ quan giua long đất thép.", "target": "Kỳ quan giữa lòng đất thép."}
+{"input": "Có một công trình kỳ diệu của nhân dnâ tp. HCM: địa đạo Củ Chi.", "target": "Có một công trình kỳ diệu của nhân dân tp. HCM: địa đạo Củ Chi."}
+{"input": "Hùng nhận định theo cả hai hướng tot va xấu đều có cơ sở.", "target": "Hùng nhận định theo cả hai hướng tốt và xấu đều có cơ sở."}
+{"input": "Và trên 10. 000 chang trai, cô gái Củ Chi dã đổ mau xương để thanh hào thanh lũy.", "target": "Và trên 10. 000 chàng trai, cô gái Củ Chi đã đổ máu xương để thành hào thành lũy."}
+{"input": "Nhiều đồng bao, đồng chí hi sinh.", "target": "Nhiều đồng bào, đồng chí hi sinh."}
+{"input": "Luc lượng cách mạng ngày càng mất mát...", "target": "Lực lượng cách mạng ngày càng mất mát..."}
+{"input": "Năm 1960, sau phong trào đồng khởi, địch càng tăng cường ruồng bố, tình hình cách mạng càng them cam go.", "target": "Năm 1960, sau phong trào đồng khởi, địch càng tăng cường ruồng bố, tình hình cách mạng càng thêm cam go."}
+{"input": "Nưgời trước nga, người sau tiến.", "target": "Người trước ngã, người sau tiến."}
+{"input": "Khắp các ụ cây, khắp các bia rừng từng nhóm người lố nhố.", "target": "Khắp các ụ cây, khắp các bìa rừng từng nhóm người lố nhố."}
+{"input": "Già tẻr gái trai, nam phụ lão ấu, tất cảk hông phân biệt thành phan đều rung rung lao vào tran mới.", "target": "Già trẻ gái trai, nam phụ lão ấu, tất cả không phân biệt thành phần đều rùng rùng lao vào trận mới."}
+{"input": "Bắt đầu từ năm 1961, xã Nhunậ Đức phát động phong trào đào dia đạo.", "target": "Bắt đầu từ năm 1961, xã Nhuận Đức phát động phong trào đào địa đạo."}
+{"input": "Điều lạ thường là địa đạo nằm giữa lòng địch, bị phong tỏa bởi bốn bề đồn bót va nam sát nách thủ do của bộ máy chiến tranh mỹ - ngụy.", "target": "Điều lạ thường là địa đạo nằm giữa lòng địch, bị phong tỏa bởi bốn bề đồn bót và nằm sát nách thủ đô của bộ máy chiến tranh mỹ - ngụy."}
+{"input": "Trước tình hình đó, đảng uy xã Nhuận Đức đã quyết định phái đào địa đạo, lấy do làm hệ thống trú ẩn và phòng thủ phản công, phòng thủ tiến công.", "target": "Trước tình hình đó, đảng ủy xã Nhuận Đức đã quyết định phải đào địa đạo, lấy đó làm hệ thống trú ẩn và phòng thủ phản công, phòng thủ tiến công."}
+{"input": "Người già đan ki, trẻ con múc nước, đàn ông đao, phụ nữ nấu cơm nấu khoai...", "target": "Người già đan ki, trẻ con múc nước, đàn ông đào, phụ nữ nấu cơm nấu khoai..."}
+{"input": "Công việc anh hùng đó không chỉ dien ra một tháng, một năm.", "target": "Công việc anh hùng đó không chỉ diễn ra một tháng, một năm."}
+{"input": "Những đôi uyên ương ngày xưa giờ này người còn người mat.", "target": "Những đôi uyên ương ngày xưa giờ này người còn người mất."}
+{"input": "Vật dung đào là một luoi cuốc cùn, dân địa phương gọi là cuốc ngao, cán ngắn chừng 3 - 4 tấc.", "target": "Vật dụng đào là một lưỡi cuốc cùn, dân địa phương gọi là cuốc ngao, cán ngắn chừng 3 - 4 tấc."}
+{"input": "Nhưng mieng thì rất hẹp, đường kính chừng 6 tấc.", "target": "Nhưng miệng thì rất hẹp, đường kính chừng 6 tấc."}
+{"input": "Mỗi mieng thí cách nhau 10 m.", "target": "Mỗi miệng thí cách nhau 10 m."}
+{"input": "Như vay mỗi tổ đào mỗi bên 5 m.", "target": "Như vậy mỗi tổ đào mỗi bên 5 m."}
+{"input": "Cứ thế các đoạn địa đạo được nối rong ra, mỗi ngày một chut.", "target": "Cứ thế các đoạn địa đạo được nối rộng ra, mỗi ngày một chút."}
+{"input": "Long địa đạo không thẳng mà ngoằn ngoèo uon khuc, ngoắt qua ngoắt lai.", "target": "Lòng địa đạo không thẳng mà ngoằn ngoèo uốn khúc, ngoắt qua ngoắt lại."}
+{"input": "Ông Út Kang giiả thich: là de tranh trai (lựu đạn) cua dich.", "target": "Ông Út Kang giải thích: là để tránh trái (lựu đạn) của địch."}
+{"input": "\"đội quân chuot cống\"bất lực và thất bại.", "target": "\"đội quân chuột cống\"bất lực và thất bại."}
+{"input": "Bằng kinh nghiệm dân gian, du kich gia nhuyễn ớt, hạt tiêu thành bột rac bên trên để cho không đánh hơi được.", "target": "Bằng kinh nghiệm dân gian, du kích giã nhuyễn ớt, hạt tiêu thành bột rắc bên trên để chó không đánh hơi được."}
+{"input": "Cuối cùng du kich phải nhờ người vào noi thành mu acác loại dầu tắm, xà bông của lính Mỹ ve bôi ở ben trên.", "target": "Cuối cùng du kích phải nhờ người vào nội thành mua các loại dầu tắm, xà bông của lính Mỹ về bôi ở bên trên."}
+{"input": "Cuộc điờ dưới vanh mũ thám tu.", "target": "Cuộc đời dưới vành mũ thám tử."}
+{"input": "Khi địch phát hien phản công, lại theo duong hào rút vào lòng đất...", "target": "Khi địch phát hiện phản công, lại theo đường hào rút vào lòng đất..."}
+{"input": "Goi điện cho Hùng, giọng ong Chương thì thào, hot hoảng:\"Tôi đang bi một thằng theo dõi.", "target": "Gọi điện cho Hùng, giọng ông Chương thì thào, hốt hoảng:\"Tôi đang bị một thằng theo dõi."}
+{"input": "\"N ókhoảng 30 tuổi, mặc ao kẻ, quần bò, ngồi trên xe Dream II, doi mũ đen.", "target": "\"Nó khoảng 30 tuổi, mặc áo kẻ, quần bò, ngồi trên xe Dream II, đội mũ đen."}
+{"input": "Rượt đuổi kẻ rượt duoi.", "target": "Rượt đuổi kẻ rượt đuổi."}
+{"input": "Ông Chương chưa từng về quê Kim và cũng không biết người thân nào của Kim ngoài bố côđ ã mất.", "target": "Ông Chương chưa từng về quê Kim và cũng không biết người thân nào của Kim ngoài bố cô đã mất."}
+{"input": "Ông Chương cho biết khi mua nha ông chỉ lam giấy tờ viết tay và tờ giấy đó ông đưa Kim giữ hộ.", "target": "Ông Chương cho biết khi mua nhà ông chỉ làm giấy tờ viết tay và tờ giấy đó ông đưa Kim giữ hộ."}
+{"input": "Kim bóc ra, đọc xong dòng chu de dọa, cô tái mặt lộ vẻ hốt hoảng.", "target": "Kim bóc ra, đọc xong dòng chữ đe dọa, cô tái mặt lộ vẻ hốt hoảng."}
+{"input": "Chắc Kim đoán co chuyện không hay nen gặng hỏi nhưng ông Chương không tiết lo.", "target": "Chắc Kim đoán có chuyện không hay nên gặng hỏi nhưng ông Chương không tiết lộ."}
+{"input": "Nhận thu, Kim keu lạ vì thư không đề họ của người nhận mà chỉ ghi tên.", "target": "Nhận thư, Kim kêu lạ vì thư không đề họ của người nhận mà chỉ ghi tên."}
+{"input": "Nếu nguoi ta nhầm thì cung phải bóc mới biết chứ!\".", "target": "Nếu người ta nhầm thì cũng phải bóc mới biết chứ!\"."}
+{"input": "Thái độ hốt hoảng là không thể đóng kịch vì dù sao Kim cung là một cô gái trẻ, nha quê, khong the\"cáo già\"đến mức ấy.", "target": "Thái độ hốt hoảng là không thể đóng kịch vì dù sao Kim cũng là một cô gái trẻ, nhà quê, không thể\"cáo già\"đến mức ấy."}
+{"input": "He thống địa đạo dưới lòng đất còn được kết nối với hệ thống chiến hào chằng chit trên mặt đất.", "target": "Hệ thống địa đạo dưới lòng đất còn được kết nối với hệ thống chiến hào chằng chịt trên mặt đất."}
+{"input": "Từ lòng địa đạ,o du kích xuất hiện, len theo chiến hào, dựa vào cac ụ chiến đấu tan công địch.", "target": "Từ lòng địa đạo, du kích xuất hiện, len theo chiến hào, dựa vào các ụ chiến đấu tấn công địch."}
+{"input": "Nhất là hôm đó Kim đang ở trong nha và vẫn mo cửa.", "target": "Nhất là hôm đó Kim đang ở trong nhà và vẫn mở cửa."}
+{"input": "Hùng dặn ông Chương cứ ngoi trong quán khoảng một tiếng nữa roi đi ra bình thường.", "target": "Hùng dặn ông Chương cứ ngồi trong quán khoảng một tiếng nữa rồi đi ra bình thường."}
+{"input": "Hắn là đầu mối duy nhất chính thuc lien quan đến thủ phạm khủng bố.", "target": "Hắn là đầu mối duy nhất chính thức liên quan đến thủ phạm khủng bố."}
+{"input": "Ông Chương dừng lại mua sam vài thứ thì hắ ncũng dừng lại chờ.", "target": "Ông Chương dừng lại mua sắm vài thứ thì hắn cũng dừng lại chờ."}
+{"input": "Và nhu vậy các thám tử đã lộ dien với tên ao kẻ.", "target": "Và như vậy các thám tử đã lộ diện với tên áo kẻ."}
+{"input": "Bất ngờ hắn tăng tốc và chay thẳng vào khu Hạ Hồi.", "target": "Bất ngờ hắn tăng tốc và chạy thẳng vào khu Hạ Hồi."}
+{"input": "Hắn không có mot dữ liệu nào nam trong tay thám tử nên bằng moi giá phải bám theo tên này!", "target": "Hắn không có một dữ liệu nào nằm trong tay thám tử nên bằng mọi giá phải bám theo tên này!"}
+{"input": "Và như vậy với cô gái này vẫn chưa thể kết luận co phải thủ phạm hay kôhng.", "target": "Và như vậy với cô gái này vẫn chưa thể kết luận có phải thủ phạm hay không."}
+{"input": "Cả hai đều không còn trẻ, lại đã sống chung thì tại sao họ không nghĩ đến chuyện lấy nhau", "target": "Cả hai đều không còn trẻ, lại đã sống chung thì tại sao họ không nghĩ đến chuyện lấy nhau?"}
+{"input": "Hùng khong thể chap nhận chuyện thách đố cua kẻ khủng bố: vừa ngang nhiên vua lộ liễu và thậm chí đã nhin thấy nhau mà chẳng lẽ bó tay?", "target": "Hùng không thể chấp nhận chuyện thách đố của kẻ khủng bố: vừa ngang nhiên vừa lộ liễu và thậm chí đã nhìn thấy nhau mà chẳng lẽ bó tay?"}
+{"input": "Còn ông Chương cũng không thể rời Hùng bởi mỗi ngày một hốt hoảng trước sự tấn cong của kẻ địch.", "target": "Còn ông Chương cũng không thể rời Hùng bởi mỗi ngày một hốt hoảng trước sự tấn công của kẻ địch."}
+{"input": "Nhu vậy ca hai vụ việc: của bà khách và của ông Chuong đến lúc này đều quá dễ giải quyết.", "target": "Như vậy cả hai vụ việc: của bà khách và của ông Chương đến lúc này đều quá dễ giải quyết."}
+{"input": "Như vậy vừa nhàn hạ, vừa đỡ tốn thời gian, công sức, vừa tăng lợi nhuận một cach hoàn toàn hợp pháp, không vi phạm đạo lý.", "target": "Như vậy vừa nhàn hạ, vừa đỡ tốn thời gian, công sức, vừa tăng lợi nhuận một cách hoàn toàn hợp pháp, không vi phạm đạo lý."}
+{"input": "Như vậy dù không có tà ý nhưng công ty cũng mang tiếng lợi dụng, chong lại khách hàng.", "target": "Như vậy dù không có tà ý nhưng công ty cũng mang tiếng lợi dụng, chống lại khách hàng."}
+{"input": "\"Khong, ý tôi muốn hỏi là ngày xưa ông da tung có vợ chưa?", "target": "\"Không, ý tôi muốn hỏi là ngày xưa ông đã từng có vợ chưa?"}
+{"input": "Tuy nhiên khả năng thứ ba da bị loại sau khi Hùng dùng\"thuốc thử\"với nhà hàng xóm.", "target": "Tuy nhiên khả năng thứ ba đã bị loại sau khi Hùng dùng\"thuốc thử\"với nhà hàng xóm."}
+{"input": "Những con người bình dị chân đấta y đã làm cách nào tạo nên một kỳ quan như thế?...", "target": "Những con người bình dị chân đất ấy đã làm cách nào tạo nên một kỳ quan như thế?..."}
+{"input": "Lúc sau ông Chương hỏi Kim:\"Nhung lúc anh đi vắng co ai gọi điện cho anh khong?\".", "target": "Lúc sau ông Chương hỏi Kim:\"Những lúc anh đi vắng có ai gọi điện cho anh không?\"."}
+{"input": "Hai người khac - có khi chỉ một - ở bên ngoài cửa hầm kéo đất len.", "target": "Hai người khác - có khi chỉ một - ở bên ngoài cửa hầm kéo đất lên."}
+{"input": "\"khi nào\"phụp\"với nhau (hai doan địa đạo thông nhau) thì mieng thí được lấp lại.", "target": "\"khi nào\"phụp\"với nhau (hai đoạn địa đạo thông nhau) thì miệng thí được lấp lại."}
+{"input": "Quy cách chuẩn được phổ biến của địa đạo là chiều rộng khoảng 9 tấc, chieu cao khoảng 1, 1 m.", "target": "Quy cách chuẩn được phổ biến của địa đạo là chiều rộng khoảng 9 tấc, chiều cao khoảng 1, 1 m."}
+{"input": "Cac đường xương cá này c ókhi được bố trí chằng chịt gần nhau, nhiều vách dat chỉ cách chừng 2 - 3 tac.", "target": "Các đường xương cá này có khi được bố trí chằng chịt gần nhau, nhiều vách đất chỉ cách chừng 2 - 3 tấc."}
+{"input": "Bắt đầu là đào miệng thí, trổ từ tren mặt đất thẳng xuống như đào giếng.", "target": "Bắt đầu là đào miệng thí, trổ từ trên mặt đất thẳng xuống như đào giếng."}
+{"input": "Chính nho thế nên khi bị lộ hoặc b ịtấn công, du kíchc hỉ cần co chân dap vách để lần sang đường hkác.", "target": "Chính nhờ thế nên khi bị lộ hoặc bị tấn công, du kích chỉ cần co chân đạp vách để lần sang đường khác."}
+{"input": "Goi là dung quy cách chiều ngang, bề cao nhung ở rất nhiều đoạn sự bố trí về kích thước cùa địa đạo hết sức lắt leo và thông minh.", "target": "Gọi là đúng quy cách chiều ngang, bề cao nhưng ở rất nhiều đoạn sự bố trí về kích thước của địa đạo hết sức lắt léo và thông minh."}
+{"input": "Sức ép của trái nổ nếu càng mạnh thì càng ép\"nút chai\"kín hon, không cho khí độc len vào địa đạo.", "target": "Sức ép của trái nổ nếu càng mạnh thì càng ép\"nút chai\"kín hơn, không cho khí độc len vào địa đạo."}
+{"input": "Tuy nhiên tất cả kiểu nguy trang đó chỉ che được mat người chứ không giấu được miũ chó.", "target": "Tuy nhiên tất cả kiểu ngụy trang đó chỉ che được mắt người chứ không giấu được mũi chó."}
+{"input": "Nhung hkổ nỗi tụi lính Mỹ ran hma cũng thừa sức phat hiện lỗ thông hơi khi thấy bọn quân khuyển... sặc sụa.", "target": "Nhưng khổ nỗi tụi lính Mỹ ranh ma cũng thừa sức phát hiện lỗ thông hơi khi thấy bọn quân khuyển... sặc sụa."}
+{"input": "Ông sẽ rẽ vào một số cửa hàng, hiệu sách mua bán vài thứ và đừng ngó nghieng tỏ ra nghi ngờ hay sợ hãi...", "target": "Ông sẽ rẽ vào một số cửa hàng, hiệu sách mua bán vài thứ và đừng ngó nghiêng tỏ ra nghi ngờ hay sợ hãi..."}
+{"input": "Dọc tuyến hàng trăm kilômet chiến hao, ở bất cứ đâu cũng có the gặp những ụ chien đấu.", "target": "Dọc tuyến hàng trăm kilômet chiến hào, ở bất cứ đâu cũng có thể gặp những ụ chiến đấu."}
+{"input": "Giữa các ụ chiến đấu thường la một miệng địa dao", "target": "Giữa các ụ chiến đấu thường là một miệng địa đạo."}
+{"input": "15 phút sau hùng và một thám tử\"tổ lai\"ữna có mat gần quán cà phê ông Chương đang ngồi.", "target": "15 phút sau hùng và một thám tử\"tổ lái\"nữa có mặt gần quán cà phê ông Chương đang ngồi."}
+{"input": "Ten này có vẻ như cố tìn hlàm cho ông Chương biết hắn đang theo dõi ông.", "target": "Tên này có vẻ như cố tình làm cho ông Chương biết hắn đang theo dõi ông."}
+{"input": "Hai thám tử lúc đó vừa vòng xe vào ngõ lại phải quay đầu lap tức bám theo hắn.", "target": "Hai thám tử lúc đó vừa vòng xe vào ngõ lại phải quay đầu lập tức bám theo hắn."}
+{"input": "Về ngõ nha ông Chương, c ó lẽ phát hiện đã bị theo doi, tên áo kẻ lao xe vào ngõ và bất ngờ vòng ra ngay.", "target": "Về ngõ nhà ông Chương, c ó lẽ phát hiện đã bị theo dõi, tên áo kẻ lao xe vào ngõ và bất ngờ vòng ra ngay."}
+{"input": "Điều nay cũng co nghĩa đã lộ việc ong Chương đang nhờ nguoi điều tra ke khủgn bố.", "target": "Điều này cũng có nghĩa đã lộ việc ông Chương đang nhờ người điều tra kẻ khủng bố."}
+{"input": "Tuy nhien không thể bỏ con mồi quí nen các thám tử chấp nhận đánh bài ngửa.", "target": "Tuy nhiên không thể bỏ con mồi quí nên các thám tử chấp nhận đánh bài ngửa."}
+{"input": "Hơn thua lúc nay chính là cuộc rượt đuổi.", "target": "Hơn thua lúc này chính là cuộc rượt đuổi."}
+{"input": "Tên ao kẻ chay lòng vòng khắ pcác phố khi nhanh khi chậm.", "target": "Tên áo kẻ chạy lòng vòng khắp các phố khi nhanh khi chậm."}
+{"input": "Tiến den phố Huế, hắn rẽ vào đường Lý Thường Kiệt và chui vào một nhà hàng.", "target": "Tiến đến phố Huế, hắn rẽ vào đường Lý Thường Kiệt và chui vào một nhà hàng."}
+{"input": "Hắn rút điện thoại gọi roi kêu thức ăn.", "target": "Hắn rút điện thoại gọi rồi kêu thức ăn."}
+{"input": "Đợi nhân viên phục vụ đang hỏi các thám tử, tên áo kẻ vùng chạy ra xe nổ may phóng đi luôn.", "target": "Đợi nhân viên phục vụ đang hỏi các thám tử, tên áo kẻ vùng chạy ra xe nổ máy phóng đi luôn."}
+{"input": "Đuổi theo hắn, các thám tử vượt lên cầu Chương Duong sang Gia Lâm.", "target": "Đuổi theo hắn, các thám tử vượt lên cầu Chương Dương sang Gia Lâm."}
+{"input": "Đây là gio tan tầm, các chung loại xe ngoại tỉnh cũng ồ ạt tiến vào nội thành qua tuyến này.", "target": "Đây là giờ tan tầm, các chủng loại xe ngoại tỉnh cũng ồ ạt tiến vào nội thành qua tuyến này."}
+{"input": "Trời tối, đènn gược rất chói mắt nên tình hình bám đuổi khá khó khan.", "target": "Trời tối, đèn ngược rất chói mắt nên tình hình bám đuổi khá khó khăn."}
+{"input": "Các thám tử hối hả quay xe, mất năm phút mới đến được dải phan cách, nhưng otô bên này đi san sát không thể lập tức sang đường.", "target": "Các thám tử hối hả quay xe, mất năm phút mới đến được dải phân cách, nhưng ôtô bên này đi san sát không thể lập tức sang đường."}
+{"input": "Trời tối hẳn và đối tượng chìm vào biển người hối ha...", "target": "Trời tối hẳn và đối tượng chìm vào biển người hối hả..."}
+{"input": "Thất bại bất kh ảkháng này làm ông Chương cũng như các thám tử rất tiec.", "target": "Thất bại bất khả kháng này làm ông Chương cũng như các thám tử rất tiếc."}
+{"input": "Tuy nhiên qua đây ông Chương cho biết tên áo k ẻchính là tên đã khủng bố ông lần đầu tiên ngay tại ngo nhà ong.", "target": "Tuy nhiên qua đây ông Chương cho biết tên áo kẻ chính là tên đã khủng bố ông lần đầu tiên ngay tại ngõ nhà ông."}
+{"input": "VàH ùng lại hpải chuyển hướng...", "target": "Và Hùng lại phải chuyển hướng..."}
+{"input": "Thủ pham dang sau thủ phạm.", "target": "Thủ phạm đằng sau thủ phạm."}
+{"input": "Tuy nhiên hắn ta chỉ đạt ưđoc mục đích một...", "target": "Tuy nhiên hắn ta chỉ đạt được mục đích một..."}
+{"input": "Muốn biết chắc vợ ong Chuong có phải l àthủ phạm hay khong, Hùng lại phải dùng phép thử.", "target": "Muốn biết chắc vợ ông Chương có phải là thủ phạm hay không, Hùng lại phải dùng phép thử."}
+{"input": "Họ âm thầm đem một so tư trang đi thuê nhà nghỉ.", "target": "Họ âm thầm đem một số tư trang đi thuê nhà nghỉ."}
+{"input": "Kết qua, 01 ngày liền không có thư khủng bố.", "target": "Kết quả, 10 ngày liền không có thư khủng bố."}
+{"input": "Vậy vợ ong Chương là thủ phạm!", "target": "Vậy vợ ông Chương là thủ phạm!"}
+{"input": "Theo kế hoạch, trong thời gian đi khoi nhà, thỉnh thoảng ông Chương bí mật quay về kiểm tra hom thư.", "target": "Theo kế hoạch, trong thời gian đi khỏi nhà, thỉnh thoảng ông Chương bí mật quay về kiểm tra hòm thư."}
+{"input": "Ông kể: vợ ông hiền thục, mộc mạc, chất phac.", "target": "Ông kể: vợ ông hiền thục, mộc mạc, chất phác."}
+{"input": "Tâm lý đó không phù hợp với người trực tiếp danh ghen...", "target": "Tâm lý đó không phù hợp với người trực tiếp đánh ghen..."}
+{"input": "Sau nhiều cân nhắc, lựa chọn ,Hùng quyết định phải dùng kế bắn tin.", "target": "Sau nhiều cân nhắc, lựa chọn, Hùng quyết định phải dùng kế bắn tin."}
+{"input": "Hùng phan tich: kẻ khủng bố tấn công ông Chương đều qua địa chỉ nhà riêng chắc chắn phải có dụng ý hoặc su kiêng dè gì.", "target": "Hùng phân tích: kẻ khủng bố tấn công ông Chương đều qua địa chỉ nhà riêng chắc chắn phải có dụng ý hoặc sự kiêng dè gì."}
+{"input": "Hôm Tùng nhận giấy to xe mẹ trao, công ty thám tử lập một kế hoạch cnôg phu với sáu vai diễn đón tai đầu đường Thanh Nien cắt Yên Phụ.", "target": "Hôm Tùng nhận giấy tờ xe mẹ trao, công ty thám tử lập một kế hoạch công phu với sáu vai diễn đón tại đầu đường Thanh Niên cắt Yên Phụ."}
+{"input": "Nhưng khi hàng đã chui vào thị rtuong thì chịu.", "target": "Nhưng khi hàng đã chui vào thị trường thì chịu."}
+{"input": "Nếu chặn bắt ngay đượ ctừ biên giới thi khỏi nói.", "target": "Nếu chặn bắt ngay được từ biên giới thì khỏi nói."}
+{"input": "Nếu con nào chết thi lap tức xẻ thịt mang gap về thành phố để bán.", "target": "Nếu con nào chết thì lập tức xẻ thịt mang gấp về thành phố để bán."}
+{"input": "Nếu noi về hình thức, mẫu mã thì ai cũng nghĩ đó là hàng thật.", "target": "Nếu nói về hình thức, mẫu mã thì ai cũng nghĩ đó là hàng thật."}
+{"input": "Dễ dàng nhận thấy đó là những chiếc mũ bảo hiểm được bọc chắc trong nhữngt úi nilông đen.", "target": "Dễ dàng nhận thấy đó là những chiếc mũ bảo hiểm được bọc chắc trong những túi nilông đen."}
+{"input": "Đến gần trưa, những vác hang đầu tiên đã qua núi.", "target": "Đến gần trưa, những vác hàng đầu tiên đã qua núi."}
+{"input": "Không vội vã, đám cửu vạn từ từ vác xuong.", "target": "Không vội vã, đám cửu vạn từ từ vác xuống."}
+{"input": "Chún gdẫn thẳng lên núi, nơi hàng lậu được chuyển đến.", "target": "Chúng dẫn thẳng lên núi, nơi hàng lậu được chuyển đến."}
+{"input": "Hang lậu tràn theo những ơcn sốt.", "target": "Hàng lậu tràn theo những cơn sốt."}
+{"input": "Bà yêu cầu Hung kể hết những chuyện gì chưa đủ, chưa dung để bà kiểm nghiệm và chỉnh sửa.", "target": "Bà yêu cầu Hùng kể hết những chuyện gì chưa đủ, chưa đúng để bà kiểm nghiệm và chỉnh sửa."}
+{"input": "Hùng thảm hạin hư banh da gặp nước.", "target": "Hùng thảm hại như bánh đa gặp nước."}
+{"input": "Năm phút sau Thanh vào nhà với vai một nhân viên cùng c ơquan bà Loan đến chở bà di thăm người ốm.", "target": "Năm phút sau Thanh vào nhà với vai một nhân viên cùng cơ quan bà Loan đến chở bà đi thăm người ốm."}
+{"input": "Thọ cho biết vợ chồng anh rất hạnh phúc và Thu chưa có hiện tượng trang gió bao giờ...", "target": "Thọ cho biết vợ chồng anh rất hạnh phúc và Thu chưa có hiện tượng trăng gió bao giờ..."}
+{"input": "Qua câu chuyện,ô ng có vẻ rất de ý den những chi tiết nằm ngoài công việc của Thu.", "target": "Qua câu chuyện, ông có vẻ rất để ý đến những chi tiết nằm ngoài công việc của Thu."}
+{"input": "Sáng hôm sau, Cường gặp riêng Tho.", "target": "Sáng hôm sau, Cường gặp riêng Thọ."}
+{"input": "Sau nhiều đêm trằn troc, vợ chồng Thọ tìm đến các thám tử.", "target": "Sau nhiều đêm trằn trọc, vợ chồng Thọ tìm đến các thám tử."}
+{"input": "Đồng minh cũng là doi thủ.", "target": "Đồng minh cũng là đối thủ."}
+{"input": "Thọ khẳng định đây không the là nhầm số được.", "target": "Thọ khẳng định đây không thể là nhầm số được."}
+{"input": "Rồi anh cũng quên dnầ mau tin nhắn khó chịu kia.", "target": "Rồi anh cũng quên dần mẩu tin nhắn khó chịu kia."}
+{"input": "Bữa cơm ket thuc chóng vanh.", "target": "Bữa cơm kết thúc chóng vánh."}
+{"input": "Tho không nói thêm nhưng lấy bút ra ghi lại số máy này.", "target": "Thọ không nói thêm nhưng lấy bút ra ghi lại số máy này."}
+{"input": "Chị bối rối trước ánh mắt xoáy như mui khoan của chồng và noi: Em cũng không biết số này của ai.", "target": "Chị bối rối trước ánh mắt xoáy như mũi khoan của chồng và nói: Em cũng không biết số này của ai."}
+{"input": "Ngày thứ tư, kih ca hai vợ chồng Thọ ở nha thì có một cuộc điện gọi đến và Thọ để vợ nghe máy.", "target": "Ngày thứ tư, khi cả hai vợ chồng Thọ ở nhà thì có một cuộc điện gọi đến và Thọ để vợ nghe máy."}
+{"input": "Thu phạm là người khá gần Thu và chỉ nằm trong diện những người được Thu cho biết mất máy điện thoại di động.", "target": "Thủ phạm là người khá gần Thu và chỉ nằm trong diện những người được Thu cho biết mất máy điện thoại di động."}
+{"input": "Những buổi hciều, Thọ co tình về muộn hơn thường lệ chừng mot tiếng.", "target": "Những buổi chiều, Thọ cố tình về muộn hơn thường lệ chừng một tiếng."}
+{"input": "Mọi kế hoạch và thành quả có nguy cơ đổ vỡ, hải va tất ca thành viên tham gi alâm vào tình thế cam go...", "target": "Mọi kế hoạch và thành quả có nguy cơ đổ vỡ, hải và tất cả thành viên tham gia lâm vào tình thế cam go..."}
+{"input": "Hai từng bước lap đầy khoảng trốgn thời gian, không gian và tình cảm của Tùng.", "target": "Hải từng bước lấp đầy khoảng trống thời gian, không gian và tình cảm của Tùng."}
+{"input": "Vua dừng lại thì một xe di ngang quệt vào @ của Tùng.", "target": "Vừa dừng lại thì một xe đi ngang quệt vào @ của Tùng."}
+{"input": "Đánh bóng ban thì luyện mắt tinh anh như thế nào?", "target": "Đánh bóng bàn thì luyện mắt tinh anh như thế nào?"}
+{"input": "Đời tư van động viên bong bàn giỏi nhất Trung Quốc ra sao?...", "target": "Đời tư vận động viên bóng bàn giỏi nhất Trung Quốc ra sao?..."}
+{"input": "Hai giải nhì: nàng tiên nhỏ trong gia dinh\"cái bang\"(của Tiến Dũng), tường trình từ nghĩa trang vòng hoa trắng của Nguyễn Lê Nguyên.", "target": "Hai giải nhì: nàng tiên nhỏ trong gia đình\"cái bang\"(của Tiến Dũng), tường trình từ nghĩa trang vòng hoa trắng của Nguyễn Lê Nguyên."}
+{"input": "Ban giám khảo cong bố cuộc thi phóng sự - ký sự 2004 như sau: giải nhất: không có.", "target": "Ban giám khảo công bố cuộc thi phóng sự - ký sự 2004 như sau: giải nhất: không có."}
+{"input": "Muốn cắt canh, cắt tráig ì cũng duoc\".", "target": "Muốn cắt cành, cắt trái gì cũng được\"."}
+{"input": "Ông đã trực tiep\"nghiệm tuh\"và cong tác tư tưởng cho Hải.", "target": "Ông đã trực tiếp\"nghiệm thu\"và công tác tư tưởng cho Hải."}
+{"input": "Ở ben mình nhằm mục đích gì?...", "target": "Ở bên mình nhằm mục đích gì?..."}
+{"input": "Riêng việ cgửi báo cáo quá nguy hiểm nên công ty hcấp nhận năm ngày Hải gửi một lần.", "target": "Riêng việc gửi báo cáo quá nguy hiểm nên công ty chấp nhận năm ngày Hải gửi một lần."}
+{"input": "Nhà Hải không phải như địa chi Tùng biết.", "target": "Nhà Hải không phải như địa chỉ Tùng biết."}
+{"input": "Hải sẽ học cùng lớp, ngồi cùng bàn, ngủ cùng phòng và ăn cung mâm với Tùng.", "target": "Hải sẽ học cùng lớp, ngồi cùng bàn, ngủ cùng phòng và ăn cùng mâm với Tùng."}
+{"input": "Vì vậy mỗ ingày Hải phai gửi về công ty một bản báo cáo ngắn thong qua thư điện tử.", "target": "Vì vậy mỗi ngày Hải phải gửi về công ty một bản báo cáo ngắn thông qua thư điện tử."}
+{"input": "Đầu đội mũ sụp vành, đeo kính đen, đi xe dap địa hình và mua sẵn bánh, sữa để mai phcụ.", "target": "Đầu đội mũ sụp vành, đeo kính đen, đi xe đạp địa hình và mua sẵn bánh, sữa để mai phục."}
+{"input": "Chị Hằng\"đành\"phải tung bước\"tìm hiểu\"và thông tin cho Tùng.", "target": "Chị Hằng\"đành\"phải từng bước\"tìm hiểu\"và thông tin cho Tùng."}
+{"input": "Lá thư thứ ba, đã gặp thầy giáo Hải ở truong trung cấ pdu lịch.", "target": "Lá thư thứ ba, đã gặp thầy giáo Hải ở trường trung cấp du lịch."}
+{"input": "Nhungc ú sốc và lòng trắc ẩn.", "target": "Những cú sốc và lòng trắc ẩn."}
+{"input": "Rồi một tnih huống khiến tim anh thắt lại.", "target": "Rồi một tình huống khiến tim anh thắt lại."}
+{"input": "Đứa bé sau đó đã chết do một cơn sốt, chỉ vì... không có thuo cchua.", "target": "Đứa bé sau đó đã chết do một cơn sốt, chỉ vì... không có thuốc chữa."}
+{"input": "Không ít vị cảm dong...", "target": "Không ít vị cảm động..."}
+{"input": "Doi đời cho những mái đầu xanh.", "target": "Đổi đời cho những mái đầu xanh."}
+{"input": "Khi khách về nước rồi, cả thẻ học lan xe đạp chúng đem đi bán.", "target": "Khi khách về nước rồi, cả thẻ học lẫn xe đạp chúng đem đi bán."}
+{"input": "Và chính anh, để xác minh, đã từng về tận nha nhiều đứa trẻ.", "target": "Và chính anh, để xác minh, đã từng về tận nhà nhiều đứa trẻ."}
+{"input": "Trong nghề, cúhng cũng co rất nhiều cách\"chan Tây\".", "target": "Trong nghề, chúng cũng có rất nhiều cách\"chăn Tây\"."}
+{"input": "Đơn giản nhất là bám theo cả chục kliômet, khi nào khach mua mới thôi.", "target": "Đơn giản nhất là bám theo cả chục kilômet, khi nào khách mua mới thôi."}
+{"input": "Gia thật chỉ có 400. 000 d / tháng nhưng chúng noi lên 2 triệu đồng để ăn chênh lệch.", "target": "Giá thật chỉ có 400. 000 đ / tháng nhưng chúng nói lên 2 triệu đồng để ăn chênh lệch."}
+{"input": "Suot mấy buổi tận tình, khách có cho tiền chúng cũng kiên quyết không lấy.", "target": "Suốt mấy buổi tận tình, khách có cho tiền chúng cũng kiên quyết không lấy."}
+{"input": "Khi đó chúng nhận dan khách đi chơi không lấy tiền.", "target": "Khi đó chúng nhận dẫn khách đi chơi không lấy tiền."}
+{"input": "Nhưng khi Tây tò mò hỏi về ước mơ, chúng sẽ trả loi là muốn... được đi hoc.", "target": "Nhưng khi Tây tò mò hỏi về ước mơ, chúng sẽ trả lời là muốn... được đi học."}
+{"input": "Dân trong ngõ này hầu hết là gioi lao động và tiểu thương.", "target": "Dân trong ngõ này hầu hết là giới lao động và tiểu thương."}
+{"input": "Đến tháng 6 - 1999 quán khai truong, có chỗ để trẻ thực hành, trực tiếp có thu nhập.", "target": "Đến tháng 6 - 1999 quán khai trương, có chỗ để trẻ thực hành, trực tiếp có thu nhập."}
+{"input": "Thoi gian chạm mặt voi hàng xóm rất ít.", "target": "Thời gian chạm mặt với hàng xóm rất ít."}
+{"input": "Đó la người đàn ông to đậm, râu quai nón, đầu trọc, hung dữ, chừng 30 tuổi.", "target": "Đó là người đàn ông to đậm, râu quai nón, đầu trọc, hung dữ, chừng 30 tuổi."}
+{"input": "Tối hôm đó, Tho kiểm tra lai thì cũng chính là số ở buồng điện thoại tren đường Nguyễn Chí Thanh.", "target": "Tối hôm đó, Thọ kiểm tra lại thì cũng chính là số ở buồng điện thoại trên đường Nguyễn Chí Thanh."}
+{"input": "Cường hỏi Thu có nghĩ tới chuyen một cô gái nào đó yêu Thọ mà làm thế không?", "target": "Cường hỏi Thu có nghĩ tới chuyện một cô gái nào đó yêu Thọ mà làm thế không?"}
+{"input": "Thứ nhất, đây đơn thuan là sự trêu chọc.", "target": "Thứ nhất, đây đơn thuần là sự trêu chọc."}
+{"input": "Phạmc ảm động:\"khi trực tiếp nghe những dua trẻ nói, co thể bạn cũng sẽ khóc\".", "target": "Phạm cảm động:\"khi trực tiếp nghe những đứa trẻ nói, có thể bạn cũng sẽ khóc\"."}
+{"input": "Cau chuyện có thể theo bốn khả nang.", "target": "Câu chuyện có thể theo bốn khả năng."}
+{"input": "Hơn nữa, với lợi nhuan cao, cac chủ hàng luôn tìm mọi cach đối phó để đưa hàng sang\".", "target": "Hơn nữa, với lợi nhuận cao, các chủ hàng luôn tìm mọi cách đối phó để đưa hàng sang\"."}
+{"input": "Công lý đứng ở phía mình, hàng trieu triệu người ủng hộ mình cơ mà.", "target": "Công lý đứng ở phía mình, hàng triệu triệu người ủng hộ mình cơ mà."}
+{"input": "Đau chỉ có mình minh, hang triệu người bị nhiễm chất độc da cam cơ mà.", "target": "Đâu chỉ có mình mình, hàng triệu người bị nhiễm chất độc da cam cơ mà."}
+{"input": "Quyền được choi, được den truong học cũng không.", "target": "Quyền được chơi, được đến trường học cũng không."}
+{"input": "Ken rể.", "target": "Kén rể."}
+{"input": "Lúc tỉnh lại cô ấy không dám nhận đó là con minh.", "target": "Lúc tỉnh lại cô ấy không dám nhận đó là con mình."}
+{"input": "\"khi vợ mang thai, anh không the tưởng tượng được tôi sung suong, hạnh phúc thế nào đâu.", "target": "\"khi vợ mang thai, anh không thể tưởng tượng được tôi sung sướng, hạnh phúc thế nào đâu."}
+{"input": "Ông bấm may nói chuyện với đầu dây bên kia như với một người bạn.", "target": "Ông bấm máy nói chuyện với đầu dây bên kia như với một người bạn."}
+{"input": "Khach tự giới thiệu tên Hùng, quê Bắc Ninh, đang làm ở cong ty TNHH K.", "target": "Khách tự giới thiệu tên Hùng, quê Bắc Ninh, đang làm ở công ty TNHH K."}
+{"input": "Lý lich trong sáng.", "target": "Lý lịch trong sáng."}
+{"input": "Trước mắt, Thanh cứ theo dõi ùHng.", "target": "Trước mắt, Thanh cứ theo dõi Hùng."}
+{"input": "Khi ra Hà Nội làm việc ông cũng có một co bồ...", "target": "Khi ra Hà Nội làm việc ông cũng có một cô bồ..."}
+{"input": "Hùng xin mot tuần suy nghĩ rồi sẽ gặp lại ông Chương.", "target": "Hùng xin một tuần suy nghĩ rồi sẽ gặp lại ông Chương."}
+{"input": "Bà này là ban thân caủ tôi.", "target": "Bà này là bạn thân của tôi."}
+{"input": "Không khí căng thẳng bao trùm ca haiđ ối tác.", "target": "Không khí căng thẳng bao trùm cả hai đối tác."}
+{"input": "Tuy nhiên ông Chương phải đánh dấu vị trí bì thu thật chính xác.", "target": "Tuy nhiên ông Chương phải đánh dấu vị trí bì thư thật chính xác."}
+{"input": "Ông Chương để công văn trong boa thư.", "target": "Ông Chương để công văn trong bao thư."}
+{"input": "Cô gái nói thủ phạm đã bỏ chạy, cô hcỉ là người vực giúp cháu bé.", "target": "Cô gái nói thủ phạm đã bỏ chạy, cô chỉ là người vực giúp cháu bé."}
+{"input": "Dam đông không tin và tạm thời đòi gữi cô lại để xác minh.", "target": "Đám đông không tin và tạm thời đòi giữ cô lại để xác minh."}
+{"input": "Một tối mùa đông, ông Chuong thay một cô gái trẻ bị đám đông giu lại vì lien quan đến một vụ tai nan giao thông.", "target": "Một tối mùa đông, ông Chương thấy một cô gái trẻ bị đám đông giữ lại vì liên quan đến một vụ tai nạn giao thông."}
+{"input": "Ba ngày sau ông đã thuc hiện duoc điều đó.", "target": "Ba ngày sau ông đã thực hiện được điều đó."}
+{"input": "Bố mẹ đã chết, quê xa, khởi nghiệp ở nuoc ngoài và nay thì làm trong công ty TNHH.", "target": "Bố mẹ đã chết, quê xa, khởi nghiệp ở nước ngoài và nay thì làm trong công ty TNHH."}
+{"input": "Nhìn vết xăm hìhn con bài chuồn (trong bộ tú lơ khơ) trên ngón tay Hùng, ba Loan thấy rờn rợn.", "target": "Nhìn vết xăm hình con bài chuồn (trong bộ tú lơ khơ) trên ngón tay Hùng, bà Loan thấy rờn rợn."}
+{"input": "Vì vậy, trong chương trình học ở Koto, cùng với hoc nghề, trẻ lang thang còn duộc dạy rất kỹ mon giáo dục giới tính.", "target": "Vì vậy, trong chương trình học ở Koto, cùng với học nghề, trẻ lang thang còn được dạy rất kỹ môn giáo dục giới tính."}
+{"input": "Hùng xách cặp lên tầng và vào một lớp học tại chức buổi toi.", "target": "Hùng xách cặp lên tầng và vào một lớp học tại chức buổi tối."}
+{"input": "Trời thương mấy mùa sau trúng dam, có tiền để mua thêm đất.", "target": "Trời thương mấy mùa sau trúng đậm, có tiền để mua thêm đất."}
+{"input": "Ông Ngọc bảo vấn đề chỉ còn là dư luận và điều kiện từng gia dinh thôi.", "target": "Ông Ngọc bảo vấn đề chỉ còn là dư luận và điều kiện từng gia đình thôi."}
+{"input": "Bắt đám cháy nói lên su thật.", "target": "Bắt đám cháy nói lên sự thật."}
+{"input": "Đóng vai một sinh viên, Thanh gặp lớp trưởng xni photo danh sách, địa chỉ, nghề nghiệp và so điện thoại của cả lớp.", "target": "Đóng vai một sinh viên, Thanh gặp lớp trưởng xin photo danh sách, địa chỉ, nghề nghiệp và số điện thoại của cả lớp."}
+{"input": "Một toi phạm chien tranh.", "target": "Một tội phạm chiến tranh."}
+{"input": "Còn quãng thời gian Hùng ởĐ ức?", "target": "Còn quãng thời gian Hùng ở Đức?"}
+{"input": "Cộng tac viên của Thanh ở Berlin tìm đến khu vực xua Hùng cư trú.", "target": "Cộng tác viên của Thanh ở Berlin tìm đến khu vực xưa Hùng cư trú."}
+{"input": "Thậm chí cả những người Hùng nhắc đến ten và nói là bạn cũng không biết ùHng.", "target": "Thậm chí cả những người Hùng nhắc đến tên và nói là bạn cũng không biết Hùng."}
+{"input": "Các đối tác, đối thu đều đánh giá công ty K làm ăn đàng hoang, phát triển mạnh...", "target": "Các đối tác, đối thủ đều đánh giá công ty K làm ăn đàng hoàng, phát triển mạnh..."}
+{"input": "Thông qua công ty, du có thông tin thi cũng chưa hcắc chính xác vì bằng cấp có thể mua bán.", "target": "Thông qua công ty, dù có thông tin thì cũng chưa chắc chính xác vì bằng cấp có thể mua bán."}
+{"input": "Thanh bắt chuyện, được biết Hùng mới đượ cde bạt làm phó phòng kinh doanh.", "target": "Thanh bắt chuyện, được biết Hùng mới được đề bạt làm phó phòng kinh doanh."}
+{"input": "Thanh nói do đi rồi lảng tránh bang hẹn hò.", "target": "Thanh nói đổ đi rồi lảng tránh bằng hẹn hò."}
+{"input": "Qua tìm hiểu, Thanh mới biết thời kỳ đó phần lon dân VN sang Đức từ một nước châu Âu khac.", "target": "Qua tìm hiểu, Thanh mới biết thời kỳ đó phần lớn dân VN sang Đức từ một nước châu Âu khác."}
+{"input": "Hùng den và tất nhiên phải chờ ở phong khách.", "target": "Hùng đến và tất nhiên phải chờ ở phòng khách."}
+{"input": "Ba Loan cũng hiểu Hùng hơn.", "target": "Bà Loan cũng hiểu Hùng hơn."}
+{"input": "Tính chi phí vật liệu, tiền công, anh Loc bảo:\"70. 000 đồng / cái kéo dài 2 m\".", "target": "Tính chi phí vật liệu, tiền công, anh Lộc bảo:\"70. 000 đồng / cái kéo dài 2 m\"."}
+{"input": "Cuộc doi dưới vành mũ thám tử.", "target": "Cuộc đời dưới vành mũ thám tử."}
+{"input": "Anh tiết lộ:\"có ai biết rằng không ít lầ ntôi sang VN mà chỉ có 200 usd trong túi\"!...", "target": "Anh tiết lộ:\"có ai biết rằng không ít lần tôi sang VN mà chỉ có 200 usd trong túi\"!..."}
+{"input": "Gắn hệ thống này vô máy xới tay chạy thử ,anh lại nghĩ:\"phải có cái rơmooc chứa lúa\".", "target": "Gắn hệ thống này vô máy xới tay chạy thử, anh lại nghĩ:\"phải có cái rơmooc chứa lúa\"."}
+{"input": "Ông và Kim đều chưa có gia đnìh riêng.", "target": "Ông và Kim đều chưa có gia đình riêng."}
+{"input": "Bóng đen và những la thư ma.", "target": "Bóng đen và những lá thư ma."}
+{"input": "Bà nhận giúp Thọ bằng một lời hứa đanh thép, cứng nhgẹn cổ hong.", "target": "Bà nhận giúp Thọ bằng một lời hứa đanh thép, cứng nghẹn cổ họng."}
+{"input": "Mat bà vợ giám đốc biến sắc theo từng ìtnh tiết câu chuyen.", "target": "Mặt bà vợ giám đốc biến sắc theo từng tình tiết câu chuyện."}
+{"input": "Từ những năm 1920 khi BácH ồ là người tham gia sáng lập dang Cộng san Pháp.", "target": "Từ những năm 1920 khi Bác Hồ là người tham gia sáng lập đảng Cộng sản Pháp."}
+{"input": "Hay mot người lính hải quân Pháp da rai truyền đơn cho người dân nước Phap cùng chống lại cuộc chiến phi nghĩa của quân đội Pháp tại VN.", "target": "Hay một người lính hải quân Pháp đã rải truyền đơn cho người dân nước Pháp cùng chống lại cuộc chiến phi nghĩa của quân đội Pháp tại VN."}
+{"input": "Sau cuộc thoai rất sôi nổi như để giải tỏa đó, ông Chương thở dài ngao ngán và than vãn mấy câu bnâg quơ.", "target": "Sau cuộc thoại rất sôi nổi như để giải tỏa đó, ông Chương thở dài ngao ngán và than vãn mấy câu bâng quơ."}
+{"input": "Trong hoàn cảnh nay nếu nhà kia co tâ mđịa\"duổi\"ông Chương, họ sẽ hùa vào cùng bàn phương án tháo gỡ với ông.", "target": "Trong hoàn cảnh này nếu nhà kia có tâm địa\"đuổi\"ông Chương, họ sẽ hùa vào cùng bàn phương án tháo gỡ với ông."}
+{"input": "Tóm lại ông khong đoan ra kẻ thù của minh có thể thuộc dạng nào và vi sao lại ghét mình.", "target": "Tóm lại ông không đoán ra kẻ thù của mình có thể thuộc dạng nào và vì sao lại ghét mình."}
+{"input": "Nhưng thật ra cậu chỉ cần thực hiện nhiệm vụ là lmà một người ban tốt, làm một thanh niên có chí hướng là đủ\".", "target": "Nhưng thật ra cậu chỉ cần thực hiện nhiệm vụ là làm một người bạn tốt, làm một thanh niên có chí hướng là đủ\"."}
+{"input": "Người được giao nhiệm vụ giúp ông Chuong là thám tử Hùng.", "target": "Người được giao nhiệm vụ giúp ông Chương là thám tử Hùng."}
+{"input": "Khi dã ngoại thì đến chùa, đnìh, danh lam nàoH ải cung có những mẩu chuyen sâu sắc hay dí dỏm để ke.", "target": "Khi dã ngoại thì đến chùa, đình, danh lam nào Hải cũng có những mẩu chuyện sâu sắc hay dí dỏm để kể."}
+{"input": "Nông dân xung quanh gặp việc bất thưnờg trên đồng ruộng lả ới\"bác sĩ\"Hạo đến bắt mach cho cây ngay...", "target": "Nông dân xung quanh gặp việc bất thường trên đồng ruộng là ới\"bác sĩ\"Hạo đến bắt mạch cho cây ngay..."}
+{"input": "Nam 2002 anh bo hơn chục triệu đồng lên Sài Gòn mang về chiếc kính hiển vi, một số lọ hóa chất... để nghiên cứu côn trùng và bệnhc ây.", "target": "Năm 2002 anh bỏ hơn chục triệu đồng lên Sài Gòn mang về chiếc kính hiển vi, một số lọ hóa chất... để nghiên cứu côn trùng và bệnh cây."}
+{"input": "Về thời gian, may của anh Tu chỉ cần 15 - 20 phút là gom hết 1. 000 m 2.", "target": "Về thời gian, máy của anh Tư chỉ cần 15 - 20 phút là gom hết 1. 000 m 2."}
+{"input": "Không loại trừ việc Hải cung có thể sa ngã.", "target": "Không loại trừ việc Hải cũng có thể sa ngã."}
+{"input": "Công ty cũng khong ngừng nhắc nhở Hải cần tỉnh táo, khôn kého với Tùng và với cả bản thân minh.", "target": "Công ty cũng không ngừng nhắc nhở Hải cần tỉnh táo, khôn khéo với Tùng và với cả bản thân mình."}
+{"input": "Một lần Tùng nói:\"Em đi choi cùng cô bạn người Thái Lan, toi muộn mới về\".", "target": "Một lần Tùng nói:\"Em đi chơi cùng cô bạn người Thái Lan, tối muộn mới về\"."}
+{"input": "Cuối ngày khi địch rút, ông đưa bạn len mặt đất, tháo khăn bịt mắt.", "target": "Cuối ngày khi địch rút, ông đưa bạn lên mặt đất, tháo khăn bịt mắt."}
+{"input": "Có người vinh danh liệt si anh hùng...", "target": "Có người vinh danh liệt sĩ anh hùng..."}
+{"input": "Khi thám tử Tuấn ve đến Hà Nội, hoàn thành vai sinh viên Hai thì cnôg ty điều tra & V cũng hoàn tất hợp đồng với chị Hằng.", "target": "Khi thám tử Tuấn về đến Hà Nội, hoàn thành vai sinh viên Hải thì công ty điều tra & V cũng hoàn tất hợp đồng với chị Hằng."}
+{"input": "\"torng cuộc đời đó, mình duoc lớn lên với tất cả mọi đủ đầy.", "target": "\"trong cuộc đời đó, mình được lớn lên với tất cả mọi đủ đầy."}
+{"input": "Trong khi co quá nhiều đứa trẻ chỉ nghi, thèm một bữa ăn...\".", "target": "Trong khi có quá nhiều đứa trẻ chỉ nghĩ, thèm một bữa ăn...\"."}
+{"input": "Xong, chúng lại thủ thỉ: muốn đi học phải có quần áo dang hoàng và một chiếc xe đạp...", "target": "Xong, chúng lại thủ thỉ: muốn đi học phải có quần áo đàng hoàng và một chiếc xe đạp..."}
+{"input": "Được hoc mọi tiểu xao, giận dữ, buồn, cảm giác... cay dang cung có, nhưng rồi Phạm vẫn bám đường.", "target": "Được học mọi tiểu xảo, giận dữ, buồn, cảm giác... cay đắng cũng có, nhưng rồi Phạm vẫn bám đường."}
+{"input": "Anh tâm niệm: chơi với trẻ đường phố nghĩa là phải chấp nhận tất ca bụi bặm mà chúng thu nhận được.", "target": "Anh tâm niệm: chơi với trẻ đường phố nghĩa là phải chấp nhận tất cả bụi bặm mà chúng thu nhận được."}
+{"input": "Từ sự so sánh hơi khập khiễng đó, đầu tiên Phạm mời những dua trẻ lang thang anh gap trên đường đi ăn phở.", "target": "Từ sự so sánh hơi khập khiễng đó, đầu tiên Phạm mời những đứa trẻ lang thang anh gặp trên đường đi ăn phở."}
+{"input": "Pham kể chính anh từng phải dẫn một em gái nhỏ den bệnh vệin do bị lạm dụng tinh dục.", "target": "Phạm kể chính anh từng phải dẫn một em gái nhỏ đến bệnh viện do bị lạm dụng tình dục."}
+{"input": "Ông là hung, lớp tại chức K 7thương mai dung không?", "target": "Ông là hùng, lớp tại chức K7 thương mại đúng không?"}
+{"input": "\"Mình không thể tin được, có gia dinh mà bố không đi được, mẹ mù, bà bị liệt\".", "target": "\"Mình không thể tin được, có gia đình mà bố không đi được, mẹ mù, bà bị liệt\"."}
+{"input": "Cùng câu lac bộ\"trốn hoc\"với nhau\".", "target": "Cùng câu lạc bộ\"trốn học\"với nhau\"."}

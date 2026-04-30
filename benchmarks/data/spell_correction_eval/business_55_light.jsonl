@@ -1,0 +1,44 @@
+{"input": "Hop đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 nam 2025 tại Hà Nội", "target": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội."}
+{"input": "Bên A: Cong ty Cổ phần Hồng Hà, mã số thuế 0123456789.", "target": "Bên A: Công ty Cổ phần Hồng Hà, mã số thuế 0123456789."}
+{"input": "Ben B: Bà Nguyễn ThịH ương, sinh năm 1990, dia chỉ tại Hà Nội.", "target": "Bên B: Bà Nguyễn Thị Hương, sinh năm 1990, địa chỉ tại Hà Nội."}
+{"input": "Tổng giá trị hợp đnồg là một tỷ năm trăm triệu đồng chẵn.", "target": "Tổng giá trị hợp đồng là một tỷ năm trăm triệu đồng chẵn."}
+{"input": "Thời han thực hiện sáu tháng kể từ ngày ký ket hợp đồng.", "target": "Thời hạn thực hiện sáu tháng kể từ ngày ký kết hợp đồng."}
+{"input": "Hai bên đã đọc, hiuể và đồng ý ký vào hop đồng này.", "target": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này."}
+{"input": "Moi tranh chấp được giải quyết thông qua thương lượng và hoà giải.", "target": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải."}
+{"input": "Quyền và nghĩa vụ các bên thực hiện theo quy định pháp luật hien hành.", "target": "Quyền và nghĩa vụ các bên thực hiện theo quy định pháp luật hiện hành."}
+{"input": "Hợp đồng có hiệu lực ke từ ngày được hai bên kýk ết.", "target": "Hợp đồng có hiệu lực kể từ ngày được hai bên ký kết."}
+{"input": "Bên thue co trách nhiệm bảo quản tài sản trong suốt thời gian thuê.", "target": "Bên thuê có trách nhiệm bảo quản tài sản trong suốt thời gian thuê."}
+{"input": "Phat vi phạm hợp đồng tối đa không qua tám phần trăm giá trị nghĩa vu vi phạm.", "target": "Phạt vi phạm hợp đồng tối đa không quá tám phần trăm giá trị nghĩa vụ vi phạm."}
+{"input": "Mỗi bên giữ hai ban để theo dõi và thực hien.", "target": "Mỗi bên giữ hai bản để theo dõi và thực hiện."}
+{"input": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoa thuận.", "target": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận."}
+{"input": "Căn cứ vào quyết dinh số 123 ngày 5 tháng 1 năm 2025 của Uỷ ban nhân dân.", "target": "Căn cứ vào quyết định số 123 ngày 5 tháng 1 năm 2025 của Uỷ ban nhân dân."}
+{"input": "Đơn vị xin phep tổ chuc hội nghị tổng kết năm vào tuần đầu thang tới.", "target": "Đơn vị xin phép tổ chức hội nghị tổng kết năm vào tuần đầu tháng tới."}
+{"input": "Đ ềnghị Quý cơ quan xem xét và phan hồi trong thời gian sớm nhất.", "target": "Đề nghị Quý cơ quan xem xét và phản hồi trong thời gian sớm nhất."}
+{"input": "Người ky tên dưới đây xin cam đoan các thong tin đã khai là đúng sự thật.", "target": "Người ký tên dưới đây xin cam đoan các thông tin đã khai là đúng sự thật."}
+{"input": "Lý do xin nghỉ l àđể chăm sóc nguoi thân đan gốm tại quê nhà.", "target": "Lý do xin nghỉ là để chăm sóc người thân đang ốm tại quê nhà."}
+{"input": "Tôi se bàn giao công việc đầy đủ trước khi nghỉ phép.", "target": "Tôi sẽ bàn giao công việc đầy đủ trước khi nghỉ phép."}
+{"input": "Hồ sơ gồm có đơn xin nghỉ, giấy xác nhận củ abệnh vien và bản sao giấy tờ tuỳ thân.", "target": "Hồ sơ gồm có đơn xin nghỉ, giấy xác nhận của bệnh viện và bản sao giấy tờ tuỳ thân."}
+{"input": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phan hồi sớm.", "target": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm."}
+{"input": "Hôm nay trời mưa to, anh có cần tôi đem ô đến khôgn?", "target": "Hôm nay trời mưa to, anh có cần tôi đem ô đến không?"}
+{"input": "Mình đang đi học ve, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.", "target": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối."}
+{"input": "Em ăn cơm chưa, nếu chưa thì cùng di ăn phở với chi nhé.", "target": "Em ăn cơm chưa, nếu chưa thì cùng đi ăn phở với chị nhé."}
+{"input": "Cam ơn bạn da giúp đỡ tôi rất nhiều trong thời gian qua.", "target": "Cám ơn bạn đã giúp đỡ tôi rất nhiều trong thời gian qua."}
+{"input": "Duong này hôm nay tắc lắm, đi đường khác cho nhanh đi.", "target": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi."}
+{"input": "Hômn ay là sinh nhật của con gai tôi, cả gia đình rất vui.", "target": "Hôm nay là sinh nhật của con gái tôi, cả gia đình rất vui."}
+{"input": "Năm nay con bé học lớp năm, kết quả khá ttố.", "target": "Năm nay con bé học lớp năm, kết quả khá tốt."}
+{"input": "Trời đẹp quá, mình đi dạo cong viên một chút nhé.", "target": "Trời đẹp quá, mình đi dạo công viên một chút nhé."}
+{"input": "Tôi moi chuyển nhà, mấy hỗ mnay vẫn đang sắp xếp đồ đạc.", "target": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc."}
+{"input": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tầun.", "target": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần."}
+{"input": "Sang nay tôi dậy sớm để đi tập thể duc cùng con.", "target": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con."}
+{"input": "Thủ tướng đã ký quyết định phê duyệt dự an vào sáng nay.", "target": "Thủ tướng đã ký quyết định phê duyệt dự án vào sáng nay."}
+{"input": "Theo bao cao của Bo Tài chính, tăng trưởng kinh tế quý đầu năm dat sáu phay hai phần trăm.", "target": "Theo báo cáo của Bộ Tài chính, tăng trưởng kinh tế quý đầu năm đạt sáu phẩy hai phần trăm."}
+{"input": "Hà Nội đang triển khai các tuyến xe buýt điện nhằm giảm ô nhiem khong khí.", "target": "Hà Nội đang triển khai các tuyến xe buýt điện nhằm giảm ô nhiễm không khí."}
+{"input": "Đội tuyen bóng đá quoc gia chuẩn bi buoc vào vòng loại giải đấu khu vực.", "target": "Đội tuyển bóng đá quốc gia chuẩn bị bước vào vòng loại giải đấu khu vực."}
+{"input": "Doanh nghiệp công nghe Việt Nam đang day mạnh xuất khau phần mềm sang thị trường Nhật.", "target": "Doanh nghiệp công nghệ Việt Nam đang đẩy mạnh xuất khẩu phần mềm sang thị trường Nhật."}
+{"input": "Cong đồng nghiên cứu trí tuệ nhân tạo trong nước có nhiều bước tien đáng ghi nhận.", "target": "Cộng đồng nghiên cứu trí tuệ nhân tạo trong nước có nhiều bước tiến đáng ghi nhận."}
+{"input": "Một so ỉtnh miền núi phía bắc đang chịu ảnh hưởng nặng do mưa lớn kéo dài.", "target": "Một số tỉnh miền núi phía bắc đang chịu ảnh hưởng nặng do mưa lớn kéo dài."}
+{"input": "Bộ Giáo dục công bố phương án tuyển sinh dai học cho năm học tới.", "target": "Bộ Giáo dục công bố phương án tuyển sinh đại học cho năm học tới."}
+{"input": "Năm nay l àdịp k ỷniệm năm mươi năm ngay thống nhất đất nước.", "target": "Năm nay là dịp kỷ niệm năm mươi năm ngày thống nhất đất nước."}
+{"input": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng My thuật Hà Nội.", "target": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội."}
+{"input": "Lễ hội đường phố thu hút hàng nghìn khach du lịch trong vàn goai nước.", "target": "Lễ hội đường phố thu hút hàng nghìn khách du lịch trong và ngoài nước."}
+{"input": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo da thay đổi nhiều ngành nghề.", "target": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề."}
