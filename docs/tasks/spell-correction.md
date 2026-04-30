@@ -195,8 +195,8 @@ python benchmarks/accuracy/bench_spell_correction_hf.py \
     bmd1905/vietnamese-correction-v2 \
     --json benchmarks/results/baseline_spell_bmd1905_v2.json
 
-# 4. Train base on the remote GPU (TRAIN_HOST=genpc2 default)
-./training/spell_correction/launch_genpc2.sh \
+# 4. Train base on the remote GPU (TRAIN_HOST set to your remote GPU host)
+./training/spell_correction/launch_remote_train.sh \
     --model-id VietAI/vit5-base \
     --epochs 5 --batch-size 32 --bf16 \
     --lr 5e-4 --lr-scheduler cosine \
@@ -205,7 +205,7 @@ python benchmarks/accuracy/bench_spell_correction_hf.py \
     --output-dir training/spell_correction/checkpoints/vit5-base-500k
 
 # 5. Train small on the same corpus
-./training/spell_correction/launch_genpc2.sh \
+./training/spell_correction/launch_remote_train.sh \
     --model-id vinai/bartpho-syllable-base \
     --epochs 5 --batch-size 32 --bf16 \
     --lr 5e-4 --lr-scheduler cosine \

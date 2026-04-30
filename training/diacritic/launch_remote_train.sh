@@ -1,15 +1,13 @@
 #!/bin/bash
-# Launch a training run on the remote GPU host in the background, immune to
+# Launch a training run on a remote GPU host in the background, immune to
 # SSH timeouts.
 #
-# The remote host is configurable via $TRAIN_HOST (default: "genpc2", our
-# in-house workstation). Override to point at any reachable SSH host that
-# has the conda env "nom-train" prepared.
+# The remote host MUST be set via $TRAIN_HOST. Point at any reachable
+# SSH host that has the conda env "nom-train" prepared.
 #
 # Usage:
-#   ./training/diacritic/launch_genpc2.sh                       # default args
-#   ./training/diacritic/launch_genpc2.sh --epochs 5            # forward to train.py
-#   TRAIN_HOST=otherbox ./training/diacritic/launch_genpc2.sh   # different remote
+#   TRAIN_HOST=mybox ./training/diacritic/launch_remote_train.sh
+#   TRAIN_HOST=mybox ./training/diacritic/launch_remote_train.sh --epochs 5
 #
 # Side effects on the remote host:
 #   ~/nom-vn-train/training/diacritic/run.log   -- stdout+stderr
@@ -23,7 +21,7 @@
 
 set -euo pipefail
 
-TRAIN_HOST="${TRAIN_HOST:-genpc2}"
+TRAIN_HOST="${TRAIN_HOST:?TRAIN_HOST env var must be set, e.g. TRAIN_HOST=mybox}"
 REMOTE_DIR="\$HOME/nom-vn-train"
 ARGS="${*:---epochs 3 --batch-size 32 --bf16 --output-dir training/diacritic/checkpoints/mt5-small-200k}"
 

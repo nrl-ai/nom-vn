@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Post-training pipeline: rsync the remote GPU host -> local re-eval -> dry-run publish.
 #
-# Run this AFTER ./launch_genpc2.sh has produced a final checkpoint on the
+# Run this AFTER ./launch_remote_train.sh has produced a final checkpoint on the
 # remote GPU host. Sequence:
 #
 #   1. rsync the checkpoint dir + training_summary.json back to local.
@@ -11,9 +11,9 @@
 #      status. If the gate passes, the operator can rerun without
 #      --dry-run to actually push.
 #
-# The remote SSH host is configurable via $TRAIN_HOST (defaults to "genpc2",
-# matching launch_genpc2.sh's default). The remote path is derived as the
-# same relative path under ~/nom-vn-train/.
+# The remote SSH host MUST be set via $TRAIN_HOST (matching
+# launch_remote_train.sh). The remote path is derived as the same relative
+# path under ~/nom-vn-train/.
 #
 # Usage::
 #
@@ -29,7 +29,7 @@ if [ $# -lt 2 ]; then
     exit 2
 fi
 
-TRAIN_HOST="${TRAIN_HOST:-genpc2}"
+TRAIN_HOST="${TRAIN_HOST:?TRAIN_HOST env var must be set, e.g. TRAIN_HOST=mybox}"
 LOCAL_DIR="$1"
 HF_REPO_ID="$2"
 REMOTE_DIR="nom-vn-train/$LOCAL_DIR"

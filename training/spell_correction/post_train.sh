@@ -8,7 +8,8 @@
 # benchmarks/data/spell_correction_eval/ instead of the diacritic
 # 4-register grid, and uses spell_correction/eval_checkpoint.py.
 #
-# The remote SSH host is configurable via $TRAIN_HOST (default "genpc2").
+# The remote SSH host MUST be set via $TRAIN_HOST (matching
+# launch_remote_train.sh).
 #
 # Usage::
 #
@@ -24,7 +25,7 @@ if [ $# -lt 2 ]; then
     exit 2
 fi
 
-TRAIN_HOST="${TRAIN_HOST:-genpc2}"
+TRAIN_HOST="${TRAIN_HOST:?TRAIN_HOST env var must be set, e.g. TRAIN_HOST=mybox}"
 LOCAL_DIR="$1"
 HF_REPO_ID="$2"
 REMOTE_DIR="nom-vn-train/$LOCAL_DIR"
@@ -32,6 +33,14 @@ REMOTE_DIR="nom-vn-train/$LOCAL_DIR"
 CHECKPOINT_DIR="$LOCAL_DIR/final"
 SUMMARY_JSON="$LOCAL_DIR/training_summary.json"
 LOCAL_EVAL_JSON="training/spell_correction/results/$(basename "$LOCAL_DIR")_eval_local.json"
+
+# Prefer the project venv (has sentencepiece + datasets installed).
+# Falls back to system python only if no venv.
+if [ -x ".venv/bin/python" ]; then
+    PY=".venv/bin/python"
+else
+    PY="python"
+fi
 
 # --- Step 1: rsync ---
 echo "==> [1/3] rsync $TRAIN_HOST:$REMOTE_DIR/ -> $LOCAL_DIR/"
@@ -50,7 +59,7 @@ fi
 
 echo
 echo "  Training summary:"
-python -c "
+"$PY" -c "
 import json
 s = json.load(open('$SUMMARY_JSON'))
 print(f'    base = {s[\"model_id\"]}')
@@ -63,14 +72,14 @@ for name, m in s.get('eval', {}).items():
 # --- Step 2: local re-eval ---
 echo
 echo "==> [2/3] local re-eval (sanity check that remote numbers reproduce)"
-python training/spell_correction/eval_checkpoint.py \
+"$PY" training/spell_correction/eval_checkpoint.py \
     --checkpoint "$CHECKPOINT_DIR" \
     --output-json "$LOCAL_EVAL_JSON" \
     --examples 0
 
 echo
 echo "  Comparison (remote vs local re-eval):"
-python -c "
+"$PY" -c "
 import json
 remote = json.load(open('$SUMMARY_JSON')).get('eval', {})
 local = json.load(open('$LOCAL_EVAL_JSON')).get('eval', {})
@@ -97,7 +106,7 @@ if diverged:
 # --- Step 3: dry-run publish ---
 echo
 echo "==> [3/3] publish dry-run (check gate, generate model card)"
-python training/spell_correction/publish_hf.py \
+"$PY" training/spell_correction/publish_hf.py \
     --checkpoint-dir "$CHECKPOINT_DIR" \
     --summary-json "$SUMMARY_JSON" \
     --repo-id "$HF_REPO_ID" \

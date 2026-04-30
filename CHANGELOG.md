@@ -56,7 +56,7 @@ New code:
 - `training/spell_correction/` — full pipeline mirror of the diacritic
   tree: `prep_data.py` (applies round-robin noise to clean text),
   `train.py` (8-split eval grid), `publish_hf.py` (different gate +
-  comparison matrix), `launch_genpc2.sh`.
+  comparison matrix), `launch_remote_train.sh`.
 - `benchmarks/data/spell_correction_eval/build.py` — 2,098 (noisy, clean)
   eval pairs from the 4 diacritic eval slices × 2 noise levels.
 - `benchmarks/accuracy/bench_spell_correction_hf.py` — bench any HF
@@ -463,7 +463,7 @@ the experiment from a clean clone:
 
 ```bash
 python training/diacritic/prep_data.py --max-pairs 200000
-./training/diacritic/launch_genpc2.sh \
+./training/diacritic/launch_remote_train.sh \
     --model-id google/mt5-small \
     --epochs 3 --batch-size 8 --gradient-accumulation-steps 4 \
     --gradient-checkpointing --bf16

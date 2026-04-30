@@ -1,15 +1,15 @@
 #!/bin/bash
-# Launch a spell-correction training run on the remote GPU host.
+# Launch a spell-correction training run on a remote GPU host.
 #
-# Mirrors training/diacritic/launch_genpc2.sh but rsyncs the
+# Mirrors training/diacritic/launch_remote_train.sh but rsyncs the
 # spell-correction tree + the spell-correction eval set.
 #
-# Configurable via $TRAIN_HOST (default: "genpc2"). Override to point at
-# any reachable SSH host with the conda env "nom-train" prepared.
+# The remote host MUST be set via $TRAIN_HOST. Point at any reachable
+# SSH host with the conda env "nom-train" prepared.
 
 set -euo pipefail
 
-TRAIN_HOST="${TRAIN_HOST:-genpc2}"
+TRAIN_HOST="${TRAIN_HOST:?TRAIN_HOST env var must be set, e.g. TRAIN_HOST=mybox}"
 ARGS="${*:---epochs 5 --batch-size 32 --bf16 --output-dir training/spell_correction/checkpoints/vit5-base-500k}"
 
 # Sync code + data + eval set first.

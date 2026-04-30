@@ -101,7 +101,7 @@ Run::
 
 Run on the GPU box (the GPU training box in our setup)::
 
-    ./training/diacritic/launch_genpc2.sh \
+    ./training/diacritic/launch_remote_train.sh \
         --model-id VietAI/vit5-base \
         --epochs 5 --batch-size 32 --bf16 \
         --lr 5e-4 --lr-scheduler cosine \
@@ -193,7 +193,7 @@ End-to-end: corpus → train → re-eval → publish:
 python training/diacritic/prep_data.py --max-pairs 500_000 --seed 42
 
 # 2. Launch on the GPU training box (~3h on RTX 3090)
-./training/diacritic/launch_genpc2.sh \
+./training/diacritic/launch_remote_train.sh \
     --model-id VietAI/vit5-base \
     --epochs 5 --batch-size 32 --bf16 \
     --lr 5e-4 --lr-scheduler cosine \
