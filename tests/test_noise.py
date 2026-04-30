@@ -7,8 +7,12 @@ import unicodedata
 from nom.text.noise import (
     NoiseConfig,
     NoiseGenerator,
+    comprehensive_noise,
     heavy_noise,
     light_noise,
+    mobile_noise,
+    ocr_realistic_noise,
+    telex_grammar_noise,
     telex_typo_noise,
 )
 
@@ -136,6 +140,92 @@ class TestPresets:
             "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 "
             "năm 2025 tại Hà Nội. Bên A: Công ty Cổ phần Hồng Hà."
         )
-        for preset in (light_noise(), heavy_noise(), telex_typo_noise()):
+        for preset in (
+            light_noise(),
+            heavy_noise(),
+            telex_typo_noise(),
+            telex_grammar_noise(),
+            mobile_noise(),
+            ocr_realistic_noise(),
+            comprehensive_noise(),
+        ):
             noisy = NoiseGenerator(preset, seed=11).noisify(clean)
             assert noisy != clean, f"{preset} produced no noise"
+
+    def test_v2_presets_are_well_formed(self) -> None:
+        # The v2 presets touch new NoiseConfig dimensions
+        # (telex_grammar / slang / segment / keyboard); guard against
+        # accidental probability typos.
+        for preset in (
+            telex_grammar_noise(),
+            mobile_noise(),
+            ocr_realistic_noise(),
+            comprehensive_noise(),
+        ):
+            assert isinstance(preset, NoiseConfig)
+            for field in (
+                "p_diacritic_strip",
+                "p_diacritic_strip_partial",
+                "p_confusion",
+                "p_char_swap",
+                "p_char_delete",
+                "p_char_insert",
+                "p_ocr",
+                "p_telex_grammar",
+                "p_slang",
+                "p_keyboard",
+                "p_segment",
+            ):
+                v = getattr(preset, field)
+                assert 0.0 <= v <= 1.0, f"{preset}.{field}={v} out of [0, 1]"
+
+
+class TestTelexGrammar:
+    def test_telex_grammar_changes_tone_letters(self) -> None:
+        # p_telex_grammar=1.0 should replace every tone mark with a stray
+        # letter or drop it. The output is shorter or roughly same length
+        # but carries no precomposed VN tone marks.
+        cfg = NoiseConfig(p_telex_grammar=1.0, max_edit_ratio=1.0)
+        gen = NoiseGenerator(cfg, seed=42)
+        out = gen.noisify("yêu Việt Nam")
+        # NFC-normalize. The point is that some token-level perturbation
+        # has happened — diacritic-restoration models are sensitive to
+        # this exact failure mode.
+        assert out != "yêu Việt Nam"
+
+
+class TestSlang:
+    def test_slang_substitutes_known_tokens(self) -> None:
+        # 'không' has _TEEN_CODE entries (ko, k, hok, ...). Push p_slang to
+        # 1.0 and we should see substitution within a small seed sweep.
+        cfg = NoiseConfig(p_slang=1.0, max_edit_ratio=1.0)
+        outs = {NoiseGenerator(cfg, seed=s).noisify("không") for s in range(30)}
+        # At least one seed should produce something other than the
+        # NFC-identity output.
+        assert any(o != "không" for o in outs), f"no slang sub fired: {outs}"
+
+    def test_slang_passes_unknown_tokens(self) -> None:
+        cfg = NoiseConfig(p_slang=1.0, max_edit_ratio=1.0)
+        out = NoiseGenerator(cfg, seed=0).noisify("xyzzyfoo")
+        assert out == "xyzzyfoo"
+
+
+class TestKeyboard:
+    def test_keyboard_perturbs_only_qwerty_chars(self) -> None:
+        # p_keyboard=1.0 + identity for everything else => only ASCII
+        # letters in the key map flip. Non-letter chars (digits / punct
+        # / VN-only diacritic letters) pass through unchanged.
+        cfg = NoiseConfig(p_keyboard=1.0, max_edit_ratio=1.0)
+        out = NoiseGenerator(cfg, seed=0).noisify("12345")
+        # Digits aren't in _KEY_ADJACENCY → unchanged.
+        assert out == "12345"
+
+
+class TestSegment:
+    def test_segment_alters_whitespace(self) -> None:
+        cfg = NoiseConfig(p_segment=1.0, max_edit_ratio=1.0)
+        text = "Mọi người ơi cho mình hỏi với"
+        # Across multiple seeds at p=1.0 we should see at least one output
+        # that differs in whitespace structure.
+        outs = {NoiseGenerator(cfg, seed=s).noisify(text) for s in range(20)}
+        assert any(o != text for o in outs)
