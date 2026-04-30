@@ -361,6 +361,17 @@ training on the same 500K-pair mixed corpus + 5 epochs as
 table on every tier's HF model card so adopters can see the
 relationship explicitly.
 
+**Note on the small-tier base for VN diacritic restoration
+(2026-04-30):** `VietAI/vit5-small` does NOT exist; VietAI ships only
+`vit5-base` (220M) and `vit5-large` (770M). For the fast tier we use
+`vinai/bartpho-syllable-base` (115M, MIT, .bin from VinAI). Its
+**syllable-level tokenizer is uniquely well-matched to the
+diacritic-restoration task** (one-syllable-one-token aligns with the
+per-syllable tone disambiguation we're predicting). Trade-off vs the
+ViT5 family: `.bin` not safetensors (VinAI is well-known but not at
+Google/Meta audit scale; document the SHA256-pin choice in the
+wrapper docstring).
+
 ## Don't leak internal terms to user-facing artifacts
 
 User-facing surfaces include: model cards on HF Hub, dataset cards,
