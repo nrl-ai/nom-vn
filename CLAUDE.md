@@ -399,9 +399,9 @@ landscape goes in `publish_hf.py`'s `COMPARISON_MATRIX` constant; the
 table auto-renders for every future publish.
 
 This is what makes a model card useful versus just a metric dump:
-context. ProtonX's protonx-legal-tc card has the metric (96.95 % ROUGE-L
-on a non-public eval set) but no landscape — readers can't tell whether
-that's good. Our cards always tell readers where we stand.
+context. A model card without a landscape forces the reader to do the
+homework themselves; our cards always show where we stand so the
+reader can decide in one glance.
 
 ## Don't leak internal terms to user-facing artifacts
 
