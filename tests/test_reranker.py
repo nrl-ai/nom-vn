@@ -12,9 +12,14 @@ from typing import Any
 import numpy as np
 import pytest
 
-from nom.rag import RAG, CrossEncoderReranker, Reranker
-from nom.retrieve import Hit
-from tests.test_rag import SAMPLE_DOCS, _FakeEmbedder, _FakeLLM
+# sentence_transformers is in the [embeddings] / [chat] extras, not [dev].
+# CI's `pip install -e ".[dev]"` doesn't pull it. Skip the file cleanly when
+# absent — the same pattern test_chat.py uses for fastapi.
+pytest.importorskip("sentence_transformers")
+
+from nom.rag import RAG, CrossEncoderReranker, Reranker  # noqa: E402
+from nom.retrieve import Hit  # noqa: E402
+from tests.test_rag import SAMPLE_DOCS, _FakeEmbedder, _FakeLLM  # noqa: E402
 
 # ---------------------------------------------------------------------------
 # Fakes

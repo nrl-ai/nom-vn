@@ -20,8 +20,6 @@ from fastapi.testclient import TestClient  # noqa: E402
 from nom.chat.server import build_app  # noqa: E402
 from nom.chat.sqlite_store import SqliteStore  # noqa: E402
 from nom.chat.store import MemoryStore, Store  # noqa: E402
-
-# ruff: noqa: I001 — these import as test-doubles below the noqa-E402 block
 from tests._fakes import CountingEmbedder as _CountingEmbedder  # noqa: E402
 from tests._fakes import FakeEmbedder as _FakeEmbedder  # noqa: E402
 from tests._fakes import FakeLLM as _FakeLLM  # noqa: E402
