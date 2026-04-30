@@ -91,7 +91,19 @@ big mix).
 | literary_800_light | **98.02 %** | 77.47 % | 171 |
 | literary_800_heavy | **95.71 %** | 61.04 % | 160 |
 
-**Light avg: 98.58 % · Heavy avg: 97.35 %** (gate: light ≥ 92, heavy ≥ 80 — passes with very wide margin).
+**Light avg: 98.58 % · Heavy avg: 97.35 %** (gate: light ≥ 92, heavy ≥ 80 — passes with wide margin).
+
+> **Honest caveat: these numbers are in-distribution.** The eval grid
+> applies the same `nom.text.noise` presets to clean text that the
+> model was trained on (different seeds, same generator). The model
+> has implicitly learned the inverse of *our* noise distribution.
+> Real-world Vietnamese typos (Telex input slips, OCR engine errors,
+> autocorrect mishaps) follow different statistics, so expect
+> measurably lower numbers on user data — probably 80-95 % depending
+> on register and noise type. Confidence intervals on the smaller
+> splits (business_55, formal_72) are ±3-4 pp at 95 %. A held-out
+> real-world eval is queued; we'll publish the OOD numbers alongside
+> these in-distribution ones when it lands.
 
 Local re-eval reproduces remote within ±0.03 pp on every split. Trained on
 the [same 500K mixed Wiki+news corpus](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-train)

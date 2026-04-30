@@ -351,6 +351,14 @@ The two averaged columns:
 
 ## Limitations
 
+- **In-distribution metric, real-world is harder.** Training and eval
+  both use `nom.text.noise` with the same three presets — different
+  seeds, but the same statistical noise distribution. The model has
+  implicitly learned the inverse of *our* noise generator. Real-world
+  Vietnamese typos (Telex input slips, OCR-engine-specific errors,
+  autocorrect mishaps) follow different statistics, so expect
+  measurably lower numbers in production. A held-out real-world eval
+  is queued.
 - **Heavy-noise corner cases.** OCR outputs that drop entire words or
   add hallucinated text are out-of-scope; the noise generator we
   trained on caps edits per sentence (max 25 % edit ratio).
@@ -358,6 +366,9 @@ The two averaged columns:
   Split paragraphs at sentence boundaries before calling.
 - **No grammar or stylistic correction.** This model fixes character /
   syllable / diacritic errors but doesn't rewrite phrasing.
+- **Confidence intervals on small splits.** business_55 (44/55 sents)
+  and formal_72 (65/72 sents) have ±3-4 pp 95 % CI; the larger
+  literary_800 split has ±1 pp. Treat single-pp differences with care.
 
 ## License & attribution
 
