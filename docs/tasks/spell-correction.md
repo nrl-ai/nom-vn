@@ -97,13 +97,51 @@ big mix).
 > applies the same `nom.text.noise` presets to clean text that the
 > model was trained on (different seeds, same generator). The model
 > has implicitly learned the inverse of *our* noise distribution.
-> Real-world Vietnamese typos (Telex input slips, OCR engine errors,
-> autocorrect mishaps) follow different statistics, so expect
-> measurably lower numbers on user data — probably 80-95 % depending
-> on register and noise type. Confidence intervals on the smaller
-> splits (business_55, formal_72) are ±3-4 pp at 95 %. A held-out
-> real-world eval is queued; we'll publish the OOD numbers alongside
-> these in-distribution ones when it lands.
+> Real-world Vietnamese typos follow different statistics — see the
+> OOD measurements below.
+
+### Out-of-distribution real-world bench (measured 2026-04-30)
+
+`benchmarks/data/spell_correction_eval_real/` is a 100-sentence
+hand-curated set whose noise patterns come from real VN error sources,
+NOT `nom.text.noise`. v0.2.28 base measured against it:
+
+| Slice | Source of noise | Word acc | Sent. exact |
+|---|---|---:|---:|
+| `forum_25` | Forum/social-media teen-code | 59.45 % | 0.0 % |
+| `mobile_25` | Phone autocorrect mishaps | 95.01 % | 40.0 % |
+| `telex_real_25` | Real Telex/VNI keystrokes | **17.38 %** | 0.0 % |
+| `ocr_25` | Tesseract/EasyOCR engine output | 93.62 % | 60.0 % |
+| **aggregate** | n=100 | **66.88 %** | 25.0 % |
+
+The synthetic eval shows 98.58 % (light avg). The real-world OOD eval
+shows 66.88 % aggregate. **The 32 pp gap is the overfit cost** — the
+v1 corpus trained the model to invert `light_noise` /
+`telex_typo_noise` / `heavy_noise`, which capture the *surface* of
+Vietnamese typos but not the keystroke artefacts of real Telex (`dduwojc`
+for `được`) or the abbreviation-heavy syntax of forum slang (`ko bt`
+for `không biết`). On those, the model has near-zero training signal
+and collapses.
+
+OCR and mobile-autocorrect slices stay close to in-distribution (94 %
+and 95 %), because those error patterns are well-represented by
+`heavy_noise` and the diacritic-strip distribution.
+
+**This is exactly what the v2 corpus + `comprehensive_noise()` fixes**
+— adding `telex_grammar_noise()` (real keystroke errors) and
+`mobile_noise()` (teen-code + adjacent-key) to the training mix should
+close most of this gap. v0.2.29 retraining on the v2 corpus is queued.
+
+Reproduce:
+```bash
+python benchmarks/accuracy/bench_spell_correction_real.py \
+    nrl-ai/vn-spell-correction-base \
+    --json benchmarks/results/real_spell_correction_base.json
+```
+
+Confidence intervals on the smaller splits (business_55, formal_72) are
+±3-4 pp at 95 %. The 25-sentence real-world slices are even noisier
+(±9 pp at 95 %) — treat them as a directional smell-test.
 
 Local re-eval reproduces remote within ±0.03 pp on every split. Trained on
 the [same 500K mixed Wiki+news corpus](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-train)

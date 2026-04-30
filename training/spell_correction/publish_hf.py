@@ -351,14 +351,29 @@ The two averaged columns:
 
 ## Limitations
 
-- **In-distribution metric, real-world is harder.** Training and eval
-  both use `nom.text.noise` with the same three presets — different
-  seeds, but the same statistical noise distribution. The model has
-  implicitly learned the inverse of *our* noise generator. Real-world
-  Vietnamese typos (Telex input slips, OCR-engine-specific errors,
-  autocorrect mishaps) follow different statistics, so expect
-  measurably lower numbers in production. A held-out real-world eval
-  is queued.
+- **In-distribution metric, real-world is harder — measured.** Training
+  and eval both use `nom.text.noise` with the same three presets —
+  different seeds, but the same statistical noise distribution. The
+  model has implicitly learned the inverse of *our* noise generator.
+  We measured the OOD gap on a 100-sentence hand-curated real-world
+  eval (forum slang / mobile autocorrect / real Telex / Tesseract+EasyOCR):
+
+  | Slice | Word acc | Sent. exact |
+  |---|---:|---:|
+  | OCR engine output | 93.62 % | 60.0 % |
+  | Mobile autocorrect | 95.01 % | 40.0 % |
+  | Forum/social slang | 59.45 % | 0.0 % |
+  | Real Telex keystrokes | 17.38 % | 0.0 % |
+  | **Aggregate (n=100)** | **66.88 %** | 25.0 % |
+
+  Synthetic light_avg is 98.58 %; real-world aggregate is 66.88 %. The
+  32 pp gap is the cost of training only on `light/telex_typo/heavy`
+  noise — those capture the *surface* of typos but not real Telex
+  keystroke artefacts (`dduwojc` for `được`) or forum-style abbreviation
+  syntax (`ko bt` for `không biết`). v0.2.29 retraining on the v2
+  multi-source corpus + `comprehensive_noise()` (which adds
+  `telex_grammar_noise()` and `mobile_noise()`) is queued and should
+  close most of this gap.
 - **Heavy-noise corner cases.** OCR outputs that drop entire words or
   add hallucinated text are out-of-scope; the noise generator we
   trained on caps edits per sentence (max 25 % edit ratio).
