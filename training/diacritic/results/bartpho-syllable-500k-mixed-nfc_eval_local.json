@@ -1,0 +1,42 @@
+{
+  "checkpoint": "training/diacritic/checkpoints/bartpho-syllable-500k-mixed-nfc/final",
+  "device": "cuda",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "max_input_length": 256,
+  "max_target_length": 256,
+  "eval": {
+    "business_55": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9457,
+      "sentence_exact": 0.5091,
+      "mean_ms_per_sentence": 49.34,
+      "p50_ms": 49.01,
+      "p95_ms": 59.13
+    },
+    "literary_udvtb": {
+      "n_sentences": 800,
+      "word_accuracy": 0.8632,
+      "sentence_exact": 0.245,
+      "mean_ms_per_sentence": 61.06,
+      "p50_ms": 60.55,
+      "p95_ms": 97.42
+    },
+    "conversational_300": {
+      "n_sentences": 300,
+      "word_accuracy": 0.9072,
+      "sentence_exact": 0.59,
+      "mean_ms_per_sentence": 38.02,
+      "p50_ms": 34.97,
+      "p95_ms": 61.11
+    },
+    "formal_udhr": {
+      "n_sentences": 72,
+      "word_accuracy": 0.9151,
+      "sentence_exact": 0.75,
+      "mean_ms_per_sentence": 94.54,
+      "p50_ms": 88.26,
+      "p95_ms": 170.05
+    }
+  }
+}

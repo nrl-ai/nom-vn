@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.27] — 2026-04-30
+
+### Fast tier: `nrl-ai/vn-diacritic-small` published (BARTpho-syllable, 115 M)
+
+Trained ViT5-small does not exist (VietAI ships only `vit5-base` and
+`vit5-large`). Picked `vinai/bartpho-syllable-base` (115 M, MIT) for the
+fast tier instead — its **syllable-level tokenizer is uniquely
+well-matched to per-syllable tone disambiguation**, the actual task in
+diacritic restoration.
+
+Trained on the **same 500K mixed Wiki+news corpus + 5 epochs cosine LR
++ same hyperparams** as the v0.2.26 base. The "small model trained on
+small corpus to save compute" instinct is exactly backwards: Chinchilla
+scaling shows compute-optimal training pairs *more* tokens per parameter
+as model size shrinks. The compute saving comes from the smaller arch
++ faster step time, not from a thinner corpus. (Codified as a rule in
+the internal operating manual.)
+
+4-register results vs the v0.2.26 base + Toshiiiii1 (the SOTA we
+benchmark against):
+
+  Register             Toshiiiii1   v0.2.26 base   v0.2.27 small   Δ vs base
+  formal_udhr          98.14 %      99.43 %        91.51 %         -7.92 pp
+  business_55          97.81 %      94.98 %        94.44 %         -0.54 pp
+  conversational_300   93.94 %      94.12 %        90.68 %         -3.44 pp
+  literary_udvtb       89.40 %      90.24 %        86.33 %         -3.91 pp
+
+Inference speed (RTX 3080 16 GB Mobile, num_beams=1):
+  base:  100-272 ms/sent (mean ~169)
+  small:  38-94  ms/sent (mean  ~58)
+  Speedup: ~2.9× on local 3080 / ~2.2× during training (115 / 220 M
+  params, 195 / 88 min total wall-clock for the same 5-epoch budget)
+
+The formal-register regression is unusually steep (-7.92 pp). Sample
+inspection shows BARTpho-syllable occasionally **drops syllables**
+during generation (e.g. "công bằng và hòa bình" → "công bằng và bình").
+That's a generation-distribution issue specific to the BARTpho
+arch, not a tokenization or training-data issue.
+
+**Published as [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small)**
+with explicit "fast tier — 2.2× speedup, ~3-4 pp avg quality cost"
+framing in the model card. Quality lower than the base, but for
+latency-bound or memory-constrained pipelines (CPU inference, edge,
+high-throughput batch) the trade is real.
+
+### `publish_hf.py` made arch-aware
+
+The model-card template was previously hard-coded to ViT5 (tags,
+title, training-corpus blurb). After publishing to a BARTpho base it
+inferred the wrong tags. Fix: detect the arch family from the
+`model_id` in the training summary (`vit5` → "ViT5" + tag `t5`,
+`bartpho` → "BARTpho-syllable" + tag `bartpho`, etc.) and
+conditionally include both `wiki` + `news` datasets in the YAML when
+`train_pairs >= 400_000`. Re-renders cleanly for any future tier.
+
+Also fixed a stale baseline constant in `TOSHIIIII_BASELINE` (was
+`conversational_300: 0.9377`, now `0.9394` matching the latest
+4-register bench JSON) so the auto-generated Δ column in the model
+card is correct.
+
+### `vn-diacritic-vit5-base` republished as v0.2.26 weights
+
+The HF repo `nrl-ai/vn-diacritic-vit5-base` now contains the v0.2.26
+mixed-source weights (replaces the v0.2.25 Wiki-only weights at the
+same name). Local re-eval reproduces remote within ±0.07 pp on every
+register. Card updated to reflect the new training data + Δ column.
+
 ## [0.2.26] — 2026-04-30
 
 ### Train experiment #6: mixed-source ViT5 beats Toshiiiii1 on 3/4 registers

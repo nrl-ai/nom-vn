@@ -5,7 +5,7 @@
 > Đặt theo tên *chữ Nôm* — bộ chữ Việt Nam dùng suốt một thiên niên kỷ.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/nrl-ai/nom-vn/blob/main/LICENSE)
-[![Trạng thái](https://img.shields.io/badge/status-v0.2.26-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
+[![Trạng thái](https://img.shields.io/badge/status-v0.2.27-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
 [![Tests](https://img.shields.io/badge/tests-354%20passing-brightgreen)](https://github.com/nrl-ai/nom-vn/tree/main/tests)
 
@@ -40,6 +40,7 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 |---|---|---|---:|---|---|
 | **Khôi phục dấu (mặc định)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc trên kinh doanh · 89.40 % văn học · 98.14 % trang trọng · 93.94 % hội thoại | vượt cloud `gpt-4o-mini` 95.37 % trên kinh doanh; SOTA trên ma trận 4 thể loại |
 | **Khôi phục dấu (cân bằng thể loại)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, của chúng tôi) | Apache 2.0 | 900 MB | 99.43 % trang trọng (+1.29 pp) · 94.12 % hội thoại (+0.18 pp) · 94.98 % kinh doanh (-2.83) · 90.24 % văn học | thắng trang trọng + hội thoại; chọn cho văn bản pháp lý / dữ liệu chat, Toshiiiii1 cho văn bản kinh doanh |
+| **Khôi phục dấu (fast tier)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) (BARTpho-syllable 115 M, của chúng tôi) | Apache 2.0 | 530 MB | 94.44 % kinh doanh · 86.33 % văn học · 90.68 % hội thoại · 91.51 % trang trọng · ~50-100 ms/câu (nhanh 2.2×) | nửa số params so với base; chọn khi latency quan trọng hơn chất lượng tuyệt đối |
 | **Khôi phục dấu (zero-dep dự phòng)** | bảng quy tắc (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
 | **Khôi phục dấu (LLM local)** | `gemma3:4b` Q4 qua Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` cao hơn +5pp nhưng lớn 3× |
 | **Tách từ (tốc độ)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |

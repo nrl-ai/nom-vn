@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.2.26"
+version = "0.2.27"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"

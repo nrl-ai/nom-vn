@@ -80,32 +80,37 @@ single-call path).
 
 ## Trained models — `nrl-ai/*`
 
-| HF model | License | Params | Disk | When to pick |
-|---|---|---|---:|---|
-| [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) | Apache-2.0 | 220 M (ViT5-base) | 900 MB | register-balanced — best for formal / conversational corpora |
+| HF model | License | Base | Params | Disk | Latency (3080) | When to pick |
+|---|---|---|---:|---:|---:|---|
+| [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) | Apache-2.0 | ViT5-base (MIT) | 220 M | 900 MB | 100-272 ms/sent | base tier — best register-balanced quality |
+| [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) | Apache-2.0 | BARTpho-syllable (MIT) | 115 M | 530 MB | 38-94 ms/sent | fast tier — 2.2× speedup, ~3-4 pp avg quality cost |
+
+Both trained on the **same 500K mixed Wiki+news corpus** for 5 epochs cosine
+LR (small models on big corpora generalize better; cutting training data for
+the small tier is a common pitfall we deliberately avoid).
 
 **Δ vs Toshiiiii1 (the public SOTA we benchmark against):**
 
-| Register | Toshiiiii1 | nrl-ai/vit5-base | Δ |
-|---|---:|---:|---:|
-| `formal_udhr` | 98.14 % | **99.43 %** | **+1.29 pp** |
-| `business_55` | **97.81 %** | 94.98 % | -2.83 pp |
-| `conversational_300` | 93.94 % | **94.12 %** | **+0.18 pp** |
-| `literary_udvtb` | **89.40 %** | 90.24 % | +0.84 pp  |
+| Register | Toshiiiii1 | base (ours) | Δ vs Toshi | small (ours) | Δ vs Toshi |
+|---|---:|---:|---:|---:|---:|
+| `formal_udhr` | 98.14 % | **99.43 %** | **+1.29 pp** | 91.51 % | -6.63 pp |
+| `business_55` | **97.81 %** | 94.98 % | -2.83 pp | 94.44 % | -3.37 pp |
+| `conversational_300` | 93.94 % | **94.12 %** | **+0.18 pp** | 90.68 % | -3.26 pp |
+| `literary_udvtb` | **89.40 %** | 90.24 % | +0.84 pp | 86.33 % | -3.07 pp |
 
-Strict adoption gate (business ≥ 96 % AND literary > 89.40 %) **fails**
-on business — so this is **not** the canonical name `nrl-ai/vn-diacritic-restoration`
-(that's reserved for a future gate-passing model). It's published under
-its arch-explicit name as the register-balanced alternative for users
-who care about formal / conversational accuracy.
+The base tier wins 3/4 registers vs Toshiiiii1 and ties on the gate
+threshold; strict business-gate (≥ 96 %) still fails by 1.02 pp, so
+neither tier claims the canonical `nrl-ai/vn-diacritic-restoration`
+name yet — both ship under their arch-descriptive names. Pick the
+base tier when quality matters most; pick the small tier when latency
+or VRAM is the constraint and ~3-4 pp average quality drop is
+acceptable.
 
-**Planned tiers** (see [training README](../../training/diacritic/README.md)):
+**Planned next tier:**
 
 | Tier | Base | Status |
 |---|---|---|
-| `nrl-ai/vn-diacritic-base` | ViT5-base or larger | TBD — pending v6 / v7 mixed-source experiment |
-| `nrl-ai/vn-diacritic-small` | ViT5-small (60 M) | queued — same recipe, ~3× faster |
-| `nrl-ai/vn-diacritic-nano` | distilled (10-30 M) | future, after base+small are validated |
+| `nrl-ai/vn-diacritic-nano` | distilled (10-30 M) | future — distillation from the base teacher, target <50 ms CPU inference |
 
 ## Datasets — `nrl-ai/*`
 

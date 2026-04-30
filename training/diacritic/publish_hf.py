@@ -71,6 +71,37 @@ def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -
     eval_data = summary.get("eval", {})
     hp = summary.get("hyperparameters", {})
 
+    # Arch family inferred from the base model id — drives the YAML tags
+    # and the title prose so the card matches the actual architecture.
+    base_lower = base.lower()
+    if "vit5" in base_lower or "t5" in base_lower:
+        arch_tag = "t5"
+        arch_label = "ViT5"
+    elif "bartpho" in base_lower:
+        arch_tag = "bartpho"
+        arch_label = "BARTpho-syllable"
+    elif "mbart" in base_lower:
+        arch_tag = "mbart"
+        arch_label = "mBART"
+    else:
+        arch_tag = "seq2seq"
+        arch_label = "seq2seq"
+
+    # Training data heuristic: assume mixed Wiki+news if train_pairs > 200K
+    # (the Wiki-only run was 200K). Avoids hard-coding the corpus name.
+    pairs = summary.get("train_pairs", 0) or 0
+    if pairs >= 400_000:
+        train_corpus_blurb = (
+            "a register-balanced mix of Vietnamese Wikipedia (CC-BY-SA-4.0) "
+            "and Vietnamese news (`tmnam20/Vietnamese-News-dedup`, CC-BY-4.0, NFC-normalized)"
+        )
+        datasets_yaml = (
+            "  - hirine/wikipedia-vietnamese-1M296K-dataset\n  - tmnam20/Vietnamese-News-dedup"
+        )
+    else:
+        train_corpus_blurb = "Vietnamese Wikipedia (CC-BY-SA-4.0)"
+        datasets_yaml = "  - hirine/wikipedia-vietnamese-1M296K-dataset"
+
     # Eval rows in monotonic register order, formal -> literary.
     register_order = [
         ("formal_udhr", "Formal / legal-prose (UDHR, public domain)"),
@@ -101,22 +132,21 @@ tags:
   - vietnamese
   - diacritic-restoration
   - seq2seq
-  - vit5
+  - {arch_tag}
 pipeline_tag: text-generation
 datasets:
-  - hirine/wikipedia-vietnamese-1M296K-dataset
+{datasets_yaml}
 metrics:
   - word_accuracy
   - sentence_exact
 library_name: transformers
 ---
 
-# {repo_id} — Vietnamese diacritic restoration (ViT5 fine-tune)
+# {repo_id} — Vietnamese diacritic restoration ({arch_label} fine-tune)
 
 Restores diacritics on Vietnamese text written without them
 (``Toi yeu Viet Nam`` → ``Tôi yêu Việt Nam``). Fine-tuned from
-[`{base}`](https://huggingface.co/{base}) on a register-balanced
-slice of Vietnamese Wikipedia.
+[`{base}`](https://huggingface.co/{base}) on {train_corpus_blurb}.
 
 **Adoption gate:** {gate_status}.
 
@@ -166,11 +196,9 @@ Each eval corpus is open-license and reproducible from the
 ## Training
 
 - **Base:** [`{base}`](https://huggingface.co/{base}) (MIT license)
-- **Corpus:** {_fmt_int(summary.get("train_pairs"))} (input, target) pairs from
-  [`hirine/wikipedia-vietnamese-1M296K-dataset`](https://huggingface.co/datasets/hirine/wikipedia-vietnamese-1M296K-dataset)
-  (CC-BY-SA-4.0). Eval-leak guarded against `diacritic_eval_v0.txt` and
-  `ud_vi_vtb/test.conllu`.
-- **Validation:** {_fmt_int(summary.get("val_pairs"))} held-out Wikipedia pairs.
+- **Corpus:** {_fmt_int(summary.get("train_pairs"))} (input, target) pairs from {train_corpus_blurb}.
+  Eval-leak guarded against the held-out `nrl-ai/vn-diacritic-eval` slices.
+- **Validation:** {_fmt_int(summary.get("val_pairs"))} held-out pairs from the same training mix.
 - **Epochs:** {summary.get("epochs", "?")}
 - **Effective batch size:** {hp.get("effective_batch_size", "?")} ({hp.get("batch_size", "?")} per device, grad-accum {hp.get("gradient_accumulation_steps", 1)})
 - **Learning rate:** {hp.get("lr", "?")} with `{hp.get("lr_scheduler", "?")}` schedule, {hp.get("warmup_steps", "?")} warmup steps
