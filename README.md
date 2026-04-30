@@ -58,6 +58,7 @@ on real Vietnamese corpora, this week.
 
 - *Want VN diacritics fixed?* Install `nom-vn[diacritic-hf]` and use the default — `nrl-ai/vn-diacritic-vit5-base`. Wins on formal + conversational + business + literary against the public landscape; the `-small` variant trades 4 pp for ~3× speed.
 - *Want spell correction (typos + accents + OCR errors in one pass)?* Same install, swap the model id to `nrl-ai/vn-spell-correction-base`. Beats `bmd1905/vietnamese-correction-v2` by 11-25 pp.
+- *Care about real-world (not just synthetic) accuracy?* Read the [out-of-distribution OOD bench](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md#bench-thực-tế-ngoài-phân-phối-mở-rộng-đo-ngày-2026-04-30) — 150 hand-curated real Vietnamese typos, with bootstrap 95 % CI. Headline: our 98.58 % synthetic drops to 77.43 % OOD; we tie `Toshiiiii1` on aggregate (77.40 %). v0.2.29 retraining on a multi-register v2 corpus is in flight to close the OOD gap.
 - *Want local RAG over Vietnamese documents?* Install `nom-vn[chat,embeddings,nlp]`, swap the default embedder to `BKaiEmbedder`. +41 pp R@1.
 - *Need OCR on Vietnamese scans?* Tesseract `vie` is the right call. Don't reach for VLM OCR — VLMs hallucinate on tight line crops.
 - *Need PDF text extraction in a license-clean way?* Use `pypdfium2` (we ship it). Skip PyMuPDF — its AGPL forces every downstream into AGPL.
