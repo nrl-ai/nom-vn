@@ -38,9 +38,11 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 
 | Tác vụ | Lựa chọn | Giấy phép | Dung lượng | Đo được | Vượt qua |
 |---|---|---|---:|---|---|
-| **Khôi phục dấu (mặc định)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc trên kinh doanh · 89.40 % văn học · 98.14 % trang trọng · 93.94 % hội thoại | vượt cloud `gpt-4o-mini` 95.37 % trên kinh doanh; SOTA trên ma trận 4 thể loại |
-| **Khôi phục dấu (cân bằng thể loại)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, của chúng tôi) | Apache 2.0 | 900 MB | 99.43 % trang trọng (+1.29 pp) · 94.12 % hội thoại (+0.18 pp) · 94.98 % kinh doanh (-2.83) · 90.24 % văn học | thắng trang trọng + hội thoại; chọn cho văn bản pháp lý / dữ liệu chat, Toshiiiii1 cho văn bản kinh doanh |
+| **Khôi phục dấu (mặc định)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, của chúng tôi) | Apache 2.0 | 900 MB | 99.43 % trang trọng · 94.12 % hội thoại · 94.98 % kinh doanh · 90.24 % văn học | thắng trang trọng + hội thoại so với Toshiiiii1; cân bằng trên cả 4 thể loại |
+| **Khôi phục dấu (chuyên kinh doanh / tin tức)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M) | Apache 2.0 | 1 GB | **97.81 %** kinh doanh · 89.40 % văn học · 98.14 % trang trọng · 93.94 % hội thoại | sít sao hơn trên text kinh doanh; -8.7 pp văn học cho thấy rủi ro register-overfit |
 | **Khôi phục dấu (fast tier)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) (BARTpho-syllable 115 M, của chúng tôi) | Apache 2.0 | 530 MB | 94.44 % kinh doanh · 86.33 % văn học · 90.68 % hội thoại · 91.51 % trang trọng · ~50-100 ms/câu (nhanh 2.2×) | nửa số params so với base; chọn khi latency quan trọng hơn chất lượng tuyệt đối |
+| **Sửa chính tả (mặc định)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) | [`nrl-ai/vn-spell-correction-base`](https://huggingface.co/nrl-ai/vn-spell-correction-base) (ViT5 220 M, của chúng tôi) | Apache 2.0 | 900 MB | **98.58 %** light avg · **97.35 %** heavy avg (lưới 8-split) | vượt `bmd1905/vietnamese-correction-v2` 11-25 pp; sửa cả lỗi chính tả + dấu + OCR |
+| **Sửa chính tả (fast tier)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) | [`nrl-ai/vn-spell-correction-small`](https://huggingface.co/nrl-ai/vn-spell-correction-small) (BARTpho-syllable 115 M, của chúng tôi) | Apache 2.0 | 530 MB | 94.78 % light avg · 92.69 % heavy avg | nửa số params so với base; chọn khi latency quan trọng hơn |
 | **Khôi phục dấu (zero-dep dự phòng)** | bảng quy tắc (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
 | **Khôi phục dấu (LLM local)** | `gemma3:4b` Q4 qua Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` cao hơn +5pp nhưng lớn 3× |
 | **Tách từ (tốc độ)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |
@@ -54,7 +56,8 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 
 **Quyết định ngắn gọn:**
 
-- *Cần khôi phục dấu tiếng Việt?* Cài `nom-vn[diacritic-hf]` và dùng Toshiiiii1 T5. Vượt cloud GPT-4o-mini.
+- *Cần khôi phục dấu tiếng Việt?* Cài `nom-vn[diacritic-hf]` và dùng mặc định — `nrl-ai/vn-diacritic-vit5-base`. Thắng trên trang trọng + hội thoại + kinh doanh + văn học so với public landscape; bản `-small` đánh đổi 4 pp lấy ~3× tốc độ.
+- *Cần sửa chính tả (lỗi typing + dấu + OCR trong một bước)?* Cùng cách cài, đổi model id sang `nrl-ai/vn-spell-correction-base`. Vượt `bmd1905/vietnamese-correction-v2` 11-25 pp.
 - *Cần RAG local trên tài liệu tiếng Việt?* Cài `nom-vn[chat,embeddings,nlp]`, đổi embedder mặc định sang `BKaiEmbedder`. +41 pp R@1.
 - *Cần OCR ảnh quét tiếng Việt?* Tesseract `vie` là lựa chọn đúng. Đừng dùng VLM cho OCR — VLM thường ảo giác trên crop dòng hẹp.
 - *Cần trích văn bản PDF không vướng giấy phép?* Dùng `pypdfium2` (đã ship sẵn). Tránh PyMuPDF — AGPL của nó kéo mọi thứ downstream thành AGPL.

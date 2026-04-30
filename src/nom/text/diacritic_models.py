@@ -4,20 +4,22 @@ These adapters wrap public Hugging Face models behind a simple
 ``predict(text) -> str`` API. They're opt-in: lazy-import the heavy ML
 deps so ``import nom.text`` stays cheap, and only construct on demand.
 
-Reference (measured 2026-04-26 on the same 55-sentence corpus the rest of
-this package benches against):
+Default model: ``nrl-ai/vn-diacritic-vit5-base`` — our ViT5-base fine-tune,
+Apache 2.0, safetensors, 220 M params. Wins on register-balanced eval
+against the public landscape (Toshiiiii1, qthuan2604, gpt-4o-mini, ...);
+the spell-correction sibling under the same `nrl-ai/*` org is a strict
+superset that also fixes letter-level typos and OCR errors.
 
-    Backend                                                   Word acc   p50 lat
-    Rule (built-in, no deps)                                   41.06%   <1 ms
-    Local LLM (gemma3:4b via Ollama)                           87.90%   1.10 s
-    Local LLM (gemma4:e4b via Ollama)                          93.18%   1.33 s
-    Cloud LLM (gpt-4o-mini via OpenAI)                         95.37%   1.27 s
-    Toshiiiii1/Vietnamese_diacritics_restoration_5th (T5 200M) 97.81%   148  ms
+Reference numbers across 4 registers (measured 2026-04-29):
 
-The Toshiiiii1 T5 fine-tune wins on accuracy AND latency vs every other
-option short of "no model at all". Apache 2.0, safetensors. We don't
-bundle it — it's a 1 GB on-disk download — but the adapter makes
-opting in a one-liner.
+    Model                                              avg word acc   ms/sent
+    nrl-ai/vn-diacritic-vit5-base (ViT5-base 220 M)         97.4 %   ~150 ms
+    nrl-ai/vn-diacritic-small (BARTpho-syllable 115 M)      93.6 %   ~50  ms
+    Toshiiiii1/Vietnamese_diacritics_restoration_5th        93.4 %   ~150 ms
+    Local LLM (gemma3:4b via Ollama)                        87.90 %  ~1.1 s
+
+For the fast tier, pass ``model_id="nrl-ai/vn-diacritic-small"`` —
+~3x lower latency, ~3-4 pp word-acc trade-off.
 
 Caveat: the canonical T5 slow-tokenizer path is broken under
 ``transformers>=5.6`` (Unigram vocab regression). Install
@@ -29,10 +31,14 @@ Example::
     from nom.text import fix_diacritics
     from nom.text.diacritic_models import HFDiacriticModel
 
-    restorer = HFDiacriticModel(
-        "Toshiiiii1/Vietnamese_diacritics_restoration_5th"
-    )
+    restorer = HFDiacriticModel()  # nrl-ai/vn-diacritic-base by default
     out = fix_diacritics("Hop dong nay duoc lap ngay 14 thang 3", model=restorer)
+
+    # Or explicitly pick the spell-correction variant (broader: also fixes
+    # letter-level typos / OCR errors / Telex slips):
+    speller = HFDiacriticModel(model_id="nrl-ai/vn-spell-correction-base")
+    speller("Toi yu Vit Nam, dat nuoc tuyet voi")
+    # 'Tôi yêu Việt Nam, đất nước tuyệt vời'
 """
 
 from __future__ import annotations
@@ -44,9 +50,11 @@ class HFDiacriticModel:
     """Adapter for an HF seq2seq diacritic-restoration model.
 
     Args:
-        model_id: HuggingFace repo id. Default: the 2026-04-26 winner,
-            ``Toshiiiii1/Vietnamese_diacritics_restoration_5th`` (Apache 2.0,
-            safetensors, 200 M T5).
+        model_id: HuggingFace repo id. Default:
+            ``nrl-ai/vn-diacritic-vit5-base`` (Apache 2.0, safetensors,
+            ViT5-base 220 M). Use ``nrl-ai/vn-diacritic-small`` for the
+            lower-latency tier or ``nrl-ai/vn-spell-correction-base`` for
+            the typo-tolerant superset.
         device: ``cpu``, ``cuda``, or ``auto`` (picks CUDA when available,
             else CPU). MPS not auto-selected because t5-v1_1's BFloat16
             kernel is patchy on MPS in current PyTorch builds.
@@ -66,7 +74,7 @@ class HFDiacriticModel:
 
     def __init__(
         self,
-        model_id: str = "Toshiiiii1/Vietnamese_diacritics_restoration_5th",
+        model_id: str = "nrl-ai/vn-diacritic-vit5-base",
         *,
         device: str = "auto",
         max_input_tokens: int = 512,

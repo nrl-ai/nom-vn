@@ -9,11 +9,11 @@ Research Lab.
 
 | Model | Base | Params | Disk | Mean word acc |
 |---|---|---:|---:|---:|
-| [`nrl-ai/vn-diacritic-base`](https://huggingface.co/nrl-ai/vn-diacritic-base) | ViT5-base (MIT) | 220 M | 900 MB | **97.4 %** |
-| [`nrl-ai/vn-diacritic-fast`](https://huggingface.co/nrl-ai/vn-diacritic-fast) | BARTpho-syllable (MIT) | 115 M | 530 MB | 93.6 % |
+| [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) | ViT5-base (MIT) | 220 M | 900 MB | **97.4 %** |
+| [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) | BARTpho-syllable (MIT) | 115 M | 530 MB | 93.6 % |
 
-* `vn-diacritic-base` is the production default.
-* `vn-diacritic-fast` runs ~3× faster on the same hardware,
+* `vn-diacritic-vit5-base` is the production default.
+* `vn-diacritic-small` runs ~3× faster on the same hardware,
   trade-off ~3-4 pp word accuracy. Suited to mobile / browser
   inference once int8-quantized.
 

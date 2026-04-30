@@ -9,11 +9,11 @@ Tác giả chính: Viet-Anh Nguyen ([vietanh@nrl.ai](mailto:vietanh@nrl.ai))
 
 | Mô hình | Base | Tham số | Dung lượng | Word acc trung bình |
 |---|---|---:|---:|---:|
-| [`nrl-ai/vn-diacritic-base`](https://huggingface.co/nrl-ai/vn-diacritic-base) | ViT5-base (MIT) | 220 M | 900 MB | **97.4 %** |
-| [`nrl-ai/vn-diacritic-fast`](https://huggingface.co/nrl-ai/vn-diacritic-fast) | BARTpho-syllable (MIT) | 115 M | 530 MB | 93.6 % |
+| [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) | ViT5-base (MIT) | 220 M | 900 MB | **97.4 %** |
+| [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) | BARTpho-syllable (MIT) | 115 M | 530 MB | 93.6 % |
 
-* `vn-diacritic-base` là mô hình mặc định cho production.
-* `vn-diacritic-fast` chạy ~3× nhanh hơn trên cùng phần cứng,
+* `vn-diacritic-vit5-base` là mô hình mặc định cho production.
+* `vn-diacritic-small` chạy ~3× nhanh hơn trên cùng phần cứng,
   trade-off ~3-4 pp word accuracy. Phù hợp cho mobile / browser
   inference khi đã quantize int8.
 

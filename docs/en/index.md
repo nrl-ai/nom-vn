@@ -11,7 +11,7 @@ contribution guides.
 ## What's inside
 
 1. **Diacritic restoration** (`nom.text.fix_diacritics`) —
-   `Toi yu Vit Nam` → `Tôi yêu Việt Nam`. The `nrl-ai/vn-diacritic-base`
+   `Toi yu Vit Nam` → `Tôi yêu Việt Nam`. The `nrl-ai/vn-diacritic-vit5-base`
    model averages 97.4 % word accuracy across 4 registers.
 2. **Spell correction** (`nrl-ai/vn-spell-correction-*`) — superset of
    diacritic restoration with extra capacity for character-level

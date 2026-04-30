@@ -29,7 +29,7 @@ nom serve   # http://localhost:8080
 from nom.text import fix_diacritics
 from nom.text.diacritic_models import HFDiacriticModel
 
-restorer = HFDiacriticModel(model_id="nrl-ai/vn-diacritic-base")
+restorer = HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")
 print(fix_diacritics("Toi yu Vit Nam", model=restorer))
 # 'Tôi yêu Việt Nam'
 ```

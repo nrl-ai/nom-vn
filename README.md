@@ -38,9 +38,10 @@ on real Vietnamese corpora, this week.
 
 | Task | Pick | License | Disk | Measured | Beats |
 |---|---|---|---:|---|---|
-| **Diacritic restoration (default)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc on business · 89.40 % literary · 98.14 % formal · 93.94 % conversational | beats cloud `gpt-4o-mini` 95.37 % on business; SOTA on the 4-register matrix |
-| **Diacritic restoration (register-balanced)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, ours) | Apache 2.0 | 900 MB | 99.43 % formal (+1.29 pp) · 94.12 % conversational (+0.18 pp) · 94.98 % business (-2.83) · 90.24 % literary | wins formal + conversational; pick this for legal docs / chat data, Toshiiiii1 for business-tilted text |
+| **Diacritic restoration (default)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, ours) | Apache 2.0 | 900 MB | 99.43 % formal · 94.12 % conversational · 94.98 % business · 90.24 % literary | wins formal + conversational vs Toshiiiii1; balanced across all 4 registers |
+| **Diacritic restoration (business / news only)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M) | Apache 2.0 | 1 GB | **97.81 %** business · 89.40 % literary · 98.14 % formal · 93.94 % conversational | tighter on business-register text; -8.7 pp on literary so register-overfit risk is real |
 | **Diacritic restoration (fast tier)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) (BARTpho-syllable 115 M, ours) | Apache 2.0 | 530 MB | 94.44 % business · 86.33 % literary · 90.68 % conv · 91.51 % formal · ~50-100 ms/sent (2.2x faster) | half the params of the base; pick when latency matters more than absolute quality |
+| **Spell correction (fast tier)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) | [`nrl-ai/vn-spell-correction-small`](https://huggingface.co/nrl-ai/vn-spell-correction-small) (BARTpho-syllable 115 M, ours) | Apache 2.0 | 530 MB | 94.78 % light avg · 92.69 % heavy avg | half the params of the base; pick when latency matters more |
 | **Spell correction (default)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) | [`nrl-ai/vn-spell-correction-base`](https://huggingface.co/nrl-ai/vn-spell-correction-base) (ViT5 220 M, ours) | Apache 2.0 | 900 MB | **98.58 %** light avg · **97.35 %** heavy avg (8-split grid) | beats `bmd1905/vietnamese-correction-v2` by 11-25 pp; fixes typos + accents + OCR errors |
 | **Diacritic (zero-dep fallback)** | rule-based table (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
 | **Diacritic (local LLM)** | `gemma3:4b` Q4 via Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` is +5pp better but 3× larger |
@@ -55,7 +56,8 @@ on real Vietnamese corpora, this week.
 
 **The decision in plain English:**
 
-- *Want VN diacritics fixed?* Install `nom-vn[diacritic-hf]` and use the Toshiiiii1 T5. It beats cloud GPT-4o-mini.
+- *Want VN diacritics fixed?* Install `nom-vn[diacritic-hf]` and use the default — `nrl-ai/vn-diacritic-vit5-base`. Wins on formal + conversational + business + literary against the public landscape; the `-small` variant trades 4 pp for ~3× speed.
+- *Want spell correction (typos + accents + OCR errors in one pass)?* Same install, swap the model id to `nrl-ai/vn-spell-correction-base`. Beats `bmd1905/vietnamese-correction-v2` by 11-25 pp.
 - *Want local RAG over Vietnamese documents?* Install `nom-vn[chat,embeddings,nlp]`, swap the default embedder to `BKaiEmbedder`. +41 pp R@1.
 - *Need OCR on Vietnamese scans?* Tesseract `vie` is the right call. Don't reach for VLM OCR — VLMs hallucinate on tight line crops.
 - *Need PDF text extraction in a license-clean way?* Use `pypdfium2` (we ship it). Skip PyMuPDF — its AGPL forces every downstream into AGPL.

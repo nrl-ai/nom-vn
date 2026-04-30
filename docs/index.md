@@ -26,9 +26,9 @@ features:
   - icon: ✍️
     title: Khôi phục dấu
     details: |
-      Mô hình `nrl-ai/vn-diacritic-base` đạt **97.4 % độ chính xác từ** trung bình
+      Mô hình `nrl-ai/vn-diacritic-vit5-base` đạt **97.4 % độ chính xác từ** trung bình
       trên 4 register (kinh doanh / hành chính / hội thoại / văn học). Bản nhỏ
-      `vn-diacritic-fast` 115 M tham số, 3× nhanh hơn.
+      `vn-diacritic-small` 115 M tham số, 3× nhanh hơn.
     link: /tasks/diacritic-restoration
     linkText: Tài liệu khôi phục dấu
 

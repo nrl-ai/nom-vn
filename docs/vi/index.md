@@ -11,7 +11,7 @@ hướng dẫn cộng đồng cho dự án.
 ## Bốn mảng chức năng
 
 1. **Khôi phục dấu** (`nom.text.fix_diacritics`) — `Toi yu Vit Nam`
-   → `Tôi yêu Việt Nam`. Mô hình `nrl-ai/vn-diacritic-base` đạt 97.4 %
+   → `Tôi yêu Việt Nam`. Mô hình `nrl-ai/vn-diacritic-vit5-base` đạt 97.4 %
    word accuracy trung bình trên 4 register.
 2. **Sửa chính tả** (`nrl-ai/vn-spell-correction-*`) — siêu tập của
    khôi phục dấu, cộng thêm sửa lỗi ký tự, gõ Telex, OCR, viết tắt

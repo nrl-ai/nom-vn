@@ -35,8 +35,12 @@ out = fix_diacritics("Hop dong nay duoc lap ngay 14/3/2025", model=restorer)
 # → 'Hợp đồng nay được lập ngày 14/3/2025'
 ```
 
-The default model is `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
-(Apache 2.0).
+The default model is [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)
+(ViT5-base 220 M, Apache 2.0). Pass
+`model_id="nrl-ai/vn-diacritic-small"` for the lower-latency tier
+(115 M, ~3× faster, ~3-4 pp word-acc trade-off), or
+`model_id="nrl-ai/vn-spell-correction-base"` to get a strict superset
+that also fixes letter-level typos and OCR errors.
 
 **Register coverage** (4-register matrix, measured 2026-04-29 — see
 [`docs/benchmark.md`](benchmark.md) for the full table):
