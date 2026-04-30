@@ -1,71 +1,65 @@
-# Documentation
+# Tài liệu
 
-::: tip Tài liệu kỹ thuật
-Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
-Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
-có script đo cam kết trong repo.
-:::
+Tài liệu chi tiết cho **nom-vn**. Các file ở repo root (`README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`) là phần tổng quan; thư mục này chứa thiết kế và chi tiết bench.
 
-Deeper documentation for **nom-vn**. The repo-root files (`README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`) cover the basics; this directory holds the design and benchmark detail.
+## Trang cho từng task
 
-## Per-task pages
+Cấu trúc chính: một trang gộp cho mỗi task user-facing, gồm bức tranh
+công khai + pipeline của chúng tôi + mô hình đã huấn luyện + dataset +
+kết quả + cách tái lập. Mỗi trang theo
+[`tasks/_template.md`](tasks/_template.md) để đọc một trang là biết
+cách đọc mọi trang.
 
-The primary structure: one consolidated page per user-facing task,
-covering public landscape + our pipeline + trained models + datasets +
-results + reproduction. Each page follows
-[`tasks/_template.md`](tasks/_template.md) so the reader navigates any
-page after learning one.
-
-| Task | Status | Page |
+| Task | Trạng thái | Trang |
 |---|---|---|
-| Diacritic restoration | shipped | [`tasks/diacritic-restoration.md`](tasks/diacritic-restoration.md) |
-| Spell correction | shipped | [`tasks/spell-correction.md`](tasks/spell-correction.md) |
-| Word segmentation | shipped | _to migrate_ |
-| Embedding | shipped | _to migrate_ |
-| Retrieval (BM25 + dense) | shipped | _to migrate_ |
-| Reranker | shipped | _to migrate_ |
-| OCR | shipped | _to migrate_ |
-| PDF text extraction | shipped | _to migrate_ |
-| Chunking | shipped | _to migrate_ |
-| LLM chat | shipped | _to migrate_ |
+| Khôi phục dấu | đã ship | [`tasks/diacritic-restoration.md`](tasks/diacritic-restoration.md) |
+| Sửa chính tả | đã ship | [`tasks/spell-correction.md`](tasks/spell-correction.md) |
+| Tách từ (word segmentation) | đã ship | _đang chuyển_ |
+| Embedding | đã ship | _đang chuyển_ |
+| Retrieval (BM25 + dense) | đã ship | _đang chuyển_ |
+| Reranker | đã ship | _đang chuyển_ |
+| OCR | đã ship | _đang chuyển_ |
+| Trích xuất text từ PDF | đã ship | _đang chuyển_ |
+| Chunking | đã ship | _đang chuyển_ |
+| LLM chat | đã ship | _đang chuyển_ |
 
-The numbers + landscape detail for the not-yet-migrated tasks live in
-[`benchmark.md`](benchmark.md) for now and are progressively being
-moved into per-task pages.
+Số liệu + chi tiết bức tranh công khai cho các task chưa chuyển hiện
+nằm ở [`benchmark.md`](benchmark.md) và đang được di chuyển dần sang
+trang per-task.
 
-## Cross-cutting docs
+## Các trang xuyên suốt
 
-- **[architecture.md](architecture.md)** — the single-library design, submodule layout, and component picks (lightweight, fast, accurate, local, replaceable per-axis).
-- **[pipeline.md](pipeline.md)** — the doc-extraction pipeline end-to-end. Per-stage picks, citations, the planned API surface.
-- **[recipes.md](recipes.md)** — task-oriented "I want X, do Y" cookbook with copy-paste code.
-- **[benchmark.md](benchmark.md)** — measured numbers per module + research-backed component selection. Being migrated to the per-task pages.
-- **[datasets.md](datasets.md)** — Vietnamese benchmark corpora shipped under `benchmarks/data/`, plus the public `nrl-ai/*` datasets we publish on HF.
-- **[release.md](release.md)** — how to cut a PyPI release (Trusted Publishing via GitHub Actions).
-- **[sota_vn_2026q2.md](sota_vn_2026q2.md)** — current LLM, embedding, and OCR picks with verified citations. Deprecating; per-task pages are the live source.
-- **[oss_landscape_2026q2.md](oss_landscape_2026q2.md)** — wider OSS Vietnamese AI ecosystem. Deprecating; per-task pages are the live source.
-- **[training_plan_2026q2.md](training_plan_2026q2.md)** — when to fine-tune vs adopt off-the-shelf, per component.
-- **[research/](research/)** — gitignored working notes (data audits, market scans). Per-claim citations land in per-task pages once distilled.
+- **[architecture.md](architecture.md)** — thiết kế single-library, layout submodule, lựa chọn component (nhẹ, nhanh, chính xác, cục bộ, swap được theo từng trục).
+- **[pipeline.md](pipeline.md)** — pipeline trích xuất tài liệu end-to-end. Lựa chọn theo từng stage, citation, API surface dự kiến.
+- **[recipes.md](recipes.md)** — cookbook task-oriented "tôi muốn X, làm Y" với code copy-paste được.
+- **[benchmark.md](benchmark.md)** — số liệu đo theo từng module + lựa chọn component có nguồn nghiên cứu. Đang được chuyển sang trang per-task.
+- **[datasets.md](datasets.md)** — corpus tiếng Việt ship kèm dưới `benchmarks/data/`, cộng các dataset `nrl-ai/*` công khai trên HF.
+- **[release.md](release.md)** — cách cắt một bản release PyPI (Trusted Publishing qua GitHub Actions).
+- **[sota_vn_2026q2.md](sota_vn_2026q2.md)** — lựa chọn LLM, embedding, OCR hiện tại với citation đã verify. Đang deprecate; trang per-task là source live.
+- **[oss_landscape_2026q2.md](oss_landscape_2026q2.md)** — bức tranh OSS tiếng Việt rộng hơn. Đang deprecate; trang per-task là source live.
+- **[training_plan_2026q2.md](training_plan_2026q2.md)** — khi nào fine-tune và khi nào dùng model có sẵn, theo từng component.
+- **[research/](research/)** — note nội bộ gitignore (audit dataset, market scan). Citation từng claim được chuyển vào trang per-task khi đã chốt.
 
-## Where things go
+## File nào ở đâu
 
-| File | Lives at | Why |
+| File | Vị trí | Lý do |
 |---|---|---|
-| `README.md`, `README.vi.md` | repo root | GitHub auto-renders; first thing new visitors see; bilingual peers — both update in lockstep when content changes |
-| `LICENSE` | repo root | toolchain + license-detection convention |
-| `CHANGELOG.md` | repo root | GitHub releases auto-pick this up |
-| `CONTRIBUTING.md` | repo root | GitHub auto-surfaces this on PR/issue creation |
-| Per-task user-facing detail | `docs/tasks/<name>.md` | one consolidated page per task |
-| Cross-cutting design / pipeline | `docs/<topic>.md` | discoverable by humans; not in GitHub's "first look" path |
-| Auto-generated API docs | `docs/api/` (planned, v0.2+) | populated by Sphinx/mkdocs in CI |
+| `README.md`, `README.vi.md` | repo root | GitHub auto-render; thứ đầu tiên người mới thấy; hai bản peer — cập nhật song song khi nội dung đổi |
+| `LICENSE` | repo root | quy ước toolchain + license-detection |
+| `CHANGELOG.md` | repo root | GitHub releases tự đọc file này |
+| `CONTRIBUTING.md` | repo root | GitHub auto-surface khi tạo PR/issue |
+| Chi tiết user-facing per-task | `docs/tasks/<name>.md` | một trang gộp cho mỗi task |
+| Thiết kế xuyên suốt / pipeline | `docs/<topic>.md` | dễ phát hiện cho người đọc; không nằm trong "đường nhìn đầu tiên" trên GitHub |
+| API doc auto-generated | `docs/api/` (dự kiến v0.2+) | sinh bởi Sphinx/mkdocs trong CI |
 
-## Filename convention
+## Quy ước tên file
 
-Lowercase under `docs/` — except for the well-known repo-level files
-GitHub auto-recognizes (`README.md`, `LICENSE`, `CHANGELOG.md`,
-`CONTRIBUTING.md`). New per-task pages live as `tasks/<task-name>.md`.
+Chữ thường dưới `docs/` — trừ các file repo-level mà GitHub tự nhận
+diện (`README.md`, `LICENSE`, `CHANGELOG.md`, `CONTRIBUTING.md`).
+Trang per-task mới đặt tại `tasks/<task-name>.md`.
 
-## Coming later
+## Sẽ thêm sau
 
-- `docs/api/` — auto-generated module reference once the public surface stabilizes
-- `docs/tutorials/` — task-driven walkthroughs (contract extraction, OCR cleanup, etc.)
-- `docs/migration/` — version-to-version migration notes when we hit a breaking release
+- `docs/api/` — module reference auto-generate khi public surface ổn định
+- `docs/tutorials/` — walkthrough theo task (trích hợp đồng, dọn OCR, ...)
+- `docs/migration/` — note migration từ phiên bản này sang phiên bản khác khi có breaking release

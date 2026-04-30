@@ -1,229 +1,171 @@
-# Nôm — Component Selection & Benchmarks
+# Nôm — Lựa chọn component & Benchmark
 
-::: tip Tài liệu kỹ thuật
-Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
-Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
-có script đo cam kết trong repo.
-:::
+Tài liệu này ghi lại các component Nôm phụ thuộc, vì sao chọn từng cái, và số benchmark khi đã đo. **Số tái lập được — mọi claim "đã đo" đều có script trong `scripts/` chạy lại được.**
 
-This document records the components Nôm depends on, why each was chosen, and benchmark numbers where measured. **Numbers are reproducible — every "measured" claim has a script in `scripts/` you can re-run.**
-
-Last updated: **2026-04-25**.
+Cập nhật lần cuối: **2026-04-25**.
 
 ---
 
-## TL;DR — recommended stack
+## TL;DR — stack khuyến nghị
 
-| Module | Component | Status | Why |
+| Module | Component | Trạng thái | Lý do |
 |---|---|---|---|
-| `nom.text` | Pure stdlib (`unicodedata`) | **shipped v0.0.1** | 9M ops/s, zero deps, deterministic |
-| `nom.doc.ocr` (primary) | **VietOCR** (Transformer, VN-specialized) | planned v0.1 | Diacritic-aware; built on VN corpus |
-| `nom.doc.ocr` (fallback) | Tesseract 5 with `vie` traineddata | planned v0.1 | Always available, ~70% accuracy baseline |
-| `nom.doc.ocr` (cloud) | PaddleOCR PP-OCRv5 | planned v0.1 | 94.5% on OmniDocBench, modular pipeline |
-| `nom.doc.pdf` | **PyMuPDF (fitz)** | planned v0.1 | 19× faster than pdfplumber on real PDFs |
-| `nom.llm` (local default) | **Qwen3-8B via Ollama** | planned v0.1 | Apache 2.0, runs on consumer GPU, strong VN |
-| `nom.llm` (cloud max) | Qwen3-235B-A22B / GPT-4o / Claude | planned v0.1 | Top-tier when budget allows |
-| `nom.llm` (vision+doc) | Qwen2.5-VL-72B-Instruct | planned v0.1 | Best open vision-language for structured doc extraction |
+| `nom.text` | Pure stdlib (`unicodedata`) | **đã ship v0.0.1** | 9M ops/s, zero deps, tất định |
+| `nom.doc.ocr` (primary) | **VietOCR** (Transformer, VN-specialized) | dự kiến v0.1 | Diacritic-aware; build trên corpus VN |
+| `nom.doc.ocr` (fallback) | Tesseract 5 với traineddata `vie` | dự kiến v0.1 | Luôn có, baseline ~70% accuracy |
+| `nom.doc.ocr` (cloud) | PaddleOCR PP-OCRv5 | dự kiến v0.1 | 94.5% trên OmniDocBench, pipeline modular |
+| `nom.doc.pdf` | **PyMuPDF (fitz)** | dự kiến v0.1 | Nhanh hơn pdfplumber 19× trên PDF thực |
+| `nom.llm` (local mặc định) | **Qwen3-8B qua Ollama** | dự kiến v0.1 | Apache 2.0, chạy trên GPU consumer, VN mạnh |
+| `nom.llm` (cloud max) | Qwen3-235B-A22B / GPT-4o / Claude | dự kiến v0.1 | Top-tier khi ngân sách cho phép |
+| `nom.llm` (vision+doc) | Qwen2.5-VL-72B-Instruct | dự kiến v0.1 | Best open vision-language cho extraction tài liệu có cấu trúc |
 
-Sources for every claim are listed under each module section.
+Nguồn cho mỗi claim được liệt kê dưới mỗi section module.
 
 ---
 
-## Module: `nom.text` — *shipped*
+## Module: `nom.text` — *đã ship*
 
-### What it does
+### Làm gì
 
-Pure-Python utilities for Vietnamese text:
+Tiện ích pure-Python cho text tiếng Việt:
 - `normalize(s)` — Unicode NFC normalization
-- `strip_diacritics(s)` — convert to ASCII (đ → d, é → e, etc.)
+- `strip_diacritics(s)` — chuyển sang ASCII (đ → d, é → e, ...)
 - `has_diacritics(s)` — boolean
-- `is_vietnamese(s)` — heuristic detection (works on diacritic-stripped text too)
-- `fix_diacritics(s)` — restore diacritics on common stripped words
+- `is_vietnamese(s)` — phát hiện heuristic (chạy được cả trên text đã strip dấu)
+- `fix_diacritics(s)` — khôi phục dấu trên các từ đã strip phổ biến
 
-### Tests
+### Test
 
-22/22 passing (`pytest tests/`).
+22/22 pass (`pytest tests/`).
 
-### Accuracy — measured 2026-04-25
+### Độ chính xác — đo 2026-04-25
 
-Corpus: `benchmarks/data/diacritic_eval_v0.txt` — 55 hand-curated VN sentences across 4 registers (15 contract, 12 official, 15 conversational, 13 news), CC0 licensed.
+Corpus: `benchmarks/data/diacritic_eval_v0.txt` — 55 câu VN hand-curated trên 4 register (15 hợp đồng, 12 official, 15 hội thoại, 13 tin tức), license CC0.
 
-| Metric | v0.0.1 baseline |
+| Metric | baseline v0.0.1 |
 |---|---:|
-| Sentences | 55 |
-| Words | 776 |
-| Words containing diacritics | 666 |
-| **Overall word accuracy** | **40.59%** |
-| **Overall diacritic recall** | **34.08%** |
+| Câu | 55 |
+| Từ | 776 |
+| Từ chứa dấu | 666 |
+| **Word accuracy tổng** | **40.59%** |
+| **Diacritic recall tổng** | **34.08%** |
 
-By register:
+Theo register:
 
 | Register | Word accuracy | Diacritic recall |
 |---|---:|---:|
-| contracts / business | 50.00% | 44.32% |
-| official docs | 39.33% | 29.33% |
-| conversational | 44.15% | 39.37% |
-| news / long-form | 29.13% | 23.33% |
+| hợp đồng / kinh doanh | 50.00% | 44.32% |
+| tài liệu official | 39.33% | 29.33% |
+| hội thoại | 44.15% | 39.37% |
+| tin tức / long-form | 29.13% | 23.33% |
 
-This is the **honest v0.0.1 baseline** with the current ~120-entry curated vocabulary table. The rule-based path is a zero-dependency stopgap. The roadmap replaces it, not extends it:
+Đây là **baseline v0.0.1 trung thực** với bảng từ vựng curated ~120 entry hiện tại. Đường rule-based là stopgap zero-dependency. Roadmap thay thế nó, không mở rộng:
 
-| Version | Approach | Dependencies | Measured accuracy |
+| Phiên bản | Cách tiếp cận | Dependency | Độ chính xác đo |
 |---|---|---|---|
-| v0.0.1 (now default) | Rule-based table lookup | none | **41.06%** |
-| **v0.2.7 cloud** | LLM-backed (`fix_diacritics(..., llm=...)`) | any `nom.llm.LLM` | **95.37%** with `OpenAI(gpt-4o-mini)` |
-| **v0.2.7 local** | LLM-backed via Ollama | `nom-vn[llm]` + `ollama pull gemma3:4b` | **87.90%** with `Ollama("gemma3:4b")` |
-| **v0.2.7 local-max** | LLM-backed via Ollama | `nom-vn[llm]` + `ollama pull gemma4:e4b` | **93.18%** with `Ollama("gemma4:e4b")` |
-| v0.0.2 | Wrap PyVi or DistilBERT model | optional `nom-vn[diacritics]` | deferred — license/format issues |
+| v0.0.1 (mặc định hiện tại) | Lookup bảng rule-based | không | **41.06%** |
+| **v0.2.7 cloud** | LLM-backed (`fix_diacritics(..., llm=...)`) | bất kỳ `nom.llm.LLM` | **95.37%** với `OpenAI(gpt-4o-mini)` |
+| **v0.2.7 local** | LLM-backed qua Ollama | `nom-vn[llm]` + `ollama pull gemma3:4b` | **87.90%** với `Ollama("gemma3:4b")` |
+| **v0.2.7 local-max** | LLM-backed qua Ollama | `nom-vn[llm]` + `ollama pull gemma4:e4b` | **93.18%** với `Ollama("gemma4:e4b")` |
+| v0.0.2 | Wrap mô hình PyVi hoặc DistilBERT | optional `nom-vn[diacritics]` | tạm hoãn — vấn đề license/format |
 
-### v0.0.2 backend options under evaluation
+### Lựa chọn backend v0.0.2 đang được đánh giá
 
-| Option | Source | Approach | Reported accuracy | License |
+| Tuỳ chọn | Nguồn | Cách tiếp cận | Acc công bố | License |
 |---|---|---|---|---|
-| **PyVi `ViUtils.add_accents()`** | [trungtv/pyvi](https://github.com/trungtv/pyvi) | trained model wrapper | mature, ~80%+ | MIT |
+| **PyVi `ViUtils.add_accents()`** | [trungtv/pyvi](https://github.com/trungtv/pyvi) | wrapper mô hình đã train | mature, ~80%+ | MIT |
 | **DistilBERT-Viet-Diacritic** | [HF: saeliddp/...](https://huggingface.co/saeliddp/distilbert-viet-diacritic-restoration) | DistilBERT token classification | ~90%+ | Apache 2.0 |
 | **restore_vietnamese_diacritics** | [duongntbk](https://github.com/duongntbk/restore_vietnamese_diacritics) | Transformer seq2seq | **94.05%** | MIT |
 | **vietai/aivivn-vn-diacritic** | [vietai](https://github.com/vietai/aivivn-vn-diacritic) | Transformer seq2seq | — | Apache 2.0 |
 
-Pick will be based on: dependency weight, CPU-only inference speed, license compatibility, and our own measurement against `diacritic_eval_v0.txt`. We do not publish projected numbers — the v0.0.2 release post will include the measured number on the same corpus.
+Lựa chọn dựa trên: trọng lượng dependency, tốc độ inference CPU-only, tương thích license, và phép đo của chính chúng tôi trên `diacritic_eval_v0.txt`. Chúng tôi không công bố số dự đoán — bài release v0.0.2 sẽ kèm số đo trên cùng corpus.
 
-Reproduce: `python benchmarks/accuracy/bench_diacritics.py`
-Baseline tracked at: `benchmarks/results/baseline_v0.0.1.json`
+Tái lập: `python benchmarks/accuracy/bench_diacritics.py`
+Baseline track tại: `benchmarks/results/baseline_v0.0.1.json`
 
-### Diacritic backend / hardware grid — *measured 2026-04-26*
+### Lưới backend / hardware diacritic — *đo 2026-04-26*
 
-Same Toshiiiii1 T5 weights, three execution paths. All hit the identical
-97.81 % word accuracy — export is correct, the only thing that varies is
-latency.
+Cùng weights Toshiiiii1 T5, ba đường execution. Mọi cái đều đạt cùng 97.81 % word accuracy — export đúng, thứ duy nhất khác là latency.
 
-| Backend | Hardware | Word acc | Mean ms | p50 ms | Notes |
+| Backend | Hardware | Word acc | Mean ms | p50 ms | Ghi chú |
 |---|---|---:|---:|---:|---|
-| PyTorch | RTX 3090 (CUDA) | 97.81 % | **152** | 148 | Production target for GPU-equipped users |
-| PyTorch | CPU (8 cores) | 97.81 % | 377 | 357 | Acceptable for batch / overnight jobs |
-| ONNX Runtime | CPU (8 cores) | 97.81 % | 410 | 394 | Slightly slower than PyTorch CPU |
+| PyTorch | RTX 3090 (CUDA) | 97.81 % | **152** | 148 | Target production cho user có GPU |
+| PyTorch | CPU (8 cores) | 97.81 % | 377 | 357 | Chấp nhận được cho job batch / overnight |
+| ONNX Runtime | CPU (8 cores) | 97.81 % | 410 | 394 | Hơi chậm hơn PyTorch CPU |
 
-**ONNX runtime adds no value here.** Modern PyTorch with MKL-DNN is
-already optimal for a 200 M T5 in eager mode. ONNX is worth re-visiting
-only with **INT8 quantization** (typical 2-3× CPU speedup at some
-accuracy cost) — not measured here; left as a follow-up.
+**ONNX runtime không thêm giá trị ở đây.** PyTorch hiện đại với MKL-DNN đã optimal cho T5 200 M ở eager mode. ONNX đáng revisit chỉ với **INT8 quantization** (typical speedup 2-3× CPU với một số chi phí accuracy) — chưa đo ở đây; để follow-up.
 
-We do not ship an ONNX export step in `nom-vn[diacritic-hf]`. Users who
-genuinely need ONNX (cross-platform deployment without a Python+PyTorch
-stack) can `optimum-cli export onnx ...` themselves; the export is
-deterministic.
+Chúng tôi không ship bước export ONNX trong `nom-vn[diacritic-hf]`. User thực sự cần ONNX (deploy cross-platform không có stack Python+PyTorch) tự `optimum-cli export onnx ...`; export tất định.
 
-### Off-the-shelf VN diacritic seq2seq models — *measured 2026-04-26*
+### Mô hình seq2seq diacritic VN off-the-shelf — *đo 2026-04-26*
 
-Tracking principle: we did not bench public Apache-licensed VN diacritic
-models before recommending a 100M-param distillation. The user flagged
-this; we re-measured. **One off-the-shelf model beats every option we
-tested, including cloud `gpt-4o-mini`.**
+Nguyên tắc tracking: chúng tôi không bench các mô hình diacritic VN Apache-licensed công khai trước khi đề xuất distillation 100M-param. User flag việc này; đo lại. **Một mô hình off-the-shelf thắng mọi lựa chọn ta đã test, kể cả cloud `gpt-4o-mini`.**
 
-Same 55-sentence corpus (CC0). Bench harness:
-`benchmarks/accuracy/bench_diacritic_hf.py`. Hardware: RTX 3090.
+Cùng corpus 55 câu (CC0). Bench harness: `benchmarks/accuracy/bench_diacritic_hf.py`. Hardware: RTX 3090.
 
-| Model | License | Disk | Word acc | Mean s/sent | Notes |
+| Mô hình | License | Disk | Word acc | Mean s/câu | Ghi chú |
 |---|---|---:|---:|---:|---|
 | **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** ⭐ | Apache 2.0 | ~1 GB | **97.81%** | **0.152** | T5 200 M, safetensors |
-| (cloud `gpt-4o-mini`) | proprietary | — | 95.37% | 1.270 | reference ceiling |
-| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18% | 1.370 | from LLM grid |
-| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 87.90% | 1.100 | from LLM grid |
-| `bmd1905/vietnamese-correction` | Apache 2.0 | ~1.6 GB | 15.57% | 0.301 | Fails — trained for spelling, not diacritic-only |
-| `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | ~1.6 GB | not benched | — | Self-reported CER 38.85 % is below rule baseline; skipped |
-| (rule baseline) | — | 0 | 41.06% | <0.001 | reference floor |
+| (cloud `gpt-4o-mini`) | proprietary | — | 95.37% | 1.270 | trần tham chiếu |
+| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18% | 1.370 | từ lưới LLM |
+| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 87.90% | 1.100 | từ lưới LLM |
+| `bmd1905/vietnamese-correction` | Apache 2.0 | ~1.6 GB | 15.57% | 0.301 | Fail — train cho spelling, không phải diacritic-only |
+| `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | ~1.6 GB | chưa đo | — | CER tự báo 38.85 % dưới rule baseline; skip |
+| (rule baseline) | — | 0 | 41.06% | <0.001 | sàn tham chiếu |
 
-**Toshiiiii1 wins decisively:**
+**Toshiiiii1 thắng quyết định:**
 
-- **+2.44 pp** over cloud `gpt-4o-mini` (97.81 % vs 95.37 %).
-- **+9.91 pp** over best local LLM (`gemma3:4b` at 87.90 %).
-- **8 × faster** than the cloud LLM (0.152 s vs 1.27 s) and **7 × faster** than local LLMs.
-- **Apache 2.0 + safetensors** — fully shippable per our no-pickle policy.
-- **~10 × smaller on disk** than `gemma4:e4b` (1 GB vs 9.6 GB).
+- **+2.44 pp** so với cloud `gpt-4o-mini` (97.81 % vs 95.37 %).
+- **+9.91 pp** so với best local LLM (`gemma3:4b` 87.90 %).
+- **Nhanh hơn 8×** so với cloud LLM (0.152 s vs 1.27 s) và **nhanh hơn 7×** so với local LLM.
+- **Apache 2.0 + safetensors** — ship được hoàn toàn theo chính sách no-pickle.
+- **Nhỏ hơn ~10 ×** trên disk so với `gemma4:e4b` (1 GB vs 9.6 GB).
 
-**Action:** retract the "distil a 100 M VN diacritic model" recommendation
-in `docs/training_plan_2026q2.md` (v0.2.12) — there's nothing to distil
-*to* that public Apache models don't already cover. Add as the
-recommended production path:
+**Hành động:** rút khuyến nghị "distil mô hình diacritic VN 100 M" trong `docs/training_plan_2026q2.md` (v0.2.12) — không có gì để distil *tới* mà mô hình Apache công khai chưa cover. Thêm như đường production khuyến nghị:
 
 ```python
 from nom.text import fix_diacritics
 from nom.text.diacritic_models import HFDiacriticModel
 
-restorer = HFDiacriticModel()  # Toshiiiii1 default, lazy-loads on first call
+restorer = HFDiacriticModel()  # mặc định Toshiiiii1, lazy-load lần gọi đầu
 out = fix_diacritics("Hop dong nay duoc lap ngay 14 thang 3", model=restorer)
 # → 'Hợp đồng này được lập ngày 14 tháng 3'
 ```
 
-Install: `pip install "nom-vn[diacritic-hf]"` (pulls `transformers<5` +
-`torch` + `sentencepiece`). The transformers cap is required: ≥5.6 has a
-slow-T5-tokenizer regression that breaks the Toshiiiii1 model load.
+Cài: `pip install "nom-vn[diacritic-hf]"` (kéo `transformers<5` + `torch` + `sentencepiece`). Cap transformers bắt buộc: ≥5.6 có regression slow-T5-tokenizer làm vỡ load mô hình Toshiiiii1.
 
-**Why we missed this initially:** the v0.2.7 → v0.2.10 push focused on
-LLM-backed diacritic restoration (the prior assumption was "all good VN
-diacritic models are pickle-shipping or behind NC licenses"). The
-benchmark.md "v0.0.2 backend options under evaluation" table from the
-v0.0.1 era still listed Apache candidates as "deferred — license/format
-issues" without the actual measurements. The 2026-04-26 audit found one
-that meets every constraint.
+**Vì sao chúng tôi miss ban đầu:** đợt v0.2.7 → v0.2.10 tập trung vào khôi phục dấu LLM-backed (giả định trước là "mọi mô hình diacritic VN tốt đều ship pickle hoặc license NC"). Bảng "v0.0.2 backend options under evaluation" trong benchmark.md từ thời v0.0.1 vẫn liệt kê các ứng viên Apache là "tạm hoãn — vấn đề license/format" mà không có phép đo thực. Audit 2026-04-26 tìm được một cái thoả mọi ràng buộc.
 
-**Cross-check:** Toshiiiii1's model card reports no metrics, so we have
-no upstream number to compare. Our 97.81 % is on a 55-sentence corpus.
+**Cross-check:** model card Toshiiiii1 không báo metric, nên ta không có số upstream để so. 97.81 % của ta trên corpus 55 câu.
 
-**Multi-corpus measurement — 4-register matrix.** First measured
-2026-04-26 (business + literary), extended 2026-04-29 (conversational +
-formal/legal):
+**Đo nhiều corpus — ma trận 4 register.** Đo lần đầu 2026-04-26 (business + literary), mở rộng 2026-04-29 (conversational + formal/legal):
 
-| Eval corpus | Sentences | Register | Word acc | Mean ms/sent |
+| Eval corpus | Câu | Register | Word acc | Mean ms/câu |
 |---|---:|---|---:|---:|
-| `udhr_vi/diacritic_eval_udhr.txt` | 72 | formal / legal-prose (UDHR) | **98.14 %** | 221 |
-| `diacritic_eval_v0.txt` | 55 | business / contract / news | **97.81 %** | 152 |
-| `tatoeba_vi/diacritic_eval_300.txt` | 300 | conversational (Tatoeba) | **93.94 %** | 82 |
-| `ud_vi_vtb/test.conllu` | 800 | classical literary (VTB treebank) | **89.40 %** | 269 |
+| `udhr_vi/diacritic_eval_udhr.txt` | 72 | hành chính / pháp lý (UDHR) | **98.14 %** | 221 |
+| `diacritic_eval_v0.txt` | 55 | kinh doanh / hợp đồng / tin tức | **97.81 %** | 152 |
+| `tatoeba_vi/diacritic_eval_300.txt` | 300 | hội thoại (Tatoeba) | **93.94 %** | 82 |
+| `ud_vi_vtb/test.conllu` | 800 | văn học cổ điển (treebank VTB) | **89.40 %** | 269 |
 
-Spread = 8.74 pp (98.14 − 89.40). The drop is monotonic from formal to
-literary, which is what register-shift looks like in practice — not a
-single failure mode but a gradient. Conversational sits ~4 pp below
-business, literary another ~4 pp below conversational. The model is
-register-overfit toward modern formal/business Vietnamese, as expected
-from its training data; it stays usable everywhere but the absolute peak
-is in the registers it was trained on.
+Spread = 8.74 pp (98.14 − 89.40). Drop là monotonic từ formal sang văn học, đó là cách register-shift nhìn trong thực tế — không phải mode fail đơn lẻ mà là gradient. Hội thoại nằm ~4 pp dưới business, văn học thêm ~4 pp dưới hội thoại. Mô hình register-overfit về tiếng Việt formal/business hiện đại, như mong đợi từ dữ liệu training; vẫn dùng được mọi nơi nhưng peak tuyệt đối ở các register đã train trên đó.
 
-**A bench-methodology bug we caught and fixed.** The first UD-VTB run
-reported 54.14 % word accuracy and 0/800 sentence-exact. The 0/800 was
-the giveaway — even a mediocre model would land *some* sentences. The
-issue: UD treebank ships sentences in their tokenized form
-(`nhỉ ? " .` with spaces around every punctuation mark, the convention
-parsing tools require), while seq2seq models output natural Vietnamese
-(`nhỉ?".`). Comparing raw `.split()` token lists between the two shifts
-the alignment at the first punctuation mark and downstream tokens
-compare wrong-vs-wrong.
+**Một bug methodology bench đã bắt và fix.** Run UD-VTB đầu báo word accuracy 54.14 % và 0/800 sentence-exact. 0/800 là dấu hiệu — kể cả mô hình tầm tầm cũng land *vài* câu. Vấn đề: treebank UD ship câu ở dạng tokenized (`nhỉ ? " .` với khoảng trắng quanh mọi dấu câu, quy ước parsing tool đòi), trong khi mô hình seq2seq output tiếng Việt tự nhiên (`nhỉ?".`). So sánh list token `.split()` raw giữa hai cái dịch alignment ở dấu câu đầu và token downstream so wrong-vs-wrong.
 
-We added a `normalize_punct()` step in
-`benchmarks/accuracy/bench_diacritic_hf_udvtb.py` that strips spaces
-before/after attaching punctuation on **both** sides before comparing.
-This isolates diacritic quality from punctuation-spacing convention.
-Numbers above are after normalization.
+Chúng tôi thêm bước `normalize_punct()` trong `benchmarks/accuracy/bench_diacritic_hf_udvtb.py` strip khoảng trắng trước/sau dấu câu trên **cả hai** phía trước khi so. Cô lập chất lượng diacritic khỏi quy ước punctuation-spacing. Số bên trên là sau normalize.
 
-**Register-conditional production guidance:**
+**Hướng dẫn production register-conditional:**
 
-| Register | Best off-the-shelf | Word acc | Notes |
+| Register | Best off-the-shelf | Word acc | Ghi chú |
 |---|---|---:|---|
-| Formal / legal-prose (UDHR-like) | **`nrl-ai/vn-diacritic-vit5-base`** | **99.43 %** | Our v0.2.25 ViT5-base fine-tune; +1.29 pp over Toshiiiii1 |
-| Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register; nrl-ai/vit5-base 4.4 pp behind |
-| Conversational (Tatoeba) | **`nrl-ai/vn-diacritic-vit5-base`** | **94.12 %** | +0.18 pp over Toshiiiii1 (93.94) |
-| Classical literary (UD-VTB) | `Toshiiiii1/...` (still useful) | 89.40 % | Below business but well above rule baseline (41 %); failures are mostly proper-noun ambiguity (`Hùng` ↔ `Hưng`) and minor-register words |
-| General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8.7 pp gap across Toshiiiii1's registers is real but bounded |
+| Hành chính / pháp lý (UDHR-like) | **`nrl-ai/vn-diacritic-vit5-base`** | **99.43 %** | Fine-tune ViT5-base v0.2.25 của ta; +1.29 pp so với Toshiiiii1 |
+| Kinh doanh hiện đại / hợp đồng / tin tức | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **97.81 %** | Thắng `gpt-4o-mini` 95.37 % ở register này; nrl-ai/vit5-base 4.4 pp sau |
+| Hội thoại (Tatoeba) | **`nrl-ai/vn-diacritic-vit5-base`** | **94.12 %** | +0.18 pp so với Toshiiiii1 (93.94) |
+| Văn học cổ điển (UD-VTB) | `Toshiiiii1/...` (vẫn hữu ích) | 89.40 % | Dưới business nhưng cao hơn nhiều rule baseline (41 %); fail chủ yếu là mơ hồ danh từ riêng (`Hùng` ↔ `Hưng`) và từ register thiểu số |
+| Mixed chung | `Toshiiiii1/...` cho hầu hết case; cloud LLM làm fallback | 89-98 % | Gap 8.7 pp giữa các register Toshiiiii1 là thật nhưng có giới hạn |
 
 <a id="vn-diacritic-vit5-base"></a>
 
-**Our `nrl-ai/vn-diacritic-vit5-base` (published 2026-04-30):** ViT5-base
-fine-tune on 500K Wikipedia pairs, 5 epochs cosine LR, bf16, 185 min
-on RTX 3090. Apache-2.0, ~900 MB safetensors. Strict adoption gate
-(business >= 96 % AND literary > 89.40 %) **fails** on business
-(94.98 %), so it's NOT the canonical name `nrl-ai/vn-diacritic-restoration`
-(reserved for a future gate-passing model). But it's the **best
-register-balanced VN diacritic model** we've trained — SOTA on
-formal/legal Vietnamese (99.43 %, +1.29 pp over Toshiiiii1) and
-conversational (94.12 %, +0.18 pp).
+**`nrl-ai/vn-diacritic-vit5-base` của chúng tôi (publish 2026-04-30):** Fine-tune ViT5-base trên 500K cặp Wikipedia, 5 epoch cosine LR, bf16, 185 phút trên RTX 3090. Apache-2.0, ~900 MB safetensors. Cổng adopt nghiêm ngặt (business >= 96 % VÀ literary > 89.40 %) **fail** trên business (94.98 %), nên KHÔNG phải tên canonical `nrl-ai/vn-diacritic-restoration` (giữ cho mô hình tương lai qua được cổng). Nhưng đó là **mô hình diacritic VN cân bằng register tốt nhất** chúng tôi đã train — SOTA trên tiếng Việt formal/legal (99.43 %, +1.29 pp so với Toshiiiii1) và hội thoại (94.12 %, +0.18 pp).
 
 | Register | Toshiiiii1 | nrl-ai/vit5-base | Δ |
 |---|---:|---:|---:|
@@ -232,26 +174,21 @@ conversational (94.12 %, +0.18 pp).
 | conversational_300 | 93.94 % | **94.12 %** | +0.39 |
 | literary_udvtb | **89.40 %** | 90.24 % | -0.01 |
 
-Use it via `HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")`.
-Full training config + reproducibility: see the [HF model card](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base).
+Dùng qua `HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")`. Config training đầy đủ + tái lập: xem [HF model card](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base).
 
-**Two methodological lessons that landed in our multi-corpus register-coverage rule:**
+**Hai bài học methodology rơi vào rule multi-corpus register-coverage:**
 
-1. **Multi-corpus measurement is mandatory** for adoption claims.
-   Single-corpus quality numbers hide register-shift weakness or
-   benchmark artifacts.
-2. **Implausible metrics demand investigation.** Anything pegged to
-   0 % or 100 % on a real model is almost certainly a bench bug, not
-   a true result. We caught one this way.
+1. **Đo nhiều corpus là bắt buộc** cho claim adopt. Số chất lượng single-corpus che yếu register-shift hoặc artifact benchmark.
+2. **Metric không hợp lý đòi hỏi điều tra.** Bất cứ thứ gì peg ở 0 % hoặc 100 % trên mô hình thật gần như chắc chắn là bug bench, không phải kết quả đúng. Chúng tôi bắt được một cái cách này.
 
-Reproduce:
+Tái lập:
 
 ```bash
-# Build the per-register eval slices (deterministic, no network).
+# Build slice eval per-register (tất định, không cần mạng).
 python benchmarks/data/tatoeba_vi/build_diacritic_eval.py
 python benchmarks/data/udhr_vi/build_diacritic_eval.py
 
-# Bench Toshiiiii1 across the 4 registers.
+# Bench Toshiiiii1 trên 4 register.
 python benchmarks/accuracy/bench_diacritic_hf.py \
     Toshiiiii1/Vietnamese_diacritics_restoration_5th \
     --json benchmarks/results/baseline_diacritic_toshiiiii_t5.json
@@ -267,19 +204,13 @@ python benchmarks/accuracy/bench_diacritic_hf_udvtb.py \
     --json benchmarks/results/baseline_diacritic_toshiiiii_udvtb_test.json
 ```
 
-### Out-of-distribution real-world bench — *measured 2026-04-30*
+### Bench thực tế ngoài-phân-phối — *đo 2026-04-30*
 
-`benchmarks/data/spell_correction_eval_real/` is a 150-sentence
-hand-curated set whose noise patterns come from real Vietnamese error
-sources (forum slang, mobile autocorrect, real Telex/VNI keystrokes,
-Tesseract+EasyOCR engine output, formal-register stripped legal text,
-news headlines), NOT from `nom.text.noise`. Same harness applies to
-both diacritic and spell-correction models — spell correction is a
-strict superset of diacritic restoration.
+`benchmarks/data/spell_correction_eval_real/` là tập 150 câu hand-curated mà mẫu nhiễu lấy từ nguồn lỗi VN thực (slang forum, autocorrect mobile, keystroke Telex/VNI thực, output engine Tesseract+EasyOCR, văn bản pháp lý register formal đã strip, headline tin tức), KHÔNG từ `nom.text.noise`. Cùng harness áp cho cả mô hình diacritic và spell-correction — sửa chính tả là siêu tập chặt của khôi phục dấu.
 
-Aggregate word accuracy on n=150 (bootstrap 95 % CI):
+Word accuracy tổng hợp trên n=150 (KTC bootstrap 95 %):
 
-| Model | Aggregate | Telex | Forum | Legal | News |
+| Mô hình | Tổng | Telex | Forum | Legal | News |
 |---|---:|---:|---:|---:|---:|
 | `nrl-ai/vn-spell-correction-base` | **77.43** [73-82] | 17.38 | 59.45 | 95.09 | 96.54 |
 | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 77.40 [73-82] | 18.54 | 60.11 | 93.80 | 94.07 |
@@ -288,33 +219,27 @@ Aggregate word accuracy on n=150 (bootstrap 95 % CI):
 | `nrl-ai/vn-diacritic-small` | 70.27 [65-76] | 9.33 | 46.28 | 89.15 | 90.35 |
 | `bmd1905/vietnamese-correction-v2` | 49.21 [44-55] | 11.58 | 59.02 | 54.90 | 30.62 |
 
-Reproduce:
+Tái lập:
 ```bash
 python benchmarks/accuracy/bench_spell_correction_real.py <model_id> \
     --json benchmarks/results/baseline_real_<short>.json
 python scripts/summarize_ood_bench.py --format markdown --ci
 ```
 
-Two findings worth noting:
+Hai phát hiện đáng lưu ý:
 
-1. **Our spell-base ties Toshiiiii1 on OOD aggregate** (77.43 vs 77.40,
-   well within bootstrap CI overlap). Synthetic 8-split shows a 3-7 pp
-   lead, but real-world noise washes that out. v0.2.29 retraining
-   targets a clear OOD lead, not just a synthetic one.
-2. **bmd1905 collapses on OOD** (49.21 % aggregate) — it trained on a
-   different noise distribution that didn't expose enough strip-diacritic
-   patterns. Cautionary tale: a model winning its own synthetic eval
-   isn't guaranteed to win on real text.
+1. **spell-base của ta hoà Toshiiiii1 trên tổng OOD** (77.43 vs 77.40, hoàn toàn trong overlap KTC bootstrap). Synthetic 8-split show lead 3-7 pp, nhưng nhiễu thực wash đi. Re-train v0.2.29 nhắm lead OOD rõ, không chỉ synthetic.
+2. **bmd1905 sụp đổ trên OOD** (49.21 % tổng) — train trên phân phối nhiễu khác mà không expose đủ pattern strip-diacritic. Bài học cảnh báo: mô hình thắng eval synthetic của chính mình không đảm bảo thắng trên text thật.
 
-JSON baselines committed under `benchmarks/results/baseline_real_*.json`.
+JSON baseline commit dưới `benchmarks/results/baseline_real_*.json`.
 
-### Local LLM grid — *measured 2026-04-26*
+### Lưới LLM cục bộ — *đo 2026-04-26*
 
-Goal: identify the smallest **local quantized model** that hits usable VN diacritic accuracy for user-machine deployment. All models served via Ollama 0.21.2 (llama.cpp backend) with `Q4_K_M` quantization (Ollama default), structured output (`format` JSON schema), `think: false`, temperature 0. Hardware: RTX 3090 24GB. Same `diacritic_eval_v0.txt` corpus.
+Mục tiêu: xác định **mô hình quantize cục bộ** nhỏ nhất chạm độ chính xác diacritic VN dùng được cho deploy user-machine. Mọi mô hình serve qua Ollama 0.21.2 (backend llama.cpp) với quantize `Q4_K_M` (mặc định Ollama), structured output (`format` JSON schema), `think: false`, nhiệt độ 0. Hardware: RTX 3090 24GB. Cùng corpus `diacritic_eval_v0.txt`.
 
-Methodology per our verified-benchmarks rule: 3 warmup calls, 55 timed sentences, per-call latency aggregated.
+Methodology theo rule verified-benchmarks: 3 warmup call, 55 câu timed, latency per-call gộp.
 
-| Model | Q4 size | Word acc | Diacritic recall | Mean s/sent | p95 s/sent |
+| Mô hình | Q4 size | Word acc | Diacritic recall | Mean s/câu | p95 s/câu |
 |---|---:|---:|---:|---:|---:|
 | **`gemma4:e4b`** | 9.6 GB | **93.18%** | 92.22% | 1.37 | 1.68 |
 | **`gemma3:4b`** ⭐ default | **3.3 GB** | **87.90%** | 87.50% | 1.10 | 1.22 |
@@ -328,28 +253,28 @@ Methodology per our verified-benchmarks rule: 3 warmup calls, 55 timed sentences
 | `phi4-mini` | 2.5 GB | 6.95% | 2.13% | 2.32 | 10.24 |
 | (cloud `gpt-4o-mini`) | — | 95.37% | 94.61% | 1.27 | — |
 
-**Findings:**
+**Phát hiện:**
 
-1. **Gemma family wins the multilingual fight.** Both `gemma3:4b` and `gemma4:e4b` outperform Qwen3 and Llama at similar size — multilingual training pays off for VN.
-2. **3-4B params is the floor for usable VN diacritic.** Sub-2B models (gemma3:1b, qwen3:1.7b) all fall *below* the rule baseline. The quality cliff is sharp.
-3. **Gemma 4's "E2B/E4B" naming is about active params, not file size.** The multimodal weights (vision + audio encoders) inflate disk: `e2b` = 7.2 GB Q4, `e4b` = 9.6 GB Q4. For a text-only task like diacritic restoration, this is dead weight on download.
-4. **`gemma3:4b` is the best size/quality tradeoff for `nom-vn`.** 3.3 GB fits 4-6 GB VRAM laptops, 87.9% acc within 7.5pp of cloud at 1.1 s/sent. Recommended default for the local LLM path.
-5. **Llama 3.2 / phi4-mini disqualified.** Llama tokenizer not balanced for VN; phi4-mini hangs on hard sentences (p95=10s).
-6. **Cloud is +2pp over best local.** `gpt-4o-mini` at 95.37% only edges out `gemma4:e4b` (93.18%) by 2.2pp; both are above the practical-usability bar.
+1. **Họ Gemma thắng cuộc chiến multilingual.** Cả `gemma3:4b` và `gemma4:e4b` đều outperform Qwen3 và Llama ở size tương tự — training multilingual trả lời cho VN.
+2. **3-4B param là sàn cho diacritic VN dùng được.** Mô hình sub-2B (gemma3:1b, qwen3:1.7b) đều rớt *xuống dưới* rule baseline. Cliff chất lượng dốc.
+3. **Tên "E2B/E4B" của Gemma 4 nói về active param, không phải file size.** Weights multimodal (encoder vision + audio) phình disk: `e2b` = 7.2 GB Q4, `e4b` = 9.6 GB Q4. Cho task text-only như khôi phục dấu, đây là dead weight khi download.
+4. **`gemma3:4b` là tradeoff size/chất lượng tốt nhất cho `nom-vn`.** 3.3 GB vừa laptop 4-6 GB VRAM, 87.9% acc trong 7.5pp của cloud ở 1.1 s/câu. Mặc định khuyến nghị cho đường LLM cục bộ.
+5. **Llama 3.2 / phi4-mini bị loại.** Tokenizer Llama không cân cho VN; phi4-mini hang trên câu khó (p95=10s).
+6. **Cloud +2pp so với best local.** `gpt-4o-mini` 95.37% chỉ vượt `gemma4:e4b` (93.18%) 2.2pp; cả hai đều trên thanh dùng-được thực tế.
 
-**Two engineering fixes shipped to make this measurable** (see [#PR](https://github.com/nrl-ai/nom-vn) and `src/nom/llm/ollama.py` + `src/nom/text/normalize.py`):
+**Hai engineering fix đã ship để đo được việc này** (xem [#PR](https://github.com/nrl-ai/nom-vn) và `src/nom/llm/ollama.py` + `src/nom/text/normalize.py`):
 
-- Pass `think: false` to Ollama. Qwen3 thinking-mode emitted CoT to a separate `thinking` field, leaving `content` empty — `qwen3:4b` previously scored 0%.
-- Switch `fix_diacritics(llm=...)` to **structured output** via Ollama's `format` JSON schema. Forces `{"restored": "..."}` shape; small models (qwen3:4b, gemma3:4b) can no longer ramble explanations into the response. Quality jumped from <50% to 87-93% across the grid.
+- Pass `think: false` cho Ollama. Mode thinking của Qwen3 emit CoT vào field `thinking` riêng, để `content` rỗng — `qwen3:4b` trước đó scored 0%.
+- Switch `fix_diacritics(llm=...)` sang **structured output** qua JSON schema `format` của Ollama. Ép hình dạng `{"restored": "..."}`; mô hình nhỏ (qwen3:4b, gemma3:4b) không còn ramble giải thích vào response. Chất lượng nhảy từ <50% lên 87-93% trên lưới.
 
-Reproduce one model: `python benchmarks/accuracy/bench_diacritics.py --llm ollama --llm-model gemma3:4b --warmup 3`
-Reproduce the full grid: `OLLAMA_BASE_URL=http://localhost:11434 ./benchmarks/accuracy/run_diacritic_local_grid.sh`
-Aggregate JSONs: `python benchmarks/accuracy/_summarize_diacritic_grid.py`
-Per-model JSONs: `benchmarks/results/local_diacritic_grid/diacritics_*.json`
+Tái lập một mô hình: `python benchmarks/accuracy/bench_diacritics.py --llm ollama --llm-model gemma3:4b --warmup 3`
+Tái lập lưới đầy đủ: `OLLAMA_BASE_URL=http://localhost:11434 ./benchmarks/accuracy/run_diacritic_local_grid.sh`
+JSON tổng hợp: `python benchmarks/accuracy/_summarize_diacritic_grid.py`
+JSON per-model: `benchmarks/results/local_diacritic_grid/diacritics_*.json`
 
-### Performance — measured 2026-04-25 on Python 3.13.9
+### Performance — đo 2026-04-25 trên Python 3.13.9
 
-Corpus: 1,000 contract-style Vietnamese sentences (67,600 chars).
+Corpus: 1.000 câu kiểu hợp đồng tiếng Việt (67.600 ký tự).
 
 | Function | Latency (best of 3) | Throughput (ops/s) | Throughput (chars/s) |
 |---|---:|---:|---:|
@@ -358,383 +283,332 @@ Corpus: 1,000 contract-style Vietnamese sentences (67,600 chars).
 | `is_vietnamese` | 0.24 ms | 4,254,631 | 287,613,073 |
 | `strip_diacritics` | 5.87 ms | 170,368 | 11,516,906 |
 | `fix_diacritics` | 5.12 ms | 195,122 | 13,190,280 |
-| **Reference: stdlib `unicodedata.normalize` NFC** | 0.12 ms | 8,365,051 | 565,477,425 |
-| **Reference: stdlib `unicodedata.normalize` NFD** | 0.48 ms | 2,062,749 | 139,441,817 |
+| **Tham chiếu: stdlib `unicodedata.normalize` NFC** | 0.12 ms | 8,365,051 | 565,477,425 |
+| **Tham chiếu: stdlib `unicodedata.normalize` NFD** | 0.48 ms | 2,062,749 | 139,441,817 |
 
-Reproduce: `python benchmarks/perf/bench_text.py`
+Tái lập: `python benchmarks/perf/bench_text.py`
 
-### Component choice rationale
+### Lý do lựa chọn component
 
-**Why pure stdlib (no third-party deps):**
-- `unicodedata` is in CPython core, zero install friction.
-- Performance is sufficient (>500 MB/s on `normalize`).
-- Deterministic — no model loading, no network.
-- v0.1 may add an LLM-backed `fix_diacritics(..., llm=...)` for ambiguous cases, but the pure-rule path stays.
+**Vì sao pure stdlib (không dep bên thứ ba):**
+- `unicodedata` trong CPython core, zero install friction.
+- Performance đủ (>500 MB/s trên `normalize`).
+- Tất định — không load mô hình, không mạng.
+- v0.1 có thể thêm `fix_diacritics(..., llm=...)` LLM-backed cho case mơ hồ, nhưng đường pure-rule giữ.
 
-**Why not `pyvi` or `underthesea` for v0?**
-- Both are excellent for tokenization/POS-tagging — out of scope for v0.0.1.
-- They'll appear as optional deps in `nom.text.tokenize` (v0.2+) for users who want them.
+**Vì sao không `pyvi` hay `underthesea` cho v0?**
+- Cả hai xuất sắc cho tokenization/POS-tagging — ngoài phạm vi v0.0.1.
+- Sẽ xuất hiện như dep tuỳ chọn trong `nom.text.tokenize` (v0.2+) cho user muốn.
 
-### Word segmentation — *measured 2026-04-26*
+### Tách từ — *đo 2026-04-26*
 
-Two backends, real gold-standard corpus:
+Hai backend, corpus gold-standard thực:
 
-- `nom.text.word_tokenize` — pure-Python rule + compound-table merge, zero deps
-- `underthesea.word_tokenize` — CRF model, Apache 2.0, opt-in via `nom-vn[nlp]`
+- `nom.text.word_tokenize` — pure-Python rule + merge bảng compound, zero deps
+- `underthesea.word_tokenize` — mô hình CRF, Apache 2.0, opt-in qua `nom-vn[nlp]`
 
-Corpus: **UD_Vietnamese-VTB test split** ([UniversalDependencies/UD_Vietnamese-VTB](https://github.com/UniversalDependencies/UD_Vietnamese-VTB), CC-BY-SA-4.0). 800 sentences, 11,692 gold word tokens. Methodology: warmup 3 + best-of-5 throughput; predicted token spans matched against gold spans by exact (start, end) char range.
+Corpus: **UD_Vietnamese-VTB test split** ([UniversalDependencies/UD_Vietnamese-VTB](https://github.com/UniversalDependencies/UD_Vietnamese-VTB), CC-BY-SA-4.0). 800 câu, 11.692 token gold. Methodology: warmup 3 + best-of-5 throughput; span token đoán so với span gold theo char range (start, end) chính xác.
 
-| Tokenizer | Precision | Recall | **F1** | Throughput | Notes |
+| Tokenizer | Precision | Recall | **F1** | Throughput | Ghi chú |
 |---|---:|---:|---:|---:|---|
-| `underthesea==9.4.0` | 95.94% | 95.46% | **95.70%** | 38,102 tok/s | CRFsuite native binary; ~5 MB on disk |
-| `nom.text` (rule) | 70.94% | 82.90% | **76.46%** | **747,117 tok/s** | Pure-Python; zero deps; 0 model |
+| `underthesea==9.4.0` | 95.94% | 95.46% | **95.70%** | 38.102 tok/s | Binary native CRFsuite; ~5 MB disk |
+| `nom.text` (rule) | 70.94% | 82.90% | **76.46%** | **747.117 tok/s** | Pure-Python; zero deps; 0 mô hình |
 
-**Findings:**
+**Phát hiện:**
 
-1. **underthesea is +19.24 pp F1 above `nom.text`** — the CRF training data wins decisively on linguistic compound boundaries (multi-syllable proper names, fixed phrases like *mã số*, *địa chỉ*, *Nguyễn Thị Hương*).
-2. **`nom.text` is ~20× faster** (747 k vs 38 k tok/s). For RAG indexing, BM25 tokenization, lightweight cleanup — speed wins; the F1 gap doesn't matter when downstream is a bag-of-words retriever.
-3. **`nom.text` recall (82.9 %) > precision (70.9 %)** — it over-splits. The compound table catches some merges (398 hits across the corpus) but is far from CRF coverage.
+1. **underthesea +19.24 pp F1 trên `nom.text`** — dữ liệu training CRF thắng quyết định trên boundary compound ngôn ngữ (danh từ riêng nhiều âm tiết, cụm cố định như *mã số*, *địa chỉ*, *Nguyễn Thị Hương*).
+2. **`nom.text` nhanh ~20×** (747 k vs 38 k tok/s). Cho RAG indexing, BM25 tokenization, dọn nhẹ — speed thắng; gap F1 không quan trọng khi downstream là retriever bag-of-words.
+3. **`nom.text` recall (82.9 %) > precision (70.9 %)** — over-split. Bảng compound bắt được vài merge (398 hit toàn corpus) nhưng còn xa coverage CRF.
 
-**Cross-check vs published numbers** (cross-check-against-published-numbers rule):
+**Cross-check so với số đã công bố** (rule cross-check-against-published-numbers):
 
-- underthesea reports ~94 % F1 on the VLSP 2013 test set [1]; our 95.70 % on UD-VTB test is ~1.5 pp above that — plausibly because UD-VTB is a slightly easier register (literary prose) than VLSP 2013 (mixed news/business). Same order of magnitude — no methodology divergence to chase.
-- We do not separately bench PyVi: it's auto-rejected per our no-pickle policy (ships `.pkl` model files = arbitrary code execution on load).
+- underthesea báo ~94 % F1 trên test set VLSP 2013 [1]; 95.70 % của ta trên UD-VTB test ~1.5 pp trên — có thể do UD-VTB là register dễ hơn VLSP 2013 (văn học prose so với tin tức/business mixed). Cùng order of magnitude — không có divergence methodology cần đuổi.
+- Chúng tôi không bench PyVi riêng: auto-reject theo chính sách no-pickle (ship file mô hình `.pkl` = arbitrary code execution khi load).
 
-**Recommendation for `nom-vn`:**
+**Khuyến nghị cho `nom-vn`:**
 
-| Use case | Pick |
+| Use case | Chọn |
 |---|---|
-| RAG indexing, BM25, tokenized search | `nom.text` — speed dominates |
-| NER / dependency parsing / linguistic analysis | `nom-vn[nlp]` → `underthesea` — F1 dominates |
-| OCR post-cleanup, diacritic restoration tokenization | `nom.text` — F1 gap is tolerable; zero deps wins |
+| RAG indexing, BM25, search tokenize | `nom.text` — speed dominant |
+| NER / dependency parsing / phân tích ngôn ngữ | `nom-vn[nlp]` → `underthesea` — F1 dominant |
+| Dọn post-OCR, tokenize khôi phục dấu | `nom.text` — gap F1 chấp nhận; zero deps thắng |
 
-The two are complementary, not interchangeable — surface this in the API docs so users don't pick the wrong one and blame the F1 gap.
+Hai cái bổ sung cho nhau, không thay thế — surface trong API doc để user không pick sai và đổ lỗi cho gap F1.
 
-Reproduce: `python benchmarks/accuracy/bench_segment.py --corpus ud_vtb --split test --json benchmarks/results/baseline_segment_ud_vtb_test.json`
+Tái lập: `python benchmarks/accuracy/bench_segment.py --corpus ud_vtb --split test --json benchmarks/results/baseline_segment_ud_vtb_test.json`
 Baseline: `benchmarks/results/baseline_segment_ud_vtb_test.json`
 
-[1]: [Underthesea README](https://github.com/undertheseanlp/underthesea) — reported VLSP 2013 numbers.
+[1]: [README Underthesea](https://github.com/undertheseanlp/underthesea) — số VLSP 2013 báo.
 
 ---
 
-## Module: `nom.doc.ocr` — *planned v0.1*
+## Module: `nom.doc.ocr` — *dự kiến v0.1*
 
-OCR is the highest-leverage and most-failed-at primitive in Vietnamese AI. We ship three backends with the same interface; default switches by available hardware.
+OCR là primitive leverage cao nhất và bị fail nhiều nhất trong AI tiếng Việt. Chúng tôi ship ba backend với cùng interface; default switch theo phần cứng có sẵn.
 
-### Backend comparison (research, not in-house tests yet)
+### So sánh backend (research, chưa test in-house)
 
-| Engine | Accuracy on VN | Speed | Diacritic handling | Setup cost | License |
+| Engine | Acc trên VN | Tốc độ | Xử lý dấu | Setup cost | License |
 |---|---|---|---|---|---|
-| **Tesseract 5 + `vie`** | ~70-97% (varies wildly with image quality) [1] | 9.8 FPS [2] | **Weak** — confuses stacked diacritics (acute vs hook above on ô) [3] | apt install | Apache 2.0 |
-| **EasyOCR** | ~79% general (no VN-specific number found) | 56 FPS [2] | Better than Tesseract on noisy backgrounds [4] | pip install + ~150MB model | Apache 2.0 |
-| **PaddleOCR PP-OCRv5** | ~94.5% on OmniDocBench [5] | Slower than EasyOCR [2] | Strong (multilingual training) | pip install + model download | Apache 2.0 |
-| **VietOCR (Transformer)** | Trained specifically on VN [6] | Slower (Transformer cost) | **Strongest** — VN-specialized | pip install + custom model | Apache 2.0 |
-| **GPT-4o / Claude vision** | ~Best-in-class | API latency | Best in handling stacked tones | API cost | Commercial |
+| **Tesseract 5 + `vie`** | ~70-97% (biến động lớn theo chất lượng ảnh) [1] | 9.8 FPS [2] | **Yếu** — nhầm dấu chồng (sắc vs móc trên ô) [3] | apt install | Apache 2.0 |
+| **EasyOCR** | ~79% chung (không có số VN-specific tìm được) | 56 FPS [2] | Tốt hơn Tesseract trên nền nhiễu [4] | pip install + ~150MB mô hình | Apache 2.0 |
+| **PaddleOCR PP-OCRv5** | ~94.5% trên OmniDocBench [5] | Chậm hơn EasyOCR [2] | Mạnh (training multilingual) | pip install + tải mô hình | Apache 2.0 |
+| **VietOCR (Transformer)** | Train đặc biệt cho VN [6] | Chậm hơn (cost Transformer) | **Mạnh nhất** — VN-specialized | pip install + mô hình tuỳ biến | Apache 2.0 |
+| **GPT-4o / Claude vision** | ~Best-in-class | Latency API | Best xử lý tone chồng | Cost API | Commercial |
 
-### Recommendation for `nom.doc`
+### Khuyến nghị cho `nom.doc`
 
-**Default backend: VietOCR (Transformer)** when available, fall back to **Tesseract** for portability.
+**Backend mặc định: VietOCR (Transformer)** khi có sẵn, fallback sang **Tesseract** cho tính portable.
 
 ```python
-# Planned v0.1 API
+# API dự kiến v0.1
 from nom.doc import extract
 from nom.doc.ocr import VietOCR, Tesseract, PaddleOCR
 
-# Auto: VietOCR if installed → PaddleOCR → Tesseract
+# Auto: VietOCR nếu cài → PaddleOCR → Tesseract
 result = extract("scan.pdf", schema={...})
 
-# Explicit
+# Rõ ràng
 result = extract("scan.pdf", schema={...}, ocr=PaddleOCR())
 ```
 
-### The PDF parsing layer underneath — *measured 2026-04-26*
+### Lớp parsing PDF bên dưới — *đo 2026-04-26*
 
-We do **not** ship PyMuPDF. Its AGPL license is incompatible with our Apache-2.0 default. Instead we use **pypdfium2** (BSD-3 wrapper over Google's PDFium, Apache-2.0) as the fast text-extraction default and keep **pdfplumber** for table-rich documents.
+Chúng tôi **không** ship PyMuPDF. License AGPL của nó không tương thích với Apache-2.0 mặc định. Thay vào dùng **pypdfium2** (BSD-3 wrapper trên PDFium của Google, Apache-2.0) làm mặc định trích text nhanh và giữ **pdfplumber** cho tài liệu nhiều bảng.
 
-Corpus: `benchmarks/data/synthetic_pdf_vi/vn_legal.pdf` — synthetic 7-page Vietnamese PDF built from real public-domain VN prose (UDHR + Wikisource Truyện Kiều prefaces) with a clean Unicode text layer (DejaVuSans embedded). Generator: `benchmarks/data/synthetic_pdf_vi/_generate.py`. Ground truth: 18,877 chars committed alongside.
+Corpus: `benchmarks/data/synthetic_pdf_vi/vn_legal.pdf` — PDF VN tổng hợp 7-page xây từ prose VN public-domain thực (UDHR + Wikisource Truyện Kiều prefaces) với lớp text Unicode sạch (DejaVuSans embed). Generator: `benchmarks/data/synthetic_pdf_vi/_generate.py`. Ground truth: 18.877 ký tự commit kèm.
 
-The shipped `udhr_vi/udhr_vie.pdf` cannot be used here — it embeds a custom font without a ToUnicode CMap, so every extractor (pdfplumber, pypdfium2, PyMuPDF) returns CIDs / garbled bytes. Documented in the bench script.
+`udhr_vi/udhr_vie.pdf` ship sẵn không dùng được ở đây — nó embed font tuỳ biến không có ToUnicode CMap, nên mọi extractor (pdfplumber, pypdfium2, PyMuPDF) trả về CIDs / byte rác. Đã tài liệu hoá trong bench script.
 
-Methodology: warmup 3 + best-of-5 (our verified-benchmarks rule). Char-overlap fidelity uses NFC-normalised multiset intersection against the ground truth.
+Methodology: warmup 3 + best-of-5 (rule verified-benchmarks). Char-overlap fidelity dùng giao multiset NFC-normalised so với ground truth.
 
 | Library | License | Best-of-5 (s) | Throughput | Char overlap |
 |---|---|---:|---:|---:|
-| **`pypdfium2==5.7.1`** ⭐ default | BSD-3 / Apache-2.0 | **0.0079** | **2,350,431 chars/s** | **99.81%** |
-| `pdfplumber==0.11.9` | MIT | 0.3654 | 51,052 chars/s | 99.81% |
+| **`pypdfium2==5.7.1`** ⭐ default | BSD-3 / Apache-2.0 | **0.0079** | **2.350.431 chars/s** | **99.81%** |
+| `pdfplumber==0.11.9` | MIT | 0.3654 | 51.052 chars/s | 99.81% |
 
-**Findings:**
+**Phát hiện:**
 
-1. **`pypdfium2` is 46× faster** than pdfplumber on text-only extraction with **identical fidelity** (99.81% — both miss the same ~36 chars, mostly Han glyphs DejaVuSans can't render).
-2. **License is the headline.** PyMuPDF's published 19× speedup on `py-pdf/benchmarks` is real — but its AGPL forces every downstream project to ship as AGPL too. PDFium under pypdfium2 gives us the same order-of-magnitude speedup with no license trap.
-3. **pdfplumber stays in `nom-vn[doc]`** — it's still the better choice when a document has tables. The `nom.doc` pipeline picks per-document at parse time.
+1. **`pypdfium2` nhanh hơn 46×** so với pdfplumber trên trích text-only với fidelity y hệt (99.81% — cả hai miss cùng ~36 ký tự, hầu hết là glyph Hán mà DejaVuSans không render được).
+2. **License là headline.** Speedup 19× của PyMuPDF công bố trên `py-pdf/benchmarks` là thật — nhưng AGPL ép mọi dự án downstream ship dạng AGPL. PDFium dưới pypdfium2 cho ta cùng order-of-magnitude speedup mà không có bẫy license.
+3. **pdfplumber giữ trong `nom-vn[doc]`** — vẫn là lựa chọn tốt hơn khi tài liệu có bảng. Pipeline `nom.doc` chọn per-document khi parse.
 
-**Recommendation:**
+**Khuyến nghị:**
 
-| Use case | Pick |
+| Use case | Chọn |
 |---|---|
-| Plain text extraction (RAG, search indexing) | `pypdfium2` — speed wins, license is clean |
-| Tables / forms / structured layout | `pdfplumber` — better cell detection |
+| Trích text thuần (RAG, search indexing) | `pypdfium2` — speed thắng, license sạch |
+| Bảng / form / layout có cấu trúc | `pdfplumber` — phát hiện cell tốt hơn |
 
-Reproduce: `python benchmarks/perf/bench_pdf_extract.py`
+Tái lập: `python benchmarks/perf/bench_pdf_extract.py`
 Baseline: `benchmarks/results/baseline_pdf_extract.json`
 
-Build the corpus from a clean clone: `python benchmarks/data/synthetic_pdf_vi/_generate.py` (requires DejaVuSans — `apt install fonts-dejavu`).
+Build corpus từ một bản clone sạch: `python benchmarks/data/synthetic_pdf_vi/_generate.py` (cần DejaVuSans — `apt install fonts-dejavu`).
 
-**Note on PyMuPDF / fitz** — we keep them out of dependencies entirely. Users who legitimately need PyMuPDF (e.g. internal AGPL-tolerant projects) can install it themselves and call it directly; we don't expose a wrapper that would muddy the license boundary.
+**Lưu ý PyMuPDF / fitz** — chúng tôi giữ chúng hoàn toàn ngoài dependency. User thực sự cần PyMuPDF (ví dụ dự án nội bộ chấp nhận AGPL) tự cài và gọi trực tiếp; chúng tôi không expose wrapper làm mờ ranh giới license.
 
-**Docling (IBM, MIT) — measured 2026-04-26.** Same VN PDF, warmup 2 + best-of-3, default `DocumentConverter()`:
+**Docling (IBM, MIT) — đo 2026-04-26.** Cùng PDF VN, warmup 2 + best-of-3, default `DocumentConverter()`:
 
 | Library | Best (s) | Throughput | Char overlap | Disk |
 |---|---:|---:|---:|---:|
-| pypdfium2 | **0.0079** | 2,350,431 chars/s | 99.81% | <10 MB |
-| pdfplumber | 0.3654 | 51,052 chars/s | 99.81% | <5 MB |
-| docling | 1.1889 | 15,703 chars/s | 99.72% | ~1 GB (PyTorch + DocLayNet + TableFormer) |
+| pypdfium2 | **0.0079** | 2.350.431 chars/s | 99.81% | <10 MB |
+| pdfplumber | 0.3654 | 51.052 chars/s | 99.81% | <5 MB |
+| docling | 1.1889 | 15.703 chars/s | 99.72% | ~1 GB (PyTorch + DocLayNet + TableFormer) |
 
-Docling is **150× slower than pypdfium2** on this Unicode-clean text PDF and slightly *worse* on fidelity (99.72% vs 99.81%) — the ML layout pipeline pays no dividends when the PDF already has a clean text layer. Docling earns its cost on **complex layouts** (multi-column, tables, formulas, mixed text+image) where pdfplumber's heuristics break. Not measured in-house yet on a table-rich VN PDF.
+Docling **chậm hơn pypdfium2 150×** trên PDF text Unicode-clean này và hơi *tệ hơn* về fidelity (99.72% vs 99.81%) — pipeline ML layout không trả lợi tức khi PDF đã có lớp text sạch. Docling kiếm cost của nó trên **layout phức tạp** (multi-column, bảng, công thức, mixed text+ảnh) nơi heuristic của pdfplumber vỡ. Chưa đo in-house trên PDF VN nhiều bảng.
 
-**Recommendation for Docling:** keep it OUT of `nom-vn[doc]` for now. If a user-facing complex-layout corpus emerges (legal forms, government reports), we'll add a `nom-vn[docling]` extra and surface it as `nom.doc.layout_extract()`. Until then, the dependency weight (~1 GB ML stack + safetensors) is unjustified for plain-text PDFs.
+**Khuyến nghị Docling:** giữ NGOÀI `nom-vn[doc]` lúc này. Nếu corpus user-facing layout phức tạp xuất hiện (form pháp lý, báo cáo chính phủ), thêm extra `nom-vn[docling]` và surface là `nom.doc.layout_extract()`. Cho đến lúc đó, trọng lượng dependency (~1 GB stack ML + safetensors) không justified cho PDF text thuần.
 
-Earlier landscape table from [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) for context (academic + business mixed PDFs):
+Bảng landscape trước từ [py-pdf/benchmarks](https://github.com/py-pdf/benchmarks) cho bối cảnh (PDF academic + business mixed):
 
-| Library | Avg time per doc | Notes |
+| Library | Thời gian trung bình per-doc | Ghi chú |
 |---|---:|---|
-| PyMuPDF (fitz) | 0.5 s | Not shipped — AGPL |
-| pypdf | 4.2 s | MIT, basic ops |
-| pdfplumber | 9.5 s | Richest table extraction |
+| PyMuPDF (fitz) | 0.5 s | Không ship — AGPL |
+| pypdf | 4.2 s | MIT, thao tác cơ bản |
+| pdfplumber | 9.5 s | Trích bảng phong phú nhất |
 
-### Sources
-- [1] [VietOCR / Tesseract VN test results](https://vietocr.sourceforge.net/)
-- [2] [PaddleOCR vs EasyOCR vs Tesseract benchmark — TildAlice](https://tildalice.io/ocr-tesseract-easyocr-paddleocr-benchmark/)
-- [3] [Tesseract Vietnamese stack-diacritic issue](https://github.com/tesseract-ocr/langdata/issues/66)
-- [4] [Tesseract vs EasyOCR comparison](https://ttsforfree.com/en/blogs/image-to-text-python-tesseract-vs-easyocr/)
-- [5] [PaddleOCR PP-OCRv5 release notes](https://www.tenorshare.com/ocr/paddleocr.html)
+### Nguồn
+- [1] [Kết quả test VietOCR / Tesseract VN](https://vietocr.sourceforge.net/)
+- [2] [Benchmark PaddleOCR vs EasyOCR vs Tesseract — TildAlice](https://tildalice.io/ocr-tesseract-easyocr-paddleocr-benchmark/)
+- [3] [Issue stack-diacritic Tesseract VN](https://github.com/tesseract-ocr/langdata/issues/66)
+- [4] [So sánh Tesseract vs EasyOCR](https://ttsforfree.com/en/blogs/image-to-text-python-tesseract-vs-easyocr/)
+- [5] [Release note PaddleOCR PP-OCRv5](https://www.tenorshare.com/ocr/paddleocr.html)
 - [6] [VietOCR (Transformer) — pbcquoc](https://github.com/pbcquoc/vietocr)
 - [7] [Survey on Vietnamese Document Analysis (arXiv 2506.05061)](https://arxiv.org/abs/2506.05061)
 
 ---
 
-## Module: `nom.llm` — *planned v0.1*
+## Module: `nom.llm` — *dự kiến v0.1*
 
-Nôm doesn't bundle a model. We ship adapter classes; users pick which model to point at.
+Nôm không bundle mô hình. Chúng tôi ship class adapter; user chọn mô hình nào để trỏ tới.
 
-### Recommended models — three brackets
+### Mô hình khuyến nghị — ba bracket
 
-#### Bracket 1 — local, free, runs on a consumer laptop
+#### Bracket 1 — local, miễn phí, chạy laptop consumer
 
-**Primary: `Qwen3-8B` via Ollama**
+**Primary: `Qwen3-8B` qua Ollama**
 
-- Apache 2.0 license — commercial use OK
-- Runs in ~6GB VRAM (Q4 quant) or 16GB RAM CPU
-- Strong VMLU performance for its size
-- Multilingual including Vietnamese
-- One-line install: `ollama pull qwen3:8b`
+- License Apache 2.0 — commercial OK
+- Chạy ~6GB VRAM (Q4 quant) hoặc 16GB RAM CPU
+- VMLU mạnh cho size
+- Multilingual gồm tiếng Việt
+- Cài một dòng: `ollama pull qwen3:8b`
 
-**Alternative: `Llama-3.1-8B-Instruct`**
-- Meta license (commercial OK with conditions)
-- Slightly worse VN performance than Qwen3 in 2026 reviews [1]
+**Thay thế: `Llama-3.1-8B-Instruct`**
+- License Meta (commercial OK với điều kiện)
+- VN performance hơi tệ hơn Qwen3 trong review 2026 [1]
 
-**Alternative: `Vistral-7B-Chat`**
-- Vietnamese-fine-tuned
-- License is research-only (per VinAI) — *not for commercial use*
+**Thay thế: `Vistral-7B-Chat`**
+- Đã fine-tune cho tiếng Việt
+- License chỉ research (theo VinAI) — *không cho commercial*
 
-#### Bracket 2 — cloud, mid cost, top open quality
+#### Bracket 2 — cloud, cost trung bình, chất lượng open top
 
-**`Qwen3-235B-A22B`** via Together AI / Fireworks / Alibaba Cloud
+**`Qwen3-235B-A22B`** qua Together AI / Fireworks / Alibaba Cloud
 - Apache 2.0
-- 235B MoE (22B active) — strong Vietnamese
-- Top recommendation in 2026 best-VN-LLM guides [1]
-- ~$0.50–1/M input tokens via providers
+- 235B MoE (22B active) — VN mạnh
+- Khuyến nghị top trong guide best-VN-LLM 2026 [1]
+- ~$0.50–1/M input token qua provider
 
-#### Bracket 3 — closed, max quality
+#### Bracket 3 — closed, chất lượng tối đa
 
-| Provider | Model | Why use it |
+| Provider | Mô hình | Vì sao dùng |
 |---|---|---|
-| OpenAI | `gpt-4o` | Best general VN reasoning, vision-capable |
-| Anthropic | `claude-sonnet` | Strong long-document reasoning, large context |
-| Google | `gemini-2.5-pro` | Cheapest at top tier in 2026 |
+| OpenAI | `gpt-4o` | Reasoning VN chung tốt nhất, vision-capable |
+| Anthropic | `claude-sonnet` | Reasoning long-document mạnh, context lớn |
+| Google | `gemini-2.5-pro` | Rẻ nhất ở top tier 2026 |
 
-### Vision-capable models for `nom.doc` (scanned docs)
+### Mô hình vision-capable cho `nom.doc` (tài liệu scan)
 
-For OCR-grade work directly on images (skipping the OCR step entirely):
+Cho công việc OCR-grade trực tiếp trên ảnh (bỏ bước OCR hoàn toàn):
 
-| Model | License | Notes |
+| Mô hình | License | Ghi chú |
 |---|---|---|
-| **Qwen2.5-VL-72B-Instruct** | Apache 2.0 | Top open vision-LLM for structured doc extraction [2] |
-| GLM-4.5V | open weights | Strong on charts, tables, complex layouts [2] |
-| DeepSeek-VL2 | open weights | Good on Vietnamese scanned docs anecdotally |
-| GPT-4o (vision) | closed | Best when latency/cost are not constraints |
+| **Qwen2.5-VL-72B-Instruct** | Apache 2.0 | Top open vision-LLM cho extraction tài liệu có cấu trúc [2] |
+| GLM-4.5V | open weights | Mạnh trên chart, bảng, layout phức tạp [2] |
+| DeepSeek-VL2 | open weights | Tốt trên doc VN scan theo anecdote |
+| GPT-4o (vision) | closed | Best khi latency/cost không phải ràng buộc |
 
-**Recommendation**: `nom.doc.extract` uses two paths:
-1. Native PDF → text → text-only LLM (cheapest, fastest)
-2. Scan/image → vision-LLM directly (skips OCR, often higher quality)
+**Khuyến nghị**: `nom.doc.extract` dùng hai đường:
+1. PDF native → text → LLM text-only (rẻ nhất, nhanh nhất)
+2. Scan/ảnh → vision-LLM trực tiếp (skip OCR, thường chất lượng cao hơn)
 
-### Sources
+### Nguồn
 - [1] [Best Open Source LLM for Vietnamese in 2026 — SiliconFlow](https://www.siliconflow.com/articles/en/best-open-source-LLM-for-Vietnamese)
 - [2] [Best LLM for Document Screening in 2026 — SiliconFlow](https://www.siliconflow.com/articles/en/best-open-source-LLM-for-Document-screening)
 - [3] [Document Data Extraction in 2026: LLMs vs OCRs — Vellum](https://www.vellum.ai/blog/document-data-extraction-llms-vs-ocrs)
-- [4] [VMLU Leaderboard](https://vmlu.ai/leaderboard) — current rankings of VN LLMs
+- [4] [VMLU Leaderboard](https://vmlu.ai/leaderboard) — xếp hạng LLM VN hiện tại
 - [5] [Qwen2.5 release notes](https://qwenlm.github.io/blog/qwen2.5-llm/)
 
 ---
 
-## Module: `nom.prompts` — *planned v0.2*
+## Module: `nom.prompts` — *dự kiến v0.2*
 
-Curated, versioned system prompts for VN business documents. **No benchmarks yet — this module's value is in *which prompts win*, not raw speed.**
+Prompt hệ thống curated, có version cho tài liệu kinh doanh VN. **Chưa có benchmark — giá trị module này nằm ở *prompt nào thắng*, không phải tốc độ raw.**
 
-### Domains we'll cover
+### Domain sẽ cover
 
-| Domain | Why prioritized | Test set source |
+| Domain | Vì sao ưu tiên | Nguồn test set |
 |---|---|---|
-| **Hợp đồng** (contracts) | Highest-frequency VN business doc | NRL-curated contract corpus |
-| **Công văn** (official docs) | Government/SMB workflow staple | VLSP corpora (where licenses allow) |
-| **Đơn từ** (applications/petitions) | High volume, low-quality OCR input | Synthetic + community submissions |
-| **Email công sở** (business email) | Tone-aware drafting (kính gửi vs cho) | Internal eval set |
-| **Hoá đơn / biên lai** (invoices/receipts) | Accounting use-case | Open OCR datasets |
+| **Hợp đồng** | Doc kinh doanh VN tần suất cao nhất | Corpus hợp đồng NRL-curated |
+| **Công văn** | Chính phủ/SMB workflow chủ yếu | Corpus VLSP (chỗ license cho phép) |
+| **Đơn từ** | Khối lượng cao, input OCR thấp | Synthetic + community submission |
+| **Email công sở** | Drafting tone-aware (kính gửi vs cho) | Eval set nội bộ |
+| **Hoá đơn / biên lai** | Use-case kế toán | Open OCR datasets |
 
 ### Versioning
 
-Prompts are versioned (`nom.prompts.contracts.v1`). Once published, never silently changed. Pinning a version is part of the user's reproducibility contract.
+Prompt có version (`nom.prompts.contracts.v1`). Một khi publish, không bao giờ silently đổi. Pin version là phần của contract tái lập của user.
 
 ---
 
-## Module-level benchmarks NRL contributes (VN-Bench v1)
+## Benchmark mức module NRL đóng góp (VN-Bench v1)
 
-This is the work that will populate `nrl.ai/bench` with NRL-original numbers (vs. the current page that aggregates VMLU). See [VN-Bench v1 roadmap](../www.nrl.ai/app/[locale]/bench/page.tsx) for the canonical task list.
+Đây là việc sẽ đưa số gốc NRL vào `nrl.ai/bench` (so với trang hiện tại tổng hợp VMLU). Xem [VN-Bench v1 roadmap](../www.nrl.ai/app/[locale]/bench/page.tsx) cho danh sách task canonical.
 
-| Task | Description | Eval | Status |
+| Task | Mô tả | Eval | Trạng thái |
 |---|---|---|---|
-| **Contract extraction** | PDF → typed schema | F1 on field accuracy | in development |
-| **Official-doc parsing** | Số / ngày / đơn vị / nội dung | Exact match | in development |
-| **Scan OCR → JSON** | Image → structured | Char-edit + field accuracy | in development |
-| **Tone-mark preservation** | Generation w/ correct diacritics | Diacritic accuracy on long passages | in development |
-| **EN/VN code-switching** | Mixed dialogue understanding | Pairwise judge | in development |
-| **Legal QA** | Article prediction, citation | Borrowed from VLegal-Bench | partner |
+| **Trích hợp đồng** | PDF → schema typed | F1 trên field accuracy | đang phát triển |
+| **Parse công văn** | Số / ngày / đơn vị / nội dung | Exact match | đang phát triển |
+| **Scan OCR → JSON** | Ảnh → có cấu trúc | Char-edit + field accuracy | đang phát triển |
+| **Giữ dấu** | Sinh có dấu đúng | Diacritic accuracy trên đoạn dài | đang phát triển |
+| **Code-switching EN/VN** | Hiểu hội thoại mixed | Pairwise judge | đang phát triển |
+| **QA pháp lý** | Dự đoán điều, trích | Mượn từ VLegal-Bench | partner |
 
 ---
 
-## Module: `nom.rag` — *shipped v0.2.5*
+## Module: `nom.rag` — *đã ship v0.2.5*
 
-### What it does
+### Làm gì
 
-End-to-end RAG over Vietnamese documents: BM25 + dense (sentence-transformers
-encoder) hybrid retrieval with RRF fusion, optional cross-encoder
-reranking, optional HyDE / multi-query expansion, then an LLM call.
+RAG end-to-end trên tài liệu VN: BM25 + dense (encoder sentence-transformers) hybrid retrieval với RRF fusion, reranking cross-encoder tuỳ chọn, mở rộng HyDE / multi-query tuỳ chọn, sau đó gọi LLM.
 
-Three lines from documents to answers — see `src/nom/rag/pipeline.py`
-docstring for the canonical example.
+Ba dòng từ tài liệu sang câu trả lời — xem docstring `src/nom/rag/pipeline.py` cho ví dụ canonical.
 
-### Reranker comparison on Zalo Legal QA 5 k — *measured 2026-04-26*
+### So sánh reranker trên Zalo Legal QA 5 k — *đo 2026-04-26*
 
-Same fixture (5,061 docs / 80 questions), bkai-vietnamese-bi-encoder
-embedder, hybrid+rerank pipeline, RTX 3090. Apples-to-apples — only the
-reranker varies.
+Cùng fixture (5.061 doc / 80 câu hỏi), embedder bkai-vietnamese-bi-encoder, pipeline hybrid+rerank, RTX 3090. So sánh apple-to-apple — chỉ reranker đổi.
 
-| Reranker | License | Disk | Params | R@1 | R@10 | MRR@10 | p50 ms (incl. seg) |
+| Reranker | License | Disk | Param | R@1 | R@10 | MRR@10 | p50 ms (gồm seg) |
 |---|---|---:|---:|---:|---:|---:|---:|
 | **`BAAI/bge-reranker-v2-m3`** ⭐ default | Apache 2.0 | ~2.3 GB | 568 M | **86.3 %** | **100.0 %** | **0.929** | 583 |
 | `itdainb/PhoRanker` *(word-segmented)* | Apache 2.0 | **~395 MB** | **100 M** | **83.8 %** | 98.8 % | 0.907 | 863 |
-| `itdainb/PhoRanker` *(NO word-segment, BROKEN config)* | Apache 2.0 | ~395 MB | 100 M | 70.0 % | 97.5 % | 0.802 | 295 |
+| `itdainb/PhoRanker` *(KHÔNG word-segment, BROKEN config)* | Apache 2.0 | ~395 MB | 100 M | 70.0 % | 97.5 % | 0.802 | 295 |
 
-**The reranker landscape, accurately framed.** PhoRanker reportedly
-beats bge-reranker-v2-m3 on MMARCO-Vi (NDCG@3 0.6625 vs 0.6087). On
-our Zalo Legal 5 k bench, **PhoRanker is only 2.5 pp behind bge-reranker-v2-m3
-at 5.7× smaller disk.** This is a much better tradeoff than v0.2.17
-implied — the original 70.0 % R@1 number was a methodology bug
-(missing word segmentation; see ALWAYS DOUBLE-CHECK rule below).
+**Bức tranh reranker, framing chính xác.** PhoRanker được báo thắng bge-reranker-v2-m3 trên MMARCO-Vi (NDCG@3 0.6625 vs 0.6087). Trên bench Zalo Legal 5 k của ta, **PhoRanker chỉ kém bge-reranker-v2-m3 2.5 pp ở disk nhỏ hơn 5.7×.** Đây là tradeoff tốt hơn nhiều so với v0.2.17 implied — số 70.0 % R@1 ban đầu là bug methodology (thiếu word segmentation; xem rule ALWAYS DOUBLE-CHECK bên dưới).
 
-**Recommendation:**
+**Khuyến nghị:**
 
-- **Default: bge-reranker-v2-m3.** Highest quality (R@1 86.3 %), simplest
-  to deploy (no preprocessing required).
-- **Light-weight tier: PhoRanker with word segmentation.** Within 2.5 pp
-  R@1 of the default at 5.7× smaller disk and faster cross-encoder
-  inference. Right pick for laptops where 2.3 GB of reranker doesn't
-  fit alongside embedder + LLM. **Requires `nom-vn[nlp]` for underthesea
-  word segmentation** — pass `word_segment=True` to `CrossEncoderReranker`
-  or `--reranker-word-segment` to the bench:
+- **Default: bge-reranker-v2-m3.** Chất lượng cao nhất (R@1 86.3 %), đơn giản nhất để deploy (không cần preprocessing).
+- **Tier light-weight: PhoRanker với word segmentation.** Trong 2.5 pp R@1 của default ở disk nhỏ hơn 5.7× và inference cross-encoder nhanh hơn. Lựa chọn đúng cho laptop nơi 2.3 GB reranker không vừa cùng embedder + LLM. **Cần `nom-vn[nlp]` cho underthesea word segmentation** — pass `word_segment=True` cho `CrossEncoderReranker` hoặc `--reranker-word-segment` cho bench:
 
   ```python
   CrossEncoderReranker("itdainb/PhoRanker", word_segment=True)
   ```
 
-  The 863 ms p50 includes per-query underthesea segmentation. In
-  production you'd cache segmented corpus chunks at index time, dropping
-  per-query cost back to ~300 ms.
+  863 ms p50 gồm segment underthesea per-query. Trong production cache chunk corpus đã segment ở thời điểm index, drop cost per-query xuống ~300 ms.
 
-**An ALWAYS DOUBLE-CHECK lesson (our ALWAYS DOUBLE-CHECK rule).** The
-v0.2.17 PhoRanker number (70.0 % R@1) was wrong because we sent raw
-unsegmented text to a model whose card explicitly requires VnCoreNLP
-segmented input. Re-checking the model card on 2026-04-26 caught it.
-Generalised the lesson: **for any new reranker, read the canonical
-usage example from the model card before benching.** Hardcoded
-preprocessing in the bench is now a `word_segment=` kwarg, not a
-hidden assumption.
+**Bài học ALWAYS DOUBLE-CHECK (rule ALWAYS DOUBLE-CHECK của ta).** Số PhoRanker v0.2.17 (70.0 % R@1) sai vì gửi text raw không segment cho mô hình mà card explicitly yêu cầu input đã segment VnCoreNLP. Re-check model card 2026-04-26 bắt được. Khái quát hoá bài học: **cho bất kỳ reranker mới nào, đọc ví dụ usage canonical từ model card trước khi bench.** Preprocessing hardcoded trong bench giờ là kwarg `word_segment=`, không phải giả định ẩn.
 
-**Auto-detect max_length:** `CrossEncoderReranker(...)` now auto-detects
-each model's `max_position_embeddings` from `config.json` so you can
-swap rerankers without thinking. PhoRanker (PhoBERT-base, 256-cap) and
-bge-reranker-v2-m3 (XLM-R-large, 512-cap) both work via the same call:
+**Auto-detect max_length:** `CrossEncoderReranker(...)` giờ auto-detect `max_position_embeddings` của mỗi mô hình từ `config.json` để bạn swap reranker không cần nghĩ. PhoRanker (PhoBERT-base, cap 256) và bge-reranker-v2-m3 (XLM-R-large, cap 512) đều chạy qua cùng call:
 
 ```python
 from nom.rag import CrossEncoderReranker
 
-# Both work — max_length is auto-detected
+# Cả hai chạy — max_length auto-detect
 default = CrossEncoderReranker()                         # bge-reranker-v2-m3
-lite    = CrossEncoderReranker("itdainb/PhoRanker")     # 256-cap, no manual flag
+lite    = CrossEncoderReranker("itdainb/PhoRanker")     # cap 256, không cần flag tay
 ```
 
-Override via `max_length=...` when the auto-detect heuristic is wrong
-for an exotic model.
+Override qua `max_length=...` khi heuristic auto-detect sai cho mô hình lạ.
 
-Reproduce: `python benchmarks/rag/bench_rag_vn.py --fixture
-benchmarks/rag/fixtures/vn_legal_zalo_5k.json --embedder bkai
---retrievers hybrid+rerank --reranker itdainb/PhoRanker --json
-benchmarks/results/baseline_phoranker_zalo5k.json`
+Tái lập: `python benchmarks/rag/bench_rag_vn.py --fixture benchmarks/rag/fixtures/vn_legal_zalo_5k.json --embedder bkai --retrievers hybrid+rerank --reranker itdainb/PhoRanker --json benchmarks/results/baseline_phoranker_zalo5k.json`
 
-Baselines:
+Baseline:
 `benchmarks/results/baseline_phoranker_zalo5k.json` (PhoRanker),
 `benchmarks/results/baseline_bge_reranker_bkai_zalo5k.json` (bge-reranker-v2-m3).
 
-### Embedder-only retrieval — *measured 2026-04-26*
+### Retrieval chỉ embedder — *đo 2026-04-26*
 
-A direct two-tower comparison: encode every doc + every question, rank docs
-by cosine. No BM25, no fusion, no reranker — every quality difference is
-purely the embedder. This catches cases where an embedder's STS-tuned
-training distribution doesn't transfer to retrieval (the asymmetric Q→Doc
-task the RAG pipeline actually does).
+So sánh two-tower trực tiếp: encode mọi doc + mọi câu hỏi, rank doc theo cosine. Không BM25, không fusion, không reranker — mọi khác biệt chất lượng đều thuần là embedder. Cách này bắt case mà phân phối training STS-tuned của embedder không transfer sang retrieval (task asymmetric Q→Doc mà pipeline RAG thực sự làm).
 
-Corpus: `benchmarks/rag/fixtures/vn_legal_zalo_5k.json` (5,061 docs / 80
-questions, sampled from Zalo AI 2021 Legal QA, MIT). Hardware: RTX 3090.
+Corpus: `benchmarks/rag/fixtures/vn_legal_zalo_5k.json` (5.061 doc / 80 câu hỏi, sample từ Zalo AI 2021 Legal QA, MIT). Hardware: RTX 3090.
 
-| Model | License | Disk | R@1 | R@10 | MRR@10 | docs/s |
+| Mô hình | License | Disk | R@1 | R@10 | MRR@10 | docs/s |
 |---|---|---:|---:|---:|---:|---:|
 | **`bkai-foundation-models/vietnamese-bi-encoder`** ⭐ | Apache 2.0 | ~383 MB | **76.25 %** | **98.75 %** | **0.8604** | 60 |
-| `dangvantuan/vietnamese-embedding` (current default) | Apache 2.0 | ~440 MB | 35.00 % | 67.50 % | 0.4449 | 53 |
+| `dangvantuan/vietnamese-embedding` (default hiện tại) | Apache 2.0 | ~440 MB | 35.00 % | 67.50 % | 0.4449 | 53 |
 
-bkai wins by **+41.25 pp R@1 and +31.25 pp R@10** in *smaller* on-disk size and
-similar throughput. The gap is structural, not tunable:
+bkai thắng **+41.25 pp R@1 và +31.25 pp R@10** ở size disk *nhỏ hơn* và throughput tương tự. Gap là cấu trúc, không tunable:
 
-- `dangvantuan` was fine-tuned on **STS** (symmetric similarity) — strong
-  on benchmarks like VN-STS but the asymmetric question→document
-  retrieval task is out of distribution.
-- `bkai` was trained with **MultipleNegativesRankingLoss** on Q→Doc pairs
-  from MS MARCO + SQuAD v2 + 80 % of Zalo Legal — exactly the task we run.
+- `dangvantuan` đã fine-tune trên **STS** (similarity đối xứng) — mạnh trên benchmark như VN-STS nhưng task retrieval câu hỏi→tài liệu asymmetric ngoài phân phối.
+- `bkai` đã train với **MultipleNegativesRankingLoss** trên cặp Q→Doc từ MS MARCO + SQuAD v2 + 80 % Zalo Legal — chính xác task ta chạy.
 
-**Catch:** bkai requires word-segmenter preprocessing
-(multi-syllable VN words joined with underscores). The
-`nom.embeddings.BKaiEmbedder` class wraps `underthesea` to do this
-automatically. Install: `pip install "nom-vn[embeddings,nlp]"`.
+**Catch:** bkai cần preprocessing word-segmenter (từ multi-syllable VN nối bằng underscore). Class `nom.embeddings.BKaiEmbedder` wrap `underthesea` để làm điều này tự động. Cài: `pip install "nom-vn[embeddings,nlp]"`.
 
-**Cross-check:** bkai's published Zalo Legal full-corpus numbers
-([model card](https://huggingface.co/bkai-foundation-models/vietnamese-bi-encoder))
-report Acc@1 73.28, Acc@10 93.59, MRR 80.73. Our 5k subset (76.25, 98.75,
-0.8604) is slightly higher because the subset has fewer distractors —
-order of magnitude consistent. No methodology divergence.
+**Cross-check:** số Zalo Legal corpus đầy đủ bkai công bố ([model card](https://huggingface.co/bkai-foundation-models/vietnamese-bi-encoder)) báo Acc@1 73.28, Acc@10 93.59, MRR 80.73. Subset 5k của ta (76.25, 98.75, 0.8604) hơi cao hơn vì subset có ít distractor — order of magnitude consistent. Không có divergence methodology.
 
-**Action for v0.2.x:** add `BKaiEmbedder` as opt-in, do NOT switch the
-default in `nom.rag` / `nom.retrieve` — that would invalidate every
-existing user's persisted embedding cache. The 0.3.x major release will
-flip the default; for now opt-in keeps cache compatibility.
+**Hành động cho v0.2.x:** thêm `BKaiEmbedder` opt-in, KHÔNG đổi default trong `nom.rag` / `nom.retrieve` — sẽ invalidate cache embedding đã persist của mọi user hiện tại. Bản major 0.3.x sẽ lật default; bây giờ opt-in giữ tương thích cache.
 
 ```python
 from nom.embeddings import BKaiEmbedder
@@ -742,17 +616,13 @@ from nom.rag import RAG
 rag = RAG(embedder=BKaiEmbedder(device="cuda"))
 ```
 
-Reproduce: `python benchmarks/rag/bench_embedder_compare.py
---json benchmarks/results/baseline_embedder_compare_zalo5k.json`
+Tái lập: `python benchmarks/rag/bench_embedder_compare.py --json benchmarks/results/baseline_embedder_compare_zalo5k.json`
 
-### Vietnamese RAG model grid — *measured 2026-04-25*
+### Lưới mô hình RAG VN — *đo 2026-04-25*
 
-Two fixtures, both sampled from
-[GreenNode/zalo-ai-legal-text-retrieval-vn](https://huggingface.co/datasets/GreenNode/zalo-ai-legal-text-retrieval-vn)
-(MIT). Hardware: NVIDIA RTX 3080 Laptop, fp16, warmup=1, timed=1-2
-(best-of-N per our verified-benchmarks rule).
+Hai fixture, đều sample từ [GreenNode/zalo-ai-legal-text-retrieval-vn](https://huggingface.co/datasets/GreenNode/zalo-ai-legal-text-retrieval-vn) (MIT). Hardware: NVIDIA RTX 3080 Laptop, fp16, warmup=1, timed=1-2 (best-of-N theo rule verified-benchmarks).
 
-#### Full corpus — `vn_legal_zalo_full.json` (61,068 articles, 82,696 chunks, 788 questions)
+#### Corpus đầy đủ — `vn_legal_zalo_full.json` (61.068 bài, 82.696 chunk, 788 câu hỏi)
 
 | Retriever | recall@1 | recall@3 | recall@5 | recall@10 | mrr@10 | p50 ms |
 |---|---:|---:|---:|---:|---:|---:|
@@ -761,7 +631,7 @@ Two fixtures, both sampled from
 | Hybrid (RRF) | 0.368 | 0.602 | 0.690 | 0.783 | 0.505 | 491 |
 | **Hybrid + bge-reranker-v2-m3** | **0.572** | **0.802** | **0.846** | **0.868** | **0.688** | 1539 |
 
-#### Subset corpus — `vn_legal_zalo_5k.json` (5,061 articles, 6,833 chunks, 80 questions)
+#### Corpus subset — `vn_legal_zalo_5k.json` (5.061 bài, 6.833 chunk, 80 câu hỏi)
 
 | Embedder | Retriever | recall@1 | recall@3 | recall@10 | mrr@10 | p50 ms | p95 ms |
 |---|---|---:|---:|---:|---:|---:|---:|
@@ -776,73 +646,26 @@ Two fixtures, both sampled from
 |  | + `BAAI/bge-reranker-v2-m3` | **0.863** | 0.988 | 0.988 | 0.923 | 720 | 786 |
 |  | + `namdp-ptit/ViRanker` | **0.863** | 0.963 | 0.988 | 0.914 | 718 | 799 |
 
-Reproduce: `bash benchmarks/rag/run_grid.sh`. Per-config baseline JSONs
-under `benchmarks/rag/baselines/zalo_5k__*.json` and mirrored to
-[nrl-ai/vn-rag-bench](https://huggingface.co/datasets/nrl-ai/vn-rag-bench).
+Tái lập: `bash benchmarks/rag/run_grid.sh`. JSON baseline per-config dưới `benchmarks/rag/baselines/zalo_5k__*.json` và mirror tới [nrl-ai/vn-rag-bench](https://huggingface.co/datasets/nrl-ai/vn-rag-bench).
 
-### Findings
+### Phát hiện
 
-1. **Embedder choice matters more than reranker choice — for the
-   bi-encoder stage.** Swapping from `dangvantuan` to `AITeamVN` doubles
-   dense recall@1 (0.412 → 0.825). The `AITeamVN/Vietnamese_Embedding`
-   BGE-M3 finetune was specifically tuned on Zalo Legal QA, which shows
-   in the in-domain numbers.
-2. **Rerankers converge.** Both `BAAI/bge-reranker-v2-m3` and
-   `namdp-ptit/ViRanker` bring final recall@1 to ~0.863 regardless of
-   feeder embedder. The reranker dominates the final ranking once the
-   gold article is in the top-30 candidate pool.
-3. **Best peak quality:** `dangvantuan` + `BAAI/bge-reranker-v2-m3` —
-   recall@10 = 1.000 and recall@3 = 1.000 on this fixture. The dangvantuan
-   embedder's higher BM25 affinity (its dense leg is weak so RRF leans
-   on BM25) lifts recall@10 ceiling.
-4. **Skip-the-reranker option:** `AITeamVN` dense alone gets recall@1 =
-   0.825 in 47 ms p50 — about **15× faster** than +rerank, with only 4%
-   absolute recall@1 lost. Right pick for latency-sensitive deployments
-   where 825/863 is acceptable.
-5. **BM25 is shockingly competitive** on legal Vietnamese — *at small
-   corpus size*. On the 5k subset BM25 hits recall@1 = 0.762, but on
-   the full 61k corpus that drops to 0.395. **The corpus-size effect
-   dominates** for lexical retrieval; dense / reranker stages get more
-   important as the distractor pool grows.
-6. **The reranker becomes more critical at scale**, not less. Going
-   from hybrid → hybrid+rerank lifts recall@1 by 0.213 absolute on the
-   5k subset and 0.204 absolute on the full 61k corpus — proportionally
-   a much bigger relative lift on the full corpus (+55% relative vs
-   +33% relative).
-7. **Pure-Python BM25 was the bottleneck at scale.** On the full 61k
-   corpus our v0.2.5 BM25.search() ran at 430ms p50 — far slower than
-   dense on GPU (18ms). v0.2.6 swapped to
-   [`bm25s`](https://github.com/xhluca/bm25s) (MIT, scipy.sparse): same
-   bit-identical recall, **607× faster search** (0.7ms p50). See
-   `benchmarks/results/bm25_compare__zalo_full.json` for the full
-   table. The dense leg is now the per-query bottleneck.
+1. **Lựa chọn embedder quan trọng hơn lựa chọn reranker — cho stage bi-encoder.** Đổi từ `dangvantuan` sang `AITeamVN` gấp đôi dense recall@1 (0.412 → 0.825). Fine-tune BGE-M3 `AITeamVN/Vietnamese_Embedding` đặc biệt tune trên Zalo Legal QA, thể hiện ở số in-domain.
+2. **Reranker hội tụ.** Cả `BAAI/bge-reranker-v2-m3` và `namdp-ptit/ViRanker` đưa recall@1 cuối lên ~0.863 bất kể embedder feeder. Reranker dominate ranking cuối khi bài gold đã trong pool top-30.
+3. **Chất lượng peak tốt nhất:** `dangvantuan` + `BAAI/bge-reranker-v2-m3` — recall@10 = 1.000 và recall@3 = 1.000 trên fixture này. Affinity BM25 cao hơn của embedder dangvantuan (chân dense yếu nên RRF nghiêng vào BM25) lift trần recall@10.
+4. **Tuỳ chọn skip-reranker:** `AITeamVN` dense một mình được recall@1 = 0.825 ở 47 ms p50 — nhanh khoảng **15×** so với +rerank, mất chỉ 4% absolute recall@1. Lựa chọn đúng cho deploy nhạy latency nơi 825/863 chấp nhận được.
+5. **BM25 cạnh tranh đến giật mình** trên VN pháp lý — *ở quy mô corpus nhỏ*. Trên subset 5k BM25 chạm recall@1 = 0.762, nhưng trên corpus 61k đầy đủ rớt xuống 0.395. **Hiệu ứng size-corpus dominant** cho retrieval lexical; stage dense / reranker quan trọng hơn khi pool distractor lớn.
+6. **Reranker trở nên critical hơn ở quy mô**, không kém. Đi từ hybrid → hybrid+rerank lift recall@1 0.213 absolute trên subset 5k và 0.204 absolute trên corpus 61k đầy đủ — proportionally lift relative lớn hơn nhiều trên corpus đầy đủ (+55% relative vs +33% relative).
+7. **BM25 pure-Python là bottleneck ở quy mô.** Trên corpus 61k đầy đủ BM25.search() v0.2.5 chạy 430ms p50 — chậm hơn nhiều dense trên GPU (18ms). v0.2.6 swap sang [`bm25s`](https://github.com/xhluca/bm25s) (MIT, scipy.sparse): cùng recall y hệt bit, **search nhanh hơn 607×** (0.7ms p50). Xem `benchmarks/results/bm25_compare__zalo_full.json` cho bảng đầy đủ. Chân dense giờ là bottleneck per-query.
 
-### Cross-checking against published numbers (per our cross-check-against-published-numbers rule)
+### Cross-check so với số đã công bố (theo rule cross-check-against-published-numbers)
 
-- **Multi-stage IR for VN Legal** (PKAW 2022, arXiv:2209.14494):
-  reports F2 = 0.741 on the full Zalo corpus with PhoBERT-large +
-  sqrt(BM25)·cos hybrid + 3-round hard-negative mining. Our recall@10
-  = 0.868 on the full 61k corpus implies a comparable F2 (≈0.6-0.7),
-  achieved off-the-shelf with bge-reranker-v2-m3 — no fine-tuning.
-  Reasonable alignment.
-- **UIT 2024** (arXiv:2507.14619): Vietnamese-bi-encoder + PhoRanker,
-  cross-encoder MRR@10 = 79.11% on 261k legal docs. Our MRR@10 = 0.688
-  on the full 61k corpus — ~10 points lower; explained by (a) we use
-  off-the-shelf bge instead of PhoRanker which is fine-tuned on legal
-  data, and (b) corpus-size effects work both ways. Adding PhoRanker
-  to our grid is a reasonable next step (excluded so far for the
-  VnCoreNLP Java dep).
-- **AITeamVN/Vietnamese_Embedding model card**: claims +27.9% Acc@1
-  over base BGE-M3 on legal-domain retrieval. Our dense Acc@1 = 0.825
-  on 5k subset vs base BGE-M3 (untested by us) — would need to bench
-  BGE-M3 on the same fixture to confirm the lift size. **Open: add
-  BGE-M3 to the grid** to verify the AITeamVN finetune's published
-  advantage.
-- **PhoRanker NDCG@10 = 0.7422 on MMARCO-VI** ([model card](https://huggingface.co/itdainb/PhoRanker)):
-  not measured — PhoRanker requires VnCoreNLP (Java JVM), excluded
-  from this grid intentionally.
+- **Multi-stage IR cho VN Legal** (PKAW 2022, arXiv:2209.14494): báo F2 = 0.741 trên corpus Zalo đầy đủ với PhoBERT-large + sqrt(BM25)·cos hybrid + 3 round mining hard-negative. recall@10 = 0.868 trên corpus 61k đầy đủ của ta implied F2 tương đương (≈0.6-0.7), đạt được off-the-shelf với bge-reranker-v2-m3 — không fine-tune. Alignment hợp lý.
+- **UIT 2024** (arXiv:2507.14619): Vietnamese-bi-encoder + PhoRanker, MRR@10 cross-encoder = 79.11% trên 261k doc pháp lý. MRR@10 = 0.688 của ta trên corpus 61k đầy đủ — ~10 điểm thấp hơn; giải thích bởi (a) ta dùng bge off-the-shelf thay PhoRanker đã fine-tune trên dữ liệu pháp lý, và (b) hiệu ứng size-corpus chạy cả hai chiều. Thêm PhoRanker vào lưới là bước tiếp theo hợp lý (excluded đến nay vì dep VnCoreNLP Java).
+- **Model card AITeamVN/Vietnamese_Embedding**: claim +27.9% Acc@1 so với BGE-M3 base trên retrieval domain pháp lý. dense Acc@1 = 0.825 của ta trên subset 5k vs BGE-M3 base (chưa test) — cần bench BGE-M3 trên cùng fixture để xác nhận size lift. **Mở: thêm BGE-M3 vào lưới** để verify lợi thế công bố của fine-tune AITeamVN.
+- **PhoRanker NDCG@10 = 0.7422 trên MMARCO-VI** ([model card](https://huggingface.co/itdainb/PhoRanker)): chưa đo — PhoRanker cần VnCoreNLP (JVM Java), excluded khỏi lưới này có chủ đích.
 
-### Recommended config (default in `nom-vn` v0.2.5)
+### Config khuyến nghị (default trong `nom-vn` v0.2.5)
 
 ```python
 from nom.rag import RAG, CrossEncoderReranker
@@ -855,95 +678,49 @@ rag = RAG.from_documents(
 answer = rag.ask(question, rerank=True, rerank_candidates=30)
 ```
 
-For latency-bound deployments without a GPU, drop the reranker and use
-`AITeamVNEmbedder()` (better dense, no cross-encoder tax).
+Cho deploy bound latency không có GPU, drop reranker và dùng `AITeamVNEmbedder()` (dense tốt hơn, không có thuế cross-encoder).
 
 ---
 
-## Module: `nom.doc.ocr` — *real-baseline measured 2026-04-26*
+## Module: `nom.doc.ocr` — *baseline thật đo 2026-04-26*
 
-### What it does
+### Làm gì
 
-Runs an OCR engine over Vietnamese images (PDF pages, scans, photos)
-and returns plain text. v0.2.x ships the Tesseract path; later versions
-will add VLM and VN-specialised options as they earn their dependency
-weight on the bench.
+Chạy engine OCR trên ảnh tiếng Việt (page PDF, scan, ảnh) và trả về text thuần. v0.2.x ship đường Tesseract; phiên bản sau sẽ thêm tuỳ chọn VLM và VN-specialised khi chúng kiếm được trọng lượng dependency trên bench.
 
-### Vietnamese OCR engine grid — *measured 2026-04-26*
+### Lưới engine OCR tiếng Việt — *đo 2026-04-26*
 
-**Real corpus:** `vn_ocr_subset` — 478 images deterministically sampled
-(seed=42) from
-[`ducto489/ocr_datasets`](https://huggingface.co/datasets/ducto489/ocr_datasets)
-shard 0 (Apache-2.0), filtered to rows containing Vietnamese diacritics
-and at least 8 characters of ground-truth text. Mostly machine-rendered
-prose at varying noise levels — representative of real document OCR
-inputs.
+**Corpus thật:** `vn_ocr_subset` — 478 ảnh sample tất định (seed=42) từ [`ducto489/ocr_datasets`](https://huggingface.co/datasets/ducto489/ocr_datasets) shard 0 (Apache-2.0), filter các hàng chứa dấu VN và ít nhất 8 ký tự ground-truth text. Hầu hết là prose machine-rendered ở các mức nhiễu khác nhau — đại diện cho input OCR tài liệu thực.
 
-Hardware: CPU (8 cores, no GPU contention with the RAG bench), warmup=1,
-timed=2, p50/p95 reported best-of-N.
+Hardware: CPU (8 cores, không có contention GPU với bench RAG), warmup=1, timed=2, p50/p95 báo best-of-N.
 
 | Engine | License | CER | WER | diacritic-CER | exact match | p50 ms | p95 ms |
 |---|---|---:|---:|---:|---:|---:|---:|
 | **Tesseract 5** (`vie` traineddata) | Apache-2.0 | **0.0819** | **0.3771** | **0.1193** | **0.345** | 447 | 656 |
 | EasyOCR 1.7 (`vi`) | Apache-2.0 | 0.1176 | 0.5304 | 0.2052 | 0.218 | **183** | **431** |
 
-JSON baselines under `benchmarks/results/ocr_vn_subset__*.json` and
-mirrored to
-[nrl-ai/vn-rag-bench](https://huggingface.co/datasets/nrl-ai/vn-rag-bench).
+JSON baseline dưới `benchmarks/results/ocr_vn_subset__*.json` và mirror tới [nrl-ai/vn-rag-bench](https://huggingface.co/datasets/nrl-ai/vn-rag-bench).
 
-### Findings
+### Phát hiện
 
-1. **The synthetic fixture is not a benchmark.** `synthetic_ocr_vi/clean`
-   gives Tesseract CER = 0.000 / exact = 1.000 — perfect. `synthetic/noisy`
-   gives CER = 0.0064. Both are too easy to rank engines. Real ducto489
-   data drops Tesseract to CER = 0.082 — that's the honest baseline.
-2. **Diacritic-CER (11.9%) is ~46% worse than overall CER (8.2%)** —
-   confirming the Vietnamese-reader-felt failure mode. Tone marks
-   (acute, grave, hook, tilde, dot below) are 1–3 pixels and the first
-   thing OCR loses on noisy scans. A diacritic-aware reranking or
-   post-OCR fix would help here.
-3. **Latency is ~450 ms per image on 8 CPU cores.** Tesseract is C++
-   under the hood and doesn't parallelise within a page; throughput
-   improvements come from running multiple pages in parallel at the
-   pipeline level, not from tuning Tesseract internals.
-4. **Tesseract beats EasyOCR on every quality metric for VN.** CER
-   8.19% vs 11.76%, diacritic-CER 11.93% vs 20.52%, exact-match 34.5%
-   vs 21.8%. EasyOCR is 2.4× faster (183 ms vs 447 ms p50) but the
-   accuracy gap dominates for document Q&A use cases — losing 13%
-   absolute exact-match for 264 ms of latency is a bad trade.
-   **Default stays Tesseract.** EasyOCR may be useful for high-throughput
-   bulk-indexing use cases where some accuracy can be traded; we
-   surface both options in `bench_ocr_real.py`.
+1. **Fixture synthetic không phải benchmark.** `synthetic_ocr_vi/clean` cho Tesseract CER = 0.000 / exact = 1.000 — hoàn hảo. `synthetic/noisy` cho CER = 0.0064. Cả hai đều quá dễ để rank engine. Dữ liệu ducto489 thật drop Tesseract xuống CER = 0.082 — đó là baseline trung thực.
+2. **Diacritic-CER (11.9%) tệ hơn ~46% so với CER tổng (8.2%)** — xác nhận mode fail mà người đọc tiếng Việt cảm thấy. Dấu thanh (sắc, huyền, hỏi, ngã, nặng) là 1–3 pixel và là thứ đầu tiên OCR mất trên scan nhiễu. Một reranking diacritic-aware hoặc fix post-OCR sẽ giúp ở đây.
+3. **Latency ~450 ms per ảnh trên 8 CPU cores.** Tesseract là C++ bên dưới và không parallel trong một page; cải thiện throughput đến từ chạy nhiều page parallel ở mức pipeline, không phải tune internals Tesseract.
+4. **Tesseract thắng EasyOCR trên mọi metric chất lượng cho VN.** CER 8.19% vs 11.76%, diacritic-CER 11.93% vs 20.52%, exact-match 34.5% vs 21.8%. EasyOCR nhanh hơn 2.4× (183 ms vs 447 ms p50) nhưng gap accuracy dominate cho use case Q&A tài liệu — mất 13% absolute exact-match cho 264 ms latency là trade tệ. **Default giữ Tesseract.** EasyOCR có thể hữu ích cho use case bulk-indexing throughput cao nơi accuracy đánh đổi được; chúng tôi surface cả hai option trong `bench_ocr_real.py`.
 
-### Engines surveyed but not yet measured
+### Engine đã khảo sát nhưng chưa đo
 
-- **VietOCR** (Apache-2.0, VN-specialised Transformer) — `pip install
-  vietocr` errors on Python 3.13 (`KeyError: '__version__'` in setup.py).
-  Pinned for follow-up; the upstream needs a Python-3.13-compatible
-  `pyproject.toml`.
-- **PaddleOCR PP-OCRv5** (Apache-2.0, lightweight ~150 MB) — most
-  promising next candidate. Reported CER ~0.94 on OmniDocBench
-  multilingual; not VN-specific but typically beats Tesseract on
-  rendered text.
-- **Surya OCR** — code is **GPL-3.0**, models are open-RAIL-M.
-  Both license-incompatible with our Apache-2.0 default surface.
-  Will bench for comparison only; cannot ship as default.
+- **VietOCR** (Apache-2.0, Transformer VN-specialised) — `pip install vietocr` lỗi trên Python 3.13 (`KeyError: '__version__'` trong setup.py). Pin cho follow-up; upstream cần `pyproject.toml` tương thích Python-3.13.
+- **PaddleOCR PP-OCRv5** (Apache-2.0, lightweight ~150 MB) — ứng viên hứa hẹn nhất tiếp theo. CER báo ~0.94 trên OmniDocBench multilingual; không VN-specific nhưng thường thắng Tesseract trên text rendered.
+- **Surya OCR** — code là **GPL-3.0**, mô hình open-RAIL-M. Cả hai license-incompatible với surface mặc định Apache-2.0. Sẽ bench cho so sánh; không thể ship làm default.
 
-### VLM OCR — *measured 2026-04-26*
+### VLM OCR — *đo 2026-04-26*
 
-Tested whether a general-purpose Vision-Language Model can match
-purpose-built OCR on Vietnamese line-image transcription.
+Test xem Vision-Language Model general-purpose có thể match OCR purpose-built trên transcription line-image VN.
 
-**Engine:** `qwen2.5vl:3b` and `qwen2.5vl:7b` (Apache-2.0) via Ollama
-0.21.2 on RTX 3090. Q4_K_M quantization. Prompt: tight Vietnamese
-"transcribe exactly, no chatter" (see `OllamaVLM` in
-`benchmarks/accuracy/bench_ocr_real.py`). Defensive output trim for
-think-tags, code-fences, and label echoes.
+**Engine:** `qwen2.5vl:3b` và `qwen2.5vl:7b` (Apache-2.0) qua Ollama 0.21.2 trên RTX 3090. Quantize Q4_K_M. Prompt: VN tight "transcribe exactly, no chatter" (xem `OllamaVLM` trong `benchmarks/accuracy/bench_ocr_real.py`). Output trim defensive cho think-tag, code-fence, và label echo.
 
-**Corpus:** First 50 images from `vn_ocr_subset` (sampled from
-[ducto489/ocr_datasets](https://huggingface.co/datasets/ducto489/ocr_datasets),
-Apache-2.0). Single-line clean printed VN text — same images run on
-Tesseract and EasyOCR for direct comparison.
+**Corpus:** 50 ảnh đầu từ `vn_ocr_subset` (sample từ [ducto489/ocr_datasets](https://huggingface.co/datasets/ducto489/ocr_datasets), Apache-2.0). Single-line text VN print sạch — cùng ảnh chạy trên Tesseract và EasyOCR cho so sánh trực tiếp.
 
 | Engine | Q4 size | CER | WER | Diacritic CER | Exact match | p50 ms | p95 ms |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -952,76 +729,24 @@ Tesseract and EasyOCR for direct comparison.
 | qwen2.5vl:7b | 6.0 GB | 31.07% | 140.04% | 33.38% | 18.0% | 818.0 | 1332.2 |
 | qwen2.5vl:3b | 3.2 GB | 39.86% | 175.43% | 41.82% | 15.0% | 1165.5 | 3993.6 |
 
-**Findings:**
+**Phát hiện:**
 
-1. **VLMs lose decisively on single-line clean OCR.** qwen2.5vl:7b
-   has CER 31% vs Tesseract's 5.53% — a 25-point gap. The model
-   hallucinates: "1892 - Tạp Chí Vogue..." → "1892 92 92 92 92..." (token
-   loop), "XÃ CHIỀNG ƠN" → "CHÍNH XÁC", "churchill và tưởng giới thạch"
-   → "Churchill và tướng Eisenhower cùng được trao giải thưởng" (whole
-   plausible-but-fabricated sentence).
-2. **The right tool stays the right tool.** VLMs are trained on full
-   pages; on tight line crops without document context, the language
-   prior dominates the visual signal and the model drifts into
-   "complete-the-sentence" mode. Tesseract's CTC head is purpose-built
-   for left-to-right glyph alignment and doesn't have this failure mode.
-3. **Latency: VLM is 10× slower** (818 ms vs 80 ms p50). For a 478-image
-   batch this is 6.5 min vs 39 s.
-4. **Use case for VLM in OCR is elsewhere.** Multi-field document
-   extraction (invoice fields, ID cards, forms with checkboxes), scanned
-   handwriting, and "OCR + understand the text" workflows are where
-   VLMs earn their cost. We've documented this so users don't reach for
-   `qwen2.5vl` expecting it to beat Tesseract on simple line images.
+1. **VLM thua quyết định trên OCR single-line sạch.** qwen2.5vl:7b có CER 31% vs Tesseract 5.53% — gap 25 điểm. Mô hình hallucinate: "1892 - Tạp Chí Vogue..." → "1892 92 92 92 92..." (loop token), "XÃ CHIỀNG ƠN" → "CHÍNH XÁC", "churchill và tưởng giới thạch" → "Churchill và tướng Eisenhower cùng được trao giải thưởng" (cả câu plausible-nhưng-bịa).
+2. **Tool đúng vẫn là tool đúng.** VLM train trên page đầy đủ; trên crop dòng tight không có context tài liệu, prior ngôn ngữ dominate signal visual và mô hình drift sang mode "complete-the-sentence". Head CTC của Tesseract purpose-built cho alignment glyph trái-sang-phải và không có mode fail này.
+3. **Latency: VLM chậm hơn 10×** (818 ms vs 80 ms p50). Cho batch 478 ảnh đây là 6.5 phút vs 39 giây.
+4. **Use case của VLM trong OCR là chỗ khác.** Extraction multi-field (field hoá đơn, CCCD, form có checkbox), chữ viết tay scan, và workflow "OCR + hiểu text" là chỗ VLM kiếm cost. Đã document để user không chộp lấy `qwen2.5vl` mong đợi nó thắng Tesseract trên ảnh dòng đơn giản.
 
-**Recommendation:** **Default OCR stays Tesseract.** VLM OCR is
-appropriate when the downstream task is *understanding* the document,
-not transcribing it — surface as a separate `nom.doc.vlm_extract()`
-path in a future release, not a swap-in OCR backend.
+**Khuyến nghị:** **OCR mặc định giữ Tesseract.** VLM OCR hợp khi task downstream là *hiểu* tài liệu, không phải transcribe nó — surface là một đường `nom.doc.vlm_extract()` riêng trong release tương lai, không phải backend OCR swap-in.
 
-Reproduce: `python benchmarks/accuracy/bench_ocr_real.py --corpus
-benchmarks/data/vn_ocr_subset --variant none --engines ollama_vlm
---ollama-model qwen2.5vl:7b --ollama-base-url http://localhost:11434
---limit 50`
-Baselines: `benchmarks/results/baseline_ocr_vlm_qwen25vl_7b.json`,
-`baseline_ocr_tesseract_50.json`, `baseline_ocr_easyocr_50.json`.
+Tái lập: `python benchmarks/accuracy/bench_ocr_real.py --corpus benchmarks/data/vn_ocr_subset --variant none --engines ollama_vlm --ollama-model qwen2.5vl:7b --ollama-base-url http://localhost:11434 --limit 50`
+Baseline: `benchmarks/results/baseline_ocr_vlm_qwen25vl_7b.json`, `baseline_ocr_tesseract_50.json`, `baseline_ocr_easyocr_50.json`.
 
-### Recommended config (v0.2.x default)
+### Config khuyến nghị (default v0.2.x)
 
 ```python
 from nom.doc import Pipeline
-# Tesseract is wired into nom.doc.OCR by default; install vie traineddata
-# via `apt install tesseract-ocr-vie` (or brew).
+# Tesseract đã wire vào nom.doc.OCR mặc định; cài vie traineddata
+# qua `apt install tesseract-ocr-vie` (hoặc brew).
 pipeline = Pipeline()
 text = pipeline.run("scanned.pdf").text
 ```
-
-The cross-checking-against-published rule (cross-check-against-published-numbers rule): published
-Tesseract `vie` accuracy on synthetic VN benchmarks varies wildly
-(70–97%) by image quality. Our 65.5% exact-match number on real
-ducto489 mid-noise images sits in the lower end of that range — which
-is the corpus, not the engine. Confirmed by the synthetic-clean run
-hitting 100%.
-
----
-
-## Reproducibility
-
-Every "measured" number in this document is reproducible:
-
-```bash
-# Clone
-git clone https://github.com/nrl-ai/nom-vn
-cd nom-vn
-
-# Install
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-
-# Tests (currently 22/22 passing)
-pytest tests/
-
-# nom.text perf benchmark (table above)
-python scripts/bench_text.py
-```
-
-Numbers from external sources (OCR engines, LLM leaderboards) are linked back to their canonical posting. Internal claims labeled "measured" carry a corresponding script in `scripts/`.

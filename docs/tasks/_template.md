@@ -1,68 +1,69 @@
-# {Task name}
+# {Tên task}
 
-> **Template** for `docs/tasks/<name>.md` pages. Each page consolidates
-> everything a user needs to make a decision for one task: what's
-> available publicly, what we built, what we measured, how to reproduce.
-> Delete this blockquote when copying.
+> **Template** cho trang `docs/tasks/<name>.md`. Mỗi trang gộp mọi
+> thứ user cần để ra quyết định cho một task: cái gì có sẵn công khai,
+> chúng tôi đã xây gì, đã đo gì, cách tái lập. Xoá blockquote này
+> khi copy.
 
-## TL;DR — our recommendation
+## TL;DR — gợi ý của chúng tôi
 
-One paragraph. What pip extra to install, what model to use, what license,
-what the measured number is on what register.
+Một đoạn. pip extra nào cần cài, model nào dùng, license gì, số
+đo được là bao nhiêu trên register nào.
 
-## Public landscape
+## Bức tranh công khai
 
-Every row backed by a license + format audit and a measured or cited
-number. **Numbers without a citation or a runnable bench script are
-forbidden.**
+Mỗi hàng phải có audit license + format và một con số đã đo hoặc đã
+trích. **Số không có citation hoặc script bench chạy được là không
+được phép.**
 
-| Model / Tool | License | Format | Reported quality | Verdict |
+| Model / Tool | License | Format | Chất lượng công bố | Kết luận |
 |---|---|---|---:|---|
-| ... | Apache 2.0 | safetensors | XX.XX % on {corpus} | use / skip / TBD |
+| ... | Apache 2.0 | safetensors | XX.XX % trên {corpus} | dùng / bỏ qua / TBD |
 
-## Our pipeline
+## Pipeline của chúng tôi
 
-How `nom.{module}` solves this. Mention the Protocol seam, the default
-backend, and the swap path for users who want a different model.
+`nom.{module}` giải quyết task này như thế nào. Chỉ ra đường nối
+Protocol, backend mặc định, và đường swap cho user muốn model khác.
 
 ```python
-# Typical 3-line use case
+# Use case điển hình 3 dòng
 ```
 
-## Trained models — `nrl-ai/*`
+## Mô hình đã huấn luyện — `nrl-ai/*`
 
-Each model card cites Viet-Anh Nguyen + Neural Research Lab. The
-HF page is verified renderable + loadable before claiming "shipped".
+Mỗi model card đều cite Viet-Anh Nguyen + Neural Research Lab.
+Trang HF được verify render được + load được trước khi claim "đã ship".
 
-| HF model | License | Tier | Δ vs SOTA | When to pick |
+| Model HF | License | Tier | Δ vs SOTA | Khi nào chọn |
 |---|---|---|---:|---|
-| [`nrl-ai/vn-{task}-base`](https://huggingface.co/nrl-ai/vn-{task}-base) | Apache-2.0 | 220 M | TBD | default |
+| [`nrl-ai/vn-{task}-base`](https://huggingface.co/nrl-ai/vn-{task}-base) | Apache-2.0 | 220 M | TBD | mặc định |
 | [`nrl-ai/vn-{task}-small`](https://huggingface.co/nrl-ai/vn-{task}-small) | Apache-2.0 | 60 M | TBD | fast tier |
 
-## Datasets — `nrl-ai/*`
+## Bộ dữ liệu — `nrl-ai/*`
 
-| HF dataset | License | What it is | Splits |
+| Dataset HF | License | Bên trong | Splits |
 |---|---|---|---|
-| [`nrl-ai/vn-{task}-eval`](https://huggingface.co/datasets/nrl-ai/vn-{task}-eval) | mixed | held-out eval | per-register splits |
-| [`nrl-ai/vn-{task}-train`](https://huggingface.co/datasets/nrl-ai/vn-{task}-train) | mixed | training pairs | per-source configs |
+| [`nrl-ai/vn-{task}-eval`](https://huggingface.co/datasets/nrl-ai/vn-{task}-eval) | mixed | eval hold-out | split per-register |
+| [`nrl-ai/vn-{task}-train`](https://huggingface.co/datasets/nrl-ai/vn-{task}-train) | mixed | cặp huấn luyện | config per-source |
 
-## Results — measured
+## Kết quả — đã đo
 
-The headline numbers, with a link to the JSON baseline + the bench script
-that produced them. Every cell is reproducible on a clean clone via the
-committed scripts.
+Số headline, kèm link tới JSON baseline + script bench đã sinh ra
+chúng. Mọi ô đều tái lập được trên một bản clone sạch qua các script
+commit.
 
-| Register | Sentences | Best model | Word acc | Latency |
+| Register | Số câu | Model tốt nhất | Word acc | Latency |
 |---|---:|---|---:|---:|
 | ... | ... | ... | ... | ... |
 
-JSON baselines:
+JSON baseline:
+
 - `benchmarks/results/baseline_<task>_<model>.json`
 
-## Reproduce
+## Tái lập
 
 ```bash
-# Build eval slices (deterministic, no network)
+# Build eval slice (tất định, không cần mạng)
 python benchmarks/data/<corpus>/build_eval.py
 
 # Bench
@@ -70,14 +71,14 @@ python benchmarks/accuracy/bench_<task>.py \
     <model_id> --json benchmarks/results/baseline_<task>_<model>.json
 ```
 
-## Training
+## Huấn luyện
 
-If we trained models for this task, point at:
+Nếu chúng tôi train mô hình cho task này, trỏ tới:
 
-- `training/<task>/README.md` for the experiment history table.
+- `training/<task>/README.md` cho bảng experiment history.
 - `training/<task>/train.py`, `prep_data.py`, `eval_checkpoint.py`,
-  `publish_hf.py` for the full pipeline.
+  `publish_hf.py` cho pipeline đầy đủ.
 
-## References
+## Tham khảo
 
-- Paper / model card / project URL for every claim above.
+- Paper / model card / URL dự án cho mọi claim ở trên.

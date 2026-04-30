@@ -1,235 +1,200 @@
-# Nôm — Architecture
+# Nôm — Kiến trúc
 
-::: tip Tài liệu kỹ thuật
-Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
-Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
-có script đo cam kết trong repo.
-:::
+Một **thư viện duy nhất** với ranh giới submodule rõ ràng. Một repo,
+một package PyPI (`nom-vn`), một license Apache 2.0. Submodule được
+cài qua extras nên user không phải trả cho cái họ không dùng.
 
-A **single library** with a clear submodule boundary. One repo, one PyPI package (`nom-vn`), one Apache 2.0 license. Submodules are individually pip-installable via extras so users don't pay for what they don't use.
+Kiến trúc theo hai nguyên tắc bất di bất dịch trong manual vận hành nội bộ:
 
-The architecture follows two non-negotiable principles from our internal operating manual:
-
-- **Principle 11 — Audit dependencies before adopting.** Pickle/opaque-binary deps auto-reject. Prefer in-tree reimplementation when feasible. Document every dep's license, format, and audit findings in `BENCHMARK.md`.
-- **Principle 12 — Verified benchmarks only.** Every metric in user-facing materials traces to a runnable script (with warmup + best-of-N for throughput) or a cited public source.
+- **Nguyên tắc 11 — Audit dependency trước khi adopt.** Dep pickle/binary opaque auto-reject. Ưu tiên tự re-implement in-tree khi khả thi. Document license, format, và phát hiện audit của mỗi dep trong `BENCHMARK.md`.
+- **Nguyên tắc 12 — Verified benchmarks only.** Mọi metric trong tài liệu user-facing đều phải truy ngược về một script chạy được (có warmup + best-of-N cho throughput) hoặc một nguồn công khai có citation.
 
 ---
 
-## TL;DR — one library, layered submodules
+## TL;DR — một thư viện, submodule phân tầng
 
-```
-                                       nom (core / Nôm brand)
-        ┌──────────────────────────────────┴──────────────────────────────────┐
-        │                                                                     │
-   ┌────▼────┐  ┌──────┐  ┌──────┐  ┌────────────┐  ┌───────┐  ┌─────────┐  ┌────┐  ┌──────┐
-   │  text   │  │ doc  │  │ llm  │  │ embeddings │  │chunk- │  │retrieve │  │rag │  │chat  │
-   │         │  │      │  │      │  │            │  │  ing  │  │         │  │    │  │      │
-   │ pure-py │  │ Pipe │  │Ollama│  │ VN models  │  │VN-aware│  │BM25 +   │  │one-│  │FastAPI│
-   │ no deps │  │-line │  │OpenAI│  │            │  │       │  │ dense + │  │shot │  │+ HTMX│
-   │         │  │      │  │Anthr │  │            │  │       │  │ hybrid  │  │+    │  │ UI   │
-   │         │  │      │  │      │  │            │  │       │  │         │  │chat │  │      │
-   └────┬────┘  └──┬───┘  └──┬───┘  └─────┬──────┘  └───┬───┘  └────┬────┘  └─┬──┘  └──┬───┘
-        │         │          │            │             │           │          │        │
-        └─────────┴──────────┴────────────┴─────────────┴───────────┴──────────┴────────┘
-                                              │
-                                              ▼
-                            One repo: github.com/nrl-ai/nom-vn
-                            One package: nom-vn  (Apache 2.0)
+```mermaid
+flowchart TB
+    NOM["<b>nom</b><br/>core · Nôm brand"]
+    NOM --> TEXT["<b>nom.text</b><br/>pure-py · no deps"]
+    NOM --> DOC["<b>nom.doc</b><br/>Pipeline · PDF/OCR"]
+    NOM --> LLM["<b>nom.llm</b><br/>Ollama · OpenAI · Anthropic"]
+    NOM --> EMB["<b>nom.embeddings</b><br/>VN-aware models"]
+    NOM --> CHUNK["<b>nom.chunking</b><br/>VN-aware splitter"]
+    NOM --> RET["<b>nom.retrieve</b><br/>BM25 + dense + hybrid"]
+    NOM --> RAG["<b>nom.rag</b><br/>one-shot · chat"]
+    NOM --> CHAT["<b>nom.chat</b><br/>FastAPI + React UI"]
+
+    TEXT --> PKG[/"One repo · github.com/nrl-ai/nom-vn<br/>One package · nom-vn · Apache 2.0"/]
+    DOC --> PKG
+    LLM --> PKG
+    EMB --> PKG
+    CHUNK --> PKG
+    RET --> PKG
+    RAG --> PKG
+    CHAT --> PKG
+
+    classDef root fill:#b5563a,stroke:#b5563a,color:#f1ede3,font-weight:bold
+    classDef module fill:#f1ede3,stroke:#141414,stroke-width:1px,color:#141414
+    classDef pkg fill:#e8e3d4,stroke:#141414,stroke-width:1px,color:#141414
+    class NOM root
+    class TEXT,DOC,LLM,EMB,CHUNK,RET,RAG,CHAT module
+    class PKG pkg
 ```
 
-| Submodule | Purpose | Status | Hard deps | Extras |
+| Submodule | Mục đích | Trạng thái | Hard deps | Extras |
 |---|---|---|---|---|
-| `nom.text` | Vietnamese text utilities | shipped v0.0.2 | none | — |
-| `nom.doc` | PDF/image → typed dict pipeline | shipped v0.0.3 | `pydantic` | `[doc]` adds pdf/ocr |
-| `nom.llm` | LLM adapters | shipped v0.0.3 | `pydantic` | `[llm]` adds httpx |
-| `nom.embeddings` | Vietnamese embedding adapters | planned v0.0.4 | `pydantic` | `[embeddings]` adds model loader |
-| `nom.chunking` | VN-aware document chunking | planned v0.0.4 | `pydantic` | — |
-| `nom.retrieve` | BM25 + dense + hybrid scoring | planned v0.0.5 | `pydantic` | — (numpy ships transitively with embeddings) |
-| `nom.index` | Vector-store adapters (Chroma, Qdrant, pgvector) | planned v0.1 | `pydantic` | `[index-chroma]`, `[index-qdrant]`, `[index-pg]` |
-| `nom.rag` | High-level RAG composition | planned v0.1 | `pydantic` | reuses other extras |
-| `nom.chat` | Optional FastAPI app + HTMX UI | planned v0.2 | `pydantic` | `[chat]` adds fastapi, jinja2 |
+| `nom.text` | Tiện ích text tiếng Việt | đã ship v0.0.2 | không | — |
+| `nom.doc` | Pipeline PDF/ảnh → dict typed | đã ship v0.0.3 | `pydantic` | `[doc]` thêm pdf/ocr |
+| `nom.llm` | Adapter LLM | đã ship v0.0.3 | `pydantic` | `[llm]` thêm httpx |
+| `nom.embeddings` | Adapter embedding tiếng Việt | dự kiến v0.0.4 | `pydantic` | `[embeddings]` thêm model loader |
+| `nom.chunking` | Chunking tài liệu nhận biết VN | dự kiến v0.0.4 | `pydantic` | — |
+| `nom.retrieve` | BM25 + dense + hybrid scoring | dự kiến v0.0.5 | `pydantic` | — (numpy ship transitively cùng embeddings) |
+| `nom.index` | Adapter vector store (Chroma, Qdrant, pgvector) | dự kiến v0.1 | `pydantic` | `[index-chroma]`, `[index-qdrant]`, `[index-pg]` |
+| `nom.rag` | Composition RAG cấp cao | dự kiến v0.1 | `pydantic` | reuse extras khác |
+| `nom.chat` | App FastAPI + UI HTMX optional | dự kiến v0.2 | `pydantic` | `[chat]` thêm fastapi, jinja2 |
 
-**One install command grows with use**:
+**Một lệnh cài lớn dần khi dùng**:
 
 ```bash
-pip install nom-vn                            # text + doc.schemas only (no PDF/OCR/LLM)
-pip install "nom-vn[doc]"                     # + PDF, OCR, image handling
-pip install "nom-vn[llm]"                     # + LLM adapters (httpx)
-pip install "nom-vn[embeddings,index-chroma]" # + RAG building blocks with Chroma
-pip install "nom-vn[all]"                     # everything
-pip install "nom-vn[chat]"                    # the deployable chat app
+pip install nom-vn                            # chỉ text + doc.schemas (không PDF/OCR/LLM)
+pip install "nom-vn[doc]"                     # + xử lý PDF, OCR, ảnh
+pip install "nom-vn[llm]"                     # + adapter LLM (httpx)
+pip install "nom-vn[embeddings,index-chroma]" # + building block RAG với Chroma
+pip install "nom-vn[all]"                     # tất cả
+pip install "nom-vn[chat]"                    # chat app deploy được
 ```
 
 ---
 
-## Why one library (and not three)
+## Vì sao một thư viện (chứ không phải ba)
 
-Considered the alternatives and rejected each:
+Cân nhắc các phương án thay thế và loại từng cái:
 
-1. **Three separate repos** (toolkit / RAG glue / chat app) — splits the brand, multiplies CI overhead, makes cross-cutting refactors painful, confuses users about which package to install.
-2. **Mega-monolith with no extras** — every user pulls every dep including the ones they'll never use; install bloats; audit surface explodes.
+1. **Ba repo riêng** (toolkit / RAG glue / chat app) — chia brand, nhân CI overhead, refactor xuyên suốt đau đớn, làm user nhầm package nào nên cài.
+2. **Mega-monolith không có extras** — mọi user kéo mọi dep kể cả cái họ không bao giờ dùng; install phình to; bề mặt audit nổ.
 
-**One repo with extras** matches the actual grain: the *brand* (Nôm) is one thing; the *deployment surface* differs per submodule. Extras let `pip` express that.
+**Một repo với extras** khớp với hạt thực sự: *brand* (Nôm) là một thứ; *bề mặt deploy* khác nhau giữa các submodule. Extras để `pip` thể hiện điều đó.
 
-This also simplifies:
-- **Versioning** — one CHANGELOG, one tag, one release
-- **Cross-cutting refactors** — change a Stage Protocol in `nom.doc`, update the call sites in `nom.rag` in the same PR
-- **Discoverability** — one Github org page, one PyPI page, one docs site
-- **Brand integrity** — every part says "Nôm"
+Cách này cũng đơn giản hoá:
+- **Versioning** — một CHANGELOG, một tag, một release
+- **Refactor xuyên suốt** — đổi một Stage Protocol trong `nom.doc`, update call site trong `nom.rag` cùng PR
+- **Khả năng phát hiện** — một trang Github org, một trang PyPI, một trang doc
+- **Toàn vẹn brand** — mọi phần đều nói "Nôm"
 
 ---
 
-## Protocol seams & scaling path
+## Đường nối Protocol & đường mở rộng quy mô
 
-Every meaningful boundary in `nom-vn` is a `typing.Protocol` (where it
-makes sense, `runtime_checkable`). The fast path is single-process
-Python; the cloud path replaces three Protocol implementations and
-changes nothing in the application layer. State lives in storage;
-computation is stateless. Caching is selective — we cache only what's
-expensive to recompute (embeddings), never what isn't (BM25, parsing).
+Mọi ranh giới có ý nghĩa trong `nom-vn` đều là `typing.Protocol` (chỗ
+hợp lý thì `runtime_checkable`). Đường nhanh là single-process Python;
+đường cloud thay ba implementation Protocol và không đổi gì ở tầng
+ứng dụng. State sống ở storage; computation stateless. Caching có
+chọn lọc — chỉ cache cái đắt để tính lại (embedding), không cache
+cái không đắt (BM25, parsing).
 
-### The seven layers
+### Bảy lớp
 
-| Layer | Role | Stateful? | Today's modules |
+| Lớp | Vai trò | Stateful? | Module hôm nay |
 |---|---|---|---|
-| **0 · Primitives** | VN text utilities, chunking | No | `nom.text`, `nom.chunking` |
-| **1 · Models** | Embedder, LLM, OCR backends | Yes (lazy-loaded weights) | `nom.embeddings`, `nom.llm`, `nom.doc.OCR` |
-| **2 · Retrieval** | BM25, Dense, hybrid fusion | Yes (in-RAM index per corpus) | `nom.retrieve` |
-| **3 · RAG** | Compose models + retrieval into ask() | Immutable per-corpus | `nom.rag.RAG` |
-| **4 · Storage** | Persistence boundary | Yes (the only durable state) | `nom.chat.Store`, `nom.chat.EmbeddingsCache` |
-| **5 · Application** | HTTP + UI bundle, DI factory | No (delegates to Layer 4) | `nom.chat.server.build_app` |
-| **6 · Deployment** | CLI, config, packaging | No | `nom.chat.cli`, `pyproject.toml`, `ui/` |
+| **0 · Primitive** | Tiện ích text VN, chunking | Không | `nom.text`, `nom.chunking` |
+| **1 · Model** | Embedder, LLM, OCR backend | Có (lazy-load weights) | `nom.embeddings`, `nom.llm`, `nom.doc.OCR` |
+| **2 · Retrieval** | BM25, Dense, hybrid fusion | Có (in-RAM index per-corpus) | `nom.retrieve` |
+| **3 · RAG** | Compose model + retrieval thành ask() | Immutable per-corpus | `nom.rag.RAG` |
+| **4 · Storage** | Ranh giới persistence | Có (state persistent duy nhất) | `nom.chat.Store`, `nom.chat.EmbeddingsCache` |
+| **5 · Application** | HTTP + UI bundle, factory DI | Không (delegate cho Lớp 4) | `nom.chat.server.build_app` |
+| **6 · Deployment** | CLI, config, packaging | Không | `nom.chat.cli`, `pyproject.toml`, `ui/` |
 
-### Where each Protocol seam lives in the code
+### Đường nối Protocol nằm đâu trong code
 
-| Seam | Defined in | Default impl | Future impls (concrete, not hypothetical) |
+| Đường nối | Định nghĩa ở | Impl mặc định | Impl tương lai (cụ thể, không giả định) |
 |---|---|---|---|
-| `nom.embeddings.Embedder` | `src/nom/embeddings/base.py` | `VietnameseEmbedder` (BGE-base, 768d) | `AITeamVNEmbedder` (BGE-M3 ft, +27.9% Acc@1 on Zalo Legal — see `docs/sota_vn_2026q2.md`) |
+| `nom.embeddings.Embedder` | `src/nom/embeddings/base.py` | `VietnameseEmbedder` (BGE-base, 768d) | `AITeamVNEmbedder` (BGE-M3 ft, +27.9% Acc@1 trên Zalo Legal — xem `docs/sota_vn_2026q2.md`) |
 | `nom.llm.LLM` | `src/nom/llm/base.py` | `Ollama` | `OpenAI`, `Anthropic`, `LlamaCppPython` |
-| `nom.retrieve.Retriever` | `src/nom/retrieve/base.py` | `BM25Retriever`, `DenseRetriever` (numpy in-RAM) | `FaissRetriever` / `QdrantRetriever` at >100k chunks (planned `nom.index`) |
-| `nom.doc.Stage` | `src/nom/doc/stages.py` | `Tesseract` for OCR | `DotsMocrOCR`, `PaddleOcrV5`, `Qwen3VLOCR` (gated on VN-corpus benchmark per principle 12) |
-| `nom.chat.Store` | `src/nom/chat/store.py` | `MemoryStore`, `SqliteStore` | `PostgresStore` (~250 LOC `psycopg`, no ORM) |
-| `nom.chat.EmbeddingsCache` | `src/nom/chat/embeddings_cache.py` | `LocalDiskCache` (one `.npy` per material), `MemoryCache` | `S3Cache`, `GcsCache`, `RedisCache` |
+| `nom.retrieve.Retriever` | `src/nom/retrieve/base.py` | `BM25Retriever`, `DenseRetriever` (numpy in-RAM) | `FaissRetriever` / `QdrantRetriever` ở >100k chunk (dự kiến `nom.index`) |
+| `nom.doc.Stage` | `src/nom/doc/stages.py` | `Tesseract` cho OCR | `DotsMocrOCR`, `PaddleOcrV5`, `Qwen3VLOCR` (gate qua benchmark corpus VN theo nguyên tắc 12) |
+| `nom.chat.Store` | `src/nom/chat/store.py` | `MemoryStore`, `SqliteStore` | `PostgresStore` (~250 LOC `psycopg`, không ORM) |
+| `nom.chat.EmbeddingsCache` | `src/nom/chat/embeddings_cache.py` | `LocalDiskCache` (một `.npy` per material), `MemoryCache` | `S3Cache`, `GcsCache`, `RedisCache` |
 
-### Data flow (RAG ingest → query → answer)
+### Luồng dữ liệu (ingest RAG → query → answer)
 
-```
-                   [bytes / paths / strings]
-                              │
-                  ┌───────────▼───────────┐
-                  │  nom.doc.Pipeline     │  Layer 1 (Stage Protocol)
-                  │  Load → Parse → OCR   │  swap: Tesseract / dots.mocr / Qwen3-VL
-                  │  → Normalize          │
-                  └───────────┬───────────┘
-                              │   text per doc
-                  ┌───────────▼───────────┐
-                  │  nom.chunking         │  Layer 0
-                  │  smart_chunk()        │  pure Python, no swap
-                  └───────────┬───────────┘
-                              │   list[Chunk]
-                  ┌───────────▼───────────┐
-                  │  nom.embeddings       │  Layer 1 (Embedder Protocol)
-                  │  embed_batch()        │  swap: dangvantuan / AITeamVN / e5-mistral
-                  └───────────┬───────────┘
-                              │   (N, D) float32 + texts
-                  ┌───────────▼───────────┐
-                  │  EmbeddingsCache      │  Layer 4 (Protocol)
-                  │  put(material, vecs)  │  swap: LocalDisk / S3 / Memory
-                  └───────────┬───────────┘
-                              │
-              ┌───────────────┼───────────────┐
-              │               │               │
-   ┌──────────▼─────┐ ┌──────▼────────┐ ┌────▼──────────┐
-   │ BM25Retriever  │ │ DenseRetriever│ │ Future:       │  Layer 2
-   │  (lexical)     │ │  (cosine)     │ │ FaissRetriever│  swap at >100k chunks
-   └──────────┬─────┘ └──────┬────────┘ └────┬──────────┘
-              │              │               │
-              └──────────────┼───────────────┘
-                             │   list[Hit]
-                  ┌──────────▼──────────┐
-                  │  hybrid_score()     │  Layer 2 (function, no swap)
-                  │  RRF fusion         │
-                  └──────────┬──────────┘
-                             │   ranked context
-                  ┌──────────▼──────────┐
-                  │  nom.llm.LLM        │  Layer 1 (LLM Protocol)
-                  │  complete(prompt)   │  swap: Ollama / OpenAI / Anthropic
-                  └──────────┬──────────┘
-                             │
-                       Answer + citations
+```mermaid
+flowchart TB
+    IN[bytes / paths / strings] --> P1
+    P1[nom.doc.Pipeline<br/>Load → Parse → OCR → Normalize<br/>Stage Protocol · swap Tesseract/dots.mocr/Qwen3-VL] -->|text per doc| P2
+    P2[nom.chunking · smart_chunk<br/>pure Python] -->|list of Chunk| P3
+    P3[nom.embeddings · embed_batch<br/>Embedder Protocol] -->|N×D float32 + texts| P4
+    P4[EmbeddingsCache · put<br/>Protocol · swap LocalDisk/S3/Memory] --> R1
+    R1[BM25Retriever · lexical] --> RR
+    P4 --> R2
+    R2[DenseRetriever · cosine] --> RR
+    RR[hybrid_score · RRF fusion] -->|ranked context| L
+    L[nom.llm.LLM · complete<br/>Ollama / OpenAI / Anthropic] --> ANS[Answer + citations]
+
+    classDef stage fill:#f1ede3,stroke:#141414,stroke-width:1px,color:#141414
+    classDef io fill:#e8e3d4,stroke:#141414,stroke-width:1px,color:#141414
+    classDef out fill:#b5563a,stroke:#b5563a,color:#f1ede3
+    class P1,P2,P3,P4,R1,R2,RR,L stage
+    class IN io
+    class ANS out
 ```
 
-### Scaling path (concrete, no fantasy numbers)
+### Đường mở rộng quy mô (cụ thể, không có số tưởng tượng)
 
-| Scale | Topology | Store | EmbeddingsCache | Retriever | Net change |
+| Quy mô | Topology | Store | EmbeddingsCache | Retriever | Thay đổi net |
 |---|---|---|---|---|---|
-| 1 user, laptop | 1 proc | `SqliteStore` | `LocalDiskCache` | BM25 + Dense | (today's default) |
-| 1 user, 100K+ chunks | 1 proc | `SqliteStore` | `LocalDiskCache` | swap → `FaissRetriever` | one constructor swap |
-| Small team, 1 host | uvicorn workers | `SqliteStore` (WAL) | `LocalDiskCache` (shared volume) | as above | add nginx in front |
-| Multi-host / cloud | N stateless app pods | `PostgresStore` | `S3Cache` | `QdrantRetriever` | three Protocol impls, **zero app changes** |
-| Multi-tenant SaaS | N pods + auth | as above + tenant scoping | as above + tenant prefix | as above | add auth middleware in `nom.chat.server` |
+| 1 user, laptop | 1 proc | `SqliteStore` | `LocalDiskCache` | BM25 + Dense | (mặc định hôm nay) |
+| 1 user, 100K+ chunk | 1 proc | `SqliteStore` | `LocalDiskCache` | đổi → `FaissRetriever` | một swap constructor |
+| Team nhỏ, 1 host | uvicorn worker | `SqliteStore` (WAL) | `LocalDiskCache` (volume chia sẻ) | như trên | thêm nginx phía trước |
+| Multi-host / cloud | N pod app stateless | `PostgresStore` | `S3Cache` | `QdrantRetriever` | ba impl Protocol, **không đổi app** |
+| SaaS multi-tenant | N pod + auth | như trên + tenant scoping | như trên + tenant prefix | như trên | thêm middleware auth trong `nom.chat.server` |
 
-Throughput / latency numbers per tier are deliberately omitted —
-those need a benchmark, not a guess (verified-benchmarks rule).
-`benchmarks/perf/` (component-level) and `benchmarks/rag/`
-(end-to-end retrieval) are the places to measure for your workload.
+Số throughput / latency per-tier cố ý bỏ — cần benchmark, không phải
+phỏng đoán (rule verified-benchmarks). `benchmarks/perf/`
+(component-level) và `benchmarks/rag/` (retrieval end-to-end) là chỗ
+để đo cho workload của bạn.
 
-### Anti-architecture rules
+### Anti-architecture rule
 
-What we deliberately **don't** build, and why:
+Cái chúng tôi cố ý **không** xây, và lý do:
 
-1. **No service locator / DI framework.** Pass dependencies through
-   constructors. 8+ params is a sign the class is doing too much.
-2. **No `…Manager` classes.** If the name doesn't describe what it
-   owns, the class probably shouldn't exist.
-3. **No abstract base classes for behavior sharing.** Protocols are
-   for contracts; module-level helpers are for shared code.
-4. **No event-emitter / pub-sub.** Python's call stack is your event
-   log.
-5. **No "future-proof" generic Repository / Entity / DTO layer.**
-   Call things what they are.
-6. **No ORM.** SQL is a language; we know it. Direct `sqlite3` /
-   `psycopg` keeps query plans visible. (Considered SQLAlchemy /
-   SQLModel; rejected — adds ~15 MB of deps to support a one-config
-   swap that's already a 7-method Protocol.)
-7. **No micro-services until we have ≥3 independently-deployed
-   teams.** We have one repo and one developer.
-8. **No config framework.** `argparse` + env vars + a single
-   `Config` dataclass is enough.
+1. **Không service locator / framework DI.** Pass dep qua constructor. 8+ param là dấu hiệu class làm quá nhiều.
+2. **Không class `…Manager`.** Nếu tên không mô tả nó owns cái gì, class đó có lẽ không nên tồn tại.
+3. **Không abstract base class cho behavior sharing.** Protocol cho contract; helper module-level cho code chia sẻ.
+4. **Không event-emitter / pub-sub.** Call stack Python là event log của bạn.
+5. **Không lớp generic Repository / Entity / DTO "future-proof".** Gọi đúng tên cái đang là.
+6. **Không ORM.** SQL là ngôn ngữ; chúng tôi biết. `sqlite3` / `psycopg` direct giữ query plan visible. (Đã cân nhắc SQLAlchemy / SQLModel; loại — thêm ~15 MB dep để hỗ trợ một swap config mà đã là Protocol 7-method.)
+7. **Không micro-service cho đến khi có ≥3 team deploy độc lập.** Chúng tôi có một repo và một dev.
+8. **Không config framework.** `argparse` + env var + một dataclass `Config` là đủ.
 
-### What we deliberately don't abstract
+### Cái chúng tôi cố ý không abstract
 
-- **Tokenization** (`nom.text.word_tokenize`) — too foundational;
-  swapping invalidates every benchmark. Stays a function call.
-- **The fusion algorithm** (`hybrid_score`'s RRF) — too small to
-  warrant a Protocol; just a function with a `method` arg.
-- **Chunking strategy** — `smart_chunk` is a function, not a service.
-  Could grow a `Chunker` Protocol when there's a second strategy
-  worth swapping.
-- **The HTTP framework** (FastAPI) — replacing it would be more work
-  than it's worth. We accept the lock-in.
+- **Tokenization** (`nom.text.word_tokenize`) — quá nền tảng; swap invalidate mọi benchmark. Giữ là function call.
+- **Thuật toán fusion** (RRF của `hybrid_score`) — quá nhỏ để xứng đáng Protocol; chỉ là function với arg `method`.
+- **Chiến lược chunking** — `smart_chunk` là function, không phải service. Có thể lớn lên thành Protocol `Chunker` khi có chiến lược thứ hai đáng swap.
+- **Framework HTTP** (FastAPI) — thay nó tốn công hơn giá trị. Chấp nhận lock-in.
 
 ---
 
-## Module-by-module spec
+## Spec từng module
 
-### `nom.text` — Vietnamese text utilities (shipped, v0.0.2)
+### `nom.text` — Tiện ích text tiếng Việt (đã ship, v0.0.2)
 
-Pure-stdlib normalization, tokenization, sentence splitting. Zero hard deps.
+Normalize, tokenization, sentence splitting pure-stdlib. Zero hard dep.
 
 ```python
 from nom.text import normalize, fix_diacritics, word_tokenize, sent_tokenize, text_normalize
 
-normalize("Hợp đồng số 02")              # NFC composition
-fix_diacritics("Hop dong nay duoc lap")  # rule-based restoration (~41% baseline)
+normalize("Hợp đồng số 02")              # composition NFC
+fix_diacritics("Hop dong nay duoc lap")  # khôi phục rule-based (~41% baseline)
 word_tokenize("Hợp đồng số 02")          # ["Hợp đồng", "số", "02"]
 sent_tokenize("Hôm nay. Anh có cần?")    # ["Hôm nay.", "Anh có cần?"]
-text_normalize("Hợp đồng  ngày 14, tháng 3.")  # whitespace + punct cleanup
+text_normalize("Hợp đồng  ngày 14, tháng 3.")  # dọn whitespace + dấu câu
 ```
 
-### `nom.doc` — Document extraction pipeline (shipped, v0.0.3)
+### `nom.doc` — Pipeline trích xuất tài liệu (đã ship, v0.0.3)
 
-Six-stage Pipeline: Load → Parse → OCR → Normalize → Extract → Validate. All stages real.
+Pipeline 6 stage: Load → Parse → OCR → Normalize → Extract → Validate. Mọi stage đều thật.
 
 ```python
 from nom.doc import extract
@@ -242,32 +207,32 @@ result = extract(
 )
 ```
 
-See `docs/pipeline.md` for the full per-stage detail.
+Xem `docs/pipeline.md` cho chi tiết per-stage đầy đủ.
 
-### `nom.llm` — LLM adapters (shipped, v0.0.3)
+### `nom.llm` — Adapter LLM (đã ship, v0.0.3)
 
 ```python
-from nom.llm import Ollama, OpenAI, Anthropic   # only Ollama is real today
+from nom.llm import Ollama, OpenAI, Anthropic   # hôm nay chỉ Ollama là thật
 
 llm = Ollama(model="qwen3:8b")
 llm.complete("Tóm tắt văn bản:", schema=optional_json_schema)
 ```
 
-`LLM` is a `Protocol` — any class with `complete(prompt, schema, max_tokens) -> str` qualifies. Users can wire custom backends without inheriting from us.
+`LLM` là `Protocol` — bất kỳ class nào có `complete(prompt, schema, max_tokens) -> str` đều đủ tiêu chuẩn. User wire backend tuỳ biến mà không cần inherit từ chúng tôi.
 
-### `nom.embeddings` — Vietnamese embedding adapters (planned v0.0.4)
+### `nom.embeddings` — Adapter embedding tiếng Việt (dự kiến v0.0.4)
 
 ```python
 from nom.embeddings import VietnameseEmbedder, Embedder
 
-embedder: Embedder = VietnameseEmbedder()           # default model
+embedder: Embedder = VietnameseEmbedder()           # mô hình mặc định
 vec = embedder.embed("Hợp đồng số 02")               # → np.ndarray
 vecs = embedder.embed_batch([...])                   # → np.ndarray (N, D)
 ```
 
-**Default model**: `AITeamVN/Vietnamese_Embedding` (BGE-M3 fine-tune on ~300k VN triplets, top performer on [VN-MTEB](https://arxiv.org/html/2507.21500v1)). Apache 2.0 weights, `safetensors` format (deterministic, not pickle).
+**Mô hình mặc định**: `AITeamVN/Vietnamese_Embedding` (fine-tune BGE-M3 trên ~300k triplet VN, top performer trên [VN-MTEB](https://arxiv.org/html/2507.21500v1)). Weights Apache 2.0, format `safetensors` (tất định, không pickle).
 
-`Embedder` is a `Protocol`:
+`Embedder` là `Protocol`:
 
 ```python
 class Embedder(Protocol):
@@ -277,7 +242,7 @@ class Embedder(Protocol):
     def embed_batch(self, texts: list[str]) -> NDArray: ...
 ```
 
-### `nom.chunking` — VN-aware document chunking (planned v0.0.4)
+### `nom.chunking` — Chunking tài liệu nhận biết VN (dự kiến v0.0.4)
 
 ```python
 from nom.chunking import smart_chunk
@@ -291,9 +256,9 @@ chunks = smart_chunk(
 # → list[Chunk(text, start, end, n_tokens, metadata)]
 ```
 
-Pure Python. Uses `nom.text.sent_tokenize` for VN-aware boundaries. Token counts via `nom.text.word_tokenize` (compounds count as 1).
+Pure Python. Dùng `nom.text.sent_tokenize` cho boundary VN-aware. Đếm token qua `nom.text.word_tokenize` (compound đếm là 1).
 
-### `nom.retrieve` — In-process retrieval primitives (planned v0.0.5)
+### `nom.retrieve` — Primitive retrieval in-process (dự kiến v0.0.5)
 
 ```python
 from nom.retrieve import BM25Retriever, DenseRetriever, hybrid_score
@@ -306,9 +271,9 @@ dense_hits = dense.search(embedder.embed(query), top_k=20)
 fused = hybrid_score(bm25_hits, dense_hits, alpha=0.5, method="rrf")
 ```
 
-In-process numpy; no DB. For up to ~100k chunks this is fine — most users never need to graduate.
+In-process numpy; không DB. Cho lên đến ~100k chunk là đủ — đa số user không bao giờ cần graduate.
 
-### `nom.index` — Vector-store adapters (planned v0.1)
+### `nom.index` — Adapter vector store (dự kiến v0.1)
 
 ```python
 from nom.index import ChromaIndex, QdrantIndex, PgVectorIndex, Index
@@ -318,9 +283,9 @@ index.upsert(chunks_with_embeddings)
 hits = index.query(query_vector, top_k=10)
 ```
 
-`Index` is a `Protocol`. Each backend is opt-in via extras: `pip install "nom-vn[index-chroma]"`. Users with their own vector store implement the Protocol and skip the extras entirely.
+`Index` là `Protocol`. Mỗi backend opt-in qua extras: `pip install "nom-vn[index-chroma]"`. User có vector store của riêng họ implement Protocol và skip extras hoàn toàn.
 
-### `nom.rag` — High-level RAG composition (planned v0.1)
+### `nom.rag` — Composition RAG cấp cao (dự kiến v0.1)
 
 ```python
 from nom.rag import IngestPipeline, RAGSession
@@ -337,250 +302,222 @@ llm = Ollama(model="qwen3:8b")
 ingest = IngestPipeline(index=index, embedder=embedder, chunk_size=512)
 ingest.add_files(["contracts/*.pdf"])
 
-# 3. Ask
+# 3. Hỏi
 session = RAGSession(index=index, embedder=embedder, llm=llm)
 answer = session.ask("Có bao nhiêu hợp đồng có điều khoản phạt vi phạm trên 10%?")
-print(answer.text)         # the LLM's answer
+print(answer.text)         # câu trả lời của LLM
 print(answer.citations)    # [(doc_id, page, chunk_idx), ...]
 ```
 
-Composes the lower-level submodules; doesn't add new external concepts. A user who wants a different chunker or a different reranker swaps it in via the Protocol.
+Compose các submodule cấp thấp; không thêm khái niệm bên ngoài mới. User muốn chunker khác hay reranker khác swap qua Protocol.
 
-### `nom.chat` — Deployable chat app (planned v0.2)
+### `nom.chat` — Chat app deploy được (dự kiến v0.2)
 
-The final headline product: a self-contained web app for Vietnamese
-document Q&A. Ships **inside the Python package** so users get the full
-experience with ``pip install`` + one CLI command.
+Sản phẩm headline cuối cùng: web app tự đứng cho Q&A tài liệu tiếng
+Việt. Ship **bên trong package Python** để user có trải nghiệm đầy đủ
+với ``pip install`` + một lệnh CLI.
 
 ```bash
 pip install "nom-vn[chat]"
-nom serve                    # starts FastAPI + ships pre-built UI
-# → opens http://localhost:8080
+nom serve                    # khởi FastAPI + ship UI build sẵn
+# → mở http://localhost:8080
 ```
 
 ```python
-# Or mount in an existing app
+# Hoặc mount trong app có sẵn
 from nom.chat import build_app
-app = build_app(...)         # returns a FastAPI instance
+app = build_app(...)         # trả về một instance FastAPI
 ```
 
-#### User-facing concepts
+#### Khái niệm user-facing
 
-- **Space** — a folder of documents the user is asking about. Owns its
-  own embeddings index. Examples: "2025 Contracts", "HR Policies",
-  "Q3 Reports". Users create / rename / delete spaces.
-- **Materials** — documents uploaded to a space. PDF / image / text.
-  Run through the v0.0.x toolkit on upload: extract → chunk → embed →
-  index.
-- **Ask** — natural-language Q&A over a space. Answer + cited source
-  chunks (page, location). Streamed.
-- **History** — past questions per space, persistent.
+- **Space** — folder tài liệu user đang hỏi. Sở hữu index embedding riêng. Ví dụ: "Hợp đồng 2025", "Chính sách HR", "Báo cáo Q3". User tạo / rename / xoá space.
+- **Material** — tài liệu upload vào space. PDF / ảnh / text. Chạy qua toolkit v0.0.x khi upload: extract → chunk → embed → index.
+- **Hỏi** — Q&A bằng ngôn ngữ tự nhiên trên một space. Trả lời + chunk nguồn được trích (page, location). Stream.
+- **Lịch sử** — câu hỏi quá khứ per-space, persistent.
 
 #### Frontend — ShadCN UI
 
-- **Stack**: React 19 + TypeScript + Vite for build · Tailwind CSS ·
-  ShadCN/ui (Radix UI primitives + idiomatic component recipes).
-- **Why ShadCN**: copy-in component library, no runtime dependency on
-  a UI framework, accessible defaults, MIT-licensed, easy to brand.
-- **Design language**: simple, signature, user-friendly. Specifically:
-    - **Simple**: every screen has one primary action (create space /
-      upload material / ask question). No navigation tree deeper than
-      two levels.
-    - **Signature**: a recognizable visual identity — restrained
-      palette (one accent color), one display typeface for headings,
-      consistent spacing, the Nôm character mark in the chrome. The
-      same restraint as `nrl.ai` so the brand carries.
-    - **User-friendly**: keyboard-driven primary flows, fast
-      streaming responses, citations always visible (not hidden behind
-      tooltips), graceful empty states with clear next-action prompts.
-- **Build artifact**: ``nom/chat/ui/dist/`` (committed pre-built
-  assets) so `pip install` ships the UI; users don't need Node.
+- **Stack**: React 19 + TypeScript + Vite cho build · Tailwind CSS · ShadCN/ui (Radix UI primitive + recipe component idiomatic).
+- **Vì sao ShadCN**: thư viện component copy-in, không có runtime dependency vào framework UI, default accessible, MIT-licensed, dễ brand.
+- **Ngôn ngữ thiết kế**: simple, signature, user-friendly. Cụ thể:
+    - **Simple**: mọi screen có một primary action (tạo space / upload material / hỏi). Không có cây navigation sâu hơn 2 cấp.
+    - **Signature**: bản sắc visual nhận diện được — palette tiết chế (một màu accent), một display typeface cho heading, spacing nhất quán, mark chữ Nôm trong chrome. Cùng tiết chế như `nrl.ai` để brand mang theo.
+    - **User-friendly**: flow primary keyboard-driven, response streaming nhanh, citation luôn visible (không ẩn sau tooltip), empty state graceful với prompt next-action rõ ràng.
+- **Build artifact**: ``nom/chat/ui/dist/`` (asset build sẵn commit) để `pip install` ship UI; user không cần Node.
 
 #### Backend — FastAPI
 
-- Routes for: ``/api/spaces`` (CRUD), ``/api/spaces/{id}/materials``
-  (upload, list, delete), ``/api/spaces/{id}/ask`` (streaming Q&A
-  with cited chunks), ``/api/spaces/{id}/history``.
-- Auth: simple username/password by default (single-user laptop
-  deployment); pluggable to OIDC for org deployments.
-- Storage: SQLite by default (zero-config, file-based); optional
-  Postgres for multi-user.
-- Vector index: ``nom.index.ChromaIndex`` per space (file-backed,
-  embedded, no server).
+- Route cho: ``/api/spaces`` (CRUD), ``/api/spaces/{id}/materials`` (upload, list, delete), ``/api/spaces/{id}/ask`` (Q&A streaming với chunk được trích), ``/api/spaces/{id}/history``.
+- Auth: username/password đơn giản mặc định (deploy laptop single-user); pluggable sang OIDC cho deploy org.
+- Storage: SQLite mặc định (zero-config, dạng file); Postgres tuỳ chọn cho multi-user.
+- Vector index: ``nom.index.ChromaIndex`` per-space (file-backed, embedded, không server).
 
-#### CLI surface
+#### Bề mặt CLI
 
 ```bash
-nom serve                           # start the web app
+nom serve                           # khởi web app
 nom serve --host 0.0.0.0 --port 8080
-nom space create "Contracts 2025"   # CLI alternatives to the UI
+nom space create "Contracts 2025"   # alternative CLI cho UI
 nom space upload <id> ./contract.pdf
 nom space ask <id> "Bao nhiêu hợp đồng có phạt vi phạm trên 10%?"
 ```
 
-#### Architecture sketch
+#### Sketch kiến trúc
 
-```
-                  ┌────────────────────────────────────────┐
-                  │  Browser  (ShadCN UI / React + Tailwind)│
-                  └──────────────────┬─────────────────────┘
-                                     │ HTTPS (REST + SSE for streaming)
-                  ┌──────────────────▼─────────────────────┐
-                  │  FastAPI (nom.chat.server)             │
-                  │  /api/spaces · /materials · /ask       │
-                  └────┬─────────────────────────────┬─────┘
-                       │ uses                        │ uses
-              ┌────────▼──────────┐        ┌─────────▼────────────┐
-              │  nom.rag          │        │  Auth / Sessions     │
-              │  IngestPipeline   │        │  (passlib + JWT)     │
-              │  RAGSession       │        └─────────┬────────────┘
-              └────────┬──────────┘                  │
-                       │                             │
-                       ▼                             ▼
-             ┌─────────────────────┐  ┌──────────────────────────┐
-             │ nom.text/doc/llm    │  │ SQLite (default) or      │
-             │ /embeddings/        │  │ Postgres                 │
-             │ chunking/retrieve/  │  │ (users, spaces, history) │
-             │ index               │  └──────────────────────────┘
-             └─────────────────────┘
+```mermaid
+flowchart TB
+    BR[Browser · ShadCN UI · React + Tailwind] -->|HTTPS · REST + SSE streaming| API
+    API[FastAPI · nom.chat.server<br/>/api/spaces · /materials · /ask]
+    API -->|uses| RAG2[nom.rag · IngestPipeline · RAGSession]
+    API -->|uses| AUTH[Auth / Sessions<br/>passlib + JWT]
+    RAG2 --> CORE[nom.text/doc/llm/embeddings<br/>chunking/retrieve/index]
+    AUTH --> DB[SQLite mặc định hoặc Postgres<br/>users · spaces · history]
+
+    classDef ext fill:#e8e3d4,stroke:#141414,stroke-width:1px,color:#141414
+    classDef int fill:#f1ede3,stroke:#141414,stroke-width:1px,color:#141414
+    classDef store fill:#b5563a,stroke:#b5563a,color:#f1ede3
+    class BR ext
+    class API,RAG2,AUTH,CORE int
+    class DB store
 ```
 
-#### What ``nom.chat`` adds on top of ``nom.rag``
+#### ``nom.chat`` thêm gì trên ``nom.rag``
 
 - HTTP API + streaming SSE
-- Browser UI (built React assets in-tree)
-- Space + material + history models (SQLite/Postgres)
-- Auth + session management
-- ``nom serve`` CLI entry point
-- ``Dockerfile`` + ``docker-compose.yml`` for self-host
+- UI Browser (asset React build sẵn in-tree)
+- Model space + material + history (SQLite/Postgres)
+- Auth + quản lý session
+- Entry point CLI ``nom serve``
+- ``Dockerfile`` + ``docker-compose.yml`` cho self-host
 
-All shipped in the same ``nom-vn`` package, behind ``[chat]`` extras.
+Tất cả ship trong cùng package ``nom-vn``, sau extras ``[chat]``.
 
 ---
 
-## Component picks — lightweight, fast, accurate, local, replaceable
+## Lựa chọn component — nhẹ, nhanh, chính xác, cục bộ, swap được
 
-The single hardest design choice for a Vietnamese AI toolkit is which models / engines to default to. Goals, ranked:
+Quyết định thiết kế khó nhất cho toolkit AI tiếng Việt là chọn model / engine nào làm mặc định. Mục tiêu, xếp hạng:
 
-1. **Local-first** — everything works offline, no cloud account required
-2. **Lightweight** — default install footprint stays small
-3. **Fast** — measured throughput / latency, not vibes
-4. **Accurate enough** — published benchmark numbers, with citations
-5. **Replaceable** — every component sits behind a `Protocol` so users can swap without forking us
+1. **Local-first** — mọi thứ chạy offline, không cần account cloud
+2. **Nhẹ** — footprint cài mặc định nhỏ
+3. **Nhanh** — throughput / latency đo được, không phải vibe
+4. **Chính xác đủ** — số benchmark đã công bố, có citation
+5. **Swap được** — mọi component nằm sau `Protocol` để user swap không fork chúng tôi
 
-For each axis, we ship a **default** (the sweet spot), a **lighter** option (resource-constrained / edge), and document a **higher-accuracy** option (when users have GPU + budget). Defaults install with `pip install nom-vn[<extra>]`; the others are user-installed.
+Cho mỗi trục, chúng tôi ship **default** (sweet spot), một lựa chọn **nhẹ hơn** (resource-constrained / edge), và document một lựa chọn **độ chính xác cao hơn** (khi user có GPU + ngân sách). Default cài với `pip install nom-vn[<extra>]`; cái khác user tự cài.
 
-### LLM (local) — `nom.llm`
+### LLM (cục bộ) — `nom.llm`
 
-| Tier | Model | Size on disk | RAM/VRAM | Quality |
+| Tier | Model | Disk | RAM/VRAM | Chất lượng |
 |---|---|---|---|---|
-| Light | `qwen3:1.7b` (Q4) | ~1 GB | ~2 GB | Acceptable for short extractions |
-| **Default** | **`qwen3:8b`** (Q4) | **~5 GB** | **~6 GB** | **Strong VN, runs on consumer laptop** |
-| Heavy (cloud or beefy GPU) | `qwen3:32b` (Q4) | ~20 GB | ~24 GB | Top open-weight VN |
+| Light | `qwen3:1.7b` (Q4) | ~1 GB | ~2 GB | Chấp nhận được cho extraction ngắn |
+| **Default** | **`qwen3:8b`** (Q4) | **~5 GB** | **~6 GB** | **VN mạnh, chạy laptop consumer** |
+| Heavy (cloud hoặc GPU mạnh) | `qwen3:32b` (Q4) | ~20 GB | ~24 GB | Top open-weight VN |
 
-- Hosted via **Ollama** (Apache 2.0 server, deterministic structured-output `format=schema` API).
+- Host qua **Ollama** (server Apache 2.0, API structured-output `format=schema` tất định).
 - Adapter: `nom.llm.Ollama(model="qwen3:8b")`.
-- Replace with: any class implementing `LLM.complete(prompt, schema=None) -> str`. Cloud adapters (`OpenAI`, `Anthropic`) ship as stubs today, real impls follow same Protocol.
+- Thay bằng: bất kỳ class nào implement `LLM.complete(prompt, schema=None) -> str`. Adapter cloud (`OpenAI`, `Anthropic`) ship dạng stub hôm nay, impl thật theo cùng Protocol.
 
-**Why Qwen3 over Llama-3 for VN default**: Qwen3 holds Apache 2.0, supports >100 languages (strong VN per `vmlu.ai/leaderboard`), and ships in 1.7B/8B/32B sizes covering the full lightweight→heavy axis. Llama-3 has restrictive license terms; Qwen3 has none.
+**Vì sao Qwen3 thay Llama-3 cho default VN**: Qwen3 giữ Apache 2.0, hỗ trợ >100 ngôn ngữ (VN mạnh theo `vmlu.ai/leaderboard`), và ship ở size 1.7B/8B/32B phủ trục lightweight→heavy đầy đủ. Llama-3 có terms license restrictive; Qwen3 không.
 
-### Embeddings (local) — `nom.embeddings`
+### Embedding (cục bộ) — `nom.embeddings`
 
-| Tier | Model | Size | Dim | Quality (VN-MTEB) |
+| Tier | Model | Size | Dim | Chất lượng (VN-MTEB) |
 |---|---|---|---|---|
-| Light | `paraphrase-multilingual-MiniLM-L12-v2` | ~120 MB | 384 | Multilingual, decent VN |
-| **Default** | **`dangvantuan/vietnamese-embedding`** | **~440 MB** | **768** | **84.87 STS Pearson — top of public VN-MTEB at its size class** |
-| Heavy | `AITeamVN/Vietnamese_Embedding` (BGE-M3 fine-tune) | ~2 GB | 1024 | Highest reported VN retrieval quality |
+| Light | `paraphrase-multilingual-MiniLM-L12-v2` | ~120 MB | 384 | Multilingual, VN tạm |
+| **Default** | **`dangvantuan/vietnamese-embedding`** | **~440 MB** | **768** | **84.87 STS Pearson — top VN-MTEB công khai ở size class** |
+| Heavy | `AITeamVN/Vietnamese_Embedding` (fine-tune BGE-M3) | ~2 GB | 1024 | Chất lượng retrieval VN cao nhất công bố |
 
-- All three are **`safetensors`** format (deterministic, not pickle — passes our no-pickle policy).
-- Apache 2.0 weights for default + heavy; MIT for light.
-- Adapter: `nom.embeddings.VietnameseEmbedder()` (default), constructor accepts an alternative `model_name=...`.
-- Replace with: any class implementing `Embedder.embed(text) -> ndarray` + `embed_batch`.
+- Cả ba đều format **`safetensors`** (tất định, không pickle — qua chính sách no-pickle).
+- Weights Apache 2.0 cho default + heavy; MIT cho light.
+- Adapter: `nom.embeddings.VietnameseEmbedder()` (default), constructor chấp nhận `model_name=...` thay thế.
+- Thay bằng: bất kỳ class nào implement `Embedder.embed(text) -> ndarray` + `embed_batch`.
 
-### Tokenizer / Sentence splitter (local) — `nom.text`
+### Tokenizer / Sentence splitter (cục bộ) — `nom.text`
 
-| Tier | Approach | Size | Throughput | Boundary agreement vs upstream |
+| Tier | Cách tiếp cận | Size | Throughput | Đồng thuận boundary so với upstream |
 |---|---|---|---|---|
-| **Default (and only)** | **Pure-Python rule-based with curated compound table** | **~30 KB** | **734k tok/s** | **77.77% Jaccard vs underthesea CRF** |
+| **Default (và duy nhất)** | **Pure-Python rule-based với bảng compound được curate** | **~30 KB** | **734k tok/s** | **77.77% Jaccard so với CRF underthesea** |
 
-Already shipped (v0.0.2). Zero deps, zero binaries. v0.0.3 plan: train our own CRF/transformer to close the gap, ship weights with checksums and a public training script.
+Đã ship (v0.0.2). Zero dep, zero binary. Kế hoạch v0.0.3: train CRF/transformer của riêng để khép gap, ship weights với checksum và một script training công khai.
 
-Replace with: any callable matching `word_tokenize(text) -> list[str]`. (Not a Protocol class — just a function shape.)
+Thay bằng: bất kỳ callable nào khớp `word_tokenize(text) -> list[str]`. (Không phải class Protocol — chỉ là hình dạng function.)
 
-### OCR (local) — `nom.doc.OCR`
+### OCR (cục bộ) — `nom.doc.OCR`
 
-| Tier | Engine | Size | Accuracy on VN scans (cited) |
+| Tier | Engine | Size | Độ chính xác trên scan VN (đã trích) |
 |---|---|---|---|
-| Light (default) | **Tesseract 5 + `vie` traineddata** | **~30 MB** + 5 MB lang pack | **70-97% (image-quality dependent)** |
-| Heavy (opt-in) | PaddleOCR PP-OCRv5 | ~500 MB | 94.5% on OmniDocBench |
+| Light (default) | **Tesseract 5 + traineddata `vie`** | **~30 MB** + 5 MB lang pack | **70-97% (phụ thuộc chất lượng ảnh)** |
+| Heavy (opt-in) | PaddleOCR PP-OCRv5 | ~500 MB | 94.5% trên OmniDocBench |
 
-- Tesseract is system-installed (`apt install tesseract-ocr tesseract-ocr-vie` on Debian/Ubuntu, `brew install tesseract tesseract-lang` on macOS).
-- pytesseract is a thin wrapper (~hundreds of LOC).
-- Replace with: any class matching `OCR.run(ctx)` Stage Protocol.
+- Tesseract cài hệ thống (`apt install tesseract-ocr tesseract-ocr-vie` trên Debian/Ubuntu, `brew install tesseract tesseract-lang` trên macOS).
+- pytesseract là wrapper mỏng (~hàng trăm LOC).
+- Thay bằng: bất kỳ class nào khớp Protocol Stage `OCR.run(ctx)`.
 
-### PDF parsing (local) — `nom.doc.Parse`
+### Parsing PDF (cục bộ) — `nom.doc.Parse`
 
-| Tier | Library | Size | Speed | License |
+| Tier | Thư viện | Size | Tốc độ | License |
 |---|---|---|---|---|
 | **Default** | **pdfplumber (+ pdfminer.six)** | **~3 MB** | 0.5×–1× | **MIT (permissive)** |
-| Heavy (opt-in) | PyMuPDF / fitz | ~30 MB | 19× faster | **AGPL** (license-restricted) |
+| Heavy (opt-in) | PyMuPDF / fitz | ~30 MB | nhanh hơn 19× | **AGPL** (license-restricted) |
 
-Permissive license wins the default slot. Users who can comply with AGPL get the speed bump via `Parse(backend="pymupdf")`.
+License permissive thắng slot mặc định. User comply được AGPL được tăng tốc qua `Parse(backend="pymupdf")`.
 
-### Vector store (local) — `nom.index` (planned v0.1)
+### Vector store (cục bộ) — `nom.index` (dự kiến v0.1)
 
-| Tier | Backend | Size | Ops/s (rough) | When to pick |
+| Tier | Backend | Size | Ops/s (xấp xỉ) | Khi nào chọn |
 |---|---|---|---|---|
-| Tiny | In-process numpy (`nom.retrieve.DenseRetriever`) | 0 (already in core) | bounded by RAM | <100k chunks, prototyping, tests |
-| **Default** | **ChromaDB (local, embedded)** | **~50 MB** | **~5k qps for top-10 over 1M vectors** | Most apps |
-| Heavy | Qdrant (separate server) | ~80 MB binary + server | ~50k qps | Production / multi-tenant |
-| Existing infra | pgvector | uses your Postgres | depends on PG | Teams with Postgres already |
+| Tiny | numpy in-process (`nom.retrieve.DenseRetriever`) | 0 (đã trong core) | bị bound bởi RAM | <100k chunk, prototype, test |
+| **Default** | **ChromaDB (cục bộ, embedded)** | **~50 MB** | **~5k qps cho top-10 trên 1M vector** | Hầu hết app |
+| Heavy | Qdrant (server riêng) | ~80 MB binary + server | ~50k qps | Production / multi-tenant |
+| Hạ tầng có sẵn | pgvector | dùng Postgres của bạn | phụ thuộc PG | Team đã có Postgres |
 
-- Each lives behind `[index-chroma]`, `[index-qdrant]`, `[index-pgvector]` extras. Users install only what they need.
-- All implement the same `Index` Protocol — apps swap backends without code changes beyond construction.
+- Mỗi cái sống sau extras `[index-chroma]`, `[index-qdrant]`, `[index-pgvector]`. User cài chỉ cái cần.
+- Tất cả implement cùng Protocol `Index` — app swap backend không đổi code ngoài construction.
 
-### Chunking — `nom.chunking` (planned v0.0.4)
+### Chunking — `nom.chunking` (dự kiến v0.0.4)
 
-Pure-Python, no models, no deps. Uses `nom.text.sent_tokenize` + `word_tokenize` for VN-aware boundaries. Sizes are negligible.
+Pure-Python, không model, không dep. Dùng `nom.text.sent_tokenize` + `word_tokenize` cho boundary VN-aware. Size không đáng kể.
 
-### Reranker (optional) — `nom.rag.Reranker` (planned v0.1+)
+### Reranker (tuỳ chọn) — `nom.rag.Reranker` (dự kiến v0.1+)
 
-| Tier | Approach | Size | Notes |
+| Tier | Cách tiếp cận | Size | Ghi chú |
 |---|---|---|---|
-| **Default** | **None** — hybrid BM25+dense usually sufficient | 0 | Skip the layer entirely |
-| Light (opt-in) | `cross-encoder/ms-marco-MiniLM-L-6-v2` | ~80 MB | Fast, multilingual, good enough for English-heavy mixed input |
-| VN-tuned | (Open question — see "Open questions" below) | TBD | We may train our own; track v0.0.3+ |
+| **Default** | **Không** — hybrid BM25+dense thường đủ | 0 | Skip lớp này hoàn toàn |
+| Light (opt-in) | `cross-encoder/ms-marco-MiniLM-L-6-v2` | ~80 MB | Nhanh, multilingual, đủ cho input mixed nặng tiếng Anh |
+| VN-tuned | (Câu hỏi mở — xem "Open questions" bên dưới) | TBD | Có thể train của riêng; track v0.0.3+ |
 
-### Diacritic restoration — `nom.text.fix_diacritics`
+### Khôi phục dấu — `nom.text.fix_diacritics`
 
-| Tier | Approach | Word accuracy on our corpus | Notes |
+| Tier | Cách tiếp cận | Word accuracy trên corpus | Ghi chú |
 |---|---|---|---|
-| **Default (shipped)** | Rule-based table (~120 entries) | **~41%** (measured) | Zero deps, instant |
-| v0.0.3 plan | DistilBERT-Viet wrapper OR our own char-level model | targeting >90% | Behind `[diacritics]` extra; weights shipped with checksum |
+| **Default (đã ship)** | Bảng rule-based (~120 entry) | **~41%** (đã đo) | Zero dep, instant |
+| Kế hoạch v0.0.3 | Wrapper DistilBERT-Viet HOẶC mô hình char-level của riêng | target >90% | Sau extras `[diacritics]`; weights ship với checksum |
 
-The v0.0.3 component will be picked based on measured accuracy *and* model size — leaning toward training a small in-tree model so we can ship weights without depending on a third-party HuggingFace ID we don't control.
+Component v0.0.3 sẽ chọn dựa trên độ chính xác đo được *và* size mô hình — nghiêng về train mô hình nhỏ in-tree để ship weights mà không phụ thuộc HuggingFace ID bên thứ ba ta không kiểm soát.
 
 ---
 
-## Replaceability — every default is a Protocol
+## Khả năng thay thế — mọi default đều là Protocol
 
-Every component above sits behind a typing Protocol. Users replace the default by writing their own class with the same shape — no inheritance from us, no import of our base class, no decorator magic.
+Mọi component ở trên đều nằm sau Protocol typing. User thay default bằng cách viết class của riêng cùng hình dạng — không inherit từ chúng tôi, không import base class của chúng tôi, không decorator ma thuật.
 
 ```python
-# Example: swap the LLM with a hosted provider
+# Ví dụ: swap LLM với provider hosted
 from nom.doc import extract
 
 class MyAzureOpenAI:
     name = "azure-openai"
     def complete(self, prompt, *, schema=None, max_tokens=2048):
-        # ...your code...
+        # ...code của bạn...
         return response_text
 
 result = extract("doc.pdf", schema={...}, llm=MyAzureOpenAI())
 ```
 
 ```python
-# Example: swap the Embedder with a custom domain-trained model
+# Ví dụ: swap Embedder với mô hình train trên domain riêng
 from nom.embeddings import Embedder
 import numpy as np
 
@@ -592,144 +529,144 @@ class LegalDomainEmbedder:
 ```
 
 ```python
-# Example: swap the entire Pipeline composition
+# Ví dụ: swap toàn bộ composition Pipeline
 from nom.doc import Pipeline, Load, Parse, Normalize, Extract, Validate
 
-# Skip OCR + Normalize for known-clean text input
+# Skip OCR + Normalize cho input text biết là sạch
 pipe = Pipeline([Load(), Parse(), Extract(my_llm), Validate()])
 ```
 
-The published Protocol surface is intentionally small. Adding capabilities (streaming, batching, async) is additive — existing implementations keep working.
+Bề mặt Protocol công bố cố ý nhỏ. Thêm khả năng (streaming, batching, async) là additive — implementation hiện tại tiếp tục chạy.
 
 ---
 
-## Cross-cutting design rules
+## Rule thiết kế xuyên suốt
 
-### 1. Hard deps stay tiny
+### 1. Hard dep giữ tí hon
 
-- **`pydantic`** is the only required runtime dep. Every other module's needs go behind extras.
-- A user who only wants `fix_diacritics` pays nothing for `nom.chat`'s FastAPI dep.
+- **`pydantic`** là dep runtime bắt buộc duy nhất. Mọi nhu cầu module khác sau extras.
+- User chỉ muốn `fix_diacritics` không trả gì cho dep FastAPI của `nom.chat`.
 
-### 2. Protocol-first interfaces (no ABC inheritance)
+### 2. Interface Protocol-first (không inherit ABC)
 
-Every public IO surface is a `typing.Protocol`. Users implement protocols in their own classes without importing our base classes. This keeps the dependency arrow pointing the right way.
+Mọi bề mặt IO public là `typing.Protocol`. User implement protocol trong class của riêng mà không import base class của chúng tôi. Cách này giữ mũi tên dependency trỏ đúng hướng.
 
-Protocols already shipped or planned:
-- `LLM.complete(prompt, schema=None) -> str` — `nom.llm` (shipped)
-- `Stage.run(ctx) -> Context` — `nom.doc` (shipped)
-- `Embedder.embed(text) -> ndarray` — `nom.embeddings` (planned)
-- `Index.upsert/query` — `nom.index` (planned)
-- `Reranker.score(query, docs)` — `nom.rag` (planned)
+Protocol đã ship hoặc dự kiến:
+- `LLM.complete(prompt, schema=None) -> str` — `nom.llm` (đã ship)
+- `Stage.run(ctx) -> Context` — `nom.doc` (đã ship)
+- `Embedder.embed(text) -> ndarray` — `nom.embeddings` (dự kiến)
+- `Index.upsert/query` — `nom.index` (dự kiến)
+- `Reranker.score(query, docs)` — `nom.rag` (dự kiến)
 
-### 3. Explicit submodule boundaries
+### 3. Ranh giới submodule rõ ràng
 
-| Layer | Imports allowed |
+| Lớp | Import được phép |
 |---|---|
-| `nom.text` | stdlib only |
-| `nom.doc` | stdlib + `nom.text` + `[doc]` extras |
-| `nom.llm` | stdlib + `[llm]` extras |
-| `nom.embeddings` | stdlib + `[embeddings]` extras |
+| `nom.text` | chỉ stdlib |
+| `nom.doc` | stdlib + `nom.text` + extras `[doc]` |
+| `nom.llm` | stdlib + extras `[llm]` |
+| `nom.embeddings` | stdlib + extras `[embeddings]` |
 | `nom.chunking` | stdlib + `nom.text` |
 | `nom.retrieve` | stdlib + `nom.embeddings` + `nom.chunking` |
-| `nom.index` | stdlib + `nom.retrieve` + `[index-*]` extras |
+| `nom.index` | stdlib + `nom.retrieve` + extras `[index-*]` |
 | `nom.rag` | stdlib + `nom.{doc,llm,embeddings,chunking,retrieve,index}` |
-| `nom.chat` | all of the above + `[chat]` extras |
+| `nom.chat` | mọi thứ trên + extras `[chat]` |
 
-Enforced via `import-linter` (or equivalent) in CI when the `nom.rag` work lands.
+Ép qua `import-linter` (hoặc tương đương) trong CI khi work `nom.rag` land.
 
 ### 4. Versioning
 
-- **Single semver** (`major.minor.patch`) across the library.
-- **Within v0.x**: no removals, only additions and bug fixes. Users can pin `nom-vn>=0.0.x,<1.0` safely.
-- **v1.0** when the public Protocols + module structure has stabilized for ~6 months.
-- Each release: tag the repo, push to PyPI, append to `CHANGELOG.md`.
+- **Semver duy nhất** (`major.minor.patch`) trong toàn library.
+- **Trong v0.x**: không xoá, chỉ thêm và fix bug. User pin `nom-vn>=0.0.x,<1.0` an toàn.
+- **v1.0** khi Protocol công khai + cấu trúc module đã ổn định ~6 tháng.
+- Mỗi release: tag repo, push lên PyPI, append vào `CHANGELOG.md`.
 
-### 5. Reproducibility (verified-benchmarks rule)
+### 5. Tái lập (rule verified-benchmarks)
 
-`benchmarks/` is one tree, organized by concern, not per-submodule:
+`benchmarks/` là một cây, sắp xếp theo concern, không per-submodule:
 
 ```
 benchmarks/
-├── perf/         # nom.text throughput, nom.doc.parse throughput
-├── accuracy/     # diacritic recovery, tokenization vs upstream tokenizers
-├── retrieval/    # recall@k, ndcg@k on a VN doc-QA corpus
-├── ingest/       # pages/sec at given chunk size
+├── perf/         # throughput nom.text, throughput nom.doc.parse
+├── accuracy/     # khôi phục dấu, tokenization vs upstream
+├── retrieval/    # recall@k, ndcg@k trên corpus VN doc-QA
+├── ingest/       # page/sec ở chunk size cho trước
 ├── rag/          # answer faithfulness + citation accuracy
-├── data/         # licensed VN corpora (CC0/CC-BY)
-└── results/      # baseline JSONs (committed for regression tracking)
+├── data/         # corpus VN có license (CC0/CC-BY)
+└── results/      # JSON baseline (commit cho regression tracking)
 ```
 
-Numbers in user-facing materials must trace back to a script in this tree. No cold-start results without warmup. No cross-borrowed metrics.
+Số trong tài liệu user-facing phải truy ngược về một script trong cây này. Không có kết quả cold-start mà không warmup. Không borrow metric chéo.
 
-### 6. Dependency audit (no-pickle rule)
+### 6. Audit dependency (rule no-pickle)
 
-Each addition to `pyproject.toml` requires a matching note in `docs/benchmark.md` covering:
+Mỗi lần thêm vào `pyproject.toml` cần một note tương ứng trong `docs/benchmark.md` cover:
 
-1. License (must be permissive — Apache / MIT / BSD / CC0)
-2. Bundled artifact format (`.pkl` = auto-reject; safe formats include `safetensors`, `pt` if directly loadable, CRFsuite native binary, ONNX)
-3. Why this dep beats reimplementation (quality gap, maintenance cost, etc.)
-4. The cited public source for any quality claim
+1. License (phải permissive — Apache / MIT / BSD / CC0)
+2. Format artifact bundled (`.pkl` = auto-reject; format an toàn gồm `safetensors`, `pt` nếu load trực tiếp được, binary native CRFsuite, ONNX)
+3. Vì sao dep này thắng reimplementation (gap chất lượng, chi phí maintenance, ...)
+4. Nguồn công khai đã trích cho bất kỳ claim chất lượng nào
 
-### 7. Release checklist (every version bump)
+### 7. Checklist release (mỗi lần bump version)
 
-1. CHANGELOG.md updated under the new version heading
-2. `__version__` and `pyproject.toml` version bumped together
-3. Benchmark baselines re-run if any code in `benchmarks/perf/` or `benchmarks/accuracy/` could have changed numbers
-4. New deps audited and noted in `BENCHMARK.md`
-5. CI green (lint + format + types + 3-Python-version test matrix + benchmark smoke)
-6. Tag + push + `pypi-publish` workflow
+1. CHANGELOG.md update dưới heading version mới
+2. `__version__` và version pyproject.toml bump cùng nhau
+3. Re-run benchmark baseline nếu có code trong `benchmarks/perf/` hoặc `benchmarks/accuracy/` có thể đã đổi số
+4. Audit dep mới và note trong `BENCHMARK.md`
+5. CI xanh (lint + format + types + test matrix 3 phiên bản Python + smoke benchmark)
+6. Tag + push + workflow `pypi-publish`
 
-### 8. License — Apache 2.0 throughout
+### 8. License — Apache 2.0 toàn bộ
 
-The whole library is Apache 2.0. No dual-licensing, no carve-outs.
+Toàn library Apache 2.0. Không dual-licensing, không carve-out.
 
-The commercial path is **services around the open library** (on-prem deployment support, SLA, custom integration), not license restrictions on the code itself. This keeps the open ecosystem genuinely open and aligns with how durable open infrastructure has historically funded itself.
+Đường thương mại là **dịch vụ quanh open library** (hỗ trợ deploy on-prem, SLA, integration tuỳ biến), không phải hạn chế license trên code. Cách này giữ hệ sinh thái open thực sự open và align với cách hạ tầng open bền vững từng tự fund mình lịch sử.
 
 ---
 
 ## Decision log
 
-The trade-offs explicitly chosen, recorded so future-us doesn't re-litigate from scratch:
+Các trade-off chọn rõ ràng, ghi lại để future-us không re-litigate từ đầu:
 
-| Decision | Alternative | Why we picked this |
+| Quyết định | Thay thế | Vì sao chọn cái này |
 |---|---|---|
-| **Single library** | 3 separate repos | One brand, one CHANGELOG, simpler refactors, less user confusion |
-| **`pydantic` as hard dep** | optional | Schemas are core to `nom.doc.extract`; making it optional split too many code paths |
-| **Vector stores behind extras** | hard dep on Chroma | Users with their own DB shouldn't pay for ours; extras let `pip` express choice |
-| **In-process BM25 in `nom.retrieve`** | always go through a vector DB | Useful even without a DB (small corpora, prototyping, tests) |
-| **Protocol-first** | ABC inheritance | Users don't need to import our base classes to satisfy the contract |
-| **`nom.chat` as a submodule** | separate repo | Same brand, same CHANGELOG, optional via `[chat]` extras |
-| **Apache 2.0 throughout** | dual / source-available | Commercial path is services, not license fences |
-| **Hybrid retrieval default** | dense-only | Hybrid wins on every public benchmark we've measured |
+| **Single library** | 3 repo riêng | Một brand, một CHANGELOG, refactor đơn giản, ít làm user lẫn |
+| **`pydantic` làm hard dep** | optional | Schema là core của `nom.doc.extract`; làm optional split quá nhiều đường code |
+| **Vector store sau extras** | hard dep Chroma | User có DB của riêng họ không nên trả cho cái của ta; extras để `pip` thể hiện lựa chọn |
+| **BM25 in-process trong `nom.retrieve`** | luôn qua vector DB | Hữu ích kể cả không DB (corpus nhỏ, prototype, test) |
+| **Protocol-first** | inherit ABC | User không cần import base class của chúng tôi để thoả contract |
+| **`nom.chat` là submodule** | repo riêng | Cùng brand, cùng CHANGELOG, optional qua extras `[chat]` |
+| **Apache 2.0 toàn bộ** | dual / source-available | Đường thương mại là dịch vụ, không phải hàng rào license |
+| **Default retrieval hybrid** | dense-only | Hybrid thắng mọi benchmark công khai chúng tôi đã đo |
 
 ---
 
-## Migration plan from current state
+## Kế hoạch migration từ trạng thái hiện tại
 
-Where we are now: `nom-vn` v0.0.3 — `text` + `doc` + `llm` shipped at `github.com/nrl-ai/nom-vn`.
+Ta đang ở: `nom-vn` v0.0.3 — `text` + `doc` + `llm` đã ship ở `github.com/nrl-ai/nom-vn`.
 
-The next four releases stay in this same repo:
+Bốn release tiếp theo nằm trong cùng repo này:
 
-| Version | Adds | Status |
+| Phiên bản | Thêm | Trạng thái |
 |---|---|---|
-| v0.0.4 | `nom.embeddings.VietnameseEmbedder` + `nom.chunking.smart_chunk` | shipped |
-| v0.0.5 | `nom.retrieve` (BM25 + Dense + hybrid) | shipped |
-| **v0.0.6** | **DenseRetriever retune** — 9 ms → 0.034 ms p50 (~264×) | shipped |
-| v0.1 | `nom.index` (Chroma adapter default; Qdrant + pgvector follow) + `nom.rag` (IngestPipeline + RAGSession) | next |
-| **v0.2** | **`nom.chat` — FastAPI server + ShadCN UI shipped pre-built. ``nom serve`` CLI launches the full app. Spaces / materials / Q&A flows.** | follow |
+| v0.0.4 | `nom.embeddings.VietnameseEmbedder` + `nom.chunking.smart_chunk` | đã ship |
+| v0.0.5 | `nom.retrieve` (BM25 + Dense + hybrid) | đã ship |
+| **v0.0.6** | **DenseRetriever retune** — 9 ms → 0.034 ms p50 (~264×) | đã ship |
+| v0.1 | `nom.index` (Chroma adapter mặc định; Qdrant + pgvector theo) + `nom.rag` (IngestPipeline + RAGSession) | tiếp theo |
+| **v0.2** | **`nom.chat` — server FastAPI + UI ShadCN ship build sẵn. CLI ``nom serve`` khởi app đầy đủ. Flow space / material / Q&A.** | theo |
 
-Every release ships with corresponding benchmark numbers (per principle 12), CHANGELOG entry, and an audit note for any new dep (per principle 11).
+Mỗi release ship cùng số benchmark tương ứng (theo nguyên tắc 12), entry CHANGELOG, và note audit cho mọi dep mới (theo nguyên tắc 11).
 
 ---
 
-## Open questions
+## Câu hỏi mở
 
-These are the hard architectural choices we haven't fully decided yet. Flagging here so future-us doesn't re-litigate from scratch.
+Đây là các lựa chọn kiến trúc khó chưa hoàn toàn quyết. Flag ở đây để future-us không re-litigate từ đầu.
 
-1. **Embedding cache layer** — should `nom.embeddings` cache embeddings on disk (e.g. SQLite KV) so repeated queries don't re-embed? Or push that to `nom.rag.IngestPipeline`?
-2. **Streaming Extract** — Ollama supports streaming. The Extract stage currently waits for full output before parsing JSON. Should we add a streaming variant for chat use cases?
-3. **`nom.rag` async-first vs sync-first** — `nom.text` / `nom.doc` are sync. `nom.chat` will need async for websockets. Where does the conversion happen — inside `nom.rag` or only at the chat-app boundary?
-4. **Multi-tenant doc isolation** — does `nom.rag` know about tenants, or is that purely `nom.chat`? Leaning `nom.chat`.
-5. **Cross-encoder rerank model choice** — there's no widely-adopted VN cross-encoder. Train our own (per the v0.0.3 plan to train a tokenizer)? Use a multilingual reranker?
+1. **Lớp cache embedding** — `nom.embeddings` có nên cache embedding trên disk (ví dụ SQLite KV) để query lặp lại không re-embed? Hay đẩy sang `nom.rag.IngestPipeline`?
+2. **Extract streaming** — Ollama hỗ trợ streaming. Stage Extract hiện tại chờ output đầy đủ trước khi parse JSON. Có nên thêm variant streaming cho use case chat?
+3. **`nom.rag` async-first vs sync-first** — `nom.text` / `nom.doc` là sync. `nom.chat` sẽ cần async cho websocket. Conversion xảy ra ở đâu — bên trong `nom.rag` hay chỉ ở ranh giới chat-app?
+4. **Cô lập tài liệu multi-tenant** — `nom.rag` có biết về tenant, hay đó thuần `nom.chat`? Nghiêng về `nom.chat`.
+5. **Lựa chọn model rerank cross-encoder** — không có cross-encoder VN được adopt rộng. Train của riêng (theo kế hoạch v0.0.3 train tokenizer)? Dùng reranker multilingual?
 
-Each gets resolved at its corresponding release-design phase. Don't let an unanswered question block a submodule that doesn't depend on the answer.
+Mỗi cái resolve ở phase release-design tương ứng. Đừng để câu hỏi chưa trả lời block một submodule không phụ thuộc đáp án.

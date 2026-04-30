@@ -1,37 +1,32 @@
-# Releasing `nom-vn` to PyPI
+# Phát hành `nom-vn` lên PyPI
 
-::: tip Tài liệu kỹ thuật
-Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
-Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
-có script đo cam kết trong repo.
-:::
+Quy trình release là **GitHub Actions + PyPI Trusted Publishing** —
+không lưu API token nào trong repo secrets, không `twine upload` từ
+laptop.
 
-The release flow is **GitHub Actions + PyPI Trusted Publishing** —
-no API tokens stored in repo secrets, no `twine upload` from a laptop.
-
-## One-time setup (already done; documented for posterity)
+## Setup một lần (đã xong; ghi lại để lưu trữ)
 
 1. PyPI account → **Account settings → Publishing**.
-2. Add a "trusted publisher" for `nom-vn`:
-   - **Owner**: `nrl-ai` (the GitHub org / user that owns this repo)
+2. Thêm "trusted publisher" cho `nom-vn`:
+   - **Owner**: `nrl-ai` (org / user GitHub sở hữu repo)
    - **Repository name**: `nom-vn`
    - **Workflow name**: `publish.yml`
    - **Environment name**: `pypi`
-3. Same flow on `test.pypi.org` with environment `testpypi` for dry-runs.
+3. Cùng quy trình trên `test.pypi.org` với environment `testpypi` cho dry-run.
 
-After that, the workflow at `.github/workflows/publish.yml` can publish
-without any token in the repo.
+Sau đó, workflow ở `.github/workflows/publish.yml` có thể publish mà
+không cần token nào trong repo.
 
-## Cutting a release — the canonical flow
+## Cắt một bản release — quy trình chuẩn
 
-Two equivalent paths. Pick whichever fits the moment.
+Hai đường tương đương. Chọn cái nào hợp khoảnh khắc.
 
-### Path A — `gh release create`
+### Đường A — `gh release create`
 
 ```bash
-# Bump version in pyproject.toml (e.g. 0.2.21 → 0.2.22)
-# Add CHANGELOG.md entry
-# Commit, push to main
+# Bump version trong pyproject.toml (ví dụ 0.2.21 → 0.2.22)
+# Thêm entry vào CHANGELOG.md
+# Commit, push lên main
 
 gh release create v0.2.22 \
   --title "v0.2.22" \
@@ -39,95 +34,97 @@ gh release create v0.2.22 \
   --target main
 ```
 
-This creates the tag, the GitHub release, and triggers the
-`publish.yml` workflow on tag push.
+Lệnh này tạo tag, GitHub release, và trigger workflow `publish.yml`
+khi tag được push.
 
-### Path B — plain git tag
+### Đường B — git tag thủ công
 
 ```bash
 git tag v0.2.22
 git push origin v0.2.22
 ```
 
-Same effect. The workflow fires on `push: tags: ['v*.*.*']`.
+Hiệu quả tương đương. Workflow chạy khi `push: tags: ['v*.*.*']`.
 
-### Path C — manual dry-run via TestPyPI
+### Đường C — dry-run thủ công qua TestPyPI
 
-Before a real release, run the workflow manually pointed at TestPyPI:
+Trước khi release thật, chạy workflow tay trỏ về TestPyPI:
 
 ```bash
 gh workflow run publish.yml -f target=testpypi
 ```
 
-Verify the upload:
+Kiểm tra upload:
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ --no-deps nom-vn
 ```
 
-If the smoke install passes, do path A or B for real.
+Nếu smoke install qua, làm đường A hoặc B cho release thật.
 
-## What the workflow does
+## Workflow làm gì
 
 ```
 push tag v*.*.*
    │
-   ├── validate-version   (read pyproject.toml, assert tag == "v" + version)
+   ├── validate-version   (đọc pyproject.toml, assert tag == "v" + version)
    │
-   ├── test-before-publish (pytest, OCR stage deselected — runner has no Tesseract)
+   ├── test-before-publish (pytest, OCR stage bỏ — runner không có Tesseract)
    │
    ├── build-ui  (pnpm install + pnpm build → src/nom/chat/ui_dist/)
    │
    ├── build  (python -m build → dist/*.whl + dist/*.tar.gz; assert wheel
-   │           contains the UI bundle — fails the release if it doesn't)
+   │           có chứa UI bundle — fail release nếu không có)
    │
    └── publish-pypi  (Trusted Publishing OIDC → pypi.org)
 ```
 
-Total runtime: ~3-5 minutes on a healthy GitHub runner.
+Tổng thời gian chạy: ~3–5 phút trên một runner GitHub khoẻ.
 
-## Sanity-check the wheel locally before tagging
+## Sanity-check wheel local trước khi tag
 
 ```bash
-# Same recipe the GH workflow uses, just locally
+# Cùng recipe workflow GH dùng, chỉ chạy local
 scripts/build_ui.sh
 python -m build --sdist --wheel --outdir dist/
 
-# Confirm the wheel ships the React UI:
+# Xác nhận wheel ship UI React:
 python -c "
 import glob, zipfile
 whl = glob.glob('dist/*.whl')[0]
 with zipfile.ZipFile(whl) as z:
-    assert any('chat/ui_dist/index.html' in n for n in z.namelist()), 'UI bundle missing'
+    assert any('chat/ui_dist/index.html' in n for n in z.namelist()), 'thiếu UI bundle'
 print(f'OK: {whl}')
 "
 
-# Install + smoke
+# Cài + smoke
 pip install dist/nom_vn-*.whl
-nom serve --in-memory  # → http://localhost:8080 should boot
+nom serve --in-memory  # → http://localhost:8080 phải boot lên
 ```
 
-If these all pass, the GH workflow will pass too — it does the same
-checks plus the publish step.
+Nếu mấy bước này đều qua, workflow GH cũng sẽ qua — nó làm cùng các
+check cộng thêm bước publish.
 
-## Common failure modes
+## Các kiểu fail thường gặp
 
-| Symptom | Cause | Fix |
+| Triệu chứng | Nguyên nhân | Cách fix |
 |---|---|---|
-| Workflow fails at `validate-version` | tag != pyproject version | Either retag to match, or bump pyproject + push a new tag |
-| `build` step says "UI bundle missing from .whl" | `pnpm build` didn't stage `ui_dist/` | Re-run `build-ui` job; check pnpm install used `--frozen-lockfile` against current `pnpm-lock.yaml` |
-| `publish-pypi` says "no permission" | Trusted Publisher misconfigured | Re-check workflow filename + environment name on PyPI publishing page |
-| Publish succeeds but `pip install nom-vn` shows old version | PyPI cache lag (~5-10 min) | Wait, retry. Don't republish — `skip-existing: false` will reject a same-version retry. Bump and re-tag. |
-| Tag pushed but workflow didn't trigger | Tag pushed via amend / force-push | Push a new tag with a fresh name (PyPI doesn't allow re-uploading the same version anyway) |
+| Workflow fail ở `validate-version` | tag != version trong pyproject | Hoặc retag cho khớp, hoặc bump pyproject + push tag mới |
+| Bước `build` báo "thiếu UI bundle khỏi .whl" | `pnpm build` không stage `ui_dist/` | Re-run job `build-ui`; check `pnpm install` đã dùng `--frozen-lockfile` đúng `pnpm-lock.yaml` |
+| `publish-pypi` báo "no permission" | Trusted Publisher cấu hình sai | Re-check tên file workflow + tên environment trên trang publishing PyPI |
+| Publish thành công nhưng `pip install nom-vn` ra version cũ | Lag cache PyPI (~5–10 phút) | Đợi, retry. Đừng republish — `skip-existing: false` sẽ reject retry cùng version. Bump rồi re-tag. |
+| Tag đã push nhưng workflow không trigger | Tag push qua amend / force-push | Push tag mới với tên fresh (PyPI không cho re-upload cùng version) |
 
-## Why no `twine upload` here
+## Tại sao không `twine upload`
 
-PyPI Trusted Publishing is the [recommended path as of 2023+](https://docs.pypi.org/trusted-publishers/).
+PyPI Trusted Publishing là [đường được khuyến nghị từ 2023+](https://docs.pypi.org/trusted-publishers/).
 
-Pros:
-- No API token to leak.
-- OIDC tokens are short-lived (per-run) and bound to this exact workflow file.
-- The "publishing identity" can be revoked in one click on PyPI without rotating tokens elsewhere.
+Lợi:
 
-Cons:
-- One-time setup (the steps at the top of this doc). Worth it.
+- Không có API token nào để bị lộ.
+- OIDC token short-lived (per-run) và bị ràng buộc với chính file workflow này.
+- "Publishing identity" có thể revoke bằng một click trên PyPI mà không cần xoay token chỗ khác.
+
+Bất lợi:
+
+- Setup một lần (các bước ở đầu doc này). Đáng.
