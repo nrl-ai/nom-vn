@@ -181,9 +181,9 @@ class TestSpaceIsolation:
         ids = _seed_three_spaces(store)
         plt_mat = store.list_materials(ids["Pháp luật"])[0]
         # Asking for that material against a DIFFERENT space's id must miss.
-        assert (
-            store.get_material_content(ids["Văn học"], plt_mat.id) is None
-        ), "material id leaked across spaces"
+        assert store.get_material_content(ids["Văn học"], plt_mat.id) is None, (
+            "material id leaked across spaces"
+        )
         assert store.get_material_content(ids["Pháp luật"], plt_mat.id) is not None
 
 
@@ -201,9 +201,9 @@ class TestAskIsolation:
         van_hoc_words = {"Trăm", "Thuở", "khách", "tài", "mệnh", "trời"}
         # At least one citation should mention something from Văn học's corpus.
         text_blob = " ".join(c.text for c in ans.citations)
-        assert any(
-            w in text_blob for w in van_hoc_words
-        ), f"Văn học ask returned citations not from Văn học: {text_blob[:200]}"
+        assert any(w in text_blob for w in van_hoc_words), (
+            f"Văn học ask returned citations not from Văn học: {text_blob[:200]}"
+        )
         # And NOT mention things from Pháp luật / Bách khoa corpora.
         forbidden = ["Doanh nghiệp 2020", "Hà Nội", "Việt Nam là một"]
         for f in forbidden:
@@ -240,9 +240,9 @@ class TestIndexingIsolation:
         # Other spaces still pending.
         for other in ("Pháp luật", "Bách khoa"):
             mats = store.list_materials(ids[other])
-            assert all(
-                m.n_chunks == 0 for m in mats
-            ), f"indexing Văn học triggered indexing in {other}"
+            assert all(m.n_chunks == 0 for m in mats), (
+                f"indexing Văn học triggered indexing in {other}"
+            )
 
     def test_index_pending_idempotent(self, store: Store) -> None:
         ids = _seed_three_spaces(store)

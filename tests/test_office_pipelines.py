@@ -83,9 +83,9 @@ class TestDocxFixture:
         # Our extractor emits `cell | cell | cell` for table rows so the
         # viewer can render them as a grid. At least one such row must
         # appear (the contract has a 3-column value table).
-        assert any(
-            " | " in p and p.count(" | ") >= 2 for p in out["pages"]
-        ), "no pipe-separated table row found in DOCX output"
+        assert any(" | " in p and p.count(" | ") >= 2 for p in out["pages"]), (
+            "no pipe-separated table row found in DOCX output"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -110,9 +110,9 @@ class TestXlsxFixture:
             out["pages"], ground_truth["xlsx"]["expected_sheets"], strict=False
         ):
             first_line = page.split("\n", 1)[0]
-            assert (
-                first_line == f"# {expected_name}"
-            ), f"sheet header mismatch: got {first_line!r}, want '# {expected_name}'"
+            assert first_line == f"# {expected_name}", (
+                f"sheet header mismatch: got {first_line!r}, want '# {expected_name}'"
+            )
 
     def test_data_cells_present(self, ground_truth: dict) -> None:
         out = _parse(DIR / ground_truth["xlsx"]["file"])
@@ -142,9 +142,9 @@ class TestPptxFixture:
             out["pages"], ground_truth["pptx"]["expected_titles"], strict=False
         ):
             first_line = page.split("\n", 1)[0]
-            assert (
-                first_line == expected_title
-            ), f"slide title mismatch: got {first_line!r}, want {expected_title!r}"
+            assert first_line == expected_title, (
+                f"slide title mismatch: got {first_line!r}, want {expected_title!r}"
+            )
 
     def test_speaker_notes_extracted(self, ground_truth: dict) -> None:
         out = _parse(DIR / ground_truth["pptx"]["file"])

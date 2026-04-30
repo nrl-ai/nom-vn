@@ -76,9 +76,9 @@ class TestEditBudget:
         # mangle the string beyond recognition. The 10 % cap means most
         # of the original chars are still present.
         # We assert the rough structural similarity: lengths within ±50 %.
-        assert (
-            0.5 * len(clean) <= len(noisy) <= 1.5 * len(clean)
-        ), f"length blew up: clean={len(clean)}, noisy={len(noisy)}"
+        assert 0.5 * len(clean) <= len(noisy) <= 1.5 * len(clean), (
+            f"length blew up: clean={len(clean)}, noisy={len(noisy)}"
+        )
 
 
 class TestSpecificNoises:

@@ -73,7 +73,7 @@ _INSTALL_HINT = (
 )
 
 _SEGMENT_INSTALL_HINT = (
-    "word_segment=True requires underthesea. " "Install with: pip install nom-vn[nlp]"
+    "word_segment=True requires underthesea. Install with: pip install nom-vn[nlp]"
 )
 
 
