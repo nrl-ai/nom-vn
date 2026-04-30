@@ -311,12 +311,20 @@ The minimum propagation matrix:
 
 | Trigger | Update in same commit |
 |---|---|
-| New bench number | `docs/benchmark.md` table row, plus the affected register-conditional production guidance table |
-| New published model on HF | `docs/recipes.md` (subsection with the new model + when to use), `docs/sota_vn_2026q2.md` (recommended-stack row), `README.md` (status badge / recommended-stack table when relevant) |
-| New shipped module under `nom.*` | `docs/recipes.md` (new section with copy-paste code), `docs/architecture.md` (layer / Protocol seam), `README.md` "Recommended stack" if user-facing |
+| New bench number | `docs/benchmark.md` table row (or the relevant `docs/tasks/*.md` page once migrated), plus the affected register-conditional production guidance table |
+| New published model on HF | `docs/recipes.md` (subsection with the new model + when to use), `docs/sota_vn_2026q2.md` or `docs/tasks/<task>.md` (recommended-stack row), **`README.md` AND `README.vi.md`** (status badge / recommended-stack table when relevant — both must stay in lockstep) |
+| New shipped module under `nom.*` | `docs/recipes.md` (new section with copy-paste code), `docs/architecture.md` (layer / Protocol seam), **`README.md` AND `README.vi.md`** "Recommended stack" if user-facing |
 | New gotcha caught (NFC bug, ES-fired-too-early, etc.) | This file's "Vietnamese language gotchas" section, plus a paragraph in the relevant module docstring |
-| New training experiment outcome | `training/diacritic/README.md` experiment-history table, `CHANGELOG.md` if version-bumping |
-| Version bump | `pyproject.toml`, `CHANGELOG.md`, `README.md` status badge |
+| New training experiment outcome | `training/<task>/README.md` experiment-history table, `CHANGELOG.md` if version-bumping |
+| Version bump | `pyproject.toml`, `CHANGELOG.md`, **`README.md` AND `README.vi.md`** status badges |
+
+**`README.vi.md` is a first-class peer of `README.md`** — Vietnamese
+is the project's primary user community. The two files must stay in
+content-parity within the same commit (sections in the same order,
+same recommended-stack table rows, same status badges with the same
+version, same code snippets — the prose can be translated freely
+provided the structure matches). Drifting them is a regression in
+the user-facing surface for a major user segment.
 
 Hard rule: **never claim a number in a doc that doesn't exist yet** —
 the order is always (a) measure / publish, (b) update doc with the

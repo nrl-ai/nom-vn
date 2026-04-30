@@ -38,8 +38,8 @@ on real Vietnamese corpora, this week.
 
 | Task | Pick | License | Disk | Measured | Beats |
 |---|---|---|---:|---|---|
-| **Diacritic restoration (default)** | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc on business · 89.40 % literary · 98.14 % formal · 93.77 % conversational | beats cloud `gpt-4o-mini` 95.37 % on business; SOTA on the 4-register matrix |
-| **Diacritic restoration (register-balanced alternative)** | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, ours) | Apache 2.0 | 900 MB | 99.57 % formal (+1.43 pp) · 94.16 % conversational (+0.39 pp) · 93.44 % business (-4.37) · 89.39 % literary | wins formal + conversational; pick this for legal docs / chat data, Toshiiiii1 for business-tilted text |
+| **Diacritic restoration (default)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc on business · 89.40 % literary · 98.14 % formal · 93.77 % conversational | beats cloud `gpt-4o-mini` 95.37 % on business; SOTA on the 4-register matrix |
+| **Diacritic restoration (register-balanced)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, ours) | Apache 2.0 | 900 MB | 99.57 % formal (+1.43 pp) · 94.16 % conversational (+0.39 pp) · 93.44 % business (-4.37) · 89.39 % literary | wins formal + conversational; pick this for legal docs / chat data, Toshiiiii1 for business-tilted text |
 | **Diacritic (zero-dep fallback)** | rule-based table (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
 | **Diacritic (local LLM)** | `gemma3:4b` Q4 via Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` is +5pp better but 3× larger |
 | **Word segmentation (speed)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |
@@ -186,8 +186,23 @@ See **[docs/architecture.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/arc
 
 ---
 
+## Models & datasets we publish
+
+Apache-2.0-friendly artifacts on Hugging Face Hub (cite Viet-Anh Nguyen
+and Neural Research Lab per the repo's citation block):
+
+- 🤗 [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) — register-balanced ViT5 fine-tune for diacritic restoration
+- 🤗 [`nrl-ai/vn-diacritic-eval`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-eval) — 4-register diacritic evaluation grid (1,227 sentence pairs)
+- 🤗 [`nrl-ai/vn-diacritic-train`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-train) — 500K Wikipedia + 150K NFC-fixed VN news training pairs
+
+Full per-task detail: [`docs/tasks/diacritic-restoration.md`](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md).
+
+---
+
 ## Documentation
 
+- **[docs/readme.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/readme.md)** — docs index pointing at all per-task pages
+- **[docs/tasks/](https://github.com/nrl-ai/nom-vn/tree/main/docs/tasks)** — one page per task (public landscape + our pipeline + trained models + datasets + results)
 - **[docs/architecture.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/architecture.md)** — the 7-layer model, Protocol seams, scaling path, anti-architecture rules
 - **[docs/pipeline.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/pipeline.md)** — the document-extraction pipeline end-to-end with per-stage picks
 - **[docs/benchmark.md](https://github.com/nrl-ai/nom-vn/blob/main/docs/benchmark.md)** — measured numbers per module (the receipts behind every "Recommended stack" row above)
