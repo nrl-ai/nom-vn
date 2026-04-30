@@ -48,6 +48,14 @@ repos:
           - "fastapi>=0.115"
           - "numpy>=1.26"
 
+  # Secret-scan every staged change before it can be committed. Inherits
+  # the gitleaks default rule set + our `.gitleaks.toml` allowlist for
+  # known data-file false positives.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.21.2
+    hooks:
+      - id: gitleaks
+
   - repo: https://github.com/codespell-project/codespell
     rev: v2.3.0
     hooks:

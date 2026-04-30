@@ -1,0 +1,27 @@
+# gitleaks config for nom-vn — https://github.com/gitleaks/gitleaks
+# Inherits default rules; allowlists known data-file false positives.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlist for nom-vn"
+
+# Paths whose contents are committed data — Vietnamese text + dataset
+# metadata. UTF-8 multi-byte sequences and `*_key` field names trip the
+# generic-api-key rule; whitelist by path.
+paths = [
+  '''benchmarks/data/.*\.jsonl''',
+  '''benchmarks/data/.*\.txt''',
+  '''benchmarks/data/.*\.conllu''',
+  '''benchmarks/data/.*\.tsv''',
+  '''training/.*/data/.*\.jsonl''',
+  '''training/.*/results/.*\.json''',
+  '''benchmarks/results/.*\.json''',
+]
+
+# Targeted regex allowlist: legitimate `source_key` JSON entries in the
+# VN OCR ground-truth file reference public VietOCR image ids, not secrets.
+regexes = [
+  '''"source_key":\s*"vietocr_img_\d+_\d+"''',
+]
