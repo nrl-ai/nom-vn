@@ -26,7 +26,10 @@ jobs:
       - name: Stub ui_dist (real bundle is built in ui-build / publish jobs)
         run: |
           mkdir -p src/nom/chat/ui_dist
-          echo '<!doctype html><meta charset="utf-8"><title>nom-vn UI placeholder</title>' \
+          # Includes "Nôm" so tests/test_chat.py::test_root_serves_html
+          # (which asserts the marketing string is in the body) still
+          # passes against the placeholder.
+          echo '<!doctype html><meta charset="utf-8"><title>Nôm — UI placeholder</title>' \
             > src/nom/chat/ui_dist/index.html
 
       - name: Install
@@ -63,7 +66,10 @@ jobs:
       - name: Stub ui_dist (real bundle is built in ui-build / publish jobs)
         run: |
           mkdir -p src/nom/chat/ui_dist
-          echo '<!doctype html><meta charset="utf-8"><title>nom-vn UI placeholder</title>' \
+          # Includes "Nôm" so tests/test_chat.py::test_root_serves_html
+          # (which asserts the marketing string is in the body) still
+          # passes against the placeholder.
+          echo '<!doctype html><meta charset="utf-8"><title>Nôm — UI placeholder</title>' \
             > src/nom/chat/ui_dist/index.html
 
       - name: Install
@@ -90,7 +96,10 @@ jobs:
       - name: Stub ui_dist (real bundle is built in ui-build / publish jobs)
         run: |
           mkdir -p src/nom/chat/ui_dist
-          echo '<!doctype html><meta charset="utf-8"><title>nom-vn UI placeholder</title>' \
+          # Includes "Nôm" so tests/test_chat.py::test_root_serves_html
+          # (which asserts the marketing string is in the body) still
+          # passes against the placeholder.
+          echo '<!doctype html><meta charset="utf-8"><title>Nôm — UI placeholder</title>' \
             > src/nom/chat/ui_dist/index.html
 
       - name: Install

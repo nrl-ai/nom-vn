@@ -27,7 +27,12 @@ repos:
       - id: debug-statements
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.4
+    # Bumped to match the ruff CI installs via `pip install -e ".[dev]"`.
+    # Older v0.7 disagreed with newer ruff on whether `pytest.importorskip`
+    # eliminates E402 for subsequent imports — newer ruff says yes (no noqa
+    # needed). Pinning the same version both places avoids the round-trip
+    # we hit on 2026-04-30.
+    rev: v0.15.12
     hooks:
       - id: ruff
         args: ["--fix", "--exit-non-zero-on-fix"]

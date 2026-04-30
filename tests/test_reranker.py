@@ -17,9 +17,9 @@ import pytest
 # absent — the same pattern test_chat.py uses for fastapi.
 pytest.importorskip("sentence_transformers")
 
-from nom.rag import RAG, CrossEncoderReranker, Reranker  # noqa: E402
-from nom.retrieve import Hit  # noqa: E402
-from tests.test_rag import SAMPLE_DOCS, _FakeEmbedder, _FakeLLM  # noqa: E402
+from nom.rag import RAG, CrossEncoderReranker, Reranker
+from nom.retrieve import Hit
+from tests.test_rag import SAMPLE_DOCS, _FakeEmbedder, _FakeLLM
 
 # ---------------------------------------------------------------------------
 # Fakes
