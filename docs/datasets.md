@@ -40,6 +40,32 @@ Total committed footprint: **~2.8 MB**.
 | `nom.doc` (PDF text extraction) | `udhr_vi/udhr_vie.pdf` | Born-digital PDF baseline |
 | `nom.doc` (OCR on images) | `synthetic_ocr_vi` (clean + noisy) | Perfect ground truth, regression-safe |
 
+## Published on Hugging Face Hub
+
+Two datasets we collated for diacritic restoration are mirrored on HF Hub
+for easy `datasets.load_dataset` use without cloning the repo:
+
+| HF dataset | License | Splits / configs | What's in it |
+|---|---|---|---|
+| [`nrl-ai/vn-diacritic-eval`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-eval) | CC-BY-SA-4.0 (most restrictive of constituents) | `business_55`, `formal_72`, `conversational_300`, `literary_800` | The 4-register evaluation grid (1,227 sentence pairs) used to bench every diacritic model in this repo. Per-config license noted in the card. |
+| [`nrl-ai/vn-diacritic-train`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-train) | CC-BY-SA-4.0 (per-config: wiki=CC-BY-SA-4.0, news=CC-BY-4.0) | `wiki_500k`, `news_150k` | 500K Wikipedia + 150K NFC-fixed VN news training pairs. Eval-leak guarded against `vn-diacritic-eval`. NFC-normalized at write time. |
+
+Loading:
+
+```python
+from datasets import load_dataset
+
+# Eval set — bench any model against the same grid
+ds = load_dataset("nrl-ai/vn-diacritic-eval", "business_55", split="train")
+
+# Training pairs — pre-built Wikipedia + news mix
+wiki = load_dataset("nrl-ai/vn-diacritic-train", "wiki_500k", split="train")
+news = load_dataset("nrl-ai/vn-diacritic-train", "news_150k", split="train")
+```
+
+The local copies under `benchmarks/data/` and `training/diacritic/data/`
+are bit-identical with the HF versions; either entry point works.
+
 ## Reproducing the corpora from a clean clone
 
 ```bash

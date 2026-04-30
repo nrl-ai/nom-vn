@@ -127,6 +127,50 @@ Use this when you've already wired an LLM for other tasks and want one
 fewer dependency. The **`Ollama` adapter defaults to `think=False`** —
 required for Qwen3, harmless for non-thinking models.
 
+### Synthesize noisy Vietnamese text (for spell-correction training data)
+
+`nom.text.noise` provides a deterministic noise generator that turns
+clean Vietnamese sentences into realistic typo/OCR-style versions —
+useful for building `(noisy, clean)` training pairs without paying for
+hand-labeled data. Six tunable noise functions (diacritic strip, partial
+strip, tone-confusion substitution, char swap/insert/delete, OCR
+substitutions) and three calibrated presets:
+
+```python
+from nom.text.noise import NoiseGenerator, light_noise, heavy_noise, telex_typo_noise
+
+# Light noise — models a person typing on a Vietnamese keyboard.
+gen = NoiseGenerator(light_noise(), seed=42)
+print(gen.noisify("Tôi yêu Việt Nam và đất nước này tuyệt vời."))
+# 'Toi yêu Viet Nam và đất nước này tuyệt vời.'
+
+# Heavy noise — models OCR output of a mid-quality scan.
+gen = NoiseGenerator(heavy_noise(), seed=42)
+print(gen.noisify("Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025."))
+# 'Hop dong số 02/HĐ/2025 được lập ngya l4 tháng 3 năm 2025.'  # <- '14' -> 'l4'
+
+# Telex typo — heavy diacritic perturbation, no OCR.
+gen = NoiseGenerator(telex_typo_noise(), seed=42)
+```
+
+Properties:
+
+- **Deterministic** — same `(text, config, seed)` always produces the
+  same output (training-corpus reproducibility).
+- **NFC-normalized output** — never returns NFD-decomposed text (the
+  silent killer of seq2seq training; see [`docs/benchmark.md`][bench]
+  v0.2.25 NFD-poisoning postmortem).
+- **Edit-budget cap** — `max_edit_ratio` prevents pile-ups so a high-p
+  config doesn't mangle the input beyond recoverability.
+
+[bench]: https://github.com/nrl-ai/nom-vn/blob/main/docs/benchmark.md
+
+Used by the upcoming `nrl-ai/vn-spell-correction-train` dataset. The
+noise functions track the VSEC paper error taxonomy
+([arxiv:2111.00640](https://arxiv.org/abs/2111.00640)) and the
+high-frequency tone confusions caught in our diacritic-restoration
+audits.
+
 ### Tokenize Vietnamese text
 
 Two backends, pick by speed vs F1:

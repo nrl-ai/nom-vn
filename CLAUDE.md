@@ -297,6 +297,37 @@ Whenever we push a model or dataset to `nrl-ai/*` on the Hub:
      full folder re-uploads the weights (slow + wasteful). One file,
      one commit message describing the fix.
 
+## Docs stay in sync with results — every commit, not "later"
+
+When a result lands (new bench number, new published model, new shipped
+module, new gotcha caught, new tool added), update the relevant docs in
+the **same commit** (or the next one) — never accumulate a backlog of
+"docs to refresh." A model card without a measurement, a `docs/recipes.md`
+without the new helper, or a README still showing the previous-quarter
+status is a regression in the user-facing surface even when the code is
+fine.
+
+The minimum propagation matrix:
+
+| Trigger | Update in same commit |
+|---|---|
+| New bench number | `docs/benchmark.md` table row, plus the affected register-conditional production guidance table |
+| New published model on HF | `docs/recipes.md` (subsection with the new model + when to use), `docs/sota_vn_2026q2.md` (recommended-stack row), `README.md` (status badge / recommended-stack table when relevant) |
+| New shipped module under `nom.*` | `docs/recipes.md` (new section with copy-paste code), `docs/architecture.md` (layer / Protocol seam), `README.md` "Recommended stack" if user-facing |
+| New gotcha caught (NFC bug, ES-fired-too-early, etc.) | This file's "Vietnamese language gotchas" section, plus a paragraph in the relevant module docstring |
+| New training experiment outcome | `training/diacritic/README.md` experiment-history table, `CHANGELOG.md` if version-bumping |
+| Version bump | `pyproject.toml`, `CHANGELOG.md`, `README.md` status badge |
+
+Hard rule: **never claim a number in a doc that doesn't exist yet** —
+the order is always (a) measure / publish, (b) update doc with the
+measured number cited to the JSON / HF URL, never the other way
+around. Speculative numbers in docs are the worst kind of
+documentation debt.
+
+When updating, link to the source of truth (the baseline JSON path in
+the repo, the HF model card URL, the bench script command) so the
+reader can re-verify in one click.
+
 ## Environment setup
 
 One-time setup for a fresh clone:
