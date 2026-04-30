@@ -66,6 +66,8 @@ repos:
         exclude: |
           (?x)^(
             .*\.lock|
+            pnpm-lock\.yaml|
+            ui/pnpm-lock\.yaml|
             benchmarks/data/.*|
             benchmarks/rag/baselines/.*|
             benchmarks/rag/fixtures/.*|

@@ -93,6 +93,11 @@ docs/research/
 # `[tool.hatch.build.targets.wheel] artifacts`; never check the built
 # JS/CSS into git history.
 ui/node_modules/
+node_modules/
+
+# VitePress site build output
+docs/.vitepress/dist/
+docs/.vitepress/cache/
 ui/dist/
 ui/.vite/
 ui/*.tsbuildinfo
