@@ -11,7 +11,7 @@ order of magnitude. The win we're chasing isn't size alone — it's
 **register-balanced** training, so the model doesn't drop from 97.81 %
 on business to 89.40 % on literary like Toshiiiii1 does.
 
-Multi-corpus eval is mandatory per CLAUDE.md autonomous-loop §5. Eval
+Multi-corpus eval is mandatory per our multi-corpus register-coverage rule. Eval
 during training reports word accuracy on both
 ``benchmarks/data/diacritic_eval_v0.txt`` (business) and
 ``benchmarks/data/ud_vi_vtb/test.conllu`` (literary). The "best
@@ -85,14 +85,14 @@ def _load_txt_corpus(path: Path) -> list[str]:
 def load_eval_corpora(repo: Path) -> dict[str, list[tuple[str, str]]]:
     """Load all 4-register eval corpora as lists of (stripped, target) pairs.
 
-    Registers (per CLAUDE.md autonomous-loop §5 register-coverage rule):
+    Registers (per our multi-corpus register-coverage rule):
       - business_55       — modern business / contracts / news (CC0)
       - literary_udvtb    — classical literary, UD-VTB test (CC-BY-SA-4.0)
       - conversational_300 — Tatoeba sample (CC-BY 2.0 FR)
       - formal_udhr       — UDHR formal/legal-prose (public domain)
 
     Each corpus is optional — if its file is absent the key is omitted (so the
-    eval still runs against whatever the genpc2 box has rsynced).
+    eval still runs against whatever the GPU training box has rsynced).
     """
     from nom.text import strip_diacritics
 
@@ -220,7 +220,7 @@ def main() -> int:
         # also normalize, but this is defense-in-depth: a future
         # mixed-source training experiment that pulls from a NFD-shipping
         # corpus shouldn't silently regress because someone forgot the
-        # filter (caught 2026-04-30 — see CLAUDE.md gotcha #1).
+        # filter (caught 2026-04-30 — see our internal policy gotcha #1).
         inputs = [unicodedata.normalize("NFC", s) for s in batch["input"]]
         targets = [unicodedata.normalize("NFC", s) for s in batch["target"]]
         model_inputs = tokenizer(
@@ -316,7 +316,7 @@ def main() -> int:
     # ============= Multi-corpus quality eval =============
     print()
     print("=" * 70)
-    print("Multi-corpus eval (CLAUDE.md autonomous-loop §5: register coverage)")
+    print("Multi-corpus eval (our internal policy autonomous-loop §5: register coverage)")
     print("=" * 70)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"

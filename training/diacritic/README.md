@@ -10,7 +10,7 @@ The 2026-04-29 4-register audit measured
 |---|---:|---:|
 | `udhr_vi/diacritic_eval_udhr.txt` (formal/legal-prose) | 72 | 98.14 % |
 | `diacritic_eval_v0.txt` (business/news) | 55 | 97.81 % |
-| `tatoeba_vi/diacritic_eval_300.txt` (conversational) | 300 | 93.77 % |
+| `tatoeba_vi/diacritic_eval_300.txt` (conversational) | 300 | 93.94 % |
 | `ud_vi_vtb/test.conllu` (classical literary) | 800 | 89.40 % |
 
 8.74 pp spread, monotonic gradient. Toshiiiii1 is the strongest
@@ -34,7 +34,7 @@ Adoption gate (both required):
 - `business_55.word_accuracy >= 0.96` (within 2 pp of Toshiiiii1)
 - `literary_udvtb.word_accuracy > 0.8940` (strictly above Toshiiiii1)
 
-Eval covers the full 4-register matrix per CLAUDE.md autonomous-loop §5
+Eval covers the full 4-register matrix per our multi-corpus register-coverage rule
 (Tatoeba conversational + UDHR formal added 2026-04-29).
 
 ## Architecture choice
@@ -99,7 +99,7 @@ Run::
 - After training, runs the multi-corpus 4-register eval and saves
   `training_summary.json` with full hyperparameters
 
-Run on the GPU box (genpc2 in our setup)::
+Run on the GPU box (the GPU training box in our setup)::
 
     ./training/diacritic/launch_genpc2.sh \
         --model-id VietAI/vit5-base \
@@ -109,15 +109,15 @@ Run on the GPU box (genpc2 in our setup)::
         --eval-steps 1000 --save-steps 1000 --logging-steps 100 \
         --output-dir training/diacritic/checkpoints/vit5-base-500k-cosine
 
-The launcher rsyncs code+data to genpc2, kicks off `python train.py`
+The launcher rsyncs code+data to the GPU training box, kicks off `python train.py`
 under `nohup`, and returns the PID. Monitoring::
 
-    ssh genpc2 'tail -f ~/nom-vn-train/training/diacritic/run.log'
-    ssh genpc2 'cat ~/nom-vn-train/training/diacritic/run.pid'
+    ssh the GPU training box 'tail -f ~/nom-vn-train/training/diacritic/run.log'
+    ssh the GPU training box 'cat ~/nom-vn-train/training/diacritic/run.pid'
 
 ## Multi-corpus evaluation
 
-Per CLAUDE.md autonomous-loop §5, single-corpus eval is not enough.
+Per our multi-corpus register-coverage rule: single-corpus eval is not enough.
 `train.py` evaluates on **all 4 registers** at the end of training and
 reports word-accuracy + sentence-exact + ms/sentence for each:
 
@@ -192,7 +192,7 @@ End-to-end: corpus → train → re-eval → publish:
 # 1. Build the 500K-pair corpus (deterministic stride, eval-leak guarded)
 python training/diacritic/prep_data.py --max-pairs 500_000 --seed 42
 
-# 2. Launch on genpc2 (~3h on RTX 3090)
+# 2. Launch on the GPU training box (~3h on RTX 3090)
 ./training/diacritic/launch_genpc2.sh \
     --model-id VietAI/vit5-base \
     --epochs 5 --batch-size 32 --bf16 \
@@ -203,10 +203,10 @@ python training/diacritic/prep_data.py --max-pairs 500_000 --seed 42
 
 # 3. Once the run completes, rsync the final checkpoint back
 rsync -av --progress \
-    genpc2:nom-vn-train/training/diacritic/checkpoints/vit5-base-500k-cosine/final \
+    the GPU training box:nom-vn-train/training/diacritic/checkpoints/vit5-base-500k-cosine/final \
     training/diacritic/checkpoints/vit5-base-500k-cosine/
 rsync -av \
-    genpc2:nom-vn-train/training/diacritic/checkpoints/vit5-base-500k-cosine/training_summary.json \
+    the GPU training box:nom-vn-train/training/diacritic/checkpoints/vit5-base-500k-cosine/training_summary.json \
     training/diacritic/checkpoints/vit5-base-500k-cosine/
 
 # 4. Re-eval locally to confirm numbers reproduce within ±0.5 pp

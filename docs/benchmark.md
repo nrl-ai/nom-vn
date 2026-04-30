@@ -130,7 +130,7 @@ Same 55-sentence corpus (CC0). Bench harness:
 - **+2.44 pp** over cloud `gpt-4o-mini` (97.81 % vs 95.37 %).
 - **+9.91 pp** over best local LLM (`gemma3:4b` at 87.90 %).
 - **8 × faster** than the cloud LLM (0.152 s vs 1.27 s) and **7 × faster** than local LLMs.
-- **Apache 2.0 + safetensors** — fully shippable per CLAUDE.md principle 11.
+- **Apache 2.0 + safetensors** — fully shippable per our no-pickle policy.
 - **~10 × smaller on disk** than `gemma4:e4b` (1 GB vs 9.6 GB).
 
 **Action:** retract the "distil a 100 M VN diacritic model" recommendation
@@ -170,7 +170,7 @@ formal/legal):
 |---|---:|---|---:|---:|
 | `udhr_vi/diacritic_eval_udhr.txt` | 72 | formal / legal-prose (UDHR) | **98.14 %** | 221 |
 | `diacritic_eval_v0.txt` | 55 | business / contract / news | **97.81 %** | 152 |
-| `tatoeba_vi/diacritic_eval_300.txt` | 300 | conversational (Tatoeba) | **93.77 %** | 82 |
+| `tatoeba_vi/diacritic_eval_300.txt` | 300 | conversational (Tatoeba) | **93.94 %** | 82 |
 | `ud_vi_vtb/test.conllu` | 800 | classical literary (VTB treebank) | **89.40 %** | 269 |
 
 Spread = 8.74 pp (98.14 − 89.40). The drop is monotonic from formal to
@@ -203,7 +203,7 @@ Numbers above are after normalization.
 |---|---|---:|---|
 | Formal / legal-prose (UDHR-like) | **`nrl-ai/vn-diacritic-vit5-base`** | **99.57 %** | Our v0.2.25 ViT5-base fine-tune; +1.43 pp over Toshiiiii1 |
 | Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register; nrl-ai/vit5-base 4.4 pp behind |
-| Conversational (Tatoeba) | **`nrl-ai/vn-diacritic-vit5-base`** | **94.16 %** | +0.39 pp over Toshiiiii1 (93.77) |
+| Conversational (Tatoeba) | **`nrl-ai/vn-diacritic-vit5-base`** | **94.16 %** | +0.22 pp over Toshiiiii1 (93.94) |
 | Classical literary (UD-VTB) | `Toshiiiii1/...` (still useful) | 89.40 % | Below business but well above rule baseline (41 %); failures are mostly proper-noun ambiguity (`Hùng` ↔ `Hưng`) and minor-register words |
 | General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8.7 pp gap across Toshiiiii1's registers is real but bounded |
 
@@ -217,19 +217,19 @@ on RTX 3090. Apache-2.0, ~900 MB safetensors. Strict adoption gate
 (reserved for a future gate-passing model). But it's the **best
 register-balanced VN diacritic model** we've trained — SOTA on
 formal/legal Vietnamese (99.57 %, +1.43 pp over Toshiiiii1) and
-conversational (94.16 %, +0.39 pp).
+conversational (94.16 %, +0.22 pp).
 
 | Register | Toshiiiii1 | nrl-ai/vit5-base | Δ |
 |---|---:|---:|---:|
 | formal_udhr | 98.14 % | **99.57 %** | +1.43 |
 | business_55 | **97.81 %** | 93.44 % | -4.37 |
-| conversational_300 | 93.77 % | **94.16 %** | +0.39 |
+| conversational_300 | 93.94 % | **94.16 %** | +0.39 |
 | literary_udvtb | **89.40 %** | 89.39 % | -0.01 |
 
 Use it via `HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")`.
 Full training config + reproducibility: see the [HF model card](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base).
 
-**Two methodological lessons that landed in CLAUDE.md autonomous-loop §5:**
+**Two methodological lessons that landed in our multi-corpus register-coverage rule:**
 
 1. **Multi-corpus measurement is mandatory** for adoption claims.
    Single-corpus quality numbers hide register-shift weakness or
@@ -265,7 +265,7 @@ python benchmarks/accuracy/bench_diacritic_hf_udvtb.py \
 
 Goal: identify the smallest **local quantized model** that hits usable VN diacritic accuracy for user-machine deployment. All models served via Ollama 0.21.2 (llama.cpp backend) with `Q4_K_M` quantization (Ollama default), structured output (`format` JSON schema), `think: false`, temperature 0. Hardware: RTX 3090 24GB. Same `diacritic_eval_v0.txt` corpus.
 
-Methodology per CLAUDE.md §12: 3 warmup calls, 55 timed sentences, per-call latency aggregated.
+Methodology per our verified-benchmarks rule: 3 warmup calls, 55 timed sentences, per-call latency aggregated.
 
 | Model | Q4 size | Word acc | Diacritic recall | Mean s/sent | p95 s/sent |
 |---|---:|---:|---:|---:|---:|
@@ -348,10 +348,10 @@ Corpus: **UD_Vietnamese-VTB test split** ([UniversalDependencies/UD_Vietnamese-V
 2. **`nom.text` is ~20× faster** (747 k vs 38 k tok/s). For RAG indexing, BM25 tokenization, lightweight cleanup — speed wins; the F1 gap doesn't matter when downstream is a bag-of-words retriever.
 3. **`nom.text` recall (82.9 %) > precision (70.9 %)** — it over-splits. The compound table catches some merges (398 hits across the corpus) but is far from CRF coverage.
 
-**Cross-check vs published numbers** (CLAUDE.md §7):
+**Cross-check vs published numbers** (cross-check-against-published-numbers rule):
 
 - underthesea reports ~94 % F1 on the VLSP 2013 test set [1]; our 95.70 % on UD-VTB test is ~1.5 pp above that — plausibly because UD-VTB is a slightly easier register (literary prose) than VLSP 2013 (mixed news/business). Same order of magnitude — no methodology divergence to chase.
-- We do not separately bench PyVi: it's auto-rejected per CLAUDE.md principle 11 (ships `.pkl` model files = arbitrary code execution on load).
+- We do not separately bench PyVi: it's auto-rejected per our no-pickle policy (ships `.pkl` model files = arbitrary code execution on load).
 
 **Recommendation for `nom-vn`:**
 
@@ -408,7 +408,7 @@ Corpus: `benchmarks/data/synthetic_pdf_vi/vn_legal.pdf` — synthetic 7-page Vie
 
 The shipped `udhr_vi/udhr_vie.pdf` cannot be used here — it embeds a custom font without a ToUnicode CMap, so every extractor (pdfplumber, pypdfium2, PyMuPDF) returns CIDs / garbled bytes. Documented in the bench script.
 
-Methodology: warmup 3 + best-of-5 (CLAUDE.md §12). Char-overlap fidelity uses NFC-normalised multiset intersection against the ground truth.
+Methodology: warmup 3 + best-of-5 (our verified-benchmarks rule). Char-overlap fidelity uses NFC-normalised multiset intersection against the ground truth.
 
 | Library | License | Best-of-5 (s) | Throughput | Char overlap |
 |---|---|---:|---:|---:|
@@ -614,7 +614,7 @@ implied — the original 70.0 % R@1 number was a methodology bug
   production you'd cache segmented corpus chunks at index time, dropping
   per-query cost back to ~300 ms.
 
-**An ALWAYS DOUBLE-CHECK lesson (CLAUDE.md autonomous-loop §8).** The
+**An ALWAYS DOUBLE-CHECK lesson (our ALWAYS DOUBLE-CHECK rule).** The
 v0.2.17 PhoRanker number (70.0 % R@1) was wrong because we sent raw
 unsegmented text to a model whose card explicitly requires VnCoreNLP
 segmented input. Re-checking the model card on 2026-04-26 caught it.
@@ -703,7 +703,7 @@ Reproduce: `python benchmarks/rag/bench_embedder_compare.py
 Two fixtures, both sampled from
 [GreenNode/zalo-ai-legal-text-retrieval-vn](https://huggingface.co/datasets/GreenNode/zalo-ai-legal-text-retrieval-vn)
 (MIT). Hardware: NVIDIA RTX 3080 Laptop, fp16, warmup=1, timed=1-2
-(best-of-N per CLAUDE.md principle 12).
+(best-of-N per our verified-benchmarks rule).
 
 #### Full corpus — `vn_legal_zalo_full.json` (61,068 articles, 82,696 chunks, 788 questions)
 
@@ -770,7 +770,7 @@ under `benchmarks/rag/baselines/zalo_5k__*.json` and mirrored to
    `benchmarks/results/bm25_compare__zalo_full.json` for the full
    table. The dense leg is now the per-query bottleneck.
 
-### Cross-checking against published numbers (per CLAUDE.md rule #7)
+### Cross-checking against published numbers (per our cross-check-against-published-numbers rule)
 
 - **Multi-stage IR for VN Legal** (PKAW 2022, arXiv:2209.14494):
   reports F2 = 0.741 on the full Zalo corpus with PhoBERT-large +
@@ -948,7 +948,7 @@ pipeline = Pipeline()
 text = pipeline.run("scanned.pdf").text
 ```
 
-The cross-checking-against-published rule (CLAUDE.md #7): published
+The cross-checking-against-published rule (cross-check-against-published-numbers rule): published
 Tesseract `vie` accuracy on synthetic VN benchmarks varies wildly
 (70–97%) by image quality. Our 65.5% exact-match number on real
 ducto489 mid-noise images sits in the lower end of that range — which

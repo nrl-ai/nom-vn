@@ -165,7 +165,7 @@ def main() -> int:
                 # NFC-normalize defensively. Wikipedia is already NFC, but the
                 # parallel prep_data_news.py path discovered tmnam20 ships ~79 %
                 # NFD-decomposed text — both inputs and the eval set must agree
-                # on form or the metric silently breaks (CLAUDE.md gotcha #1).
+                # on form or the metric silently breaks (NFC-vs-NFD silent killer).
                 sent = unicodedata.normalize("NFC", sent)
                 if not (args.min_chars <= len(sent) <= args.max_chars):
                     n_filtered_length += 1

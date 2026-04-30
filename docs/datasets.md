@@ -84,7 +84,7 @@ The fetcher uses only stdlib (`urllib.request`) plus `huggingface_hub` for
 gated-dataset paths. The renderer requires `Pillow` and Vietnamese-capable
 system fonts (DejaVu / Lato / FreeFont — present on most Linux distros).
 
-## License posture (CLAUDE.md principle 11 + 12)
+## License posture (our no-pickle + verified-benchmarks policy)
 
 - **Per-folder LICENSE** with explicit attribution rules — never relying on
   global "license file" inheritance.

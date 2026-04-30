@@ -2,7 +2,7 @@
 
 A **single library** with a clear submodule boundary. One repo, one PyPI package (`nom-vn`), one Apache 2.0 license. Submodules are individually pip-installable via extras so users don't pay for what they don't use.
 
-The architecture follows two non-negotiable principles from `PPlanning/CLAUDE.md`:
+The architecture follows two non-negotiable principles from our internal operating manual:
 
 - **Principle 11 — Audit dependencies before adopting.** Pickle/opaque-binary deps auto-reject. Prefer in-tree reimplementation when feasible. Document every dep's license, format, and audit findings in `BENCHMARK.md`.
 - **Principle 12 — Verified benchmarks only.** Every metric in user-facing materials traces to a runnable script (with warmup + best-of-N for throughput) or a cited public source.
@@ -164,7 +164,7 @@ expensive to recompute (embeddings), never what isn't (BM25, parsing).
 | Multi-tenant SaaS | N pods + auth | as above + tenant scoping | as above + tenant prefix | as above | add auth middleware in `nom.chat.server` |
 
 Throughput / latency numbers per tier are deliberately omitted —
-those need a benchmark, not a guess (CLAUDE.md principle 12).
+those need a benchmark, not a guess (verified-benchmarks rule).
 `benchmarks/perf/` (component-level) and `benchmarks/rag/`
 (end-to-end retrieval) are the places to measure for your workload.
 
@@ -486,7 +486,7 @@ For each axis, we ship a **default** (the sweet spot), a **lighter** option (res
 | **Default** | **`dangvantuan/vietnamese-embedding`** | **~440 MB** | **768** | **84.87 STS Pearson — top of public VN-MTEB at its size class** |
 | Heavy | `AITeamVN/Vietnamese_Embedding` (BGE-M3 fine-tune) | ~2 GB | 1024 | Highest reported VN retrieval quality |
 
-- All three are **`safetensors`** format (deterministic, not pickle — passes CLAUDE.md principle 11).
+- All three are **`safetensors`** format (deterministic, not pickle — passes our no-pickle policy).
 - Apache 2.0 weights for default + heavy; MIT for light.
 - Adapter: `nom.embeddings.VietnameseEmbedder()` (default), constructor accepts an alternative `model_name=...`.
 - Replace with: any class implementing `Embedder.embed(text) -> ndarray` + `embed_batch`.
@@ -638,7 +638,7 @@ Enforced via `import-linter` (or equivalent) in CI when the `nom.rag` work lands
 - **v1.0** when the public Protocols + module structure has stabilized for ~6 months.
 - Each release: tag the repo, push to PyPI, append to `CHANGELOG.md`.
 
-### 5. Reproducibility (CLAUDE.md principle 12)
+### 5. Reproducibility (verified-benchmarks rule)
 
 `benchmarks/` is one tree, organized by concern, not per-submodule:
 
@@ -655,7 +655,7 @@ benchmarks/
 
 Numbers in user-facing materials must trace back to a script in this tree. No cold-start results without warmup. No cross-borrowed metrics.
 
-### 6. Dependency audit (CLAUDE.md principle 11)
+### 6. Dependency audit (no-pickle rule)
 
 Each addition to `pyproject.toml` requires a matching note in `docs/benchmark.md` covering:
 

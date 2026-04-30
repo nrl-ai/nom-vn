@@ -1,0 +1,15 @@
+{
+  "source": "tmnam20/Vietnamese-News-dedup",
+  "split": "train",
+  "pairs": 150000,
+  "articles_scanned": 374272,
+  "filtered_empty_row": 0,
+  "filtered_no_diacritic": 0,
+  "filtered_length": 93225,
+  "filtered_high_ascii": 744,
+  "filtered_blocked_eval_leak": 0,
+  "filtered_duplicate": 4258,
+  "stride": 3,
+  "min_chars": 30,
+  "max_chars": 300
+}

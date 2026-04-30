@@ -12,9 +12,9 @@ what the measured number is on what register.
 
 ## Public landscape
 
-Per CLAUDE.md principles 11 + 12. Every row backed by a license + format
-audit and a measured or cited number. **Numbers without a citation or a
-runnable bench script are forbidden.**
+Every row backed by a license + format audit and a measured or cited
+number. **Numbers without a citation or a runnable bench script are
+forbidden.**
 
 | Model / Tool | License | Format | Reported quality | Verdict |
 |---|---|---|---:|---|
@@ -31,8 +31,8 @@ backend, and the swap path for users who want a different model.
 
 ## Trained models — `nrl-ai/*`
 
-Per CLAUDE.md principle 13 (Viet-Anh Nguyen on every artifact) +
-principle 14 (verify HF page after publish).
+Each model card cites Viet-Anh Nguyen + Neural Research Lab. The
+HF page is verified renderable + loadable before claiming "shipped".
 
 | HF model | License | Tier | Δ vs SOTA | When to pick |
 |---|---|---|---:|---|
@@ -49,8 +49,8 @@ principle 14 (verify HF page after publish).
 ## Results — measured
 
 The headline numbers, with a link to the JSON baseline + the bench script
-that produced them. Per CLAUDE.md principle 12, every cell is reproducible
-on a clean clone.
+that produced them. Every cell is reproducible on a clean clone via the
+committed scripts.
 
 | Register | Sentences | Best model | Word acc | Latency |
 |---|---:|---|---:|---:|

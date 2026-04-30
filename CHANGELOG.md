@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Train experiments #3 and #4: register-balanced ViT5 fine-tune published
 
-Two training runs on RTX 3090 / genpc2:
+Two training runs on RTX 3090 / the GPU training box:
 
 **Run #3 (failed gate, archived):** ViT5-base, 500K Wiki, 5 epochs cosine,
 patience=3 early stopping, eval_samples=200. Stopped at epoch 0.96
@@ -28,7 +28,7 @@ cosine LR, NO early stop, eval_samples=1000. 185 min on RTX 3090.
   Register             Toshiiiii1   v0.2.23   v0.2.25
   formal_udhr          98.14 %      —         99.57 % ⭐
   business_55          97.81 %      93.69 %   93.44 %
-  conversational_300   93.77 %      —         94.16 % ⭐
+  conversational_300   93.94 %      —         94.16 % ⭐
   literary_udvtb       89.40 %      89.47 %   89.39 %
 
 Strict gate fails on business (-4.37 pp). But this is **the best
@@ -75,7 +75,7 @@ Queued for v0.2.26: **mixed-source corpus** experiment.
     with auto-generated model card, license attribution, BibTeX
     citation, "when to use" trade-off summary.
   - `training/diacritic/post_train.sh` — end-to-end after-training
-    pipeline: rsync from genpc2 → local re-eval (>0.5 pp divergence
+    pipeline: rsync from the GPU training box → local re-eval (>0.5 pp divergence
     fails) → publish_hf.py --dry-run.
   - `training/diacritic/prep_data_news.py` — VN news ingestor for the
     upcoming mixed-source experiment.
@@ -133,7 +133,7 @@ calls):
   Register                Sents   Word acc   Mean ms/sent
   formal/legal (UDHR)        72   98.14 %    221
   business/news              55   97.81 %    152
-  conversational (Tatoeba)  300   93.77 %     82
+  conversational (Tatoeba)  300   93.94 %     82
   literary (UD-VTB)         800   89.40 %    269
 
 Spread = 8.74 pp. Drop is **monotonic** from formal → literary, which
@@ -143,14 +143,14 @@ cliff. Conversational sits ~4 pp below business; literary another
 toward modern formal/business Vietnamese (matching its training
 data) without being unusable elsewhere.
 
-Sample inspection (first-5 raw I/O dump per CLAUDE.md DOUBLECHECK
+Sample inspection (first-5 raw I/O dump per our internal DOUBLECHECK
 rule): UDHR errors are real disambiguation (``nhân nhượng`` →
 ``nhận nhượng``, ``mọi`` → ``mỗi``); Tatoeba errors include
 ``chữ`` (letter) → ``chứ`` (rather/but). Metric matches eyeballed
 quality; no methodology bug.
 
 Updated ``docs/benchmark.md`` register-conditional production table
-to four rows; updated ``CLAUDE.md`` register-shift gotcha with the
+to four rows; updated `our internal policy` register-shift gotcha with the
 new gradient and dataset entries.
 
 JSON baselines:
@@ -298,7 +298,7 @@ CrossEncoderReranker("itdainb/PhoRanker", word_segment=True)
 ```
 
 `bench_rag_vn.py` gains `--reranker-word-segment`. No model-name
-sniffing — caller decides per CLAUDE.md best-practice rule.
+sniffing — caller decides per our internal best-practice rule.
 
 ## [0.2.19] — 2026-04-26
 
@@ -341,7 +341,7 @@ question selection. bkai stays.
 
 ### `--samples N` dumps raw I/O per model
 
-Per CLAUDE.md autonomous-loop §8 (ALWAYS DOUBLE-CHECK):
+Per our internal autonomous-loop §8 (ALWAYS DOUBLE-CHECK):
 `bench_embedder_compare.py --samples 3` dumps the first N (question,
 gold doc, top-1 predicted doc) tuples into the JSON output. Reading
 five raw samples is the cheapest way to catch broken metrics —
@@ -380,7 +380,7 @@ literary VN. The 8 pp gap between business and literary is mostly
 proper-noun ambiguity (Hùng / Hưng / Hứng) and a few minor-register
 words — not architectural failure.
 
-CLAUDE.md autonomous-loop §5 gains a second methodological lesson:
+our internal policy autonomous-loop §5 gains a second methodological lesson:
 **implausible metrics demand investigation.** Anything pegged at 0 %
 or 100 % on a real model is almost certainly a bench bug. We caught
 this exact failure mode here.
@@ -412,7 +412,7 @@ implied. Production guidance updated to register-conditional:
   - Classical literary / mixed / unknown → cloud gpt-4o-mini, or
     register-aware fallback
 
-CLAUDE.md autonomous-loop §5 gains a "multi-corpus measurement is
+our internal policy autonomous-loop §5 gains a "multi-corpus measurement is
 mandatory for adoption claims" rule. README + recipes.md flagged
 with a register-caveat note. docs/training_plan_2026q2.md updated.
 
@@ -599,7 +599,7 @@ tokenizer regression that breaks Toshiiiii1's load.
 
 Distil recommendation in docs/training_plan_2026q2.md RETRACTED.
 
-CLAUDE.md gains an "Autonomous improvement loop" section codifying the
+our internal policy gains an "Autonomous improvement loop" section codifying the
 "off-the-shelf before training" rule: exhaustively bench public
 Apache/MIT/safetensors candidates *before* recommending a fine-tune.
 This was the third time we'd missed this — saving it as a durable rule.
@@ -719,7 +719,7 @@ that ships it to be AGPL. We will not ship that. Instead:
   it directly; we won't expose a wrapper that muddies the license.
 
 Measured 2026-04-26 on a synthetic 7-page VN PDF (47 KB, 18,877 GT
-chars), warmup 3 + best-of-5 (CLAUDE.md §12):
+chars), warmup 3 + best-of-5 (our internal policy §12):
 
 | Library | License | Best (s) | Throughput | Char overlap |
 |---|---|---:|---:|---:|
@@ -776,7 +776,7 @@ Cross-checked against underthesea's own published VLSP 2013 numbers (~94%
 F1) — our 95.70% on UD-VTB is consistent (UD-VTB is a slightly easier
 register than VLSP). No methodology divergence to chase.
 
-PyVi remains auto-rejected per CLAUDE.md principle 11 (ships `.pkl`
+PyVi remains auto-rejected per our internal principle 11 (ships `.pkl`
 model files = arbitrary code execution on load).
 
 `bench_segment.py` gains `--corpus {diacritic_eval, ud_vtb}` and `--split`
@@ -891,7 +891,7 @@ label-echoes, and code fences from LLM output.
 The pure-Python BM25 implementation became the latency bottleneck on
 the full Zalo Legal QA corpus (430 ms p50 on 82,696 chunks). Swapped to
 [`bm25s`](https://github.com/xhluca/bm25s) (MIT, scipy.sparse, no
-pickle, no native binaries — passes CLAUDE.md principle 11).
+pickle, no native binaries — passes our internal policy principle 11).
 
 Verified on the full corpus (`benchmarks/results/bm25_compare__zalo_full.json`):
 
@@ -994,7 +994,7 @@ Three findings worth noting:
 - **Skip-the-reranker option exists** — AITeamVN dense alone gets 0.825
   recall@1 in 47 ms, ~15× faster than +rerank for a 4% absolute drop.
 
-Per CLAUDE.md principle 12 + new component-build rule #7: numbers come
+Per our internal principle 12 + new component-build rule #7: numbers come
 from a committed-and-runnable script (`benchmarks/rag/bench_rag_vn.py`)
 and a checked-in baseline JSON. Divergence from public Zalo numbers
 (BM25 alone here = 0.762 recall@1; UIT 2024 reports BM25Plus
@@ -1007,12 +1007,12 @@ distractors in our 5k subset — not a methodology bug.
 hosts the fixture builder + JSON fixtures + JSON baselines so anyone
 can reproduce or compare without re-sampling.
 
-### CLAUDE.md — component-build workflow
+### our internal policy — component-build workflow
 
 Codified the loop applied here so every future component follows it:
 research → build → test with real models → benchmark on real datasets →
 iterate as a grid → cross-check against published numbers. See the
-"Component build workflow" section in `CLAUDE.md` for the full rule
+"Component build workflow" section in our internal policy for the full rule
 set including the file-format trust ladder (safetensors > HF .bin from
 a major lab > native opaque > pickle = always reject).
 
@@ -1052,7 +1052,7 @@ queries = multi_query("Quyền cơ bản?", llm, n=3)  # ["Quyền…", *3 rewri
 10 new tests in `tests/test_rag.py` covering the strategies and the
 standalone helpers (deterministic — no real LLM calls).
 
-**No quality numbers claimed.** Per CLAUDE.md principle 12, we won't
+**No quality numbers claimed.** Per our internal principle 12, we won't
 publish "X% improvement" without a real VN benchmark corpus
 (Zalo Legal QA being the obvious target). The primitives ship; the
 quality claims wait.
@@ -1194,7 +1194,7 @@ claimed BGE-M3 is the VN-MTEB #1 at 64.90 overall. Per Table 3 of
 top of that table is `intfloat/multilingual-e5-large-instruct` at
 **67.99**, with `intfloat/e5-mistral-7b-instruct` (67.67) and
 `Alibaba-NLP/gte-Qwen2-7B-instruct` (65.84) above BGE-M3 (~4th).
-Corrected per CLAUDE.md principle 12.
+Corrected per our internal principle 12.
 
 ### Docs — `docs/architecture.md` extended
 
@@ -1525,7 +1525,7 @@ test double so no model downloads or LLM calls happen in CI.
 
 ### Engineering
 - 34 new tests across the two modules (167 total passing).
-- `PPlanning/CLAUDE.md` gained a 4-stage component-build workflow:
+- `PPlanning/our internal policy` gained a 4-stage component-build workflow:
   Research → Build → Benchmark → Tune. Each new component must show
   cited OSS prior art, smallest dep surface that meets quality goals,
   warmup + best-of-N benchmarks with committed baselines, and any

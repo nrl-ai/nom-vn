@@ -30,7 +30,7 @@ For each: license, the pattern worth borrowing, the trap to avoid, URL.
 ### DSPy
 - **License:** MIT. Repo: <https://github.com/stanfordnlp/dspy> ("160k monthly downloads, 16k stars" per <https://dspy.ai/roadmap/>).
 - **Borrow:** Signature-as-contract — `signature = "question -> answer: str"` is a typed I/O spec, not a prompt template. <https://dspy.ai/learn/programming/signatures/> When `nom.llm` formalizes typed extraction, this is the cleaner shape.
-- **Avoid:** The optimizer-as-default narrative. `BootstrapFewShot` / `MIPROv2` / `GEPA` produce real wins on the benchmarks they tune for, but they're heavy for "answer one VN legal question." Ship without an optimizer; add only when we have a held-out eval set (CLAUDE.md principle 12).
+- **Avoid:** The optimizer-as-default narrative. `BootstrapFewShot` / `MIPROv2` / `GEPA` produce real wins on the benchmarks they tune for, but they're heavy for "answer one VN legal question." Ship without an optimizer; add only when we have a held-out eval set (verified-benchmarks rule).
 
 ### txtai
 - **License:** Apache 2.0. Repo: <https://github.com/neuml/txtai> — closest peer to our stance ("Local laptop: zero-config, runs on CPU"). Worth reading the `Embeddings` class as a reference for an in-process vector index API.
@@ -53,7 +53,7 @@ For each: license, the pattern worth borrowing, the trap to avoid, URL.
 - **Avoid:** Tightly coupling to one engine. Ollama is fundamentally a llama.cpp wrapper; when llama.cpp lags, Ollama lags. Keep Ollama as one adapter, not the floor.
 
 ### llama.cpp / vLLM / LiteLLM
-- **llama.cpp** (MIT, <https://github.com/ggml-org/llama.cpp>): GGUF is the right "weights as data, mmap-able, deterministic" format — matches CLAUDE.md principle 11. Don't bind directly; talk via Ollama or `llama-cpp-python` adapter. The C++ ABI churns.
+- **llama.cpp** (MIT, <https://github.com/ggml-org/llama.cpp>): GGUF is the right "weights as data, mmap-able, deterministic" format — matches our no-pickle policy. Don't bind directly; talk via Ollama or `llama-cpp-python` adapter. The C++ ABI churns.
 - **vLLM** (Apache 2.0, <https://github.com/vllm-project/vllm>, "~75K stars"): borrow PagedAttention *as a concept* — memory layout dominates inference cost. Avoid as a default — V1 multi-process / ZeroMQ architecture is for serving Llama-405B, not one Mac user.
 - **LiteLLM** (MIT, <https://github.com/BerriAI/litellm>): borrow the OpenAI-compatible wire format as lingua franca. <https://docs.litellm.ai/docs/simple_proxy> Ship `nom.llm.OpenAICompatible` once and you adopt LiteLLM's catalog for free. Avoid the proxy-server form — different product.
 
@@ -112,7 +112,7 @@ For each: license, the pattern worth borrowing, the trap to avoid, URL.
 5. **OpenTelemetry + OpenInference span conventions** (Phoenix / OpenLLMetry). One afternoon of work in `nom.chat.server` opens the door to Phoenix, Langfuse, Datadog, Honeycomb.
 6. **Connector pattern, when we need it** (Onyx). A `Connector` is "iterator that yields documents with metadata" — small Protocol when the time comes; no need today.
 7. **Single-binary user experience** (Ollama). Even though we're a Python wheel, `pip install "nom-vn[chat]" && nom serve` should feel as one-shot as `ollama pull && ollama serve`. We're close. Keep that bar.
-8. **GGUF-style "weights as data" discipline** (llama.cpp). Already encoded in CLAUDE.md principle 11 (no pickle). Stay strict.
+8. **GGUF-style "weights as data" discipline** (llama.cpp). Already encoded in our no-pickle policy (no pickle). Stay strict.
 9. **Connector / IO as iterator + provenance** (Docling). A `Document` carries `provenance` (page, section, bbox) end-to-end so citations work. We already do citations; tighten the data class.
 
 ---
@@ -125,7 +125,7 @@ For each: license, the pattern worth borrowing, the trap to avoid, URL.
 4. **All-in-one mega-class** (txtai's `Embeddings`). Our split (Embedder / Retriever / Index / Store) is cleaner; don't collapse it under "simplicity" pressure.
 5. **Required external services for the local tier** (Onyx, RAGFlow). Postgres + ES + Redis + MinIO is a fine production tier; it cannot be the laptop default.
 6. **AGPL/GPL bundled deps** (Marker, PyMuPDF — already documented in ARCHITECTURE.md, Khoj). Study, don't copy. Adapters only, opt-in.
-7. **Optimizers / agent loops as default** (DSPy `BootstrapFewShot`, generic ReAct). Demoware unless paired with held-out evals proving wins. Per CLAUDE.md principle 12, add only when the bench number moves.
+7. **Optimizers / agent loops as default** (DSPy `BootstrapFewShot`, generic ReAct). Demoware unless paired with held-out evals proving wins. Per our verified-benchmarks rule, add only when the bench number moves.
 8. **Vendor-locked observability SDKs** (LangSmith, Helicone proprietary mode). OpenTelemetry exists; use it.
 9. **YAML/JSON-as-API** (Continue's `config.json`, Flowise's flow definitions). Code is the API. A Config dataclass is enough.
 10. **ORMs in the core data path** — already explicitly ruled out in `ARCHITECTURE.md` rule #6. Keeping it.
@@ -174,7 +174,7 @@ Ranked by impact / cost.
 ### Tier L — noted, not now
 
 9. **Connector Protocol** (Onyx-style 40-source plugin set). Out of scope until users actually have non-file sources.
-10. **Optimizers / iterative-retrieval agent loops.** DSPy `BootstrapFewShot`, ReAct-style retries. Demoware unless we have an eval set proving wins. Per CLAUDE.md principle 12, gate on the bench number.
+10. **Optimizers / iterative-retrieval agent loops.** DSPy `BootstrapFewShot`, ReAct-style retries. Demoware unless we have an eval set proving wins. Per our verified-benchmarks rule, gate on the bench number.
 11. **Multi-tenant story.** `ARCHITECTURE.md` already lists this in the scaling table; the Protocol seams are positioned correctly. No code action until the second customer asks.
 12. **vLLM adapter.** Right answer for a future `nom.llm.VLLM`; wrong default. The `LLM` Protocol means it's additive when the time comes.
 

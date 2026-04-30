@@ -66,7 +66,7 @@ mathematically-impossible 0/800 sentence-exact. After
 The model is real-world useful on both registers; it's still register-
 sensitive (8 pp gap) but mostly because of proper-noun ambiguity
 (`Hùng` ↔ `Hưng` ↔ `Hứng`) and a few minor-register lexical choices,
-not architectural failure. Lesson logged in CLAUDE.md autonomous-loop
+not architectural failure. Lesson logged in our internal policy autonomous-loop
 §5: implausible metrics (anything pegged at 0 % or 100 %) demand
 investigation; multi-corpus measurement is mandatory for adoption.
 
@@ -79,7 +79,7 @@ investigation; multi-corpus measurement is mandatory for adoption.
 | Throughput-bound, tolerable error rate | Rule path — register-independent floor at ~41 % |
 
 We should have spotted this earlier — running on `diacritic_eval_v0.txt`
-alone (55 sentences) was test-set overfitting. CLAUDE.md §12 only
+alone (55 sentences) was test-set overfitting. our verified-benchmarks rule only
 required warmup + best-of-N; for *quality* numbers it should also
 require multi-corpus measurement when the candidate model has unknown
 training distribution. Updated in the autonomous-loop §5.
@@ -89,7 +89,7 @@ production recommendation. Wired into `nom.text.fix_diacritics(model=...)`
 via `HFDiacriticModel` adapter (v0.2.14). Install:
 `pip install "nom-vn[diacritic-hf]"`.
 
-**Process correction logged.** Per CLAUDE.md autonomous loop §5:
+**Process correction logged.** Per our multi-corpus register-coverage rule:
 "off-the-shelf before training" — exhaustively bench public candidates
 *before* recommending a fine-tune. We documented the user's catch and
 added a project rule.
@@ -203,7 +203,7 @@ sub-100 M model can beat a general 8 B LLM**, because:
 
 **Expected outcome:** 92–95% accuracy at 250–500 MB on disk, sub-50 ms
 on CPU. Fits in `nom-vn[diacritics]` extra without violating
-CLAUDE.md principle 11 (safetensors, no pickle).
+our no-pickle policy (safetensors, no pickle).
 
 **Compute cost:** 1× H100 for ~6 h ≈ $20 on Lambda Cloud. Inference
 cost: free (CPU OK).
@@ -362,12 +362,12 @@ Each "do nothing" recommendation has a trigger that flips it:
 ## Process notes
 
 - All measurements above come from scripts in `benchmarks/` runnable
-  from a clean clone (CLAUDE.md §12 verified-benchmarks rule).
+  from a clean clone (our verified-benchmarks rule verified-benchmarks rule).
 - Cross-checks against published numbers were done where the upstream
   reported them — diacritic accuracy vs. OpenAI's general
   capabilities; underthesea vs. its own VLSP 2013 numbers; Tesseract
   vs. published `vie` accuracy ranges. No silent disagreements.
-- The PyVi auto-rejection (CLAUDE.md principle 11, ships `.pkl`) and
+- The PyVi auto-rejection (our no-pickle policy, ships `.pkl`) and
   the AGPL exclusions (PyMuPDF, Surya) constrain the recommendation
   surface and are reflected in the picks.
 

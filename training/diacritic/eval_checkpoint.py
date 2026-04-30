@@ -9,11 +9,11 @@ Why a separate script: re-evaluating a trained checkpoint shouldn't
 require the training data or the heavy Trainer imports; this script
 only needs ``transformers`` + ``torch``. Useful for:
 
-- Re-eval after rsyncing a checkpoint back from genpc2.
+- Re-eval after rsyncing a checkpoint back from the GPU training box.
 - Comparing the trained checkpoint's numbers against an updated
   eval corpus (e.g. when we add a 5th register).
 - Sanity-check before publishing — re-run the eval on the local
-  machine to confirm the genpc2 numbers reproduce.
+  machine to confirm the GPU training box numbers reproduce.
 
 Usage::
 

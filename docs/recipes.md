@@ -45,7 +45,7 @@ The default model is `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
 |---|---:|
 | Formal / legal-prose (UDHR) | 98.14 % |
 | Business / news | 97.81 % |
-| Conversational (Tatoeba) | 93.77 % |
+| Conversational (Tatoeba) | 93.94 % |
 | Classical literary (UD-VTB) | 89.40 % |
 
 8.7 pp spread, monotonic gradient. The model is register-overfit toward
@@ -62,7 +62,7 @@ Vietnamese, our in-house ViT5-base fine-tune wins on those registers:
 |---|---:|---:|
 | Formal / legal-prose | 98.14 % | **99.57 %** ⭐ |
 | Business / news | **97.81 %** | 93.44 % |
-| Conversational | 93.77 % | **94.16 %** ⭐ |
+| Conversational | 93.94 % | **94.16 %** ⭐ |
 | Classical literary | **89.40 %** | 89.39 % |
 
 ```python
@@ -578,7 +578,7 @@ python benchmarks/rag/bench_embedder_compare.py
 ```
 
 Baselines under `benchmarks/results/baseline_*.json`. Reproducibility
-is a CLAUDE.md §12 hard rule — every number must come from a script
+is a our verified-benchmarks rule hard rule — every number must come from a script
 runnable from a clean clone, not a model-card screenshot.
 
 ### See what changed between releases
@@ -598,8 +598,7 @@ pip-licenses --format=markdown --packages nom-vn pypdfium2 pdfplumber \
 ```
 
 We refuse AGPL (PyMuPDF, Surya), GPL (Surya code), and pickle-shipping
-deps (PyVi). The auto-rejection list is in `CLAUDE.md` (component-build
-workflow §1, file-format trust ladder).
+deps (PyVi). The auto-rejection list is in our component-build policy.
 
 ---
 

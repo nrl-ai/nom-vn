@@ -128,7 +128,7 @@ def main() -> int:
             for sent in _split_sentences(text):
                 # NFC-normalize. tmnam20 news ships ~79 % NFD-decomposed text,
                 # which silently broke v0.2.26 (caught 2026-04-30 — see
-                # CLAUDE.md gotcha #1: NFC vs NFD). The base ViT5 SentencePiece
+                # our internal policy gotcha #1: NFC vs NFD). The base ViT5 SentencePiece
                 # tokenizer is NFC; training on NFD targets makes the model
                 # emit decomposed forms that don't byte-match NFC-normalized
                 # eval targets.

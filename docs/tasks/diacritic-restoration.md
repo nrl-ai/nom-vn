@@ -24,14 +24,14 @@ The default model is `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
 (Apache 2.0, T5 200 M, safetensors) — public SOTA on the 4-register
 matrix. For corpora skewed toward formal / legal-prose / conversational
 Vietnamese, our [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)
-is +1.43 pp on formal / +0.39 pp on conversational at the same arch
+is +1.43 pp on formal / +0.22 pp on conversational at the same arch
 size + license.
 
 ## Public landscape — measured 2026-04-30
 
 | Model | License | Format | business 55 | literary 800 | conv 300 | formal 72 | Verdict |
 |---|---|---|---:|---:|---:|---:|---|
-| [`Toshiiiii1/Vietnamese_diacritics_restoration_5th`](https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th) | Apache 2.0 | safetensors | **97.81 %** | **89.40 %** | 93.77 % | 98.14 % | ⭐ public SOTA, current default |
+| [`Toshiiiii1/Vietnamese_diacritics_restoration_5th`](https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th) | Apache 2.0 | safetensors | **97.81 %** | **89.40 %** | 93.94 % | 98.14 % | ⭐ public SOTA, current default |
 | **[`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)** (ours) | Apache 2.0 | safetensors | 93.44 % | 89.39 % | **94.16 %** | **99.57 %** | best register-balanced; pick for legal / conversational |
 | `qthuan2604/ViT5_Restore_Diacritics_Vietnamese` | MIT | bin | 90.59 % | — | — | — | weaker than ours; skip |
 | `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | safetensors | 83.92 % | — | — | — | weakest of audited; skip |
@@ -90,7 +90,7 @@ single-call path).
 |---|---:|---:|---:|
 | `formal_udhr` | 98.14 % | **99.57 %** | **+1.43 pp** |
 | `business_55` | **97.81 %** | 93.44 % | -4.37 pp |
-| `conversational_300` | 93.77 % | **94.16 %** | **+0.39 pp** |
+| `conversational_300` | 93.94 % | **94.16 %** | **+0.22 pp** |
 | `literary_udvtb` | **89.40 %** | 89.39 % | -0.01 pp (tied) |
 
 Strict adoption gate (business ≥ 96 % AND literary > 89.40 %) **fails**
@@ -109,8 +109,7 @@ who care about formal / conversational accuracy.
 
 ## Datasets — `nrl-ai/*`
 
-Both verified renderable + `datasets.load_dataset`-loadable per CLAUDE.md
-principle 14.
+Both verified renderable + loadable via `datasets.load_dataset`.
 
 | HF dataset | License | What it is |
 |---|---|---|
@@ -130,7 +129,8 @@ news = load_dataset("nrl-ai/vn-diacritic-train", "news_150k", split="train")
 
 ## Results — measured
 
-All numbers reproducible on a clean clone (CLAUDE.md principle 12).
+All numbers reproducible on a clean clone via the bench scripts under
+`benchmarks/accuracy/` and `training/diacritic/eval_checkpoint.py`.
 RTX 3080 16 GB Mobile / RTX 3090 measurements, NFC + punctuation
 normalization on both sides of comparison, 3-call warmup, num_beams=1.
 
@@ -178,19 +178,17 @@ The full training pipeline is under [`training/diacritic/`](../../training/diacr
 - `train.py` — HF `Seq2SeqTrainer` with cosine LR, optional early stopping, 4-register post-training eval.
 - `eval_checkpoint.py` — standalone re-eval given a checkpoint dir or HF repo id.
 - `publish_hf.py` — gate-checked HF Hub publishing with auto-generated model card.
-- `post_train.sh` — rsync from genpc2 → local re-eval (>0.5 pp divergence fails) → publish dry-run.
+- `post_train.sh` — rsync from the GPU training box → local re-eval (>0.5 pp divergence fails) → publish dry-run.
 
 Experiment history (5 runs to date) in [`training/diacritic/README.md`](../../training/diacritic/README.md).
 
 ## Vietnamese-specific gotchas hit during this work
 
-(Captured in [`CLAUDE.md`](../../CLAUDE.md) "Vietnamese language gotchas":)
-
 - **NFC vs NFD.** `tmnam20/Vietnamese-News-dedup` ships ~79 % NFD-decomposed
-  text. v5 trained on it; the model emitted decomposed combining marks
-  that NFC eval byte-compare missed → **-15.45 pp catastrophic regression**
-  on business register. Now NFC-normalized at three layers (prep, prep-news,
-  train preprocess).
+  text. An earlier mixed-source run trained on it; the model emitted
+  decomposed combining marks that NFC eval byte-compare missed →
+  **-15.45 pp catastrophic regression** on business register. Now
+  NFC-normalized at three layers (prep, prep-news, train preprocess).
 - **Early stopping on noisy small eval.** `--early-stopping-patience 3`
   with 200-sample eval set fired at epoch 0.96 of v3 — the model never
   converged. Now default `--eval-samples 1000` and recommend

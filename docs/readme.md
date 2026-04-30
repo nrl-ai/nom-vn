@@ -44,7 +44,7 @@ moved into per-task pages.
 
 | File | Lives at | Why |
 |---|---|---|
-| `README.md`, `README.vi.md` | repo root | GitHub auto-renders; first thing new visitors see; bilingual peers (CLAUDE.md principle 15 propagation matrix) |
+| `README.md`, `README.vi.md` | repo root | GitHub auto-renders; first thing new visitors see; bilingual peers — both update in lockstep when content changes |
 | `LICENSE` | repo root | toolchain + license-detection convention |
 | `CHANGELOG.md` | repo root | GitHub releases auto-pick this up |
 | `CONTRIBUTING.md` | repo root | GitHub auto-surfaces this on PR/issue creation |

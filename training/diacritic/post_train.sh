@@ -1,25 +1,25 @@
 #!/usr/bin/env bash
-# Post-training pipeline: rsync genpc2 → local re-eval → dry-run publish.
+# Post-training pipeline: rsync the remote GPU host -> local re-eval -> dry-run publish.
 #
-# Run this AFTER ./launch_genpc2.sh has produced a final checkpoint on
-# genpc2. Sequence:
+# Run this AFTER ./launch_genpc2.sh has produced a final checkpoint on the
+# remote GPU host. Sequence:
 #
 #   1. rsync the checkpoint dir + training_summary.json back to local.
 #   2. Re-eval the checkpoint locally; fail loudly if word-acc diverges
-#      from the genpc2 numbers by more than ±0.5 pp on any register.
+#      from the remote numbers by more than +/- 0.5 pp on any register.
 #   3. Run publish_hf.py --dry-run to print the upload plan and gate
 #      status. If the gate passes, the operator can rerun without
 #      --dry-run to actually push.
+#
+# The remote SSH host is configurable via $TRAIN_HOST (defaults to "genpc2",
+# matching launch_genpc2.sh's default). The remote path is derived as the
+# same relative path under ~/nom-vn-train/.
 #
 # Usage::
 #
 #     ./training/diacritic/post_train.sh \
 #         training/diacritic/checkpoints/vit5-base-500k-cosine \
 #         nrl-ai/vn-diacritic-restoration
-#
-# The two args are: (a) the local output-dir from launch_genpc2.sh, and
-# (b) the target HF repo id. The remote path is derived as the same
-# relative path under ~/nom-vn-train/ on genpc2.
 
 set -euo pipefail
 
@@ -29,6 +29,7 @@ if [ $# -lt 2 ]; then
     exit 2
 fi
 
+TRAIN_HOST="${TRAIN_HOST:-genpc2}"
 LOCAL_DIR="$1"
 HF_REPO_ID="$2"
 REMOTE_DIR="nom-vn-train/$LOCAL_DIR"
@@ -38,13 +39,13 @@ SUMMARY_JSON="$LOCAL_DIR/training_summary.json"
 LOCAL_EVAL_JSON="training/diacritic/results/$(basename "$LOCAL_DIR")_eval_local.json"
 
 # --- Step 1: rsync ---
-echo "==> [1/3] rsync $REMOTE_DIR/ -> $LOCAL_DIR/"
+echo "==> [1/3] rsync $TRAIN_HOST:$REMOTE_DIR/ -> $LOCAL_DIR/"
 mkdir -p "$LOCAL_DIR"
 rsync -av --progress \
-    "genpc2:$REMOTE_DIR/final/" \
+    "$TRAIN_HOST:$REMOTE_DIR/final/" \
     "$LOCAL_DIR/final/"
 rsync -av \
-    "genpc2:$REMOTE_DIR/training_summary.json" \
+    "$TRAIN_HOST:$REMOTE_DIR/training_summary.json" \
     "$LOCAL_DIR/"
 
 if [ ! -f "$SUMMARY_JSON" ]; then
@@ -66,19 +67,19 @@ for name, m in s.get('eval', {}).items():
 
 # --- Step 2: local re-eval ---
 echo
-echo "==> [2/3] local re-eval (sanity check that genpc2 numbers reproduce)"
+echo "==> [2/3] local re-eval (sanity check that remote numbers reproduce)"
 python training/diacritic/eval_checkpoint.py \
     --checkpoint "$CHECKPOINT_DIR" \
     --output-json "$LOCAL_EVAL_JSON" \
     --examples 0
 
 echo
-echo "  Comparison (genpc2 vs local re-eval):"
+echo "  Comparison (remote vs local re-eval):"
 python -c "
 import json
 remote = json.load(open('$SUMMARY_JSON')).get('eval', {})
 local = json.load(open('$LOCAL_EVAL_JSON')).get('eval', {})
-print(f'  {\"register\":<24s} {\"genpc2\":>8s} {\"local\":>8s} {\"delta\":>8s}')
+print(f'  {\"register\":<24s} {\"remote\":>8s} {\"local\":>8s} {\"delta\":>8s}')
 diverged = False
 for name in sorted(set(remote) | set(local)):
     r = remote.get(name, {}).get('word_accuracy')

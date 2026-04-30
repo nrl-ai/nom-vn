@@ -326,6 +326,26 @@ version, same code snippets — the prose can be translated freely
 provided the structure matches). Drifting them is a regression in
 the user-facing surface for a major user segment.
 
+## Don't reference this file in user-facing artifacts
+
+This file (`CLAUDE.md`) is an internal AI-operator instruction
+document. It must not be cited or linked from any user-facing
+surface: model cards on HF Hub, dataset cards, the project README,
+files under `docs/`, blog posts, talks, papers. Phrases like "per
+CLAUDE.md principle 11", "CLAUDE.md autonomous-loop §5", or links to
+this file leak the AI-instruction layer to users who came for the
+software.
+
+When you need to invoke a policy from this file in a user-facing
+doc, restate the underlying policy in self-contained terms. Examples:
+
+- "per our verified-benchmarks rule" instead of "per CLAUDE.md §12"
+- "our no-pickle policy" instead of "CLAUDE.md principle 11"
+- "we cite Viet-Anh Nguyen + Neural Research Lab on every artifact"
+  instead of "principle 13"
+
+The reader should not need to know that this file exists.
+
 Hard rule: **never claim a number in a doc that doesn't exist yet** —
 the order is always (a) measure / publish, (b) update doc with the
 measured number cited to the JSON / HF URL, never the other way
