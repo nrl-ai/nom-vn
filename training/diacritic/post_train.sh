@@ -99,9 +99,42 @@ if diverged:
     sys.exit(1)
 "
 
-# --- Step 3: dry-run publish ---
+# --- Step 3: OOD real-world bench (the load-bearing eval) ---
 echo
-echo "==> [3/3] publish dry-run (check gate, generate model card)"
+echo "==> [3/4] OOD real-world bench on $CHECKPOINT_DIR (150 sentences, 6 slices)"
+LOCAL_OOD_JSON="training/diacritic/results/$(basename "$LOCAL_DIR")_eval_real.json"
+PY="${PY:-python}"
+[ -x ".venv/bin/python" ] && PY=".venv/bin/python"
+"$PY" benchmarks/accuracy/bench_spell_correction_real.py \
+    "$CHECKPOINT_DIR" \
+    --json "$LOCAL_OOD_JSON" \
+    --examples 0
+
+echo
+echo "  OOD vs the public landscape (and prior shipped tier):"
+"$PY" -c "
+import json, os
+ours = json.load(open('$LOCAL_OOD_JSON'))['eval']
+others = {
+    'Toshiiiii1 (public)': 'benchmarks/results/baseline_real_toshiiiii1.json',
+    'diacritic v0.2.28 (prev)': 'benchmarks/results/baseline_real_diacritic_vit5_base.json',
+}
+loaded = {k: json.load(open(p))['eval'] for k, p in others.items() if os.path.exists(p)}
+slices = ['forum_25', 'mobile_25', 'telex_real_25', 'ocr_25', 'legal_real_25', 'news_real_25', '__all_real__']
+header = ['this run'] + list(loaded)
+print(f'  {\"slice\":<22s} ' + ' '.join(f'{h:>22s}' for h in header))
+for sl in slices:
+    row = [f'  {sl:<22s}']
+    for src in ['this'] + list(loaded):
+        d = ours if src == 'this' else loaded[src]
+        wa = d.get(sl, {}).get('word_accuracy', 0) * 100
+        row.append(f'{wa:>22.2f}')
+    print(' '.join(row))
+"
+
+# --- Step 4: dry-run publish ---
+echo
+echo "==> [4/4] publish dry-run (check gate, generate model card)"
 python training/diacritic/publish_hf.py \
     --checkpoint-dir "$CHECKPOINT_DIR" \
     --summary-json "$SUMMARY_JSON" \
