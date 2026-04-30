@@ -107,20 +107,24 @@ hand-curate mà mẫu nhiễu lấy từ nguồn lỗi VN thực tế, KHÔNG ph
 `legal_real_25` và `news_real_25`) để có gradient ổn định hơn. Mọi
 con số đi kèm khoảng tin cậy bootstrap 95 % (n=1000 resample).
 
-| Slice | Nguồn | spell-correction-base | spell-correction-small | diacritic-vit5-base |
-|---|---|---:|---:|---:|
-| `forum_25` | Forum / teen-code | 59.45 [45.21-72.01] | 58.73 [44.57-71.28] | 49.31 [37.33-60.45] |
-| `mobile_25` | Autocorrect điện thoại | 95.01 [92.98-96.76] | 95.01 [93.18-96.71] | 79.66 [71.59-86.65] |
-| `telex_real_25` | Telex/VNI thực | **17.38** [12.20-22.60] | 9.51 [5.28-14.08] | 14.89 [11.73-17.98] |
-| `ocr_25` | Tesseract / EasyOCR | 93.62 [89.30-97.27] | 91.16 [86.89-94.74] | 94.53 [90.36-98.14] |
-| `legal_real_25` | Văn bản pháp lý thật | **95.09** [91.41-98.19] | 93.56 [89.97-96.46] | 88.05 [80.25-93.92] |
-| `news_real_25` | Tiêu đề + tin tức | 96.54 [94.50-98.50] | 91.58 [82.13-97.72] | 95.80 [93.69-98.01] |
-| **Tổng hợp** | n=150 | **77.43** [72.57-82.28] | 75.92 [70.60-81.01] | 71.50 [66.49-76.54] |
+| Slice | Nguồn | **ours base** | ours small | ours diacritic | Toshiiiii1 (public) | bmd1905 (public) |
+|---|---|---:|---:|---:|---:|---:|
+| `forum_25` | Forum / teen-code | 59.45 | 58.73 | 49.31 | **60.11** | 59.02 |
+| `mobile_25` | Autocorrect điện thoại | 95.01 | 95.01 | 79.66 | **96.95** | 88.09 |
+| `telex_real_25` | Telex/VNI thực | 17.38 | 9.51 | 14.89 | **18.54** | 11.58 |
+| `ocr_25` | Tesseract / EasyOCR | 93.62 | 91.16 | **94.53** | 94.22 | 47.42 |
+| `legal_real_25` | Văn bản pháp lý thật | **95.09** | 93.56 | 88.05 | 93.80 | 54.90 |
+| `news_real_25` | Tiêu đề + tin tức | **96.54** | 91.58 | 95.80 | 94.07 | 30.62 |
+| **Tổng hợp** | n=150 | **77.43** | 75.92 | 71.50 | 77.40 | 49.21 |
 
-Tất cả số là word accuracy (%). JSON nguồn:
-[base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_base.json) /
-[small](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_small.json) /
-[diacritic-vit5-base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_diacritic_vit5_base.json).
+Tất cả số là word accuracy (%). Khoảng tin cậy bootstrap 95 % (±~5 pp
+trên tổng hợp 150 câu) là rộng — base của chúng tôi và Toshiiiii1
+đang **ngang nhau trong khoảng nhiễu thống kê** trên OOD. JSON nguồn:
+[ours-base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_base.json) /
+[ours-small](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_small.json) /
+[ours-diacritic](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_diacritic_vit5_base.json) /
+[Toshiiiii1](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_toshiiiii1.json) /
+[bmd1905](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_bmd1905.json).
 
 #### Phân tích kiểu lỗi (n=150, tổng hợp)
 
@@ -136,22 +140,32 @@ trong corpus v2 nhắm đến.
 
 #### Quan sát chính
 
-1. **Khoảng cách synthetic vs OOD vẫn lớn** — `vn-spell-correction-base`
-   đạt 98.58 % light avg trên lưới synthetic 8-split rớt xuống 77.43 %
-   tổng hợp OOD. Trên 6 register: legal + news + mobile gần ngưỡng
-   in-distribution (88-96 %), forum + telex là điểm yếu nghiêm trọng
-   (17-59 %).
-2. **spell-base vs spell-small ngang nhau trên tổng hợp** (77.43 vs
-   75.92, KTC 95 % chồng nhau). Khác biệt rõ là **spell-small drop
-   trên Telex** (-7.87 pp) và mất nhiều token hơn (`missing_word`
-   = 64 vs 15 — BARTpho hay bỏ token cuối câu).
-3. **Sửa chính tả vẫn thắng diacritic-only** trên 5/6 slice. Khoảng
-   cách +5.93 pp tổng hợp (77.43 vs 71.50) — mô hình spell sửa được
-   lỗi cấp ký tự mà mô hình diacritic không làm được.
-4. **Telex là điểm yếu chung** — 9-17 % trên cả ba mô hình. Đây
-   chính là gap mà corpus v2 + `comprehensive_noise()` đang khắc phục
-   (thêm `telex_grammar_noise()` cho lỗi keystroke thực + `mobile_noise()`
-   cho teen-code + lỗi phím gần). v0.2.29 retrain đang chạy chuỗi
+1. **Phát hiện quan trọng: chúng tôi NGANG NHAU với Toshiiiii1 trên OOD.**
+   Tổng hợp 77.43 % (chúng tôi) vs 77.40 % (Toshiiiii1) — khác biệt
+   0.03 pp, nằm trong nhiễu thống kê. Trên synthetic 8-split chúng tôi
+   thắng Toshiiiii1 ~3-7 pp, nhưng OOD chuyển bài toán sang xử lý nhiễu
+   thực — và Toshiiiii1 đã chứng tỏ mình là một mô hình diacritic
+   restorer **được hardened tốt**. Chúng tôi vượt nhẹ trên `legal_real_25`
+   (95.09 vs 93.80) và `news_real_25` (96.54 vs 94.07); Toshiiiii1
+   vượt nhẹ trên `mobile_25`, `forum_25`, và `telex_real_25`. Mục tiêu
+   v0.2.29: **vượt rõ Toshiiiii1 trên OOD chứ không chỉ synthetic**.
+2. **bmd1905 thua xa** (49.21 % aggregate). Thua cả mô hình diacritic-only
+   của chúng tôi (71.50 %). Lý do: bmd1905 được huấn luyện chủ yếu trên
+   lỗi cấp ký tự, không gặp đủ pattern strip-dấu — nên nó để lại 459
+   missed_diacritic của 1058 lỗi. Đây là cảnh báo: chỉ vì một mô hình
+   thắng trên synthetic của chính họ không có nghĩa thắng trên thực tế.
+3. **Khoảng cách synthetic vs OOD vẫn lớn** — base chúng tôi đạt 98.58 %
+   light avg trên synthetic rớt xuống 77.43 % OOD (-21 pp). Trên 6 register:
+   legal + news + mobile gần ngưỡng in-distribution (88-96 %), forum +
+   telex là điểm yếu nghiêm trọng (17-59 %).
+4. **spell-base vs spell-small ngang nhau trên tổng hợp** (77.43 vs
+   75.92, KTC chồng nhau). Khác biệt rõ là **spell-small drop trên
+   Telex** (-7.87 pp) và mất nhiều token hơn (`missing_word` = 64 vs 15).
+5. **Telex là điểm yếu chung** — 9-19 % trên cả 5 mô hình (kể cả
+   Toshiiiii1 best 18.54 %). Đây chính là gap mà corpus v2 +
+   `comprehensive_noise()` đang khắc phục (thêm `telex_grammar_noise()`
+   cho lỗi keystroke thực + `mobile_noise()` cho teen-code + lỗi phím
+   gần). v0.2.29 retrain đang chạy chuỗi
    spell-base → spell-small → diacritic-base trên corpus v2.
 
 Tái lập:
