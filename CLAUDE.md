@@ -372,6 +372,37 @@ ViT5 family: `.bin` not safetensors (VinAI is well-known but not at
 Google/Meta audit scale; document the SHA256-pin choice in the
 wrapper docstring).
 
+## Every published model card carries a public-landscape comparison
+
+When we publish a model on HF Hub, the model card must include a
+"How we compare" section showing **this model versus**:
+
+1. **Our other variants** (the `-base` / `-small` / `-nano` siblings
+   under `nrl-ai/*` — readers usually want to know if the larger
+   sibling is worth the extra latency).
+2. **The public SOTA we benchmark against** for this task (e.g.
+   `Toshiiiii1/Vietnamese_diacritics_restoration_5th` for diacritics).
+3. **Other public candidates** at similar arch / param scale (the ones
+   we audited in the bench grid — even if we rejected them, showing
+   the numbers documents *why*).
+4. **A baseline reference** (rule-based / cloud LLM / etc.) so the
+   reader can see the ceiling and floor.
+
+Format: a single matrix with one row per model and one column per
+register / metric. Bold the best number per column. Cells we have not
+measured render as "—" (per the verified-benchmarks rule — don't
+fabricate cells).
+
+The publishing model is highlighted (e.g. `**this** →` prefix) so the
+reader sees its position at a glance. Adding a new candidate to the
+landscape goes in `publish_hf.py`'s `COMPARISON_MATRIX` constant; the
+table auto-renders for every future publish.
+
+This is what makes a model card useful versus just a metric dump:
+context. ProtonX's protonx-legal-tc card has the metric (96.95 % ROUGE-L
+on a non-public eval set) but no landscape — readers can't tell whether
+that's good. Our cards always tell readers where we stand.
+
 ## Don't leak internal terms to user-facing artifacts
 
 User-facing surfaces include: model cards on HF Hub, dataset cards,

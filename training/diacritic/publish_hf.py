@@ -41,6 +41,85 @@ TOSHIIIII_BASELINE = {
     "literary_udvtb": 0.8940,
 }
 
+# Public landscape — every measured row has a JSON baseline in the repo.
+# Used to render the "How we compare" section of every model card we publish.
+# Adding a new candidate? Append a row; the table auto-renders.
+COMPARISON_MATRIX: list[dict[str, Any]] = [
+    {
+        "repo_id": "Toshiiiii1/Vietnamese_diacritics_restoration_5th",
+        "label": "Toshiiiii1/...5th",
+        "family": "public",
+        "params": "200 M",
+        "license": "Apache 2.0",
+        "scores": {
+            "formal_udhr": 0.9814,
+            "business_55": 0.9781,
+            "conversational_300": 0.9394,
+            "literary_udvtb": 0.8940,
+        },
+    },
+    {
+        "repo_id": "nrl-ai/vn-diacritic-vit5-base",
+        "label": "nrl-ai/vn-diacritic-vit5-base",
+        "family": "ours",
+        "params": "220 M",
+        "license": "Apache 2.0",
+        "scores": {
+            "formal_udhr": 0.9943,
+            "business_55": 0.9498,
+            "conversational_300": 0.9412,
+            "literary_udvtb": 0.9024,
+        },
+    },
+    {
+        "repo_id": "nrl-ai/vn-diacritic-small",
+        "label": "nrl-ai/vn-diacritic-small",
+        "family": "ours",
+        "params": "115 M",
+        "license": "Apache 2.0",
+        "scores": {
+            "formal_udhr": 0.9151,
+            "business_55": 0.9444,
+            "conversational_300": 0.9068,
+            "literary_udvtb": 0.8633,
+        },
+    },
+    {
+        "repo_id": "qthuan2604/ViT5_Restore_Diacritics_Vietnamese",
+        "label": "qthuan2604/ViT5_Restore_Diacritics_Vietnamese",
+        "family": "public",
+        "params": "220 M",
+        "license": "MIT",
+        # Only business benched (90.59 was too far below SOTA to spend GPU
+        # on the other 3 registers); other cells left blank intentionally.
+        "scores": {"business_55": 0.9059},
+    },
+    {
+        "repo_id": "qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese",
+        "label": "qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese",
+        "family": "public",
+        "params": "115 M",
+        "license": "MIT",
+        "scores": {"business_55": 0.8392},
+    },
+    {
+        "repo_id": None,  # cloud, no HF link
+        "label": "OpenAI gpt-4o-mini (cloud)",
+        "family": "external",
+        "params": "proprietary",
+        "license": "proprietary",
+        "scores": {"business_55": 0.9537},
+    },
+    {
+        "repo_id": None,
+        "label": "rule-based (`nom.text.fix_diacritics`)",
+        "family": "ours",
+        "params": "0",
+        "license": "Apache 2.0",
+        "scores": {"business_55": 0.4106},
+    },
+]
+
 
 def check_gate(eval_data: dict[str, Any]) -> tuple[bool, str]:
     """Return (passed, reason)."""
@@ -63,6 +142,99 @@ def _fmt_int(v: Any) -> str:
     if isinstance(v, int):
         return f"{v:,}"
     return "?"
+
+
+def _render_comparison_section(
+    publishing_repo_id: str,
+    publishing_summary: dict[str, Any],
+) -> str:
+    """Render a comparison table putting the publishing model in context.
+
+    Includes:
+    - This model (highlighted)
+    - Our other variants (`nrl-ai/*` siblings)
+    - External public candidates we have measured
+    - External cloud / rule baselines for context
+
+    Bolds the top number per register so the reader can see who wins
+    each one. Cells we haven't measured render as "—".
+    """
+    # Build a synthetic row for the publishing model from its training_summary,
+    # in case it's not yet in COMPARISON_MATRIX (first publish of a new tier).
+    eval_data = publishing_summary.get("eval", {})
+    this_scores = {
+        k: v.get("word_accuracy") for k, v in eval_data.items() if v.get("word_accuracy")
+    }
+
+    rows: list[dict[str, Any]] = []
+    # Did we already include the publishing repo in the matrix?
+    matched = False
+    for entry in COMPARISON_MATRIX:
+        if entry["repo_id"] == publishing_repo_id:
+            # Override the matrix scores with this run's freshest numbers.
+            row = {**entry, "scores": this_scores or entry["scores"], "is_this": True}
+            rows.append(row)
+            matched = True
+        else:
+            rows.append({**entry, "is_this": False})
+    if not matched:
+        # First publish of this repo — synthesize a row.
+        rows.insert(
+            0,
+            {
+                "repo_id": publishing_repo_id,
+                "label": publishing_repo_id,
+                "family": "ours",
+                "params": "?",
+                "license": "Apache 2.0",
+                "scores": this_scores,
+                "is_this": True,
+            },
+        )
+
+    # Find the best score per register across all rows (for bolding).
+    registers = ("formal_udhr", "business_55", "conversational_300", "literary_udvtb")
+    best_per_reg = {
+        reg: max((r["scores"].get(reg, 0.0) for r in rows), default=0.0) for reg in registers
+    }
+
+    def _cell(score: float | None, reg: str, is_this: bool) -> str:
+        if score is None:
+            return "—"
+        pct = f"{score * 100:.2f}"
+        # Bold the best in column.
+        if abs(score - best_per_reg[reg]) < 1e-6 and best_per_reg[reg] > 0:
+            return f"**{pct}**"
+        return pct
+
+    header = (
+        "| Model | Family | Params | License "
+        "| formal_72 | business_55 | conv_300 | literary_800 |\n"
+        "|---|---|---:|---|---:|---:|---:|---:|"
+    )
+    lines = [header]
+    for r in rows:
+        label = r["label"]
+        if r.get("repo_id"):
+            label_md = f"[`{label}`](https://huggingface.co/{r['repo_id']})"
+        else:
+            label_md = label
+        if r["is_this"]:
+            label_md = f"**this** &rarr; {label_md}"
+        scores = r["scores"]
+        cells = [
+            label_md,
+            r["family"],
+            r["params"],
+            r["license"],
+            _cell(scores.get("formal_udhr"), "formal_udhr", r["is_this"]),
+            _cell(scores.get("business_55"), "business_55", r["is_this"]),
+            _cell(scores.get("conversational_300"), "conversational_300", r["is_this"]),
+            _cell(scores.get("literary_udvtb"), "literary_udvtb", r["is_this"]),
+        ]
+        lines.append("| " + " | ".join(cells) + " |")
+
+    return "\n".join(lines)
 
 
 def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -> str:
@@ -122,6 +294,7 @@ def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -
             f"| {sign}{delta:.2f} pp | {m.get('mean_ms_per_sentence', 0):.0f} |"
         )
     eval_table = "\n".join(rows)
+    comparison_table = _render_comparison_section(repo_id, summary)
 
     return f"""---
 license: apache-2.0
@@ -192,6 +365,14 @@ Each eval corpus is open-license and reproducible from the
 - **literary_udvtb** — `benchmarks/data/ud_vi_vtb/test.conllu` (CC-BY-SA-4.0)
 - **conversational_300** — `benchmarks/data/tatoeba_vi/diacritic_eval_300.txt` (CC-BY 2.0 FR)
 - **formal_udhr** — `benchmarks/data/udhr_vi/diacritic_eval_udhr.txt` (public domain)
+
+## How we compare
+
+Where this model sits in the public Vietnamese diacritic-restoration
+landscape — same 4-register grid for every measured row. **Bold** = best
+in column. Cells marked "—" weren't run on that register.
+
+{comparison_table}
 
 ## Training
 
