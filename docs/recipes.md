@@ -60,10 +60,10 @@ Vietnamese, our in-house ViT5-base fine-tune wins on those registers:
 
 | Register | Toshiiiii1 | `nrl-ai/vn-diacritic-vit5-base` |
 |---|---:|---:|
-| Formal / legal-prose | 98.14 % | **99.57 %** ⭐ |
-| Business / news | **97.81 %** | 93.44 % |
-| Conversational | 93.94 % | **94.16 %** ⭐ |
-| Classical literary | **89.40 %** | 89.39 % |
+| Formal / legal-prose | 98.14 % | **99.43 %** ⭐ |
+| Business / news | **97.81 %** | 94.98 % |
+| Conversational | 93.94 % | **94.12 %** ⭐ |
+| Classical literary | **89.40 %** | 90.24 % |
 
 ```python
 restorer = HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")

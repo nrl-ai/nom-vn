@@ -1,0 +1,42 @@
+{
+  "checkpoint": "training/diacritic/checkpoints/vit5-base-500k-mixed-nfc/final",
+  "device": "cuda",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "max_input_length": 256,
+  "max_target_length": 256,
+  "eval": {
+    "business_55": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9498,
+      "sentence_exact": 0.5091,
+      "mean_ms_per_sentence": 127.6,
+      "p50_ms": 120.93,
+      "p95_ms": 171.22
+    },
+    "literary_udvtb": {
+      "n_sentences": 800,
+      "word_accuracy": 0.9029,
+      "sentence_exact": 0.365,
+      "mean_ms_per_sentence": 153.67,
+      "p50_ms": 151.55,
+      "p95_ms": 246.37
+    },
+    "conversational_300": {
+      "n_sentences": 300,
+      "word_accuracy": 0.9419,
+      "sentence_exact": 0.6633,
+      "mean_ms_per_sentence": 106.6,
+      "p50_ms": 98.73,
+      "p95_ms": 164.15
+    },
+    "formal_udhr": {
+      "n_sentences": 72,
+      "word_accuracy": 0.9943,
+      "sentence_exact": 0.8611,
+      "mean_ms_per_sentence": 305.36,
+      "p50_ms": 272.46,
+      "p95_ms": 562.93
+    }
+  }
+}

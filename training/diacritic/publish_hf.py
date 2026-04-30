@@ -37,7 +37,7 @@ GATE_LITERARY_MIN = 0.8940  # word accuracy on 800-sent UD-VTB literary
 TOSHIIIII_BASELINE = {
     "formal_udhr": 0.9814,
     "business_55": 0.9781,
-    "conversational_300": 0.9377,
+    "conversational_300": 0.9394,
     "literary_udvtb": 0.8940,
 }
 

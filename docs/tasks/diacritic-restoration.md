@@ -24,7 +24,7 @@ The default model is `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
 (Apache 2.0, T5 200 M, safetensors) — public SOTA on the 4-register
 matrix. For corpora skewed toward formal / legal-prose / conversational
 Vietnamese, our [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)
-is +1.43 pp on formal / +0.22 pp on conversational at the same arch
+is +1.29 pp on formal / +0.18 pp on conversational at the same arch
 size + license.
 
 ## Public landscape — measured 2026-04-30
@@ -32,7 +32,7 @@ size + license.
 | Model | License | Format | business 55 | literary 800 | conv 300 | formal 72 | Verdict |
 |---|---|---|---:|---:|---:|---:|---|
 | [`Toshiiiii1/Vietnamese_diacritics_restoration_5th`](https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th) | Apache 2.0 | safetensors | **97.81 %** | **89.40 %** | 93.94 % | 98.14 % | ⭐ public SOTA, current default |
-| **[`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)** (ours) | Apache 2.0 | safetensors | 93.44 % | 89.39 % | **94.16 %** | **99.57 %** | best register-balanced; pick for legal / conversational |
+| **[`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)** (ours) | Apache 2.0 | safetensors | 94.98 % | 90.24 % | **94.12 %** | **99.43 %** | best register-balanced; pick for legal / conversational |
 | `qthuan2604/ViT5_Restore_Diacritics_Vietnamese` | MIT | bin | 90.59 % | — | — | — | weaker than ours; skip |
 | `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | safetensors | 83.92 % | — | — | — | weakest of audited; skip |
 | `yammdd/vietnamese-diacritic-restoration-v2` | MIT | tf_model.h5 | not benched | — | — | — | TF-only; conversion overhead, defer |
@@ -88,10 +88,10 @@ single-call path).
 
 | Register | Toshiiiii1 | nrl-ai/vit5-base | Δ |
 |---|---:|---:|---:|
-| `formal_udhr` | 98.14 % | **99.57 %** | **+1.43 pp** |
-| `business_55` | **97.81 %** | 93.44 % | -4.37 pp |
-| `conversational_300` | 93.94 % | **94.16 %** | **+0.22 pp** |
-| `literary_udvtb` | **89.40 %** | 89.39 % | -0.01 pp (tied) |
+| `formal_udhr` | 98.14 % | **99.43 %** | **+1.29 pp** |
+| `business_55` | **97.81 %** | 94.98 % | -2.83 pp |
+| `conversational_300` | 93.94 % | **94.12 %** | **+0.18 pp** |
+| `literary_udvtb` | **89.40 %** | 90.24 % | +0.84 pp  |
 
 Strict adoption gate (business ≥ 96 % AND literary > 89.40 %) **fails**
 on business — so this is **not** the canonical name `nrl-ai/vn-diacritic-restoration`

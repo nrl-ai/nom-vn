@@ -5,7 +5,7 @@
 > Named after *chữ Nôm* — the script Vietnam wrote in for a millennium.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/nrl-ai/nom-vn/blob/main/LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.2.25-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.2.26-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
 [![Tests](https://img.shields.io/badge/tests-354%20passing-brightgreen)](https://github.com/nrl-ai/nom-vn/tree/main/tests)
 
@@ -39,7 +39,7 @@ on real Vietnamese corpora, this week.
 | Task | Pick | License | Disk | Measured | Beats |
 |---|---|---|---:|---|---|
 | **Diacritic restoration (default)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (T5 200 M, opt-in) | Apache 2.0 | 1 GB | **97.81 %** word acc on business · 89.40 % literary · 98.14 % formal · 93.94 % conversational | beats cloud `gpt-4o-mini` 95.37 % on business; SOTA on the 4-register matrix |
-| **Diacritic restoration (register-balanced)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, ours) | Apache 2.0 | 900 MB | 99.57 % formal (+1.43 pp) · 94.16 % conversational (+0.22 pp) · 93.44 % business (-4.37) · 89.39 % literary | wins formal + conversational; pick this for legal docs / chat data, Toshiiiii1 for business-tilted text |
+| **Diacritic restoration (register-balanced)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) (ViT5 220 M, ours) | Apache 2.0 | 900 MB | 99.43 % formal (+1.29 pp) · 94.12 % conversational (+0.18 pp) · 94.98 % business (-2.83) · 90.24 % literary | wins formal + conversational; pick this for legal docs / chat data, Toshiiiii1 for business-tilted text |
 | **Diacritic (zero-dep fallback)** | rule-based table (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
 | **Diacritic (local LLM)** | `gemma3:4b` Q4 via Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` is +5pp better but 3× larger |
 | **Word segmentation (speed)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |

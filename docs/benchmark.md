@@ -201,9 +201,9 @@ Numbers above are after normalization.
 
 | Register | Best off-the-shelf | Word acc | Notes |
 |---|---|---:|---|
-| Formal / legal-prose (UDHR-like) | **`nrl-ai/vn-diacritic-vit5-base`** | **99.57 %** | Our v0.2.25 ViT5-base fine-tune; +1.43 pp over Toshiiiii1 |
+| Formal / legal-prose (UDHR-like) | **`nrl-ai/vn-diacritic-vit5-base`** | **99.43 %** | Our v0.2.25 ViT5-base fine-tune; +1.29 pp over Toshiiiii1 |
 | Modern business / contracts / news | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | **97.81 %** | Beats `gpt-4o-mini` 95.37 % in this register; nrl-ai/vit5-base 4.4 pp behind |
-| Conversational (Tatoeba) | **`nrl-ai/vn-diacritic-vit5-base`** | **94.16 %** | +0.22 pp over Toshiiiii1 (93.94) |
+| Conversational (Tatoeba) | **`nrl-ai/vn-diacritic-vit5-base`** | **94.12 %** | +0.18 pp over Toshiiiii1 (93.94) |
 | Classical literary (UD-VTB) | `Toshiiiii1/...` (still useful) | 89.40 % | Below business but well above rule baseline (41 %); failures are mostly proper-noun ambiguity (`Hùng` ↔ `Hưng`) and minor-register words |
 | General mixed | `Toshiiiii1/...` for most cases; cloud LLM as fallback | 89-98 % | The 8.7 pp gap across Toshiiiii1's registers is real but bounded |
 
@@ -213,18 +213,18 @@ Numbers above are after normalization.
 fine-tune on 500K Wikipedia pairs, 5 epochs cosine LR, bf16, 185 min
 on RTX 3090. Apache-2.0, ~900 MB safetensors. Strict adoption gate
 (business >= 96 % AND literary > 89.40 %) **fails** on business
-(93.44 %), so it's NOT the canonical name `nrl-ai/vn-diacritic-restoration`
+(94.98 %), so it's NOT the canonical name `nrl-ai/vn-diacritic-restoration`
 (reserved for a future gate-passing model). But it's the **best
 register-balanced VN diacritic model** we've trained — SOTA on
-formal/legal Vietnamese (99.57 %, +1.43 pp over Toshiiiii1) and
-conversational (94.16 %, +0.22 pp).
+formal/legal Vietnamese (99.43 %, +1.29 pp over Toshiiiii1) and
+conversational (94.12 %, +0.18 pp).
 
 | Register | Toshiiiii1 | nrl-ai/vit5-base | Δ |
 |---|---:|---:|---:|
-| formal_udhr | 98.14 % | **99.57 %** | +1.43 |
-| business_55 | **97.81 %** | 93.44 % | -4.37 |
-| conversational_300 | 93.94 % | **94.16 %** | +0.39 |
-| literary_udvtb | **89.40 %** | 89.39 % | -0.01 |
+| formal_udhr | 98.14 % | **99.43 %** | +1.43 |
+| business_55 | **97.81 %** | 94.98 % | -4.37 |
+| conversational_300 | 93.94 % | **94.12 %** | +0.39 |
+| literary_udvtb | **89.40 %** | 90.24 % | -0.01 |
 
 Use it via `HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")`.
 Full training config + reproducibility: see the [HF model card](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base).
