@@ -1,5 +1,11 @@
 # Releasing `nom-vn` to PyPI
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 The release flow is **GitHub Actions + PyPI Trusted Publishing** —
 no API tokens stored in repo secrets, no `twine upload` from a laptop.
 

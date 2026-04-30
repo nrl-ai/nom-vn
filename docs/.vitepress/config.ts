@@ -3,9 +3,9 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 
 // nom-vn documentation site — published at https://nom-vn.nrl.ai
 //
-// Vietnamese is the primary language; the English structure is
-// scaffolded under /en/ so we can fill it in incrementally without
-// re-architecting later. Default landing page is the Vietnamese index.
+// Vietnamese-only. The /vi/ URL prefix is kept for the deep
+// pages (intro / quickstart / models) so existing links still work,
+// while the root `/` index renders the Vietnamese landing page.
 
 export default withMermaid(
   defineConfig({
@@ -32,8 +32,6 @@ export default withMermaid(
     ignoreDeadLinks: [
       "localhost",
       /^https?:\/\/(localhost|127\.0\.0\.1)/,
-      // Cross-language deep links resolve only after both locales fill in.
-      /^\/en\//,
       // Repo paths surfaced from inside docs/ — present on GitHub but
       // not built into the VitePress site.
       /^(\.\.\/)+(?:training|benchmarks|tests|src|ui|scripts|CHANGELOG|README|CONTRIBUTING)/,
@@ -52,8 +50,8 @@ export default withMermaid(
     ],
 
     head: [
-      ["link", { rel: "icon", type: "image/png", href: "/favicon.png" }],
-      ["meta", { name: "theme-color", content: "#c46a37" }],
+      ["link", { rel: "icon", type: "image/svg+xml", href: "/logo.svg" }],
+      ["meta", { name: "theme-color", content: "#b5563a" }],
       [
         "meta",
         {
@@ -73,197 +71,99 @@ export default withMermaid(
 
     appearance: false,
 
-    locales: {
-      root: {
-        label: "Tiếng Việt",
-        lang: "vi-VN",
-        title: "Nôm",
-        description:
-          "Bộ công cụ AI tiếng Việt — khôi phục dấu, sửa chính tả, OCR, RAG, đánh chỉ mục cục bộ.",
-        themeConfig: {
-          nav: [
-            { text: "Bắt đầu", link: "/vi/quickstart" },
-            { text: "Tài liệu", link: "/vi/" },
-            { text: "Mô hình", link: "/vi/models" },
-            { text: "Đánh giá", link: "/benchmark" },
-            {
-              text: "Liên kết",
-              items: [
-                { text: "GitHub", link: "https://github.com/nrl-ai/nom-vn" },
-                { text: "PyPI", link: "https://pypi.org/project/nom-vn" },
-                {
-                  text: "Hugging Face",
-                  link: "https://huggingface.co/nrl-ai",
-                },
-              ],
-            },
-          ],
-
-          sidebar: {
-            "/vi/": [
-              {
-                text: "Bắt đầu",
-                items: [
-                  { text: "Giới thiệu", link: "/vi/" },
-                  { text: "Cài đặt nhanh", link: "/vi/quickstart" },
-                  { text: "Mô hình đã huấn luyện", link: "/vi/models" },
-                ],
-              },
-              {
-                text: "Tác vụ",
-                items: [
-                  {
-                    text: "Khôi phục dấu",
-                    link: "/tasks/diacritic-restoration",
-                  },
-                  {
-                    text: "Sửa chính tả",
-                    link: "/tasks/spell-correction",
-                  },
-                ],
-              },
-              {
-                text: "Tham khảo",
-                items: [
-                  { text: "Kiến trúc", link: "/architecture" },
-                  { text: "Pipeline", link: "/pipeline" },
-                  { text: "Recipes", link: "/recipes" },
-                  { text: "Đánh giá", link: "/benchmark" },
-                  { text: "Bộ dữ liệu", link: "/datasets" },
-                  { text: "SOTA tiếng Việt 2026Q2", link: "/sota_vn_2026q2" },
-                ],
-              },
-            ],
-            "/tasks/": [
-              {
-                text: "Tác vụ",
-                items: [
-                  {
-                    text: "Khôi phục dấu",
-                    link: "/tasks/diacritic-restoration",
-                  },
-                  {
-                    text: "Sửa chính tả",
-                    link: "/tasks/spell-correction",
-                  },
-                ],
-              },
-            ],
-          },
-
-          outline: {
-            level: [2, 3],
-            label: "Trên trang",
-          },
-          docFooter: {
-            prev: "Trang trước",
-            next: "Trang sau",
-          },
-          lastUpdatedText: "Cập nhật lần cuối",
-          darkModeSwitchLabel: "Giao diện",
-          sidebarMenuLabel: "Menu",
-          returnToTopLabel: "Lên đầu trang",
-          editLink: {
-            pattern:
-              "https://github.com/nrl-ai/nom-vn/edit/main/docs/:path",
-            text: "Chỉnh sửa trên GitHub",
-          },
-        },
-      },
-      en: {
-        label: "English",
-        lang: "en-US",
-        link: "/en/",
-        title: "Nôm",
-        description:
-          "Vietnamese AI toolkit — diacritic restoration, spell correction, OCR, RAG, on-device indexing.",
-        themeConfig: {
-          nav: [
-            { text: "Get started", link: "/en/quickstart" },
-            { text: "Docs", link: "/en/" },
-            { text: "Models", link: "/en/models" },
-            { text: "Benchmarks", link: "/benchmark" },
-            {
-              text: "Links",
-              items: [
-                { text: "GitHub", link: "https://github.com/nrl-ai/nom-vn" },
-                { text: "PyPI", link: "https://pypi.org/project/nom-vn" },
-                {
-                  text: "Hugging Face",
-                  link: "https://huggingface.co/nrl-ai",
-                },
-              ],
-            },
-          ],
-
-          sidebar: {
-            "/en/": [
-              {
-                text: "Start here",
-                items: [
-                  { text: "Introduction", link: "/en/" },
-                  { text: "Quickstart", link: "/en/quickstart" },
-                  { text: "Trained models", link: "/en/models" },
-                ],
-              },
-              {
-                text: "Tasks",
-                items: [
-                  {
-                    text: "Diacritic restoration",
-                    link: "/tasks/diacritic-restoration",
-                  },
-                  {
-                    text: "Spell correction",
-                    link: "/tasks/spell-correction",
-                  },
-                ],
-              },
-              {
-                text: "Reference",
-                items: [
-                  { text: "Architecture", link: "/architecture" },
-                  { text: "Pipeline", link: "/pipeline" },
-                  { text: "Recipes", link: "/recipes" },
-                  { text: "Benchmarks", link: "/benchmark" },
-                  { text: "Datasets", link: "/datasets" },
-                  { text: "VN SOTA 2026Q2", link: "/sota_vn_2026q2" },
-                ],
-              },
-            ],
-          },
-
-          editLink: {
-            pattern:
-              "https://github.com/nrl-ai/nom-vn/edit/main/docs/:path",
-            text: "Edit on GitHub",
-          },
-        },
-      },
-    },
-
     themeConfig: {
-      logo: "/logo.svg",
+      logo: { src: "/logo.svg", alt: "Nôm" },
       siteTitle: "Nôm",
+
+      nav: [
+        { text: "Bắt đầu", link: "/vi/quickstart" },
+        { text: "Tài liệu", link: "/vi/" },
+        { text: "Mô hình", link: "/vi/models" },
+        { text: "Đánh giá", link: "/benchmark" },
+        {
+          text: "Liên kết",
+          items: [
+            { text: "GitHub", link: "https://github.com/nrl-ai/nom-vn" },
+            { text: "PyPI", link: "https://pypi.org/project/nom-vn" },
+            {
+              text: "Hugging Face",
+              link: "https://huggingface.co/nrl-ai",
+            },
+          ],
+        },
+      ],
+
+      sidebar: [
+        {
+          text: "Bắt đầu",
+          items: [
+            { text: "Giới thiệu", link: "/vi/" },
+            { text: "Cài đặt nhanh", link: "/vi/quickstart" },
+            { text: "Mô hình đã huấn luyện", link: "/vi/models" },
+          ],
+        },
+        {
+          text: "Tác vụ",
+          items: [
+            { text: "Khôi phục dấu", link: "/tasks/diacritic-restoration" },
+            { text: "Sửa chính tả", link: "/tasks/spell-correction" },
+          ],
+        },
+        {
+          text: "Tham khảo",
+          items: [
+            { text: "Kiến trúc", link: "/architecture" },
+            { text: "Pipeline", link: "/pipeline" },
+            { text: "Công thức triển khai", link: "/recipes" },
+            { text: "Đánh giá", link: "/benchmark" },
+            { text: "Bộ dữ liệu", link: "/datasets" },
+            { text: "SOTA tiếng Việt 2026Q2", link: "/sota_vn_2026q2" },
+            { text: "Bức tranh OSS 2026Q2", link: "/oss_landscape_2026q2" },
+            { text: "Kế hoạch huấn luyện 2026Q2", link: "/training_plan_2026q2" },
+            { text: "Phát hành", link: "/release" },
+          ],
+        },
+      ],
+
+      outline: {
+        level: [2, 3],
+        label: "Trên trang",
+      },
+      docFooter: {
+        prev: "Trang trước",
+        next: "Trang sau",
+      },
+      lastUpdatedText: "Cập nhật lần cuối",
+      darkModeSwitchLabel: "Giao diện",
+      sidebarMenuLabel: "Menu",
+      returnToTopLabel: "Lên đầu trang",
+      editLink: {
+        pattern:
+          "https://github.com/nrl-ai/nom-vn/edit/main/docs/:path",
+        text: "Chỉnh sửa trên GitHub",
+      },
 
       search: {
         provider: "local",
         options: {
-          locales: {
-            root: {
-              translations: {
-                button: {
-                  buttonText: "Tìm kiếm",
-                  buttonAriaLabel: "Tìm kiếm",
-                },
-                modal: {
-                  noResultsText: "Không có kết quả cho",
-                  resetButtonTitle: "Xoá tìm kiếm",
-                  footer: {
-                    selectText: "chọn",
-                    navigateText: "di chuyển",
-                  },
-                },
+          translations: {
+            button: {
+              buttonText: "Tìm kiếm",
+              buttonAriaLabel: "Tìm kiếm",
+            },
+            modal: {
+              displayDetails: "Hiện chi tiết",
+              resetButtonTitle: "Xoá tìm kiếm",
+              backButtonTitle: "Quay lại",
+              noResultsText: "Không có kết quả cho",
+              footer: {
+                selectText: "chọn",
+                selectKeyAriaLabel: "Enter",
+                navigateText: "di chuyển",
+                navigateUpKeyAriaLabel: "lên",
+                navigateDownKeyAriaLabel: "xuống",
+                closeText: "đóng",
+                closeKeyAriaLabel: "Esc",
               },
             },
           },

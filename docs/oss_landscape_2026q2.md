@@ -1,5 +1,11 @@
 # OSS Local-First AI / RAG Landscape — 2026 Q2
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 **Audience:** nom-vn architecture team. Reference document for which patterns to borrow, which to avoid, and where we are deliberately diverging.
 
 **Scope:** ~12 leading projects across RAG frameworks, local-first chat apps, model serving, vector infra, doc parsing, eval, and observability — sampled in April 2026, not 2024.

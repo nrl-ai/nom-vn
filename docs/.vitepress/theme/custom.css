@@ -81,7 +81,7 @@ body {
 /* Editorial meta row above the hero title — attached to .main so it stacks
    above the name, not as a flex sibling to the left of it */
 .VPHero .main::before {
-  content: "OFFLINE  ·  REAL-TIME  ·  ROS2-NATIVE  ·  MIT";
+  content: "Ngoại tuyến  ·  Ưu tiên tiếng Việt  ·  Mã nguồn mở  ·  Apache 2.0";
   display: block;
   font-family: var(--vp-font-family-mono);
   font-size: 11px;
@@ -94,9 +94,9 @@ body {
   max-width: 540px;
 }
 
-/* Stat strip under the actions */
+/* Stat strip under the actions — measured numbers, see /benchmark for receipts */
 .VPHero .main::after {
-  content: "16 LANGUAGES   ·   56 VOICES   ·   ~0.8s FIRST AUDIO   ·   CPU / CUDA / METAL";
+  content: "97.4 % khôi phục dấu   ·   98.6 % sửa chính tả   ·   4 register   ·   CPU / CUDA";
   display: block;
   margin-top: 32px;
   padding-top: 18px;
@@ -197,7 +197,7 @@ body {
 /* ===== FEATURE CARDS ===== */
 
 .VPFeatures .container::before {
-  content: "§ Capabilities";
+  content: "§ Bốn mảng chức năng";
   display: block;
   font-family: var(--vp-font-family-mono);
   font-size: 11px;
@@ -588,6 +588,40 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.14em;
   font-weight: 600;
+}
+
+/* ===== HOME-EXTRA (markdown content sitting under the feature grid on /) ===== */
+
+/* The VPHome layout puts a `.VPHomeContent` wrapper around any markdown body
+   the page author writes after the frontmatter. We want it constrained to
+   the same column as the feature grid, with a generous gap above. */
+.VPHome .vp-doc.home-extra {
+  max-width: 1152px;
+  margin: 56px auto 80px;
+  padding: 0 24px;
+}
+
+@media (min-width: 960px) {
+  .VPHome .vp-doc.home-extra {
+    padding: 0 64px;
+  }
+}
+
+/* The H2 ("Cộng đồng") under home-extra should respect the editorial
+   section style — strip the default vp-doc top border so it doesn't
+   stack with .ev-section's own divider. */
+.VPHome .vp-doc.home-extra h2 {
+  border-top: 1px solid var(--vp-c-text-1);
+  padding-top: 18px;
+  margin-top: 56px;
+}
+
+.VPHome .vp-doc.home-extra h2::before {
+  content: "§";
+  color: var(--vp-c-brand-1);
+  font-weight: 400;
+  margin-right: 0.4em;
+  opacity: 0.7;
 }
 
 /* ===== RESPONSIVE ===== */

@@ -1,5 +1,11 @@
 # Nôm — Architecture
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 A **single library** with a clear submodule boundary. One repo, one PyPI package (`nom-vn`), one Apache 2.0 license. Submodules are individually pip-installable via extras so users don't pay for what they don't use.
 
 The architecture follows two non-negotiable principles from our internal operating manual:

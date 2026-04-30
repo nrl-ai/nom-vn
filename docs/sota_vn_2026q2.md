@@ -1,5 +1,11 @@
 # SOTA for Local-First Vietnamese AI — 2026 Q2 Snapshot
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 **Scope.** Three layers of `nom-vn`: local LLM, dense text embedding, document OCR.
 **Constraints.** Apache-2.0-friendly, no pickled weights, runs on a laptop or one consumer GPU (≤24 GB VRAM, ideally ≤8 GB at default), VN quality from a citable benchmark.
 **Date.** 2026-04-25. Every number below has a working URL; where none exists we say so explicitly.

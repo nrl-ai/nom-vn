@@ -6,15 +6,15 @@
 * Tuỳ chọn: GPU (CUDA) — mọi mô hình đều chạy trên CPU; GPU chỉ giúp
   giảm latency từ ~150 ms xuống ~30 ms cho mỗi câu.
 
-## Cài bản nhân
+## Cài phần lõi
 
 ```bash
 pip install nom-vn
 ```
 
-Bản nhân chứa các thư viện chuẩn hoá tiếng Việt (`nom.text.normalize`,
+Phần lõi chứa các thư viện chuẩn hoá tiếng Việt (`nom.text.normalize`,
 `nom.text.strip_diacritics`), pipeline tách câu, và chunker — không
-kéo theo PyTorch.
+kéo PyTorch về.
 
 ## Cài bản đầy đủ (chat web app)
 
@@ -64,4 +64,4 @@ trích nguồn theo từng đoạn.
 * [Mô hình đã huấn luyện](/vi/models) — `nrl-ai/*` trên Hugging Face
 * [Tác vụ khôi phục dấu](/tasks/diacritic-restoration)
 * [Tác vụ sửa chính tả](/tasks/spell-correction)
-* [Recipes — pipeline thực dụng](/recipes)
+* [Recipes — pipeline thực tế](/recipes)

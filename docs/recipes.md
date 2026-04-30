@@ -1,5 +1,11 @@
 # Recipes — task-oriented `nom-vn` cookbook
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 *Last updated: 2026-04-26.*
 
 Each recipe is a self-contained "I want X, do Y" entry. Code samples

@@ -1,5 +1,11 @@
 # Nôm — Component Selection & Benchmarks
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 This document records the components Nôm depends on, why each was chosen, and benchmark numbers where measured. **Numbers are reproducible — every "measured" claim has a script in `scripts/` you can re-run.**
 
 Last updated: **2026-04-25**.

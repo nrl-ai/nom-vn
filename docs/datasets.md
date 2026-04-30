@@ -1,5 +1,11 @@
 # Vietnamese benchmark datasets
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 Catalogue of every Vietnamese corpus shipped with `nom-vn` for testing and
 benchmarking. All datasets are license-clean for **redistribution + modification**
 (Apache 2.0 / CC-BY / CC-BY-SA / CC0 / public domain). Each folder has its

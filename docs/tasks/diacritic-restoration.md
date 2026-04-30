@@ -1,11 +1,11 @@
-# Diacritic restoration (Vietnamese)
+# Khôi phục dấu (tiếng Việt)
 
-Restore tone marks and vowel modifiers on Vietnamese text written
-without them: `Toi yeu Viet Nam` → `Tôi yêu Việt Nam`. The single most
-common pre-processing step on noisy VN text (OCR output, foreign
-keyboards, social-media short-form, untyped Telex sequences).
+Khôi phục dấu thanh và biến điệu nguyên âm trên văn bản tiếng Việt được
+viết không dấu: `Toi yeu Viet Nam` → `Tôi yêu Việt Nam`. Đây là bước
+tiền xử lý phổ biến nhất trên văn bản tiếng Việt nhiễu — kết quả OCR,
+gõ từ bàn phím nước ngoài, viết tắt mạng xã hội, chuỗi Telex chưa gõ.
 
-## TL;DR — our recommendation
+## TL;DR — gợi ý của chúng tôi
 
 ```bash
 pip install "nom-vn[diacritic-hf]"   # transformers<5 + torch + sentencepiece
@@ -13,158 +13,157 @@ pip install "nom-vn[diacritic-hf]"   # transformers<5 + torch + sentencepiece
 
 ```python
 from nom.text.diacritic_models import HFDiacriticModel
-restorer = HFDiacriticModel()  # Toshiiiii1 default, lazy-loads on first call
+restorer = HFDiacriticModel()  # mặc định Toshiiiii1, lazy-load lần gọi đầu
 restorer("Toi yeu Viet Nam")    # 'Tôi yêu Việt Nam'
 
-# Batched (7.6× throughput on a 3080)
+# Theo lô (nhanh hơn 7.6× trên 3080)
 restorer.predict_batch(sentences, batch_size=16)
 ```
 
-The default model is `Toshiiiii1/Vietnamese_diacritics_restoration_5th`
-(Apache 2.0, T5 200 M, safetensors) — public SOTA on the 4-register
-matrix. For corpora skewed toward formal / legal-prose / conversational
-Vietnamese, our [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)
-is +1.29 pp on formal / +0.18 pp on conversational at the same arch
-size + license.
+Mô hình mặc định là [`Toshiiiii1/Vietnamese_diacritics_restoration_5th`](https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th)
+(Apache 2.0, T5 200 M, safetensors) — SOTA công khai trên ma trận 4
+register. Với corpora thiên về tiếng Việt formal / pháp lý / hội thoại,
+mô hình của chúng tôi [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)
+hơn +1.29 pp trên formal / +0.18 pp trên hội thoại với cùng kích thước
+và giấy phép.
 
-## Public landscape — measured 2026-04-30
+## Bức tranh công khai — đo ngày 2026-04-30
 
-| Model | License | Format | business 55 | literary 800 | conv 300 | formal 72 | Verdict |
+| Mô hình | Giấy phép | Format | business 55 | literary 800 | conv 300 | formal 72 | Kết luận |
 |---|---|---|---:|---:|---:|---:|---|
-| [`Toshiiiii1/Vietnamese_diacritics_restoration_5th`](https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th) | Apache 2.0 | safetensors | **97.81 %** | **89.40 %** | 93.94 % | 98.14 % | ⭐ public SOTA, current default |
-| **[`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)** (ours) | Apache 2.0 | safetensors | 94.98 % | 90.24 % | **94.12 %** | **99.43 %** | best register-balanced; pick for legal / conversational |
-| `qthuan2604/ViT5_Restore_Diacritics_Vietnamese` | MIT | bin | 90.59 % | — | — | — | weaker than ours; skip |
-| `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | safetensors | 83.92 % | — | — | — | weakest of audited; skip |
-| `yammdd/vietnamese-diacritic-restoration-v2` | MIT | tf_model.h5 | not benched | — | — | — | TF-only; conversion overhead, defer |
-| Rule-based table (`nom.text.fix_diacritics`) | Apache 2.0 | none | 41.06 % | — | — | — | zero-deps fallback |
-| Local LLM (`gemma3:4b` Q4 via Ollama) | Apache 2.0 | gguf | — | — | — | — | 87.90 % on `diacritic_eval_v0` mixed; ~1 s/sentence |
-| Cloud LLM (`gpt-4o-mini`) | proprietary | — | 95.37 % | — | — | — | beats cost only when batch is small |
+| [`Toshiiiii1/Vietnamese_diacritics_restoration_5th`](https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th) | Apache 2.0 | safetensors | **97.81 %** | **89.40 %** | 93.94 % | 98.14 % | ⭐ SOTA công khai, mặc định hiện tại |
+| **[`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base)** (chúng tôi) | Apache 2.0 | safetensors | 94.98 % | 90.24 % | **94.12 %** | **99.43 %** | cân bằng register tốt nhất; chọn cho pháp lý / hội thoại |
+| `qthuan2604/ViT5_Restore_Diacritics_Vietnamese` | MIT | bin | 90.59 % | — | — | — | yếu hơn của chúng tôi; bỏ qua |
+| `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | safetensors | 83.92 % | — | — | — | yếu nhất trong số đã audit; bỏ qua |
+| `yammdd/vietnamese-diacritic-restoration-v2` | MIT | tf_model.h5 | chưa đo | — | — | — | chỉ TF; chi phí chuyển đổi cao, để sau |
+| Bảng quy tắc (`nom.text.fix_diacritics`) | Apache 2.0 | none | 41.06 % | — | — | — | dự phòng zero-deps |
+| LLM cục bộ (`gemma3:4b` Q4 qua Ollama) | Apache 2.0 | gguf | — | — | — | — | 87.90 % trên `diacritic_eval_v0` mixed; ~1 s/câu |
+| LLM đám mây (`gpt-4o-mini`) | proprietary | — | 95.37 % | — | — | — | thắng về chi phí chỉ khi batch nhỏ |
 
-8.7 pp register-spread on Toshiiiii1 confirms it's register-overfit
-toward modern formal/business Vietnamese. Our `vit5-base` fine-tune
-trades 4 pp of business for ~1.4 pp gain on formal and a tied
-literary score — the right choice for legal / chat / OCR corpora.
+Khoảng cách 8.7 pp giữa các register trên Toshiiiii1 xác nhận mô hình
+này over-fit về tiếng Việt formal/business hiện đại. Bản fine-tune
+`vit5-base` của chúng tôi đánh đổi 4 pp business để được +1.4 pp formal
+và ngang điểm literary — lựa chọn đúng cho corpora pháp lý / chat / OCR.
 
-JSON baselines: `benchmarks/results/baseline_diacritic_*.json`.
+JSON baseline: `benchmarks/results/baseline_diacritic_*.json`.
 
-## Our pipeline
+## Pipeline của chúng tôi
 
-`nom.text.fix_diacritics` is a Protocol-based seam: any callable
-mapping `str -> str` plugs in.
+`nom.text.fix_diacritics` là một seam dạng Protocol: bất kỳ callable
+nào ánh xạ `str -> str` đều cắm vào được.
 
 ```python
 from nom.text import fix_diacritics
 from nom.text.diacritic_models import HFDiacriticModel
 
-# Default Toshiiiii1
+# Mặc định Toshiiiii1
 fix_diacritics("Hop dong nay duoc lap", model=HFDiacriticModel())
 
-# Our register-balanced fine-tune
+# Bản fine-tune cân bằng register của chúng tôi
 fix_diacritics(
     "Hop dong nay duoc lap",
     model=HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base"),
 )
 
-# Or via Ollama LLM
+# Hoặc qua Ollama LLM
 from nom.llm import Ollama
 fix_diacritics("Hop dong nay duoc lap", llm=Ollama(model="gemma3:4b"))
 
-# Or zero-deps rule-based (best-effort only)
+# Hoặc dự phòng quy tắc zero-deps (chỉ best-effort)
 fix_diacritics("Hop dong nay duoc lap")
 ```
 
-`HFDiacriticModel` exposes `predict()` (single sentence) and
-`predict_batch()` (padded batched inference, **7.60× throughput**
-measured on a 3080 16 GB Mobile, 120/120 quality match against the
-single-call path).
+`HFDiacriticModel` cung cấp `predict()` (1 câu) và `predict_batch()`
+(suy luận batched có pad, **throughput 7.60×**, đo trên 3080 16 GB
+Mobile, 120/120 chất lượng tương đương đường gọi đơn).
 
-## Trained models — `nrl-ai/*`
+## Mô hình đã huấn luyện — `nrl-ai/*`
 
-| HF model | License | Base | Params | Disk | Latency (3080) | When to pick |
+| Mô hình HF | Giấy phép | Base | Tham số | Disk | Latency (3080) | Khi nào chọn |
 |---|---|---|---:|---:|---:|---|
-| [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) | Apache-2.0 | ViT5-base (MIT) | 220 M | 900 MB | 100-272 ms/sent | base tier — best register-balanced quality |
-| [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) | Apache-2.0 | BARTpho-syllable (MIT) | 115 M | 530 MB | 38-94 ms/sent | fast tier — 2.2× speedup, ~3-4 pp avg quality cost |
+| [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) | Apache-2.0 | ViT5-base (MIT) | 220 M | 900 MB | 100-272 ms/câu | base tier — chất lượng cân bằng register tốt nhất |
+| [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) | Apache-2.0 | BARTpho-syllable (MIT) | 115 M | 530 MB | 38-94 ms/câu | fast tier — nhanh 2.2×, chi phí ~3-4 pp chất lượng trung bình |
 
-Both trained on the **same 500K mixed Wiki+news corpus** for 5 epochs cosine
-LR (small models on big corpora generalize better; cutting training data for
-the small tier is a common pitfall we deliberately avoid).
+Cả hai cùng huấn luyện trên **một corpus 500K mixed Wiki+news** trong
+5 epoch cosine LR (mô hình nhỏ huấn luyện trên corpus lớn tổng quát hoá
+tốt hơn; cắt dữ liệu huấn luyện cho fast tier là cạm bẫy phổ biến mà
+chúng tôi chủ ý tránh).
 
-**Δ vs Toshiiiii1 (the public SOTA we benchmark against):**
+**Δ so với Toshiiiii1 (SOTA công khai chúng tôi đối chiếu):**
 
-| Register | Toshiiiii1 | base (ours) | Δ vs Toshi | small (ours) | Δ vs Toshi |
+| Register | Toshiiiii1 | base (chúng tôi) | Δ vs Toshi | small (chúng tôi) | Δ vs Toshi |
 |---|---:|---:|---:|---:|---:|
 | `formal_udhr` | 98.14 % | **99.43 %** | **+1.29 pp** | 91.51 % | -6.63 pp |
 | `business_55` | **97.81 %** | 94.98 % | -2.83 pp | 94.44 % | -3.37 pp |
 | `conversational_300` | 93.94 % | **94.12 %** | **+0.18 pp** | 90.68 % | -3.26 pp |
 | `literary_udvtb` | **89.40 %** | 90.24 % | +0.84 pp | 86.33 % | -3.07 pp |
 
-The base tier wins 3/4 registers vs Toshiiiii1 and ties on the gate
-threshold; strict business-gate (≥ 96 %) still fails by 1.02 pp, so
-neither tier claims the canonical `nrl-ai/vn-diacritic-restoration`
-name yet — both ship under their arch-descriptive names. Pick the
-base tier when quality matters most; pick the small tier when latency
-or VRAM is the constraint and ~3-4 pp average quality drop is
-acceptable.
+Bản base thắng 3/4 register so với Toshiiiii1 và hoà ở ngưỡng cổng
+chính; cổng nghiêm ngặt cho business (≥ 96 %) vẫn fail 1.02 pp, nên
+chưa bản nào nhận tên canonical `nrl-ai/vn-diacritic-restoration` —
+cả hai đều xuất xưởng dưới tên mô tả arch. Chọn base tier khi chất
+lượng quan trọng nhất; chọn small tier khi latency hoặc VRAM là ràng
+buộc và mức rớt ~3-4 pp trung bình chấp nhận được.
 
-**Planned next tier:**
+**Tier kế hoạch tiếp theo:**
 
-| Tier | Base | Status |
+| Tier | Base | Trạng thái |
 |---|---|---|
-| `nrl-ai/vn-diacritic-nano` | distilled (10-30 M) | future — distillation from the base teacher, target <50 ms CPU inference |
+| `nrl-ai/vn-diacritic-nano` | distilled (10-30 M) | tương lai — distillation từ teacher base, đích <50 ms inference CPU |
 
-## Datasets — `nrl-ai/*`
+## Bộ dữ liệu — `nrl-ai/*`
 
-Both verified renderable + loadable via `datasets.load_dataset`.
+Cả hai đã verify render được + load được qua `datasets.load_dataset`.
 
-| HF dataset | License | What it is |
+| Bộ dữ liệu HF | Giấy phép | Là gì |
 |---|---|---|
-| [`nrl-ai/vn-diacritic-eval`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-eval) | CC-BY-SA-4.0 (most restrictive of constituents) | 4-register evaluation grid: business_55 (CC0), formal_72 (PD UDHR), conversational_300 (CC-BY 2.0 Tatoeba), literary_800 (CC-BY-SA 4.0 UD-VTB). 1,227 sentence pairs total. |
-| [`nrl-ai/vn-diacritic-train`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-train) | CC-BY-SA-4.0 (per-config per `wiki_500k`=CC-BY-SA, `news_150k`=CC-BY-4.0) | 500K Wikipedia + 150K NFC-fixed VN news training pairs. Eval-leak guarded against `vn-diacritic-eval`. NFC-normalized at write time. |
+| [`nrl-ai/vn-diacritic-eval`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-eval) | CC-BY-SA-4.0 (chặt nhất trong các thành phần) | Lưới đánh giá 4 register: business_55 (CC0), formal_72 (PD UDHR), conversational_300 (CC-BY 2.0 Tatoeba), literary_800 (CC-BY-SA 4.0 UD-VTB). Tổng 1.227 cặp câu. |
+| [`nrl-ai/vn-diacritic-train`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-train) | CC-BY-SA-4.0 (per-config: `wiki_500k`=CC-BY-SA, `news_150k`=CC-BY-4.0) | 500K cặp Wikipedia + 150K cặp tin tức VN đã sửa NFC. Đã chống rò rỉ với `vn-diacritic-eval`. NFC-normalize tại lúc ghi. |
 
 ```python
 from datasets import load_dataset
 
-# Evaluate any model against the same 4-register grid
+# Đánh giá bất kỳ mô hình nào trên cùng lưới 4 register
 ds = load_dataset("nrl-ai/vn-diacritic-eval", "business_55", split="train")
 
-# Train your own — the same data we used for nrl-ai/vn-diacritic-vit5-base
+# Tự huấn luyện — cùng dữ liệu chúng tôi dùng cho nrl-ai/vn-diacritic-vit5-base
 wiki = load_dataset("nrl-ai/vn-diacritic-train", "wiki_500k", split="train")
 news = load_dataset("nrl-ai/vn-diacritic-train", "news_150k", split="train")
 ```
 
-## Results — measured
+## Kết quả — đã đo
 
-All numbers reproducible on a clean clone via the bench scripts under
-`benchmarks/accuracy/` and `training/diacritic/eval_checkpoint.py`.
-RTX 3080 16 GB Mobile / RTX 3090 measurements, NFC + punctuation
-normalization on both sides of comparison, 3-call warmup, num_beams=1.
+Mọi con số đều tái lập được trên một bản clone sạch qua các script
+bench dưới `benchmarks/accuracy/` và `training/diacritic/eval_checkpoint.py`.
+Đo trên RTX 3080 16 GB Mobile / RTX 3090, có NFC + chuẩn hoá dấu câu
+ở cả hai phía, warmup 3 lần, num_beams=1.
 
-| Register | Sentences | Toshiiiii1 (ms/sent) | nrl-ai/vit5-base (ms/sent) |
+| Register | Số câu | Toshiiiii1 (ms/câu) | nrl-ai/vit5-base (ms/câu) |
 |---|---:|---:|---:|
 | `formal_udhr` | 72 | 245 | 272 |
 | `business_55` | 55 | 119 | 147 |
 | `conversational_300` | 300 | 91 | 101 |
 | `literary_udvtb` | 800 | 137 | 156 |
 
-Latency dominated by ViT5's 220 M decoder; both models run on the same
-arch family. For 7.6× throughput on either, use `predict_batch`.
+Latency bị decoder ViT5 220 M chi phối; cả hai mô hình cùng họ arch.
+Để được 7.6× throughput trên cả hai, dùng `predict_batch`.
 
-JSON baselines:
+JSON baseline:
 
 - `benchmarks/results/baseline_diacritic_toshiiiii_4register.json` (Toshiiiii1)
 - `benchmarks/results/baseline_diacritic_toshiiiii_t5.json`, `..._tatoeba300.json`, `..._udhr72.json`, `..._udvtb_test.json` (per-register)
-- `training/diacritic/results/vit5-base-500k-cosine-full_summary.json` (our fine-tune)
-- `training/diacritic/results/vit5-base-500k-cosine-full_eval_local.json` (local re-eval, ±0.12 pp reproducible)
-- `benchmarks/results/baseline_diacritic_qthuan_*.json` (audited candidates)
+- `training/diacritic/results/vit5-base-500k-cosine-full_summary.json` (fine-tune của chúng tôi)
+- `training/diacritic/results/vit5-base-500k-cosine-full_eval_local.json` (re-eval local, ±0.12 pp tái lập được)
+- `benchmarks/results/baseline_diacritic_qthuan_*.json` (các ứng viên đã audit)
 
-## Reproduce
+## Tái lập
 
 ```bash
-# 1. Build eval slices (deterministic, no network)
+# 1. Build các slice eval (tất định, không cần mạng)
 python benchmarks/data/tatoeba_vi/build_diacritic_eval.py
 python benchmarks/data/udhr_vi/build_diacritic_eval.py
 
-# 2. Run the 4-register eval against any HF model
+# 2. Chạy eval 4 register cho bất kỳ mô hình HF nào
 python training/diacritic/eval_checkpoint.py \
     --checkpoint Toshiiiii1/Vietnamese_diacritics_restoration_5th \
     --output-json benchmarks/results/baseline_diacritic_toshiiiii_4register.json
@@ -174,46 +173,46 @@ python training/diacritic/eval_checkpoint.py \
     --output-json benchmarks/results/baseline_diacritic_vit5_base_4register.json
 ```
 
-## Training
+## Huấn luyện
 
-The full training pipeline is under [`training/diacritic/`](../../training/diacritic/):
+Pipeline huấn luyện đầy đủ ở [`training/diacritic/`](../../training/diacritic/):
 
-- `prep_data.py` — Wikipedia stream → filtered (input, target) pairs (NFC, eval-leak guarded).
-- `prep_data_news.py` — same for `tmnam20/Vietnamese-News-dedup` (CC-BY-4.0, NFC-fixed).
-- `train.py` — HF `Seq2SeqTrainer` with cosine LR, optional early stopping, 4-register post-training eval.
-- `eval_checkpoint.py` — standalone re-eval given a checkpoint dir or HF repo id.
-- `publish_hf.py` — gate-checked HF Hub publishing with auto-generated model card.
-- `post_train.sh` — rsync from the GPU training box → local re-eval (>0.5 pp divergence fails) → publish dry-run.
+- `prep_data.py` — Wikipedia stream → các cặp (input, target) đã lọc (NFC, chống rò eval).
+- `prep_data_news.py` — tương tự cho `tmnam20/Vietnamese-News-dedup` (CC-BY-4.0, đã sửa NFC).
+- `train.py` — HF `Seq2SeqTrainer` cosine LR, early stopping tuỳ chọn, eval 4 register hậu huấn luyện.
+- `eval_checkpoint.py` — re-eval độc lập từ một checkpoint dir hoặc HF repo id.
+- `publish_hf.py` — publish HF Hub có gate-check + tự sinh model card.
+- `post_train.sh` — rsync từ host GPU → re-eval local (lệch >0.5 pp là fail) → publish dry-run.
 
-Experiment history (5 runs to date) in [`training/diacritic/README.md`](../../training/diacritic/README.md).
+Lịch sử thí nghiệm (đến nay 5 lượt) ở [`training/diacritic/README.md`](../../training/diacritic/README.md).
 
-## Vietnamese-specific gotchas hit during this work
+## Cạm bẫy đặc thù tiếng Việt gặp trong quá trình này
 
-- **NFC vs NFD.** `tmnam20/Vietnamese-News-dedup` ships ~79 % NFD-decomposed
-  text. An earlier mixed-source run trained on it; the model emitted
-  decomposed combining marks that NFC eval byte-compare missed →
-  **-15.45 pp catastrophic regression** on business register. Now
-  NFC-normalized at three layers (prep, prep-news, train preprocess).
-- **Early stopping on noisy small eval.** `--early-stopping-patience 3`
-  with 200-sample eval set fired at epoch 0.96 of v3 — the model never
-  converged. Now default `--eval-samples 1000` and recommend
-  `--early-stopping-patience 0` for full-budget training runs.
-- **Punctuation normalization for byte-equal sentence-match.**
-  UD-VTB ships sentences with spaces around every punctuation mark
-  (treebank convention); modern seq2seq output has attached punctuation.
-  Bench scripts now `normalize_punct()` both sides before comparison —
-  caught a "0/800 sentence-exact" false negative in v0.2.17.
-- **Proper-noun ambiguity.** `Hung` → `Hùng` / `Hưng` / `Hứng`
-  (different real names). The model picks training-frequency winner;
-  not always right for the input. Document NER+lookup separately for
-  use cases that need the gold proper noun.
+- **NFC vs NFD.** `tmnam20/Vietnamese-News-dedup` ship ~79 % văn bản
+  decompose NFD. Một lần huấn luyện mixed-source trước đó đã train trên
+  đó; mô hình emit ký tự kết hợp decompose mà eval byte-compare NFC bỏ
+  sót → **regression thảm khốc -15.45 pp** trên register business. Hiện
+  đã NFC-normalize tại 3 tầng (prep, prep-news, train preprocess).
+- **Early stopping trên eval nhỏ nhiễu.** `--early-stopping-patience 3`
+  với eval 200 mẫu fire ở epoch 0.96 của v3 — mô hình chưa kịp hội tụ.
+  Hiện mặc định `--eval-samples 1000` và khuyến nghị
+  `--early-stopping-patience 0` cho các run huấn luyện full-budget.
+- **Chuẩn hoá dấu câu để khớp byte câu nguyên.** UD-VTB ship câu có
+  khoảng trắng quanh từng dấu (quy ước treebank); đầu ra seq2seq hiện
+  đại có dấu dính liền. Bench script nay `normalize_punct()` cả hai
+  phía trước so sánh — đã bắt được lỗi "0/800 sentence-exact" giả ở
+  v0.2.17.
+- **Đa nghĩa danh từ riêng.** `Hung` → `Hùng` / `Hưng` / `Hứng`
+  (các tên thật khác nhau). Mô hình chọn theo tần số huấn luyện;
+  không phải lúc nào cũng đúng cho input. Cần tài liệu hoá NER+lookup
+  riêng cho các use case đòi hỏi danh từ riêng đúng.
 
-## References
+## Tham khảo
 
-- Toshiiiii1 model card: <https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th>
-- Our fine-tune: <https://huggingface.co/nrl-ai/vn-diacritic-vit5-base>
-- ViT5 paper: Phan et al., NAACL-SRW 2022, <https://aclanthology.org/2022.naacl-srw.18>
-- ByT5 (canonical char-level VN diacritic SOTA in literature): Xue et al., 2022, <https://arxiv.org/abs/2201.13242>
-- Wikipedia training corpus: <https://huggingface.co/datasets/hirine/wikipedia-vietnamese-1M296K-dataset>
-- News training corpus: <https://huggingface.co/datasets/tmnam20/Vietnamese-News-dedup>
-- VSEC paper (error taxonomy used by `nom.text.noise`): Do et al., PRICAI'21, <https://arxiv.org/abs/2111.00640>
+- Model card Toshiiiii1: <https://huggingface.co/Toshiiiii1/Vietnamese_diacritics_restoration_5th>
+- Bản fine-tune của chúng tôi: <https://huggingface.co/nrl-ai/vn-diacritic-vit5-base>
+- Bài báo ViT5: Phan et al., NAACL-SRW 2022, <https://aclanthology.org/2022.naacl-srw.18>
+- ByT5 (SOTA char-level VN diacritic kinh điển): Xue et al., 2022, <https://arxiv.org/abs/2201.13242>
+- Corpus huấn luyện Wikipedia: <https://huggingface.co/datasets/hirine/wikipedia-vietnamese-1M296K-dataset>
+- Corpus huấn luyện tin tức: <https://huggingface.co/datasets/tmnam20/Vietnamese-News-dedup>
+- Bài VSEC (taxonomy lỗi `nom.text.noise` dùng): Do et al., PRICAI'21, <https://arxiv.org/abs/2111.00640>

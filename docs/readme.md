@@ -1,5 +1,11 @@
 # Documentation
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 Deeper documentation for **nom-vn**. The repo-root files (`README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `LICENSE`) cover the basics; this directory holds the design and benchmark detail.
 
 ## Per-task pages

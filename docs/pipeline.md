@@ -1,38 +1,30 @@
 # Nôm v0.1 — the document-extraction pipeline
 
+::: tip Tài liệu kỹ thuật
+Trang này còn ở bản tiếng Anh — bản gốc dùng cho contributor quốc tế trên GitHub.
+Đang được dịch dần sang tiếng Việt. Mọi con số trong trang là chính thức,
+có script đo cam kết trong repo.
+:::
+
 This document specifies the full data flow for `nom.doc.extract`. Every stage has a chosen primary, a tested alternative, and a benchmark plan. Numbers are either **measured here** or **cited from upstream** — never invented.
 
-```
-                             ┌─────────────────────┐
-   PDF / image / text ──────▶│  1. Load            │
-                             └──────────┬──────────┘
-                                        │  raw bytes + format
-                             ┌──────────▼──────────┐
-       (native PDF) ◀────────│  2. Parse           │────────▶ (scan)
-                             └──────────┬──────────┘
-                                        │
-                             ┌──────────▼──────────┐
-              text blocks ◀──│  3. OCR (if scan)   │
-                             └──────────┬──────────┘
-                                        │
-                             ┌──────────▼──────────┐
-                             │  4. Normalize       │
-                             │     (nom.text)      │
-                             └──────────┬──────────┘
-                                        │  clean text
-                             ┌──────────▼──────────┐
-                             │  5. Extract         │
-                             │     (LLM + schema)  │
-                             └──────────┬──────────┘
-                                        │
-                             ┌──────────▼──────────┐
-                             │  6. Validate        │
-                             │     (Pydantic)      │
-                             └──────────┬──────────┘
-                                        │
-                                 ┌──────▼──────┐
-                                 │  dict[str,] │
-                                 └─────────────┘
+```mermaid
+flowchart TB
+    IN[PDF · ảnh · text] --> S1[1 · Load<br/>pathlib + mimetypes]
+    S1 -->|raw bytes + format| S2[2 · Parse<br/>native PDF text + layout]
+    S2 -->|native PDF| S4
+    S2 -->|scan| S3[3 · OCR<br/>Tesseract vie]
+    S3 --> S4[4 · Normalize<br/>nom.text NFC]
+    S4 -->|clean text| S5[5 · Extract<br/>LLM + schema]
+    S5 --> S6[6 · Validate<br/>Pydantic]
+    S6 --> OUT[dict typed]
+
+    classDef stage fill:#f1ede3,stroke:#141414,stroke-width:1px,color:#141414
+    classDef io fill:#e8e3d4,stroke:#141414,stroke-width:1px,color:#141414
+    classDef out fill:#b5563a,stroke:#b5563a,color:#f1ede3
+    class S1,S2,S3,S4,S5,S6 stage
+    class IN io
+    class OUT out
 ```
 
 The shape: `bytes/Path → Pipeline.run(schema) → typed dict`. Every stage is a `Stage` protocol; users can swap implementations or insert their own.
