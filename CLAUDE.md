@@ -326,6 +326,41 @@ version, same code snippets — the prose can be translated freely
 provided the structure matches). Drifting them is a regression in
 the user-facing surface for a major user segment.
 
+## Fast / small / nano tiers train on the SAME corpus as the base
+
+When we train a smaller variant of a model (`-small`, `-nano`,
+`-distilled`) for a "fast tier", it must use **at least as much
+training data and at least as many epochs as the `-base` sibling**.
+The instinct to think "smaller model = smaller corpus to save
+compute" is exactly backwards:
+
+- **Chinchilla scaling** (Hoffmann et al., 2022) shows compute-optimal
+  training pairs *more* tokens per parameter as model size shrinks
+  — small models trained on big corpora generalize better than small
+  models trained on small corpora.
+- Less capacity = less ability to memorize spurious patterns, *and*
+  less ability to extract signal from limited data. Small models
+  underfitted on a thin corpus collapse to mode-of-data; the same
+  small model on a rich corpus learns broader patterns.
+- Distillation from a `-base` teacher requires the teacher's soft
+  labels on the full corpus — using a thinner corpus for the student
+  loses the teacher's coverage on the dropped slice.
+
+**Concrete rule for nom-vn:** every `-small` / `-nano` training run
+uses the same `train.jsonl` / `val.jsonl` and the same epoch count
+(or more) as the `-base` it derives from. The compute saving comes
+from the smaller arch + faster step time, not from a thinner corpus.
+If the small model overfits before the base does — a common
+symptom of "small model trained too long" — it means we cut the LR
+too late or the corpus is genuinely small relative to capacity, not
+that we should drop training data.
+
+**Captured 2026-04-30** while planning `nrl-ai/vn-diacritic-small`:
+training on the same 500K-pair mixed corpus + 5 epochs as
+`nrl-ai/vn-diacritic-vit5-base`. Document the same training-config
+table on every tier's HF model card so adopters can see the
+relationship explicitly.
+
 ## Don't leak internal terms to user-facing artifacts
 
 User-facing surfaces include: model cards on HF Hub, dataset cards,
