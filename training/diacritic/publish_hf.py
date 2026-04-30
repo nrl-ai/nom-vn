@@ -216,7 +216,7 @@ license. Cite both this fine-tune and the base model:
 
 @misc{{nom_vn_diacritic_2026,
   title={{Vietnamese Diacritic Restoration — register-balanced ViT5 fine-tune}},
-  author={{Neural Research Lab}},
+  author={{Nguyen, Viet-Anh and {{Neural Research Lab}}}},
   year={{2026}},
   howpublished={{\\url{{https://huggingface.co/{repo_id}}}}}
 }}

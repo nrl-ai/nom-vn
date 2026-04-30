@@ -260,6 +260,43 @@ back factual claims with verifiable citations:
 This enforces CLAUDE.md principle 12 (verified benchmarks only) at the
 documentation layer.
 
+## Publishing to Hugging Face Hub — author + verification rules
+
+Whenever we push a model or dataset to `nrl-ai/*` on the Hub:
+
+1. **Cite Viet-Anh Nguyen on every artifact.** Per parent CLAUDE.md
+   principle 13. The principal's name + `vietanh@nrl.ai` must appear in the
+   citation block on every model card and dataset card we ship. Format:
+   `author={Nguyen, Viet-Anh and {Neural Research Lab}}` in BibTeX,
+   alongside any organizational attribution. Apply retroactively when
+   patching old cards.
+
+2. **Verify the page after every push.** Per parent CLAUDE.md principle 14.
+   `huggingface_hub.upload_*` returning success only means the bytes
+   transferred — the YAML metadata could still be invalid:
+
+   - Run `HfApi().model_info(repo_id)` (or `dataset_info`) and read back
+     `pipeline_tag`, `library_name`, `tags`, `siblings`.
+   - For datasets, run `datasets.load_dataset(repo_id, config)` to confirm
+     each config parses. A README that *renders* but doesn't *load*
+     defeats the purpose.
+   - Open `https://huggingface.co/<repo_id>` once before declaring done
+     and look for the yellow YAML warning banner.
+
+   Known traps:
+
+   - **`pipeline_tag: text2text-generation` is NOT valid** (caught 2026-04-30).
+     Use `text-generation` for seq2seq diacritic / spell-correction models.
+     The full valid list ships in the warning itself when it fires.
+   - Per-config license overrides don't exist at the YAML level — the
+     repo-level `license:` is the only field. Document per-config
+     differences in the README body (e.g. CC-BY for news subset, CC-BY-SA
+     for wiki subset, repo-level = CC-BY-SA = most restrictive).
+   - **Fix-only pushes:** when only the YAML / README changes, use
+     `HfApi().upload_file(path_in_repo="README.md", ...)` — re-pushing the
+     full folder re-uploads the weights (slow + wasteful). One file,
+     one commit message describing the fix.
+
 ## Environment setup
 
 One-time setup for a fresh clone:
