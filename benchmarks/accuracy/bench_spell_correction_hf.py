@@ -30,6 +30,16 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
 from training.diacritic.train import _word_accuracy, normalize_punct  # noqa: E402
 
+# Reuse the bootstrap-CI + error-categorization helpers from the
+# real-world bench so the methodology is identical across synthetic
+# and OOD measurements (per CLAUDE.md verified-benchmarks rule:
+# methodology must match across the same metric).
+sys.path.insert(0, str(REPO / "benchmarks" / "accuracy"))
+from bench_spell_correction_real import (  # noqa: E402
+    _bootstrap_ci_word_acc,
+    _categorize_errors,
+)
+
 EVAL_REGISTERS = (
     "business_55_light",
     "business_55_heavy",
@@ -139,20 +149,33 @@ def main() -> int:
             targets.append(target)
         latencies.sort()
         wa, se = _word_accuracy(preds, targets)
+        ci_lo, ci_hi = _bootstrap_ci_word_acc(preds, targets)
+        err_counts = _categorize_errors(preds, targets)
         mean_ms = sum(latencies) / len(latencies) * 1000
         p50_ms = latencies[len(latencies) // 2] * 1000
         p95_ms = latencies[max(0, int(len(latencies) * 0.95) - 1)] * 1000
         eval_summary[name] = {
             "n_sentences": len(pairs),
             "word_accuracy": round(wa, 4),
+            "word_accuracy_ci95": [round(ci_lo, 4), round(ci_hi, 4)],
             "sentence_exact": round(se, 4),
+            "errors": err_counts,
             "mean_ms_per_sentence": round(mean_ms, 2),
             "p50_ms": round(p50_ms, 2),
             "p95_ms": round(p95_ms, 2),
         }
-        print(f"  Word accuracy:   {wa:.4f}")
+        print(f"  Word accuracy:   {wa:.4f} [95% CI {ci_lo:.4f}-{ci_hi:.4f}]")
         print(f"  Sentence exact:  {se:.4f}")
         print(f"  Latency:         mean {mean_ms:.1f} ms · p50 {p50_ms:.1f} · p95 {p95_ms:.1f}")
+        total_errs = sum(v for k, v in err_counts.items() if k != "correct")
+        if total_errs > 0:
+            print(
+                f"  Error breakdown: missed_diac={err_counts['missed_diacritic']} "
+                f"wrong_tone={err_counts['wrong_tone']} "
+                f"base_char={err_counts['base_char']} "
+                f"extra={err_counts['extra_word']} "
+                f"missing={err_counts['missing_word']}"
+            )
         if args.examples > 0:
             for (noisy, target), pred in list(zip(pairs, preds, strict=False))[: args.examples]:
                 gt = normalize_punct(target)
