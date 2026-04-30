@@ -326,15 +326,20 @@ version, same code snippets — the prose can be translated freely
 provided the structure matches). Drifting them is a regression in
 the user-facing surface for a major user segment.
 
-## Don't reference this file in user-facing artifacts
+## Don't leak internal terms to user-facing artifacts
 
-This file (`CLAUDE.md`) is an internal AI-operator instruction
-document. It must not be cited or linked from any user-facing
-surface: model cards on HF Hub, dataset cards, the project README,
-files under `docs/`, blog posts, talks, papers. Phrases like "per
-CLAUDE.md principle 11", "CLAUDE.md autonomous-loop §5", or links to
-this file leak the AI-instruction layer to users who came for the
-software.
+User-facing surfaces include: model cards on HF Hub, dataset cards,
+the project README (English + Vietnamese), every file under `docs/`,
+blog posts, talks, papers, training scripts (docstrings + comments
+that ship in the repo), and CHANGELOG entries.
+
+Two classes of internal terms must never appear in those:
+
+**(a) References to this file (`CLAUDE.md`).** This file is an
+AI-operator instruction document — citing or linking it leaks the
+instruction layer to users who came for the software. Phrases like
+"per CLAUDE.md principle 11", "CLAUDE.md autonomous-loop §5", or
+markdown links to it are forbidden in user-facing surfaces.
 
 When you need to invoke a policy from this file in a user-facing
 doc, restate the underlying policy in self-contained terms. Examples:
@@ -344,7 +349,27 @@ doc, restate the underlying policy in self-contained terms. Examples:
 - "we cite Viet-Anh Nguyen + Neural Research Lab on every artifact"
   instead of "principle 13"
 
-The reader should not need to know that this file exists.
+**(b) Specific internal hostnames / box names** like `genpc2`. These
+are infrastructure names that mean something to us but nothing to a
+reader, and they leak our internal topology. Use generic phrasing
+("the remote GPU host", "the training box") in prose; in scripts,
+parametrize the host through an environment variable
+(`TRAIN_HOST="${TRAIN_HOST:-genpc2}"`) so the literal default is
+visible only as fallback inside one location, not strewn through
+docs.
+
+**Audit checklist on every change touching user-facing surfaces:**
+
+```bash
+grep -rn "CLAUDE\.md\|genpc2" docs/ README.md README.vi.md \
+    training/*/README.md training/*/*.py training/*/*.sh \
+    CHANGELOG.md
+```
+
+After any HF Hub publish or re-push, also fetch each card via
+`HfApi().model_info(repo_id)` / `dataset_info(repo_id)` and grep the
+returned text for the same patterns. The reader on HF Hub should not
+need to know that these terms exist.
 
 Hard rule: **never claim a number in a doc that doesn't exist yet** —
 the order is always (a) measure / publish, (b) update doc with the
