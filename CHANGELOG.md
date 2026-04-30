@@ -5,6 +5,79 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.28] — 2026-04-30
+
+### Spell-correction track: base tier shipped, decisively beats public landscape
+
+`nrl-ai/vn-spell-correction-base` published — ViT5-base (220 M, MIT) fine-tuned
+on 459K (noisy, clean) pairs synthesized from the 500K mixed Wiki+news clean
+corpus via `nom.text.noise`. 5 epochs cosine LR, no early stop, 180 min on
+RTX 3090.
+
+8-split grid (4 registers × 2 noise levels), measured against the public
+spell-correction landscape:
+
+  Split                       bmd1905   iAmHieu    ours base   Δ vs bmd1905
+  business_55_light            91.18 %   90.22 %   98.58 %     +7.4 pp
+  business_55_heavy            76.97 %   68.98 %   98.33 %     +21.4 pp
+  formal_72_light              83.46 %   85.38 %   99.80 %     +16.3 pp
+  formal_72_heavy              73.37 %   51.33 %   99.19 %     +25.8 pp
+  conversational_300_light     84.72 %   85.45 %   97.90 %     +13.2 pp
+  conversational_300_heavy     73.63 %   63.77 %   96.18 %     +22.6 pp
+  literary_800_light           87.42 %   61.81 %   98.02 %     +10.6 pp
+  literary_800_heavy           66.53 %   42.11 %   95.71 %     +29.2 pp
+
+  light_avg                    86.95 %   80.31 %   98.58 %     +11.6 pp
+  heavy_avg                    72.62 %   56.55 %   97.35 %     +24.7 pp
+
+**Wins every split by 7-29 pp.** Adoption gate (light_avg ≥ 0.92,
+heavy_avg ≥ 0.80) passes by very wide margin. Local re-eval reproduces
+remote within ±0.03 pp.
+
+The size advantage of bmd1905 (400 M vs our 220 M) doesn't matter — a
+targeted fine-tune on the 8-register noise distribution dominates a
+generic correction model.
+
+### Spell-correction tier strategy
+
+Same base+small two-tier convention as diacritic, **same 500K training
+corpus across both tiers** per the same-corpus-for-all-tiers rule:
+
+- `nrl-ai/vn-spell-correction-base` (ViT5-base, 220 M) — shipped.
+- `nrl-ai/vn-spell-correction-small` (BARTpho-syllable, 115 M) — training,
+  ETA ~1.5 h.
+
+### Spell-correction infrastructure
+
+New code:
+
+- `nom.text.noise` — already in v0.2.25; deterministic noise generator
+  with 3 calibrated presets. Powers the training-corpus build.
+- `training/spell_correction/` — full pipeline mirror of the diacritic
+  tree: `prep_data.py` (applies round-robin noise to clean text),
+  `train.py` (8-split eval grid), `publish_hf.py` (different gate +
+  comparison matrix), `launch_genpc2.sh`.
+- `benchmarks/data/spell_correction_eval/build.py` — 2,098 (noisy, clean)
+  eval pairs from the 4 diacritic eval slices × 2 noise levels.
+- `benchmarks/accuracy/bench_spell_correction_hf.py` — bench any HF
+  spell-correction model. `--use-slow-tokenizer` for older bartpho releases.
+
+New HF artifacts:
+
+- 🤗 [`nrl-ai/vn-spell-correction-base`](https://huggingface.co/nrl-ai/vn-spell-correction-base) — base tier
+- 🤗 [`nrl-ai/vn-spell-correction-eval`](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-eval) — 8-split eval grid (2,098 pairs)
+- 🤗 [`nrl-ai/vn-spell-correction-train`](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-train) — 459K (noisy, clean) training pairs
+
+All cards include the comparison matrix vs the public landscape and cite
+Viet-Anh Nguyen + Neural Research Lab.
+
+### docs/tasks/spell-correction.md
+
+New per-task page with public landscape + our pipeline + trained models +
+datasets + measured results + reproduce sequence + noise-generator
+explanation. README.md and README.vi.md "Recommended stack" tables
+updated with the new spell-correction row.
+
 ## [0.2.27] — 2026-04-30
 
 ### Fast tier: `nrl-ai/vn-diacritic-small` published (BARTpho-syllable, 115 M)

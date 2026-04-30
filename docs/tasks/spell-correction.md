@@ -75,11 +75,40 @@ big mix).
 
 | HF model | License | Base | Params | Disk | Status |
 |---|---|---|---:|---:|---|
-| `nrl-ai/vn-spell-correction-base` | Apache-2.0 | ViT5-base (MIT) | 220 M | ~900 MB | training |
-| `nrl-ai/vn-spell-correction-small` | Apache-2.0 | BARTpho-syllable (MIT) | 115 M | ~530 MB | queued — same recipe, ~2× faster inference |
+| [`nrl-ai/vn-spell-correction-base`](https://huggingface.co/nrl-ai/vn-spell-correction-base) | Apache-2.0 | ViT5-base (MIT) | 220 M | 900 MB | shipped (v0.2.28) |
+| `nrl-ai/vn-spell-correction-small` | Apache-2.0 | BARTpho-syllable (MIT) | 115 M | 530 MB | training |
 
-Numbers will be filled in as runs complete. Eval grid is 8 splits
-(4 registers × 2 noise levels).
+### v0.2.28 base — measured on the 8-split grid
+
+| Split | Word acc | Sentence exact | ms/sent |
+|---|---:|---:|---:|
+| business_55_light | **98.58 %** | 79.55 % | 147 |
+| business_55_heavy | **98.33 %** | 81.82 % | 145 |
+| formal_72_light | **99.80 %** | 95.38 % | 288 |
+| formal_72_heavy | **99.19 %** | 84.72 % | 274 |
+| conversational_300_light | **97.90 %** | 83.24 % | 107 |
+| conversational_300_heavy | **96.18 %** | 76.31 % | 103 |
+| literary_800_light | **98.02 %** | 77.47 % | 171 |
+| literary_800_heavy | **95.71 %** | 61.04 % | 160 |
+
+**Light avg: 98.58 % · Heavy avg: 97.35 %** (gate: light ≥ 92, heavy ≥ 80 — passes with very wide margin).
+
+Local re-eval reproduces remote within ±0.03 pp on every split. Trained on
+the [same 500K mixed Wiki+news corpus](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-train)
+with `light_noise` / `telex_typo_noise` / `heavy_noise` round-robin
+applied. 5 epochs cosine LR. 180 min on a single RTX 3090.
+
+### Δ vs the public landscape (light_avg / heavy_avg)
+
+| Model | light avg | heavy avg | Δ vs ours base |
+|---|---:|---:|---:|
+| **`nrl-ai/vn-spell-correction-base`** (ours) | **98.58 %** | **97.35 %** | — |
+| `bmd1905/vietnamese-correction-v2` (400 M) | 86.95 % | 72.62 % | **-11.6 / -24.7** pp |
+| `iAmHieu2012/vit5-vietnamese-spelling-correction` (220 M) | 80.31 % | 56.55 % | **-18.3 / -40.8** pp |
+
+Our base wins every split by 7-29 pp. The size advantage of bmd1905
+(400M vs our 220M) doesn't matter — the targeted fine-tune on the
+8-register noise distribution dominates a generic correction model.
 
 ## Datasets — `nrl-ai/*` (queued)
 

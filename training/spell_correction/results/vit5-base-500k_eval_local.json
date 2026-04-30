@@ -1,0 +1,53 @@
+{
+  "eval": {
+    "business_55_light": {
+      "n_sentences": 44,
+      "word_accuracy": 0.9858,
+      "sentence_exact": 0.8182,
+      "mean_ms_per_sentence": 125.95
+    },
+    "business_55_heavy": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9833,
+      "sentence_exact": 0.8182,
+      "mean_ms_per_sentence": 125.16
+    },
+    "formal_72_light": {
+      "n_sentences": 65,
+      "word_accuracy": 0.998,
+      "sentence_exact": 0.9538,
+      "mean_ms_per_sentence": 267.67
+    },
+    "formal_72_heavy": {
+      "n_sentences": 72,
+      "word_accuracy": 0.9919,
+      "sentence_exact": 0.8472,
+      "mean_ms_per_sentence": 253.4
+    },
+    "conversational_300_light": {
+      "n_sentences": 179,
+      "word_accuracy": 0.979,
+      "sentence_exact": 0.8324,
+      "mean_ms_per_sentence": 98.63
+    },
+    "conversational_300_heavy": {
+      "n_sentences": 287,
+      "word_accuracy": 0.9621,
+      "sentence_exact": 0.7631,
+      "mean_ms_per_sentence": 95.96
+    },
+    "literary_800_light": {
+      "n_sentences": 608,
+      "word_accuracy": 0.9802,
+      "sentence_exact": 0.7747,
+      "mean_ms_per_sentence": 163.0
+    },
+    "literary_800_heavy": {
+      "n_sentences": 788,
+      "word_accuracy": 0.9573,
+      "sentence_exact": 0.6117,
+      "mean_ms_per_sentence": 166.13
+    }
+  },
+  "device": "cuda"
+}
