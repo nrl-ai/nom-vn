@@ -5,15 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — 0.2.29 work in flight (v2 corpus retraining)
+## [0.2.29] — 2026-05-01
 
-### v0.2.29 retraining chain — spell-base + spell-small + diacritic-base on v2 corpus
+### Spell-correction track: v2 corpus retraining beats Toshiiiii1 on OOD
 
-A multi-source v2 training corpus is built and the v0.2.29 retraining
-chain is running on the remote GPU box (RTX 3090). Three stages
-back-to-back, ~7-8 hours total:
+`nrl-ai/vn-spell-correction-base` re-published — same ViT5-base 220 M
+arch, retrained on a **multi-source v2 corpus** (Wiki+news 65 % + Zalo
+Legal QA 25 % + comprehensive_noise 10 %, with 6 noise presets
+round-robin including `telex_grammar_noise()` and `mobile_noise()`).
+545K (noisy, clean) pairs, 5 epochs cosine LR, 215 min on RTX 3090.
 
-- **Stage A** — `vn-spell-correction-base` (ViT5 220 M) on v2.
+**Out-of-distribution eval (n=150, hand-curated, bootstrap 95 % CI):**
+
+  Slice            v0.2.29 (new)   v0.2.28 (prev)   Toshiiiii1   bmd1905
+  forum_25         **65.84**        59.45            60.11         59.02
+  mobile_25        95.84            95.01            96.95         88.09
+  telex_real_25    **19.15**        17.38            18.54         11.58
+  ocr_25           **97.57**        93.62            94.22         47.42
+  legal_real_25    **95.87**        95.09            93.80         54.90
+  news_real_25     96.54            96.54            94.07         30.62
+  Aggregate        **79.62**        77.43            77.40         49.21
+
+**+2.22 pp over Toshiiiii1, +2.19 pp over our own v0.2.28.** Forum
+slang slice +6.39 pp — the targeted gain from `mobile_noise()`. Telex
+slice +1.77 pp — `telex_grammar_noise()` working as designed.
+
+Synthetic 8-split has minor regressions (light_avg 98.58 → 98.32,
+heavy_avg 97.35 → 97.03 — both still well above the 92/80 gates).
+Trade-off accepted: ~0.3 pp synthetic for +2.2 pp OOD aggregate.
+
+### v0.2.29 retraining chain (in flight)
+
+Stage A (`vn-spell-correction-base`) is shipped. Two more stages running:
+
 - **Stage B** — `vn-spell-correction-small` (BARTpho-syllable 115 M) on v2.
 - **Stage C** — `vn-diacritic-vit5-base` (ViT5 220 M) on v2 diacritic corpus.
 

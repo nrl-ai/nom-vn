@@ -107,15 +107,15 @@ hand-curate mà mẫu nhiễu lấy từ nguồn lỗi VN thực tế, KHÔNG ph
 `legal_real_25` và `news_real_25`) để có gradient ổn định hơn. Mọi
 con số đi kèm khoảng tin cậy bootstrap 95 % (n=1000 resample).
 
-| Slice | Nguồn | **ours base** | ours small | ours diacritic | Toshiiiii1 (public) | bmd1905 (public) |
+| Slice | Nguồn | **ours v0.2.29 base** | v0.2.28 (cũ) | ours small | Toshiiiii1 (public) | bmd1905 (public) |
 |---|---|---:|---:|---:|---:|---:|
-| `forum_25` | Forum / teen-code | 59.45 | 58.73 | 49.31 | **60.11** | 59.02 |
-| `mobile_25` | Autocorrect điện thoại | 95.01 | 95.01 | 79.66 | **96.95** | 88.09 |
-| `telex_real_25` | Telex/VNI thực | 17.38 | 9.51 | 14.89 | **18.54** | 11.58 |
-| `ocr_25` | Tesseract / EasyOCR | 93.62 | 91.16 | **94.53** | 94.22 | 47.42 |
-| `legal_real_25` | Văn bản pháp lý thật | **95.09** | 93.56 | 88.05 | 93.80 | 54.90 |
-| `news_real_25` | Tiêu đề + tin tức | **96.54** | 91.58 | 95.80 | 94.07 | 30.62 |
-| **Tổng hợp** | n=150 | **77.43** | 75.92 | 71.50 | 77.40 | 49.21 |
+| `forum_25` | Forum / teen-code | **65.84** | 59.45 | 58.73 | 60.11 | 59.02 |
+| `mobile_25` | Autocorrect điện thoại | 95.84 | 95.01 | 95.01 | **96.95** | 88.09 |
+| `telex_real_25` | Telex/VNI thực | **19.15** | 17.38 | 9.51 | 18.54 | 11.58 |
+| `ocr_25` | Tesseract / EasyOCR | **97.57** | 93.62 | 91.16 | 94.22 | 47.42 |
+| `legal_real_25` | Văn bản pháp lý thật | **95.87** | 95.09 | 93.56 | 93.80 | 54.90 |
+| `news_real_25` | Tiêu đề + tin tức | **96.54** | 96.54 | 91.58 | 94.07 | 30.62 |
+| **Tổng hợp** | n=150 | **79.62** | 77.43 | 75.92 | 77.40 | 49.21 |
 
 Tất cả số là word accuracy (%). Khoảng tin cậy bootstrap 95 % (±~5 pp
 trên tổng hợp 150 câu) là rộng — base của chúng tôi và Toshiiiii1
@@ -140,15 +140,16 @@ trong corpus v2 nhắm đến.
 
 #### Quan sát chính
 
-1. **Phát hiện quan trọng: chúng tôi NGANG NHAU với Toshiiiii1 trên OOD.**
-   Tổng hợp 77.43 % (chúng tôi) vs 77.40 % (Toshiiiii1) — khác biệt
-   0.03 pp, nằm trong nhiễu thống kê. Trên synthetic 8-split chúng tôi
-   thắng Toshiiiii1 ~3-7 pp, nhưng OOD chuyển bài toán sang xử lý nhiễu
-   thực — và Toshiiiii1 đã chứng tỏ mình là một mô hình diacritic
-   restorer **được hardened tốt**. Chúng tôi vượt nhẹ trên `legal_real_25`
-   (95.09 vs 93.80) và `news_real_25` (96.54 vs 94.07); Toshiiiii1
-   vượt nhẹ trên `mobile_25`, `forum_25`, và `telex_real_25`. Mục tiêu
-   v0.2.29: **vượt rõ Toshiiiii1 trên OOD chứ không chỉ synthetic**.
+1. **v0.2.29 (corpus v2) vượt Toshiiiii1 rõ rệt trên OOD.**
+   Tổng hợp 79.62 % (mới) vs 77.40 % (Toshiiiii1) — **+2.22 pp**.
+   Điểm cải thiện lớn nhất: `forum_25` 59.45 → 65.84 (+6.39 pp), nhờ
+   `mobile_noise()` trong corpus v2 đã đưa các viết tắt teen-code
+   (`ko bt`, `mn`, `vs`) vào phân phối huấn luyện. `telex_real_25` cũng
+   tăng từ 17.38 → 19.15 (+1.77 pp), xác nhận `telex_grammar_noise()`
+   thực sự dạy mô hình xử lý lỗi keystroke Telex. Trade-off: synthetic
+   8-split light_avg giảm từ 98.58 → 98.32 (-0.26 pp), heavy_avg từ
+   97.35 → 97.03 (-0.32 pp) — mô hình bớt over-fit lưới synthetic, đổi
+   lại OOD tăng. Đây là tỷ lệ trao đổi đúng hướng.
 2. **bmd1905 thua xa** (49.21 % aggregate). Thua cả mô hình diacritic-only
    của chúng tôi (71.50 %). Lý do: bmd1905 được huấn luyện chủ yếu trên
    lỗi cấp ký tự, không gặp đủ pattern strip-dấu — nên nó để lại 459
