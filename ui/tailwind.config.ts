@@ -77,11 +77,16 @@ const config: Config = {
           "0%, 80%, 100%": { opacity: "0.2" },
           "40%": { opacity: "1" },
         },
+        "slide-x": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(400%)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 220ms ease-out",
         "dialog-in": "dialog-in 160ms ease-out",
         "pulse-dot": "pulse-dot 1.4s ease-in-out infinite",
+        "slide-x": "slide-x 1.2s linear infinite",
       },
     },
   },

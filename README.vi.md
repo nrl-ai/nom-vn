@@ -25,7 +25,11 @@ nom serve                       # mở http://localhost:8080
 
 ![Nôm — chat với trích dẫn dựa trên tài liệu tiếng Việt được index](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/02-chat-with-answer.png)
 
-Web app được build sẵn vào wheel — không cần cài thêm gì.
+Web app được build sẵn vào wheel — không cần cài thêm gì. Từ v0.2.30 web
+app là một **playground**: chat RAG cùng 5 trang công cụ tách rời — khôi
+phục dấu (3 backend: rule / HF seq2seq / LLM), tách từ + câu, chuẩn hoá
+NFC + nhận diện tiếng Việt, bỏ dấu, sinh nhiễu (7 preset, deterministic).
+Bấm `Cmd/Ctrl + Enter` để chạy ở bất kỳ trang công cụ nào.
 
 ---
 

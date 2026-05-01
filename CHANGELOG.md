@@ -5,6 +5,68 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.30] — 2026-05-01
+
+### Playground UI: multi-task front-end + stateless `/api/tools/*` surface
+
+The chat web app is now a **playground** for the full
+`nom.text` toolbox, not just RAG. New left rail with task switcher;
+chat lives alongside five stateless tools, each with its own option
+panel:
+
+- **Khôi phục dấu** — diacritic restore (rule / HF seq2seq / LLM
+  backend; HF model picker between `nrl-ai/vn-diacritic-vit5-base`,
+  `-small`, `-spell-correction-base`, and the Toshiiiii1 baseline).
+  Output renders with diff-highlighted changed words.
+- **Tách từ / câu** — word + sentence segmentation, list-of-chips or
+  underscore-joined output, compounds tinted in accent.
+- **Chuẩn hoá** — NFC normalize + `is_vietnamese` / `has_diacritics`
+  flags, with a per-codepoint inspector when the input was NFD.
+- **Bỏ dấu** — strip diacritics (URL slug / search-key use case).
+- **Sinh nhiễu** — reproducible noise generator with all 7 presets
+  (`light` … `comprehensive`), seedable, deterministic.
+
+Chat gains an inline **top_k** options popover (1–20 slider, Esc
+closes) that's persisted in localStorage; replaces the fixed
+`top_k=5` default.
+
+### Backend
+
+New `nom.chat.tools_api.register_tool_routes()` mounts seven POST
+endpoints + two GET catalog endpoints under `/api/tools/*`. The HF
+diacritic model is lazy + process-cached per `model_id` so first-call
+weight load is amortized across the rest of the session. The LLM-
+backed restore reuses whatever LLM was passed into `build_app`.
+
+Eighteen new pytest cases under `tests/test_tools_api.py` cover happy
+path + 422 / 503 error surfaces. HF model load is gated behind a
+separate import guard so unit tests don't touch torch.
+
+### UI tests
+
+Vitest + Testing Library added (Vitest 2 — Vite 5 compatible). 27
+component tests across `DiffView`, `Select`, `Segmented`,
+`NumberField`, `OptionRow`, `CopyButton`, `TextInput`, `ToolShell`,
+`Panel`, `EmptyHint`, `Spinner`, `useToolRunner`, and `TaskNav`. Run
+with `pnpm test`.
+
+### UX polish
+
+- **Cmd/Ctrl + Enter** runs the active tool from anywhere on the page.
+- **Esc** closes the chat options popover.
+- Sonner toast on every tool API error (in addition to the inline
+  error panel).
+- Empty-state hint replaces the bare "—" when no result yet.
+- Diff highlight upgraded from dotted-underline tint to a solid
+  accent-tinted background so changes are unmissable.
+- Run button label normalized to a single Vietnamese verb (`Chạy`)
+  instead of bilingual "`Chạy / Run`".
+
+### Bumped
+
+- `src/nom/__init__.py` `__version__` was lagging behind `pyproject`
+  (0.2.7 vs 0.2.29); aligned to the new 0.2.30.
+
 ## [0.2.29] — 2026-05-01
 
 ### Spell-correction track: v2 corpus retraining beats Toshiiiii1 on OOD

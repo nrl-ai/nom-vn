@@ -45,3 +45,97 @@ export interface ChatMessage {
   /** Set if the request errored — text holds the error message. */
   error?: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Playground tools — stateless endpoints under /api/tools/*. Each request
+// is pure (text in, derived text out). The UI types here mirror the
+// FastAPI response shapes in src/nom/chat/tools_api.py. Kept lightweight
+// — no codegen, no envelopes; the surface is small.
+// ---------------------------------------------------------------------------
+
+export type DiacriticBackend = "rule" | "hf" | "llm";
+
+export interface DiacriticRestoreReq {
+  text: string;
+  backend?: DiacriticBackend;
+  model_id?: string;
+}
+
+export interface DiacriticRestoreRes {
+  input: string;
+  restored: string;
+  backend: DiacriticBackend;
+  model_id: string | null;
+}
+
+export interface DiacriticModelInfo {
+  id: string;
+  label: string;
+  tier: "accuracy" | "fast" | "robust" | "baseline";
+  params_m: number;
+  license: string;
+}
+
+export interface DiacriticModelsRes {
+  default: string;
+  models: DiacriticModelInfo[];
+  presets: DiacriticBackend[];
+}
+
+export interface StripRes {
+  input: string;
+  stripped: string;
+}
+
+export type WordFmt = "list" | "text";
+
+export interface WordTokenizeRes {
+  input: string;
+  tokens?: string[];
+  text?: string;
+  n_tokens?: number;
+  n_compounds?: number;
+}
+
+export interface SentenceTokenizeRes {
+  input: string;
+  sentences: string[];
+  n_sentences: number;
+}
+
+export interface NormalizeRes {
+  input: string;
+  nfc: string;
+  full_normalized: string;
+  is_nfc: boolean;
+  n_input_codepoints: number;
+  n_nfc_codepoints: number;
+}
+
+export interface DetectRes {
+  input: string;
+  is_vietnamese: boolean;
+  has_diacritics: boolean;
+  reason: string;
+}
+
+export type NoisePreset =
+  | "light"
+  | "heavy"
+  | "telex_typo"
+  | "telex_grammar"
+  | "mobile"
+  | "ocr_realistic"
+  | "comprehensive";
+
+export interface NoisePresetInfo {
+  id: NoisePreset;
+  label: string;
+}
+
+export interface NoiseApplyRes {
+  input: string;
+  noisy: string;
+  preset: NoisePreset;
+  seed: number;
+}

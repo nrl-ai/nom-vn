@@ -82,6 +82,13 @@ def build_app(
 
     maybe_install_otel(app)
 
+    # Stateless playground tools (/api/tools/*) — independent of the
+    # spaces / materials store. Reuses the chat LLM for the optional
+    # llm-backed diacritic restorer.
+    from nom.chat.tools_api import register_tool_routes
+
+    register_tool_routes(app, llm=getattr(store, "_llm", None))
+
     # ------------------------------------------------------------------
     # Static UI
     # ------------------------------------------------------------------

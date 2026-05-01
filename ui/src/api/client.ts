@@ -1,7 +1,23 @@
 // Thin fetch client. No swagger/codegen — endpoints are stable and few.
 // All errors throw `ApiError` so React Query's onError gets a typed shape.
 
-import type { Answer, Material, Space } from "./types";
+import type {
+  Answer,
+  DetectRes,
+  DiacriticBackend,
+  DiacriticModelsRes,
+  DiacriticRestoreRes,
+  Material,
+  NoiseApplyRes,
+  NoisePreset,
+  NoisePresetInfo,
+  NormalizeRes,
+  SentenceTokenizeRes,
+  Space,
+  StripRes,
+  WordFmt,
+  WordTokenizeRes,
+} from "./types";
 
 export class ApiError extends Error {
   constructor(
@@ -88,4 +104,44 @@ export const api = {
       embedder: string | null;
       ocr_available: boolean;
     }>(`/api/health`),
+  // -- Playground tools --------------------------------------------------
+  tools: {
+    diacriticRestore: (text: string, backend: DiacriticBackend, modelId?: string) =>
+      request<DiacriticRestoreRes>("/api/tools/diacritic/restore", {
+        method: "POST",
+        body: JSON.stringify({ text, backend, ...(modelId ? { model_id: modelId } : {}) }),
+      }),
+    diacriticStrip: (text: string) =>
+      request<StripRes>("/api/tools/diacritic/strip", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      }),
+    diacriticModels: () => request<DiacriticModelsRes>("/api/tools/diacritic/models"),
+    tokenizeWord: (text: string, fmt: WordFmt = "list") =>
+      request<WordTokenizeRes>("/api/tools/tokenize/word", {
+        method: "POST",
+        body: JSON.stringify({ text, fmt }),
+      }),
+    tokenizeSentence: (text: string) =>
+      request<SentenceTokenizeRes>("/api/tools/tokenize/sentence", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      }),
+    normalize: (text: string) =>
+      request<NormalizeRes>("/api/tools/text/normalize", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      }),
+    detect: (text: string) =>
+      request<DetectRes>("/api/tools/text/detect", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      }),
+    noiseApply: (text: string, preset: NoisePreset, seed: number) =>
+      request<NoiseApplyRes>("/api/tools/noise/apply", {
+        method: "POST",
+        body: JSON.stringify({ text, preset, seed }),
+      }),
+    noisePresets: () => request<{ presets: NoisePresetInfo[] }>("/api/tools/noise/presets"),
+  },
 };

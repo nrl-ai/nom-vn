@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { api } from "./client";
-import type { Material, Space } from "./types";
+import type { DiacriticBackend, Material, NoisePreset, Space, WordFmt } from "./types";
 
 const keys = {
   spaces: () => ["spaces"] as const,
@@ -101,5 +101,64 @@ export function useAsk(spaceId: string | null) {
       // Indexing may have updated material chunk counts (first ask).
       if (spaceId) qc.invalidateQueries({ queryKey: keys.materials(spaceId) });
     },
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Playground tools — one mutation per tool. Mutations (not queries) because
+// each is action-driven: user fills the input, hits Run, we POST. Persisting
+// last-run results is the responsibility of the page component.
+// ---------------------------------------------------------------------------
+
+export function useDiacriticRestore() {
+  return useMutation({
+    mutationFn: (vars: { text: string; backend: DiacriticBackend; modelId?: string }) =>
+      api.tools.diacriticRestore(vars.text, vars.backend, vars.modelId),
+  });
+}
+
+export function useDiacriticStrip() {
+  return useMutation({ mutationFn: (text: string) => api.tools.diacriticStrip(text) });
+}
+
+export function useDiacriticModels() {
+  return useQuery({
+    queryKey: ["tools", "diacritic-models"],
+    queryFn: api.tools.diacriticModels,
+    staleTime: Infinity,
+  });
+}
+
+export function useWordTokenize() {
+  return useMutation({
+    mutationFn: (vars: { text: string; fmt: WordFmt }) =>
+      api.tools.tokenizeWord(vars.text, vars.fmt),
+  });
+}
+
+export function useSentenceTokenize() {
+  return useMutation({ mutationFn: (text: string) => api.tools.tokenizeSentence(text) });
+}
+
+export function useNormalize() {
+  return useMutation({ mutationFn: (text: string) => api.tools.normalize(text) });
+}
+
+export function useDetect() {
+  return useMutation({ mutationFn: (text: string) => api.tools.detect(text) });
+}
+
+export function useNoiseApply() {
+  return useMutation({
+    mutationFn: (vars: { text: string; preset: NoisePreset; seed: number }) =>
+      api.tools.noiseApply(vars.text, vars.preset, vars.seed),
+  });
+}
+
+export function useNoisePresets() {
+  return useQuery({
+    queryKey: ["tools", "noise-presets"],
+    queryFn: api.tools.noisePresets,
+    staleTime: Infinity,
   });
 }

@@ -25,7 +25,11 @@ nom serve                       # opens http://localhost:8080
 
 ![Nôm — chat with citations grounded in indexed Vietnamese documents](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/02-chat-with-answer.png)
 
-The web app is built into the wheel — there's nothing else to install.
+The web app is built into the wheel — there's nothing else to install. As of
+v0.2.30 it's a full **playground**: chat-with-RAG plus stateless tool pages
+for diacritic restore (rule / HF seq2seq / LLM backends), word + sentence
+segmentation, NFC normalize + VN detect, strip-diacritics, and a reproducible
+noise generator for training. `Cmd/Ctrl + Enter` runs from anywhere.
 
 ---
 
