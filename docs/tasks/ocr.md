@@ -100,8 +100,60 @@ OCR-specific; tokenizer SentencePiece phân tách output Tesseract bị
 corrupt thành garbage. Literature
 ([Tran et al. 2024](https://arxiv.org/html/2410.13305)) báo cáo
 WER 27 % → 18 % khi train trực tiếp trên cặp `(Tesseract, GT)` —
-tức là gain 5 lần khi data khớp. Future work: build OCR-specific
-post-correct corpus + cân nhắc base byte-level (ByT5) cho robustness.
+nhưng giả định baseline ~5-30 % CER (printed scan).
+
+### Negative result đã đo: handwriting (CER ~70 %) (2026-05-01)
+
+Đã thử fine-tune `nrl-ai/vn-spell-correction-base` trên 9,626 cặp
+`(Tesseract output, GT)` từ
+[`brianhuster/VietnameseOCRdataset`](https://huggingface.co/datasets/brianhuster/VietnameseOCRdataset)
+(Apache 2.0, handwriting). Bench trên 200 ảnh test split (giữ tách
+khỏi training):
+
+| Pipeline | CER | WER | helped/hurt |
+|---|---:|---:|---|
+| Tesseract `vie` baseline | **69.34 %** | 98.95 % | — |
+| + base spell-correct (off-the-shelf) | 69.98 % (+0.64) | 98.56 % (-0.40) | 35 / 103 |
+| + fine-tuned ocr-correct (3 epochs) | **81.80 % (+12.46)** | 101.26 % (+2.31) | 14 / 173 |
+
+**Cả hai post-correct đều làm tệ hơn.** Fine-tuned phiên bản tệ
+nhiều hơn — mô hình học bịa văn bản tiếng Việt plausible từ rác,
+không sửa.
+
+Ví dụ thất bại điển hình:
+```
+GOLD: khung cảnh kinh tế, xã hội và định chế.
+RAW : vhuag cảnh kuÄ tố, xá đậu v3 đụnh chế   (CER 33 %)
+PP  : và những cảnh sát, xã hội và 3            (CER 51 %)
+```
+
+Mô hình bịa "cảnh sát" thay vì "kinh tế".
+
+**Root cause:** Tesseract `vie` không train cho VN handwriting; CER
+70 % không đủ tín hiệu để recover. Đây là failure mode "hallucination
+over-correction" mà
+[Kanerva et al. 2025](https://arxiv.org/html/2502.01205v1) đã báo
+cáo trên Finnish (LLM post-OCR -19 % đến -76 % CER, *tệ hơn* baseline).
+
+**Bài học:** post-correct không cứu được OCR tệ. Đúng next step là
+fix OCR engine (train TrOCR cho VN handwriting, hoặc dùng PaddleOCR
+PP-OCRv5 với model handwriting), không phải fine-tune post-correct
+trên data corrupt 70 %.
+
+Reproduce (verify negative-result):
+
+```bash
+.venv/bin/python -m huggingface_hub.commands.huggingface_cli download \
+    brianhuster/VietnameseOCRdataset dataset_small.zip --repo-type dataset \
+    --local-dir /tmp/brianhuster_ocr
+unzip /tmp/brianhuster_ocr/dataset_small.zip -d /tmp/brianhuster_ocr/
+
+python training/ocr_correction/prep_data.py --engines tesseract,easyocr
+TRAIN_HOST=mybox ./training/ocr_correction/launch_remote_train.sh
+python benchmarks/accuracy/bench_ocr_post_correct_real.py \
+    --corrector training/ocr_correction/checkpoints/vit5-ocr-correct/final \
+    --json benchmarks/results/baseline_ocr_post_correct_real_finetuned.json
+```
 
 **Quyết định:** không bật mặc định (gain không đáng phức tạp), nhưng
 làm sẵn như opt-in cho ai có ảnh quét xấu thực sự (CER ≥ 20 %).

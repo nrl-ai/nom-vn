@@ -1,0 +1,37 @@
+{
+  "ocr_engine": "tesseract-vie",
+  "post_correct_model": "training/ocr_correction/checkpoints/vit5-ocr-correct/final",
+  "dataset": "brianhuster/VietnameseOCRdataset (line, handwriting)",
+  "license": "Apache-2.0",
+  "n_samples": 200,
+  "seed": 42,
+  "cer_raw_mean": 0.6934,
+  "cer_post_correct_mean": 0.818,
+  "wer_raw_mean": 0.9895,
+  "wer_post_correct_mean": 1.0126,
+  "n_helped": 14,
+  "n_neutral": 13,
+  "n_hurt": 173,
+  "buckets": {
+    "<10%": {
+      "n": 0
+    },
+    "10-30%": {
+      "n": 0
+    },
+    "30-50%": {
+      "n": 7,
+      "cer_raw_mean": 0.4342,
+      "cer_post_correct_mean": 0.6897,
+      "n_helped": 0,
+      "n_hurt": 7
+    },
+    "50%+": {
+      "n": 193,
+      "cer_raw_mean": 0.7028,
+      "cer_post_correct_mean": 0.8227,
+      "n_helped": 14,
+      "n_hurt": 166
+    }
+  }
+}
