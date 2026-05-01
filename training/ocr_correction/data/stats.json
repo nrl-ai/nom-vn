@@ -1,0 +1,32 @@
+{
+  "source": "brianhuster/VietnameseOCRdataset (line, handwriting, Apache 2.0)",
+  "split_used": "train_line_annotation.txt (test split held out for bench)",
+  "n_train_images": 4935,
+  "n_val_images": 548,
+  "engines": [
+    "tesseract",
+    "easyocr"
+  ],
+  "max_cer_kept": 0.95,
+  "val_fraction": 0.1,
+  "seed": 42,
+  "counts": {
+    "kept": 10690,
+    "skipped_empty": 84,
+    "skipped_high_cer": 192,
+    "kept_identity": 0,
+    "missing_image": 0
+  },
+  "per_engine": {
+    "tesseract": {
+      "pairs_kept": 5257,
+      "cer_mean": 0.6751,
+      "cer_median": 0.678
+    },
+    "easyocr": {
+      "pairs_kept": 5433,
+      "cer_mean": 0.7032,
+      "cer_median": 0.7126
+    }
+  }
+}
