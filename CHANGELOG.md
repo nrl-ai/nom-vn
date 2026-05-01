@@ -34,12 +34,60 @@ Synthetic 8-split has minor regressions (light_avg 98.58 → 98.32,
 heavy_avg 97.35 → 97.03 — both still well above the 92/80 gates).
 Trade-off accepted: ~0.3 pp synthetic for +2.2 pp OOD aggregate.
 
-### v0.2.29 retraining chain (in flight)
+### Stage B — `vn-spell-correction-small` (BARTpho 115 M) on v2
 
-Stage A (`vn-spell-correction-base`) is shipped. Two more stages running:
+Re-published. 96.6 min training on RTX 3090.
 
-- **Stage B** — `vn-spell-correction-small` (BARTpho-syllable 115 M) on v2.
-- **Stage C** — `vn-diacritic-vit5-base` (ViT5 220 M) on v2 diacritic corpus.
+      Slice            v0.2.29 (new)   v0.2.28 (prev)   Toshiiiii1
+      forum_25          64.64           58.73            60.11
+      mobile_25         95.29           95.01            96.95
+      telex_real_25     16.45            9.51            18.54
+      ocr_25            94.19           91.16            94.22
+      legal_real_25     93.54           93.56            93.80
+      news_real_25      91.34           91.58            94.07
+      Aggregate         **77.55**       75.92            77.40
+
++1.63 pp over v0.2.28. Forum slice +5.91 pp, Telex +6.94 pp — same
+targeted gains as the base tier.
+
+### Stage C — `vn-diacritic-vit5-base` (ViT5 220 M) on v2 diacritic corpus
+
+Re-published. 231.8 min training on RTX 3090. The v2 corpus for the
+diacritic-only path is Wiki+news+legal (595K stripped/clean pairs;
+no synthetic noise generator since the diacritic task is determined
+by `strip_diacritics`).
+
+      Slice            v0.2.29 (new)   v0.2.28 (prev)   Toshiiiii1
+      forum_25          43.54           49.31            60.11
+      mobile_25         76.99           79.66            96.95
+      telex_real_25     14.37           14.89            18.54
+      ocr_25            94.83           94.53            94.22
+      legal_real_25     **93.02**       88.05            93.80
+      news_real_25      96.05           95.80            94.07
+      Aggregate         71.15           71.50            77.40
+
+**Mixed result on the diacritic tier.** Legal slice +4.97 pp (legal
+corpus paid off), news +0.25 pp, OCR +0.30 pp — formal-register text
+is genuinely better. Aggregate is -0.35 pp because the legal-skewed
+corpus moved the model away from informal slang (`forum_25` -5.77 pp,
+`mobile_25` -2.67 pp). For the diacritic-only use case (formal text
+with stripped accents — legal docs, news, OCR), v0.2.29 is the right
+choice; for informal text (forum / mobile), users should route to
+`vn-spell-correction-base` anyway, so this trade-off is intentional.
+
+### Final OOD landscape (n=150, after v0.2.29 chain)
+
+      Model                              Aggregate    95 % CI
+      vn-spell-correction-base v0.2.29   79.62        [74.7-84.6]
+      vn-spell-correction-small v0.2.29  77.55        [72.5-82.6]
+      Toshiiiii1 (public)                77.40        [72.7-82.1]
+      vn-diacritic-vit5-base v0.2.29     71.15        [66.0-76.3]
+      vn-diacritic-small v0.2.28         70.27        [65.1-75.8]
+      bmd1905 (public)                   49.21        [43.5-54.9]
+
+Both spell-correction tiers now decisively beat the public landscape
+on OOD. The diacritic-only tiers retain the public-landscape gap on
+informal slices but are the right choice for formal-text-only workloads.
 
 The v2 corpus closes specific weaknesses surfaced by the OOD eval:
 

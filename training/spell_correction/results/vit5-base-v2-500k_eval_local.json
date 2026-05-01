@@ -1,0 +1,72 @@
+{
+  "checkpoint": "training/spell_correction/checkpoints/vit5-base-v2-500k/final",
+  "device": "cuda",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "eval": {
+    "business_55_light": {
+      "n_sentences": 44,
+      "word_accuracy": 0.9874,
+      "sentence_exact": 0.8409,
+      "mean_ms_per_sentence": 126.06,
+      "p50_ms": 121.78,
+      "p95_ms": 164.32
+    },
+    "business_55_heavy": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9897,
+      "sentence_exact": 0.8545,
+      "mean_ms_per_sentence": 123.72,
+      "p50_ms": 117.18,
+      "p95_ms": 167.92
+    },
+    "formal_72_light": {
+      "n_sentences": 65,
+      "word_accuracy": 0.9975,
+      "sentence_exact": 0.9385,
+      "mean_ms_per_sentence": 251.72,
+      "p50_ms": 235.82,
+      "p95_ms": 439.68
+    },
+    "formal_72_heavy": {
+      "n_sentences": 72,
+      "word_accuracy": 0.9905,
+      "sentence_exact": 0.8333,
+      "mean_ms_per_sentence": 237.18,
+      "p50_ms": 221.35,
+      "p95_ms": 427.34
+    },
+    "conversational_300_light": {
+      "n_sentences": 179,
+      "word_accuracy": 0.9762,
+      "sentence_exact": 0.8101,
+      "mean_ms_per_sentence": 93.79,
+      "p50_ms": 85.44,
+      "p95_ms": 153.16
+    },
+    "conversational_300_heavy": {
+      "n_sentences": 287,
+      "word_accuracy": 0.9554,
+      "sentence_exact": 0.7352,
+      "mean_ms_per_sentence": 94.79,
+      "p50_ms": 88.2,
+      "p95_ms": 147.68
+    },
+    "literary_800_light": {
+      "n_sentences": 608,
+      "word_accuracy": 0.9712,
+      "sentence_exact": 0.7319,
+      "mean_ms_per_sentence": 317.07,
+      "p50_ms": 265.89,
+      "p95_ms": 609.69
+    },
+    "literary_800_heavy": {
+      "n_sentences": 788,
+      "word_accuracy": 0.9456,
+      "sentence_exact": 0.5685,
+      "mean_ms_per_sentence": 306.07,
+      "p50_ms": 265.12,
+      "p95_ms": 615.73
+    }
+  }
+}

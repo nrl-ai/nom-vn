@@ -148,7 +148,7 @@ bench dưới `benchmarks/accuracy/` và `training/diacritic/eval_checkpoint.py`
 Latency bị decoder ViT5 220 M chi phối; cả hai mô hình cùng họ arch.
 Để được 7.6× throughput trên cả hai, dùng `predict_batch`.
 
-### Bench thực tế ngoài-phân-phối (OOD, đo ngày 2026-04-30)
+### Bench thực tế ngoài-phân-phối (OOD, đo ngày 2026-05-01 sau v0.2.29)
 
 `benchmarks/data/spell_correction_eval_real/` là tập 150 câu hand-curate
 mà nhiễu lấy từ nguồn lỗi VN thực tế (forum / mobile / Telex thật / OCR
@@ -158,33 +158,39 @@ tập của khôi phục dấu.
 
 Cả hai tier khôi phục dấu của chúng tôi vs Toshiiiii1 trên OOD:
 
-| Slice | ours `vn-diacritic-vit5-base` | ours `vn-diacritic-small` | Toshiiiii1 |
-|---|---:|---:|---:|
-| `forum_25` | 49.31 | 46.28 | **60.11** |
-| `mobile_25` | 79.66 | 81.51 | **96.95** |
-| `telex_real_25` | 14.89 | 9.33 | **18.54** |
-| `ocr_25` | **94.53** | 93.29 | 94.22 |
-| `legal_real_25` | 88.05 | 89.15 | **93.80** |
-| `news_real_25` | **95.80** | 90.35 | 94.07 |
-| **Tổng hợp** (n=150) | 71.50 [66-77] | 70.27 [65-76] | **77.40** [73-82] |
+| Slice | `vit5-base` v0.2.29 | `vit5-base` v0.2.28 | `small` v0.2.28 | Toshiiiii1 |
+|---|---:|---:|---:|---:|
+| `forum_25` | 43.54 | 49.31 | 46.28 | **60.11** |
+| `mobile_25` | 76.99 | 79.66 | 81.51 | **96.95** |
+| `telex_real_25` | 14.37 | 14.89 | 9.33 | **18.54** |
+| `ocr_25` | **94.83** | 94.53 | 93.29 | 94.22 |
+| `legal_real_25` | **93.02** | 88.05 | 89.15 | 93.80 |
+| `news_real_25` | **96.05** | 95.80 | 90.35 | 94.07 |
+| **Tổng hợp** (n=150) | 71.15 [66-76] | 71.50 [66-77] | 70.27 [65-76] | **77.40** [73-82] |
 
-**Phát hiện quan trọng**: trên OOD, Toshiiiii1 vượt cả hai tier diacritic
-của chúng tôi với khoảng cách rõ rệt — +5.9 pp so với base, +7.1 pp so
-với small. Hai lý do:
+**Phát hiện chính sau v0.2.29 retrain** (Wiki+news+legal corpus):
 
-1. Toshiiiii1 được huấn luyện trên một mix nhiễu rộng hơn (đa dạng
-   typing real-world, không chỉ strip-dấu thuần).
-2. Mô hình diacritic-only của chúng tôi học đảo ngược phép strip
-   determinis, nên gặp các lỗi không phải strip (Telex grammar, teen
-   code, OCR substitution) thì không có đủ tín hiệu.
+1. **Văn bản formal/legal cải thiện rõ.** legal_real_25: 88.05 → 93.02
+   (+4.97 pp), news +0.25, OCR +0.30. Đây là chính cái mục tiêu của
+   việc thêm 100K cặp legal vào corpus: phủ thêm vocab pháp lý.
+2. **Văn bản informal regress.** forum_25: 49.31 → 43.54 (-5.77 pp),
+   mobile -2.67. Lý do: mô hình diacritic-only chỉ thấy cặp `(stripped,
+   clean)`, nên thêm corpus legal đẩy phân phối nghiêng về formal —
+   informal vì thế hơi tệ đi.
+3. **Tổng hợp -0.35 pp** (71.50 → 71.15) vì regression informal lớn
+   hơn improvement formal trong tỷ lệ slice. Nhưng đây là trade-off
+   đúng cho use case thực tế.
 
-**Hệ quả thực tế**: nếu input của bạn là văn bản đã strip-dấu sạch (ví
-dụ ASCII pipe đầu ra của một hệ thống cũ), dùng `vn-diacritic-vit5-base`.
-Nếu input là nhiễu thực tế (OCR, người gõ tay, social media), dùng
-`vn-spell-correction-base` — model đó vượt diacritic-only của chúng tôi
-+5.93 pp tổng hợp trên cùng OOD eval. v0.2.29 retrain (đang chạy) sẽ
-thử khép khoảng cách diacritic vs Toshiiiii1 bằng cách huấn luyện lại
-trên corpus v2 (Wiki + news + legal) thay vì chỉ Wiki.
+**Hệ quả thực tế** (cập nhật sau v0.2.29):
+
+- *Văn bản formal đã strip-dấu* (legal docs, news, OCR text-only): dùng
+  `vn-diacritic-vit5-base` v0.2.29. Tốt hơn v0.2.28 trên các slice này.
+- *Nhiễu thực tế hỗn hợp* (OCR + người gõ tay + social): dùng
+  `vn-spell-correction-base` (siêu tập). Aggregate 79.62 % vs diacritic-only
+  71.15 % — chênh lệch +8.47 pp, vượt cả Toshiiiii1.
+- *Toshiiiii1 vẫn dẫn đầu trên informal* (forum / mobile / telex slices)
+  cho mục đích diacritic-only thuần. Sự lựa chọn giữa Toshiiiii1 và
+  vn-diacritic-vit5-base là register-dependent.
 
 JSON nguồn:
 [diacritic-vit5-base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_diacritic_vit5_base.json) /

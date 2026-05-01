@@ -1,0 +1,72 @@
+{
+  "checkpoint": "training/spell_correction/checkpoints/bartpho-syllable-v2-500k/final",
+  "device": "cuda",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "eval": {
+    "business_55_light": {
+      "n_sentences": 44,
+      "word_accuracy": 0.9874,
+      "sentence_exact": 0.8182,
+      "mean_ms_per_sentence": 51.89,
+      "p50_ms": 50.43,
+      "p95_ms": 63.36
+    },
+    "business_55_heavy": {
+      "n_sentences": 55,
+      "word_accuracy": 0.9743,
+      "sentence_exact": 0.6909,
+      "mean_ms_per_sentence": 51.55,
+      "p50_ms": 50.77,
+      "p95_ms": 61.79
+    },
+    "formal_72_light": {
+      "n_sentences": 65,
+      "word_accuracy": 0.9234,
+      "sentence_exact": 0.7846,
+      "mean_ms_per_sentence": 104.11,
+      "p50_ms": 101.0,
+      "p95_ms": 179.43
+    },
+    "formal_72_heavy": {
+      "n_sentences": 72,
+      "word_accuracy": 0.8912,
+      "sentence_exact": 0.6667,
+      "mean_ms_per_sentence": 102.22,
+      "p50_ms": 95.12,
+      "p95_ms": 183.57
+    },
+    "conversational_300_light": {
+      "n_sentences": 179,
+      "word_accuracy": 0.9316,
+      "sentence_exact": 0.7207,
+      "mean_ms_per_sentence": 42.48,
+      "p50_ms": 38.72,
+      "p95_ms": 68.29
+    },
+    "conversational_300_heavy": {
+      "n_sentences": 287,
+      "word_accuracy": 0.9232,
+      "sentence_exact": 0.6655,
+      "mean_ms_per_sentence": 43.28,
+      "p50_ms": 40.99,
+      "p95_ms": 66.56
+    },
+    "literary_800_light": {
+      "n_sentences": 608,
+      "word_accuracy": 0.9486,
+      "sentence_exact": 0.6135,
+      "mean_ms_per_sentence": 157.98,
+      "p50_ms": 154.54,
+      "p95_ms": 260.57
+    },
+    "literary_800_heavy": {
+      "n_sentences": 788,
+      "word_accuracy": 0.9043,
+      "sentence_exact": 0.4467,
+      "mean_ms_per_sentence": 167.55,
+      "p50_ms": 164.48,
+      "p95_ms": 268.06
+    }
+  }
+}

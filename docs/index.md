@@ -28,7 +28,7 @@ features:
       width: 32
       height: 32
     title: Khôi phục dấu
-    details: 'Mô hình <code>nrl-ai/vn-diacritic-vit5-base</code> đạt <strong>97.4 % word accuracy</strong> trung bình trên 4 register (hành chính / kinh doanh / hội thoại / văn học). Bản <code>vn-diacritic-small</code> 115M tham số, nhanh gấp 3 lần.'
+    details: 'Mô hình <code>nrl-ai/vn-diacritic-vit5-base</code> v0.2.29 đạt <strong>94.95 % word accuracy</strong> trên 4 register in-dist (formal / business / hội thoại / văn học), <strong>71.15 %</strong> trên OOD 150-câu hand-curate. Bản <code>vn-diacritic-small</code> 115M tham số, nhanh gấp 3 lần.'
     link: /tasks/diacritic-restoration
     linkText: Tài liệu khôi phục dấu
 
@@ -37,7 +37,7 @@ features:
       width: 32
       height: 32
     title: Sửa chính tả
-    details: '<code>nrl-ai/vn-spell-correction-base</code> xử lý lỗi gõ Telex, lỗi OCR, viết tắt teen-code trong một lượt. <strong>98.58 % light · 97.35 % heavy</strong> trên 8-split eval grid — vượt baseline công khai 11–25 pp.'
+    details: '<code>nrl-ai/vn-spell-correction-base</code> v0.2.29 xử lý lỗi gõ Telex, lỗi OCR, viết tắt teen-code trong một lượt. <strong>98.32 % light · 97.03 % heavy</strong> trên 8-split synthetic; <strong>79.62 %</strong> trên OOD 150-câu hand-curate — <strong>vượt Toshiiiii1 +2.22 pp trên thực tế</strong>, vượt bmd1905 +30 pp.'
     link: /tasks/spell-correction
     linkText: Tài liệu sửa chính tả
 
@@ -79,7 +79,7 @@ features:
 <span class="marker">01 · mặc định</span>
 </div>
 <h3>vn-diacritic-vit5-base</h3>
-<p>Khôi phục dấu trên 4 register, trung bình <strong>97.4 %</strong>. Cân bằng giữa hành chính / kinh doanh / hội thoại / văn học. 220M tham số, giấy phép Apache 2.0.</p>
+<p>Khôi phục dấu trên 4 register synthetic <strong>94.95 %</strong>; trên OOD thực tế (legal / news / OCR) <strong>71.15 %</strong>. v0.2.29 (Wiki+news+legal corpus) cải thiện legal +4.97 pp so với v0.2.28. 220M tham số, Apache 2.0.</p>
 <a href="/tasks/diacritic-restoration" class="ev-corner-link">tài liệu</a>
 </div>
 
@@ -88,7 +88,7 @@ features:
 <span class="marker">02 · sửa lỗi</span>
 </div>
 <h3>vn-spell-correction-base</h3>
-<p>Một lượt cho cả lỗi gõ Telex, lỗi OCR, viết tắt teen-code và mất dấu. <strong>98.58 % light · 97.35 % heavy</strong> trên 8-split eval grid.</p>
+<p>Một lượt cho cả lỗi gõ Telex, lỗi OCR, viết tắt teen-code và mất dấu. v0.2.29: <strong>98.32 % light · 97.03 % heavy</strong> trên 8-split synthetic; <strong>79.62 %</strong> trên OOD thực tế — vượt cả Toshiiiii1.</p>
 <a href="/tasks/spell-correction" class="ev-corner-link">tài liệu</a>
 </div>
 

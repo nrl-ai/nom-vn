@@ -1,5 +1,5 @@
 {
-  "model_id": "nrl-ai/vn-diacritic-vit5-base",
+  "model_id": "training/diacritic/checkpoints/vit5-base-v2-600k/final",
   "device": "cuda",
   "eval_dir": "spell_correction_eval_real",
   "warmup_calls": 3,
@@ -22,9 +22,9 @@
         "missing_word": 21,
         "correct": 155
       },
-      "mean_ms_per_sentence": 447.92,
-      "p50_ms": 433.21,
-      "p95_ms": 504.33
+      "mean_ms_per_sentence": 156.74,
+      "p50_ms": 155.84,
+      "p95_ms": 183.43
     },
     "mobile_25": {
       "n_sentences": 25,
@@ -42,9 +42,9 @@
         "missing_word": 9,
         "correct": 271
       },
-      "mean_ms_per_sentence": 367.26,
-      "p50_ms": 368.1,
-      "p95_ms": 405.68
+      "mean_ms_per_sentence": 130.81,
+      "p50_ms": 127.44,
+      "p95_ms": 147.19
     },
     "telex_real_25": {
       "n_sentences": 25,
@@ -62,9 +62,9 @@
         "missing_word": 3,
         "correct": 47
       },
-      "mean_ms_per_sentence": 650.75,
-      "p50_ms": 677.6,
-      "p95_ms": 825.5
+      "mean_ms_per_sentence": 254.51,
+      "p50_ms": 255.45,
+      "p95_ms": 302.75
     },
     "ocr_25": {
       "n_sentences": 25,
@@ -82,9 +82,9 @@
         "missing_word": 0,
         "correct": 312
       },
-      "mean_ms_per_sentence": 185.84,
-      "p50_ms": 161.78,
-      "p95_ms": 268.04
+      "mean_ms_per_sentence": 174.71,
+      "p50_ms": 155.23,
+      "p95_ms": 247.02
     },
     "legal_real_25": {
       "n_sentences": 25,
@@ -102,9 +102,9 @@
         "missing_word": 1,
         "correct": 360
       },
-      "mean_ms_per_sentence": 225.55,
-      "p50_ms": 209.81,
-      "p95_ms": 308.49
+      "mean_ms_per_sentence": 208.55,
+      "p50_ms": 193.84,
+      "p95_ms": 280.67
     },
     "news_real_25": {
       "n_sentences": 25,
@@ -122,9 +122,9 @@
         "missing_word": 0,
         "correct": 389
       },
-      "mean_ms_per_sentence": 199.63,
-      "p50_ms": 203.59,
-      "p95_ms": 227.99
+      "mean_ms_per_sentence": 181.3,
+      "p50_ms": 181.89,
+      "p95_ms": 209.11
     },
     "__all_real__": {
       "n_sentences": 150,

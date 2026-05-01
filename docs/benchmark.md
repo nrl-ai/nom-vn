@@ -212,11 +212,11 @@ Word accuracy tổng hợp trên n=150 (KTC bootstrap 95 %):
 
 | Mô hình | Tổng | Telex | Forum | Legal | News |
 |---|---:|---:|---:|---:|---:|
-| `nrl-ai/vn-spell-correction-base` | **77.43** [73-82] | 17.38 | 59.45 | 95.09 | 96.54 |
+| `nrl-ai/vn-spell-correction-base` v0.2.29 | **79.62** [75-85] | **19.15** | **65.84** | **95.87** | **96.54** |
+| `nrl-ai/vn-spell-correction-small` v0.2.29 | 77.55 [73-83] | 16.45 | 64.64 | 93.54 | 91.34 |
 | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 77.40 [73-82] | 18.54 | 60.11 | 93.80 | 94.07 |
-| `nrl-ai/vn-spell-correction-small` | 75.92 [71-81] | 9.51 | 58.73 | 93.56 | 91.58 |
-| `nrl-ai/vn-diacritic-vit5-base` | 71.50 [66-77] | 14.89 | 49.31 | 88.05 | 95.80 |
-| `nrl-ai/vn-diacritic-small` | 70.27 [65-76] | 9.33 | 46.28 | 89.15 | 90.35 |
+| `nrl-ai/vn-diacritic-vit5-base` v0.2.29 | 71.15 [66-76] | 14.37 | 43.54 | 93.02 | 96.05 |
+| `nrl-ai/vn-diacritic-small` v0.2.28 | 70.27 [65-76] | 9.33 | 46.28 | 89.15 | 90.35 |
 | `bmd1905/vietnamese-correction-v2` | 49.21 [44-55] | 11.58 | 59.02 | 54.90 | 30.62 |
 
 Tái lập:
@@ -226,10 +226,22 @@ python benchmarks/accuracy/bench_spell_correction_real.py <model_id> \
 python scripts/summarize_ood_bench.py --format markdown --ci
 ```
 
-Hai phát hiện đáng lưu ý:
+Phát hiện chính sau v0.2.29:
 
-1. **spell-base của ta hoà Toshiiiii1 trên tổng OOD** (77.43 vs 77.40, hoàn toàn trong overlap KTC bootstrap). Synthetic 8-split show lead 3-7 pp, nhưng nhiễu thực wash đi. Re-train v0.2.29 nhắm lead OOD rõ, không chỉ synthetic.
-2. **bmd1905 sụp đổ trên OOD** (49.21 % tổng) — train trên phân phối nhiễu khác mà không expose đủ pattern strip-diacritic. Bài học cảnh báo: mô hình thắng eval synthetic của chính mình không đảm bảo thắng trên text thật.
+1. **Cả hai tier spell-correction vượt Toshiiiii1 trên OOD.** base
+   v0.2.29 dẫn +2.22 pp tổng hợp; small v0.2.29 dẫn +0.15 pp dù ít
+   tham số bằng một nửa. Synthetic 8-split show lead 3-7 pp, OOD
+   show lead +0.15 → +2.22 pp — corpus v2 + `comprehensive_noise()`
+   đã làm đúng việc khép khoảng cách cho nhiễu thực.
+2. **bmd1905 sụp đổ trên OOD** (49.21 % tổng) — train trên phân phối
+   nhiễu khác mà không expose đủ pattern strip-diacritic. Bài học
+   cảnh báo: mô hình thắng eval synthetic của chính mình không đảm
+   bảo thắng trên text thật.
+3. **Diacritic-only v0.2.29 mixed result.** Legal +4.97 pp, News +0.25
+   pp — formal-text đã cải thiện. Nhưng aggregate -0.35 pp vì
+   informal slices (forum / mobile) regress khi corpus skew về legal.
+   Cho diacritic-only formal use case (legal docs / news): chọn v0.2.29.
+   Cho informal: route qua `vn-spell-correction-base` thay vì.
 
 JSON baseline commit dưới `benchmarks/results/baseline_real_*.json`.
 
