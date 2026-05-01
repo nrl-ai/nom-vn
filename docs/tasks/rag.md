@@ -19,14 +19,21 @@ trích nguồn theo từng span.
 
 ```mermaid
 flowchart LR
-  A[Tài liệu<br/>PDF/DOCX/MD] --> B[Chunker<br/>nom.chunking]
-  B --> C[Embedder<br/>bkai-vietnamese]
-  C --> D[(Vector store<br/>SQLite)]
-  Q[Câu hỏi VN] --> E[Retriever<br/>dense + BM25 hybrid]
-  D --> E
-  E --> F[Reranker<br/>bge-v2-m3]
-  F --> G[LLM<br/>qwen3:8b via Ollama]
-  G --> H[Câu trả lời<br/>+ trích nguồn]
+    A[Tài liệu<br/>PDF · DOCX · MD] --> B[1 · Chunk<br/>nom.chunking]
+    B --> C[2 · Embed<br/>bkai-vietnamese]
+    C --> D[(3 · Vector store<br/>SQLite)]
+    Q[Câu hỏi VN] --> E[4 · Retrieve<br/>dense + BM25]
+    D --> E
+    E --> F[5 · Rerank<br/>bge-v2-m3]
+    F --> G[6 · LLM<br/>qwen3:8b · Ollama]
+    G --> OUT[Câu trả lời<br/>+ trích nguồn]
+
+    classDef stage fill:#f1ede3,stroke:#141414,stroke-width:1px,color:#141414
+    classDef io fill:#e8e3d4,stroke:#141414,stroke-width:1px,color:#141414
+    classDef out fill:#b5563a,stroke:#b5563a,color:#f1ede3
+    class B,C,D,E,F,G stage
+    class A,Q io
+    class OUT out
 ```
 
 | Stage | Module / mô hình | Đo |

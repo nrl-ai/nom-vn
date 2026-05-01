@@ -116,3 +116,4 @@ benchmarks/rag/fixtures/vn_legal_zalo_*.json
 # Mirrored at https://huggingface.co/datasets/nrl-ai/vn-rag-bench.
 benchmarks/data/vn_ocr_subset/images/
 training/onnx_export/vn-spell-correction-*-int8*/
+training/onnx_export/vn-diacritic-*-int8*/

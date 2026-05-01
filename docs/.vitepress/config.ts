@@ -21,6 +21,13 @@ export default withMermaid(
       "research/**",
       "screenshots/**",
       "**/node_modules/**",
+      // Historical planning / landscape docs from 2026 Q2. They stay
+      // in the repo as decision-record artifacts (GitHub search still
+      // finds them) but aren't built into the public site, where the
+      // per-task pages and CHANGELOG are the canonical references.
+      "training_plan_2026q2.md",
+      "sota_vn_2026q2.md",
+      "oss_landscape_2026q2.md",
     ],
 
     // Existing docs/*.md files predate this site and link out to repo
@@ -47,6 +54,10 @@ export default withMermaid(
       // Out-of-tree references to the marketing site repo (handled
       // separately).
       /www\.nrl\.ai/,
+      // Historical 2026Q2 docs are excluded from the site build but
+      // some pages still link to them (catalog / readme refs); GitHub
+      // resolves the links, the website doesn't try to.
+      /(sota_vn|oss_landscape|training_plan)_2026q2/,
     ],
 
     head: [
@@ -140,9 +151,6 @@ export default withMermaid(
             { text: "Công thức triển khai", link: "/recipes" },
             { text: "Đánh giá", link: "/benchmark" },
             { text: "Bộ dữ liệu", link: "/datasets" },
-            { text: "SOTA tiếng Việt 2026Q2", link: "/sota_vn_2026q2" },
-            { text: "Bức tranh OSS 2026Q2", link: "/oss_landscape_2026q2" },
-            { text: "Kế hoạch huấn luyện 2026Q2", link: "/training_plan_2026q2" },
           ],
         },
       ],

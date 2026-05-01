@@ -1,0 +1,145 @@
+{
+  "model_id": "training/onnx_export/vn-diacritic-vit5-base-int8",
+  "format": "onnx-int8",
+  "warmup_calls": 3,
+  "num_beams": 1,
+  "eval": {
+    "forum_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.4225,
+      "word_accuracy_ci95": [
+        0.3079,
+        0.5311
+      ],
+      "sentence_exact": 0.0,
+      "errors": {
+        "missed_diacritic": 1,
+        "wrong_tone": 6,
+        "base_char": 198,
+        "extra_word": 0,
+        "missing_word": 22,
+        "correct": 150
+      },
+      "mean_ms_per_sentence": 294.66,
+      "p50_ms": 292.51,
+      "p95_ms": 319.17
+    },
+    "mobile_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.7756,
+      "word_accuracy_ci95": [
+        0.6936,
+        0.842
+      ],
+      "sentence_exact": 0.12,
+      "errors": {
+        "missed_diacritic": 0,
+        "wrong_tone": 16,
+        "base_char": 63,
+        "extra_word": 0,
+        "missing_word": 9,
+        "correct": 273
+      },
+      "mean_ms_per_sentence": 273.0,
+      "p50_ms": 274.08,
+      "p95_ms": 328.69
+    },
+    "telex_real_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.1437,
+      "word_accuracy_ci95": [
+        0.1091,
+        0.1801
+      ],
+      "sentence_exact": 0.0,
+      "errors": {
+        "missed_diacritic": 4,
+        "wrong_tone": 19,
+        "base_char": 257,
+        "extra_word": 0,
+        "missing_word": 3,
+        "correct": 47
+      },
+      "mean_ms_per_sentence": 426.45,
+      "p50_ms": 424.78,
+      "p95_ms": 515.62
+    },
+    "ocr_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.9483,
+      "word_accuracy_ci95": [
+        0.9075,
+        0.9845
+      ],
+      "sentence_exact": 0.68,
+      "errors": {
+        "missed_diacritic": 1,
+        "wrong_tone": 6,
+        "base_char": 10,
+        "extra_word": 0,
+        "missing_word": 0,
+        "correct": 312
+      },
+      "mean_ms_per_sentence": 335.53,
+      "p50_ms": 306.45,
+      "p95_ms": 463.59
+    },
+    "legal_real_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.9225,
+      "word_accuracy_ci95": [
+        0.8895,
+        0.9519
+      ],
+      "sentence_exact": 0.36,
+      "errors": {
+        "missed_diacritic": 4,
+        "wrong_tone": 9,
+        "base_char": 17,
+        "extra_word": 0,
+        "missing_word": 1,
+        "correct": 357
+      },
+      "mean_ms_per_sentence": 374.01,
+      "p50_ms": 319.01,
+      "p95_ms": 534.89
+    },
+    "news_real_25": {
+      "n_sentences": 25,
+      "word_accuracy": 0.9556,
+      "word_accuracy_ci95": [
+        0.9352,
+        0.9747
+      ],
+      "sentence_exact": 0.48,
+      "errors": {
+        "missed_diacritic": 1,
+        "wrong_tone": 8,
+        "base_char": 9,
+        "extra_word": 0,
+        "missing_word": 0,
+        "correct": 387
+      },
+      "mean_ms_per_sentence": 857.58,
+      "p50_ms": 824.23,
+      "p95_ms": 1169.52
+    },
+    "__all_real__": {
+      "n_sentences": 150,
+      "word_accuracy": 0.7081,
+      "word_accuracy_ci95": [
+        0.6563,
+        0.7583
+      ],
+      "sentence_exact": 0.2733,
+      "errors": {
+        "missed_diacritic": 11,
+        "wrong_tone": 64,
+        "base_char": 554,
+        "extra_word": 0,
+        "missing_word": 35,
+        "correct": 1526
+      }
+    }
+  }
+}

@@ -57,28 +57,66 @@ Việt formal/business hiện đại (khớp dữ liệu training) nhưng vẫn 
 được mọi nơi. Lỗi trên văn học chủ yếu là mơ hồ danh từ riêng
 (`Hùng` ↔ `Hưng` ↔ `Hứng`) và từ register thiểu số.
 
-#### Thay thế cân bằng register — `nrl-ai/vn-diacritic-vit5-base`
+#### Đường siêu tập — `nrl-ai/vn-spell-correction-base` (mặc định khuyến nghị)
 
-Nếu khối lượng công việc nặng về **hành chính/pháp lý** hoặc **hội thoại** tiếng
-Việt, fine-tune ViT5-base in-house của chúng tôi thắng các register đó:
+Nếu input có thể có lỗi cấp ký tự (OCR, người gõ tay, social media,
+form data) — không chỉ thiếu dấu — dùng mô hình sửa chính tả thay vì:
 
-| Register | Toshiiiii1 | `nrl-ai/vn-diacritic-vit5-base` |
-|---|---:|---:|
-| Hành chính / pháp lý | 98.14 % | **99.43 %** ⭐ |
-| Kinh doanh / tin tức | **97.81 %** | 94.98 % |
-| Hội thoại | 93.94 % | **94.12 %** ⭐ |
-| Văn học cổ điển | **89.40 %** | 90.24 % |
+```python
+from nom.text.diacritic_models import HFDiacriticModel
+restorer = HFDiacriticModel(model_id="nrl-ai/vn-spell-correction-base")
+restorer("Toi yu Vit Nam, dat nuoc tuyet voi")
+# 'Tôi yêu Việt Nam, đất nước tuyệt vời'
+```
+
+Là siêu tập chặt của khôi phục dấu (cùng API), nhưng cộng thêm khả năng
+vá lỗi ký tự, OCR, gõ Telex, viết tắt teen-code. Trên OOD 150-câu thực
+tế: **79.62 %** word accuracy aggregate — vượt Toshiiiii1 (77.40 %) +2.22 pp,
+vượt diacritic-only của chúng tôi +8.47 pp.
+
+#### Tier nhanh / quantize edge
+
+| Tier | Repo | Disk | OOD aggregate | Khi nào chọn |
+|---|---|---:|---:|---|
+| Base PyTorch | `nrl-ai/vn-spell-correction-base` | 900 MB | **79.62 %** | mặc định, có GPU + PyTorch |
+| Small PyTorch | `nrl-ai/vn-spell-correction-small` | 530 MB | 77.55 % | latency quan trọng, vẫn có PyTorch |
+| **Base ONNX int8** | [`nrl-ai/vn-spell-correction-base-onnx-int8`](https://huggingface.co/nrl-ai/vn-spell-correction-base-onnx-int8) | 438 MB | 78.76 % | CPU-only server, không phụ thuộc PyTorch |
+| **Small ONNX int8** | [`nrl-ai/vn-spell-correction-small-onnx-int8`](https://huggingface.co/nrl-ai/vn-spell-correction-small-onnx-int8) | 307 MB | 77.30 % | edge / browser / mobile |
+
+```bash
+pip install optimum[onnxruntime]
+```
+
+```python
+from optimum.onnxruntime import ORTModelForSeq2SeqLM
+from transformers import AutoTokenizer
+
+tok = AutoTokenizer.from_pretrained("nrl-ai/vn-spell-correction-small-onnx-int8")
+model = ORTModelForSeq2SeqLM.from_pretrained("nrl-ai/vn-spell-correction-small-onnx-int8")
+```
+
+Cả 4 tier đều thắng Toshiiiii1 (77.40 %) trên OOD aggregate.
+
+#### Diacritic-only — `nrl-ai/vn-diacritic-vit5-base`
+
+Nếu input thuần ASCII đã strip dấu (legal docs / form / pipe ASCII cũ),
+mô hình diacritic-only nhỏ gọn hơn:
+
+| Register (in-distribution) | Word acc |
+|---|---:|
+| Hành chính / pháp lý (UDHR) | **99.52 %** |
+| Kinh doanh / tin tức | 96.14 % |
+| Hội thoại | 94.16 % |
+| Văn học cổ điển | 89.97 % |
 
 ```python
 restorer = HFDiacriticModel(model_id="nrl-ai/vn-diacritic-vit5-base")
 ```
 
-Cùng license Apache-2.0, cùng checkpoint safetensors ~900 MB, cùng
-~150 ms/câu trên 3090. Train trên 500K cặp Wikipedia, 5 epoch cosine
-LR. Chọn Toshiiiii1 cho corpus thiên business; chọn cái này cho
-doc pháp lý, mẫu chính phủ, hoặc dữ liệu chat. Xem
-[`docs/benchmark.md`](benchmark.md#vn-diacritic-vit5-base) cho eval
-và config training đầy đủ.
+OOD aggregate 71.15 % — kém spell-correction-base 8.47 pp trên text thực
+tế hỗn hợp, nhưng nhanh + nhẹ hơn cho input thuần strip-dấu. Xem
+[`/tasks/diacritic-restoration`](/tasks/diacritic-restoration) cho phân
+tích trade-off đầy đủ.
 
 #### Inference batched cho throughput (speedup 7.6× trên 3080)
 

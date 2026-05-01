@@ -1,6 +1,16 @@
 # Khuyến nghị training / fine-tuning cho `nom-vn`
 
-*Cập nhật lần cuối: 2026-04-26.*
+*Cập nhật lần cuối: 2026-04-26 (đoạn TL;DR cập nhật 2026-05-01 sau v0.2.29).*
+
+> **Cập nhật 2026-05-01:** Khuyến nghị "adopt Toshiiiii1" trong tài
+> liệu này phản ánh trạng thái **2026-04-26**. Sau v0.2.29 retraining
+> trên corpus v2 (Wiki+news+legal + comprehensive_noise), `nrl-ai/vn-spell-correction-base`
+> đạt 79.62 % OOD aggregate, **vượt Toshiiiii1** (77.40 %) trên cùng
+> 150-câu eval thực tế. Mặc định `HFDiacriticModel` đã được flip sang
+> `nrl-ai/vn-diacritic-vit5-base`. Phần dưới giữ nguyên dạng lịch sử
+> để theo dõi quyết định; xem [`/tasks/spell-correction`](/tasks/spell-correction)
+> và [`/tasks/diacritic-restoration`](/tasks/diacritic-restoration)
+> cho trạng thái hiện tại.
 
 Tài liệu này khép lại mảng việc "cải tiến pipeline hiện tại tới
 chính xác tối đa trước, sau đó mới đề xuất tuning" từ đợt v0.2.5 →
@@ -17,7 +27,7 @@ là quá sớm.
 
 | Component | Best hiện tại | Gap so với lý tưởng | Khuyến nghị | Ước tính chi phí |
 |---|---|---|---|---|
-| Khôi phục dấu | **Toshiiiii1 T5 200M 97.81% (có sẵn) ⭐** | không (thắng cloud +2.44 pp) | **Adopt Toshiiiii1/Vietnamese_diacritics_restoration_5th.** Khuyến nghị distil RÚT 2026-04-26. | $0 |
+| Khôi phục dấu / sửa chính tả | **`nrl-ai/vn-spell-correction-base` v0.2.29** (ours, ViT5 220M) — 79.62 % OOD aggregate ⭐ | đã thắng public landscape | **Đã ship.** Vượt Toshiiiii1 +2.22 pp tổng hợp OOD; +6.39 pp trên forum slang. v0.2.29 retraining trên corpus v2 đa register hoàn tất. | đã trả |
 | OCR (in sạch) | Tesseract `vie` 5.5% CER | không | **Không làm gì.** Tesseract nhanh hơn VLM 10× và chính xác hơn 4×. | $0 |
 | OCR (scan / nhiễu / chữ viết tay) | chưa đo in-house | có thể lớn | **Fine-tune VietOCR trên corpus scan thực** khi gỡ chặn | ~$80–150 (H100, 24h) |
 | Tách từ | underthesea CRF F1 95.7% | không | **Không làm gì.** CRF đã ở trần cho corpus này. | $0 |
@@ -34,7 +44,22 @@ chưa fix package Python 3.13).
 
 ## Phân tích từng component
 
-### 1. Khôi phục dấu → **adopt `Toshiiiii1/Vietnamese_diacritics_restoration_5th`** (RÚT khuyến nghị distil, 2026-04-26)
+### 1. Khôi phục dấu / sửa chính tả → **`nrl-ai/vn-spell-correction-base` v0.2.29 (đã ship, vượt Toshiiiii1)**
+
+> **Cập nhật 2026-05-01:** Phần dưới giữ nguyên dạng lịch sử quyết định
+> 2026-04-26 (lúc đó adopt `Toshiiiii1` là đúng). Sau v0.2.29 retraining
+> trên corpus v2 đa register (Wiki + news + Zalo Legal), chúng tôi đã
+> ship `nrl-ai/vn-spell-correction-base` đạt **79.62 % OOD** trên 150-câu
+> hand-curate — vượt Toshiiiii1 (77.40 %) +2.22 pp. Cũng ship 4 tier
+> khác: small (77.55 %), base ONNX int8 (78.76 %, 438 MB), small ONNX
+> int8 (77.30 %, 307 MB). Cả bốn đều thắng Toshiiiii1. Xem
+> [`/tasks/spell-correction`](/tasks/spell-correction).
+>
+> Section dưới đây không còn là khuyến nghị — đó là context cho lý do
+> tại sao quyết định distil ban đầu bị rút và tại sao chúng tôi cuối
+> cùng quay lại train sau khi corpus + noise generator được nâng cấp.
+
+### 1. (Lịch sử) Khôi phục dấu → adopt `Toshiiiii1/Vietnamese_diacritics_restoration_5th` (RÚT khuyến nghị distil, 2026-04-26)
 
 **Phiên bản trước của section này khuyến nghị distil một mô hình
 diacritic VN sub-100 M.** Sai. Chúng tôi chưa bench các mô hình
