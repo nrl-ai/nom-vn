@@ -1,0 +1,38 @@
+{
+  "n_samples": 200,
+  "seed": 42,
+  "guards": {
+    "num_beams": 4,
+    "length_penalty": 1.0,
+    "no_repeat_ngram_size": 3,
+    "min_vn_chars": 2,
+    "min_alpha_ratio": 0.4
+  },
+  "results": {
+    "raw_only": {
+      "cer_mean": 0.6934,
+      "wer_mean": 0.9895,
+      "n_gate_skipped": 0
+    },
+    "nrl-ai/vn-spell-correction-base (greedy)": {
+      "cer_mean": 0.6998,
+      "wer_mean": 0.9856,
+      "n_gate_skipped": 0
+    },
+    "nrl-ai/vn-spell-correction-base (guarded)": {
+      "cer_mean": 0.704,
+      "wer_mean": 0.9919,
+      "n_gate_skipped": 25
+    },
+    "training/ocr_correction/checkpoints/vit5-ocr-correct/final (greedy)": {
+      "cer_mean": 0.818,
+      "wer_mean": 1.0126,
+      "n_gate_skipped": 0
+    },
+    "training/ocr_correction/checkpoints/vit5-ocr-correct/final (guarded)": {
+      "cer_mean": 0.7832,
+      "wer_mean": 0.9891,
+      "n_gate_skipped": 24
+    }
+  }
+}

@@ -102,7 +102,7 @@ corrupt thành garbage. Literature
 WER 27 % → 18 % khi train trực tiếp trên cặp `(Tesseract, GT)` —
 nhưng giả định baseline ~5-30 % CER (printed scan).
 
-### Negative result đã đo: handwriting (CER ~70 %) (2026-05-01)
+### Phân tích sâu thất bại — vì sao post-correct không cứu được handwriting (2026-05-01)
 
 Đã thử fine-tune `nrl-ai/vn-spell-correction-base` trên 9,626 cặp
 `(Tesseract output, GT)` từ
@@ -135,24 +135,104 @@ over-correction" mà
 [Kanerva et al. 2025](https://arxiv.org/html/2502.01205v1) đã báo
 cáo trên Finnish (LLM post-OCR -19 % đến -76 % CER, *tệ hơn* baseline).
 
-**Bài học:** post-correct không cứu được OCR tệ. Đúng next step là
-fix OCR engine (train TrOCR cho VN handwriting, hoặc dùng PaddleOCR
-PP-OCRv5 với model handwriting), không phải fine-tune post-correct
-trên data corrupt 70 %.
+#### Quantified failure modes (analyze_failure.py)
 
-Reproduce (verify negative-result):
+Diagnostic script `training/ocr_correction/analyze_failure.py` đã phân
+tích 200 ảnh test:
+
+| Chỉ báo | Off-the-shelf base | Fine-tuned ocr-correct |
+|---|---:|---:|
+| **% từ trong post-correct KHÔNG có trong raw OCR** (chỉ số hallucination) | 39.5 % | **91.3 %** |
+| Độ dài trung bình output (ký tự, gold = 67) | 46.4 | 39.3 |
+| Số output trùng lặp (mode collapse) | 0 | 2 (`. `, ...) |
+| Per-bucket Δ CER (50-70 % CER bucket, n=105) | +1.45 pp | **+15.58 pp** |
+| Per-bucket Δ CER (70 %+ bucket, n=88) | -0.66 pp | **+7.70 pp** |
+
+**91 % các từ trong output fine-tune không tồn tại trong input gốc**
+— mô hình đang sinh tự do thay vì sửa.
+
+#### Inference-time guards giảm regression nhưng không cứu được
+
+Thử thêm guardrails (beam search 4, no-repeat n-gram=3, length-conditioned
+generation, confidence gate dựa trên ký tự diacritic VN):
+
+| Pipeline | CER | WER | Δ vs raw |
+|---|---:|---:|---:|
+| Tesseract raw only | 69.34 % | 98.95 % | baseline |
+| + spell-correction-base (greedy) | 69.98 % | 98.56 % | +0.64 / -0.40 |
+| + spell-correction-base (guarded) | 70.40 % | 99.19 % | +1.06 / +0.24 |
+| + fine-tuned ocr-correct (greedy) | 81.80 % | 101.26 % | +12.46 / +2.31 |
+| + fine-tuned ocr-correct (guarded) | 78.32 % | 98.91 % | **+8.98** / **-0.04** |
+
+Guards giảm regression của fine-tune từ +12.46 → +8.98 pp CER (cải thiện
+3.5 pp) nhưng không đảo ngược được kết luận: **post-correct trên
+Tesseract handwriting không thể net-positive**.
+
+#### Root cause
+
+**OCR baseline 70 % CER là quá xấu để post-correct cứu được.** Khi
+7/10 ký tự sai, không còn đủ tín hiệu cho mô hình recover nội dung
+gốc. Kết quả tốt nhất là "không làm gì" (raw_only) — bất kỳ post-correct
+nào đều thêm risk hallucination.
+
+Literature tham khảo:
+
+- [Tran et al. 2024](https://arxiv.org/html/2410.13305) báo cáo
+  WER 27 % → 18 % khi train trực tiếp trên cặp `(Tesseract, GT)` —
+  nhưng baseline của họ là **printed scan ~30 % CER**, không phải
+  handwriting 70 %.
+- [Kanerva et al. 2025](https://arxiv.org/html/2502.01205v1) báo cáo
+  LLM post-OCR trên Finnish: CER -19 % đến -76 % (tệ hơn baseline)
+  trên một số corpus — chính xác failure mode chúng tôi gặp.
+
+### Future work — đường đi để OCR thật sự cải thiện
+
+Xếp theo ROI giảm dần:
+
+1. **Replace OCR engine với một mô hình handwriting-aware**
+   (không phải post-correct).
+   - **PaddleOCR PP-OCRv5** với VN handwriting model: literature báo
+     cáo CER 15-30 % cho VN handwriting, đủ thấp để post-correct
+     có chance.
+   - **VietOCR transformer** (cộng đồng pbcquoc/vietocr): VN-specific,
+     license Apache 2.0, format `.pth` (PyTorch state dict).
+   - **TrOCR fine-tune trên brianhuster** (start from
+     `microsoft/trocr-base-handwritten`, replace tokenizer với
+     BARTpho-syllable, train ~8 h GPU). Likely best result.
+2. **Gate post-correct với confidence proxy** — chỉ áp dụng khi raw
+   OCR đạt baseline 5-30 % CER (printed text). Đã có hint từ
+   `_confidence_gate_passes()` trong `bench_with_guards.py` —
+   chỉ cần thêm một phán đoán "raw đủ tốt để correct" để skip cases
+   gibberish.
+3. **Train OCR-correction trên printed-VN corpus thay vì handwriting**
+   — generate cặp `(Tesseract output trên ảnh print synthetic, GT)`
+   với CER 5-15 %. Đây là band post-correct hoạt động được.
+4. **Switch base sang ByT5 byte-level** thay vì SentencePiece — robust
+   hơn với corruption ký tự cấp byte (literature confirms).
+5. **Add copy mechanism** vào architecture (Pointer-Generator) — cho
+   phép model copy chữ đúng từ input thay vì phải regenerate. Yêu
+   cầu retrain từ đầu.
+
+#### Decision sau phân tích
+
+- **KHÔNG ship `vit5-ocr-correct` model.** Negative-result kể cả với
+  guards.
+- **KHÔNG enable post-correct mặc định trong `nom.doc.ocr`** — nó
+  không cải thiện trên handwriting, neutral trên printed in sạch.
+- **Document opt-in path** với confidence gate cho user có printed
+  scan với baseline ~5-30 % CER (band post-correct chứng minh hoạt
+  động được trong literature).
+- **Pivot ưu tiên** sang fix OCR engine — train TrOCR-VN cho
+  handwriting hoặc thử PaddleOCR PP-OCRv5 với handwriting model.
+  Đây là sprint riêng, sẽ có corpus + bench harness trong repo
+  để re-evaluate nhanh khi engine khác có sẵn.
+
+Reproduce postmortem analysis:
 
 ```bash
-.venv/bin/python -m huggingface_hub.commands.huggingface_cli download \
-    brianhuster/VietnameseOCRdataset dataset_small.zip --repo-type dataset \
-    --local-dir /tmp/brianhuster_ocr
-unzip /tmp/brianhuster_ocr/dataset_small.zip -d /tmp/brianhuster_ocr/
-
-python training/ocr_correction/prep_data.py --engines tesseract,easyocr
-TRAIN_HOST=mybox ./training/ocr_correction/launch_remote_train.sh
-python benchmarks/accuracy/bench_ocr_post_correct_real.py \
-    --corrector training/ocr_correction/checkpoints/vit5-ocr-correct/final \
-    --json benchmarks/results/baseline_ocr_post_correct_real_finetuned.json
+python training/ocr_correction/analyze_failure.py --n-samples 200
+python training/ocr_correction/bench_with_guards.py \
+    --json benchmarks/results/baseline_ocr_post_correct_real_guarded.json
 ```
 
 **Quyết định:** không bật mặc định (gain không đáng phức tạp), nhưng
