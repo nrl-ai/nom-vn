@@ -107,15 +107,15 @@ hand-curate mà mẫu nhiễu lấy từ nguồn lỗi VN thực tế, KHÔNG ph
 `legal_real_25` và `news_real_25`) để có gradient ổn định hơn. Mọi
 con số đi kèm khoảng tin cậy bootstrap 95 % (n=1000 resample).
 
-| Slice | Nguồn | **base v0.2.29** | small v0.2.29 | Toshiiiii1 | bmd1905 |
-|---|---|---:|---:|---:|---:|
-| `forum_25` | Forum / teen-code | **65.84** | 64.64 | 60.11 | 59.02 |
-| `mobile_25` | Autocorrect điện thoại | 95.84 | 95.29 | **96.95** | 88.09 |
-| `telex_real_25` | Telex/VNI thực | **19.15** | 16.45 | 18.54 | 11.58 |
-| `ocr_25` | Tesseract / EasyOCR | **97.57** | 94.19 | 94.22 | 47.42 |
-| `legal_real_25` | Văn bản pháp lý thật | **95.87** | 93.54 | 93.80 | 54.90 |
-| `news_real_25` | Tiêu đề + tin tức | **96.54** | 91.34 | 94.07 | 30.62 |
-| **Tổng hợp** | n=150 | **79.62** | **77.55** | 77.40 | 49.21 |
+| Slice | Nguồn | **ours base v0.2.29** | ours small v0.2.29 | Toshiiiii1 | qthuan ViT5 | chamdent | bmd1905 | iAmHieu |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| `forum_25` | Forum / teen-code | **65.84** | 64.64 | 60.11 | 58.38 | 62.19 | 59.02 | 57.66 |
+| `mobile_25` | Autocorrect điện thoại | 95.84 | 95.29 | **96.95** | 90.28 | 86.15 | 88.09 | 84.72 |
+| `telex_real_25` | Telex/VNI thực | **19.15** | 16.45 | 18.54 | 15.65 | 17.14 | 11.58 | 13.58 |
+| `ocr_25` | Tesseract / EasyOCR | **97.57** | 94.19 | 94.22 | 85.41 | 44.17 | 47.42 | 34.87 |
+| `legal_real_25` | Văn bản pháp lý | **95.87** | 93.54 | 93.80 | 88.14 | 61.76 | 54.90 | 50.68 |
+| `news_real_25` | Tiêu đề + tin tức | **96.54** | 91.34 | 94.07 | 87.65 | 34.81 | 30.62 | 27.35 |
+| **Tổng hợp** | n=150 | **79.62** | **77.55** | 77.40 | 72.42 | 51.69 | 49.21 | 45.57 |
 
 Tất cả số là word accuracy (%). Khoảng tin cậy bootstrap 95 % (±~5 pp
 trên tổng hợp 150 câu) là rộng — base của chúng tôi và Toshiiiii1

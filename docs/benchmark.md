@@ -212,12 +212,15 @@ Word accuracy tổng hợp trên n=150 (KTC bootstrap 95 %):
 
 | Mô hình | Tổng | Telex | Forum | Legal | News |
 |---|---:|---:|---:|---:|---:|
-| `nrl-ai/vn-spell-correction-base` v0.2.29 | **79.62** [75-85] | **19.15** | **65.84** | **95.87** | **96.54** |
+| **`nrl-ai/vn-spell-correction-base`** v0.2.29 | **79.62** [75-85] | **19.15** | **65.84** | **95.87** | **96.54** |
 | `nrl-ai/vn-spell-correction-small` v0.2.29 | 77.55 [73-83] | 16.45 | 64.64 | 93.54 | 91.34 |
 | `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 77.40 [73-82] | 18.54 | 60.11 | 93.80 | 94.07 |
+| `qthuan2604/ViT5_Restore_Diacritics_Vietnamese` | 72.42 [68-77] | 15.65 | 58.38 | 88.14 | 87.65 |
 | `nrl-ai/vn-diacritic-vit5-base` v0.2.29 | 71.15 [66-76] | 14.37 | 43.54 | 93.02 | 96.05 |
 | `nrl-ai/vn-diacritic-small` v0.2.28 | 70.27 [65-76] | 9.33 | 46.28 | 89.15 | 90.35 |
+| `chamdentimem/ViT5_Vietnamese_Correction` | 51.69 [46-57] | 17.14 | 62.19 | 61.76 | 34.81 |
 | `bmd1905/vietnamese-correction-v2` | 49.21 [44-55] | 11.58 | 59.02 | 54.90 | 30.62 |
+| `iAmHieu2012/vit5-vietnamese-spelling-correction` | 45.57 [39-52] | 13.58 | 57.66 | 50.68 | 27.35 |
 
 Tái lập:
 ```bash
