@@ -79,17 +79,11 @@ JSON baseline: `benchmarks/results/baseline_segmentation_*.json`.
 ## Tái lập
 
 ```bash
-# nom rule path
-python benchmarks/accuracy/bench_segmentation.py \
-    --backend nom \
-    --json benchmarks/results/baseline_segmentation_nom.json
-
-# underthesea CRF
-pip install "nom-vn[nlp]"
-python benchmarks/accuracy/bench_segmentation.py \
-    --backend underthesea \
-    --json benchmarks/results/baseline_segmentation_underthesea.json
+# Benchmark cả hai backend trên UD-VTB test
+python benchmarks/accuracy/bench_segment.py
 ```
+
+JSON output: `benchmarks/results/baseline_segment_ud_vtb_test.json`.
 
 ## Tham khảo
 
