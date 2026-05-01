@@ -326,6 +326,35 @@ version, same code snippets — the prose can be translated freely
 provided the structure matches). Drifting them is a regression in
 the user-facing surface for a major user segment.
 
+## Language by surface — English vs Vietnamese
+
+The project ships content to two distinct audiences and the language
+choice is fixed per surface, not per author preference:
+
+| Surface | Language | Why |
+|---|---|---|
+| **Website** (`docs/**/*.md` rendered at `nom-vn.nrl.ai`) | **Vietnamese** | The website's primary audience is Vietnamese developers and end users. The website is the project's public face. |
+| `README.vi.md` | Vietnamese | Peer to `README.md` for the VN audience reading on GitHub. |
+| **HuggingFace content** (model cards, dataset cards, repo descriptions on `nrl-ai/*`) | **English** | HF Hub's audience is the global ML community; English is the lingua franca. Model card discoverability and citation in academic work both depend on English. |
+| **`README.md`** (repo root) | **English** | First thing international contributors see on GitHub. Pairs with the Vietnamese `README.vi.md`. |
+| **`CHANGELOG.md`** | **English** | Read by package consumers via PyPI; English is conventional for release notes. |
+| **Commit messages, PR titles, PR descriptions** | **English** | Read across the team and by external contributors browsing git history. |
+| **Code comments and docstrings** in `src/` | **English** | Tooling, IDE integration, and Python ecosystem convention. |
+| **Issue / PR comments** | Either, follow the thread's language | Mirror the questioner. |
+| **Internal `docs/research/`** | Either; default English for academic prose | Research notes are typically academic and cite English-language sources. |
+| **Training scripts under `training/`** (docstrings, comments, run-launcher echoes) | **English** | Read by ML engineers worldwide. |
+
+Hard rule: **a website page (any file under `docs/` that is built into
+the VitePress site) is Vietnamese**. If a deep technical doc cannot be
+translated immediately, leave a short banner at the top noting the
+translation is pending — but the canonical version is still
+Vietnamese, not English.
+
+Hard rule: **HuggingFace cards are English.** When publishing to
+`nrl-ai/*` on the Hub, the model / dataset card body is English.
+Citation block (BibTeX, author names) is English. Quoted Vietnamese
+example sentences inside the card are fine and welcome.
+
 ## Fast / small / nano tiers train on the SAME corpus as the base
 
 When we train a smaller variant of a model (`-small`, `-nano`,
