@@ -1,0 +1,16 @@
+{
+  "n_samples": 200,
+  "seed": 42,
+  "engines": [
+    "rapidocr"
+  ],
+  "results": {
+    "rapidocr": {
+      "cer_mean": 0.972,
+      "cer_p50": 1.0,
+      "wer_mean": 0.9992,
+      "latency_ms_mean": 122.9,
+      "latency_ms_p50": 8.6
+    }
+  }
+}

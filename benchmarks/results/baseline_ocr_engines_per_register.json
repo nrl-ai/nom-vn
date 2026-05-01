@@ -1,29 +1,39 @@
 {
   "n_samples": 20,
-  "comment": "Side-by-side per register on synthetic_ocr_vi + brianhuster handwriting",
+  "comment": "Side-by-side per register on synthetic_ocr_vi + brianhuster handwriting. PaddleOCR + RapidOCR added 2026-04-30 in response to user's 'check PaddleOCR again' ask: confirmed both share the generic latin_PP-OCRv5_mobile_rec recognizer, which strips all VN diacritics on every register.",
   "engines_per_register": {
     "printed_clean_n20": {
       "tesseract_cer": 0.0,
-      "vietocr_cer": 0.0141
+      "vietocr_cer": 0.0141,
+      "paddleocr_cer": 0.1163,
+      "rapidocr_cer": 0.6397
     },
     "printed_noisy_n20": {
       "tesseract_cer": 0.007,
-      "vietocr_cer": 0.0337
+      "vietocr_cer": 0.0337,
+      "paddleocr_cer": 0.1309,
+      "rapidocr_cer": 0.7783
     },
     "printed_hard_n30": {
       "tesseract_cer": 0.3034,
-      "vietocr_cer": 0.29
+      "vietocr_cer": 0.29,
+      "paddleocr_cer": 0.734,
+      "rapidocr_cer": 1.0
     },
     "handwriting_brianhuster_n200": {
       "tesseract_cer": 0.6934,
       "vietocr_cer": 0.3182,
       "easyocr_cer": 0.7152,
+      "paddleocr_cer": 0.5943,
+      "rapidocr_cer": 0.972,
       "trocr_handwritten_cer": 0.7589
     }
   },
   "recommendation": {
-    "printed_clean_or_noisy": "tesseract — 0.00 / 0.70 % CER vs vietocr 1.41 / 3.37 %",
-    "printed_hard_scan": "vietocr (slight edge) — 29.00 % vs tesseract 30.34 %",
-    "handwriting_register": "vietocr — 31.82 % CER, 37.5 pp absolute reduction vs tesseract 69.34 %"
-  }
+    "printed_clean_or_noisy": "tesseract — 0.00 / 0.70 % CER vs vietocr 1.41 / 3.37 %; PaddleOCR distant 3rd at 11.63 / 13.09 %; RapidOCR unusable (drops diacritics)",
+    "printed_hard_scan": "vietocr (slight edge) — 29.00 % vs tesseract 30.34 %; PaddleOCR collapses at 73.40 %",
+    "handwriting_register": "vietocr — 31.82 % CER, 37.5 pp absolute reduction vs tesseract 69.34 %; PaddleOCR 3rd at 59.43 %; RapidOCR effectively non-functional on handwriting line crops (97.20 %)"
+  },
+  "paddleocr_paddleocr_v5_note": "PP-OCRv5 ships no VN-specific recognizer. lang='vi' loads latin_PP-OCRv5_mobile_rec, a generic Latin model that recognizes the alphabet but strips VN tone marks. This is a structural limit, not a config issue — verified by testing default pipeline, doc-prep skipped, standalone TextRecognition, and server-rec model.",
+  "rapidocr_note": "RapidOCR is the ONNX-runtime port of PaddleOCR. It uses the same recognizer family and exhibits the same diacritic stripping. Docling's ocr_engine='rapidocr' option is therefore not viable for VN."
 }

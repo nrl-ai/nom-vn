@@ -11,6 +11,7 @@ Engines tested (lazy-imported; missing ones skip cleanly):
   - easyocr (Vietnamese)
   - vietocr (vgg_transformer, pbcquoc/vietocr Apache 2.0)
   - paddleocr PP-OCRv5        — if installed
+  - rapidocr (ONNX-runtime port of PaddleOCR, Apache 2.0)
   - microsoft/trocr-base-handwritten — English handwriting
                                        reference baseline
 
@@ -102,6 +103,24 @@ def _build_engine(name: str):
                 return ""
             texts = res[0].get("rec_texts", []) if isinstance(res[0], dict) else []
             return " ".join(t for t in texts if t)
+
+        return run
+
+    if name == "rapidocr":
+        try:
+            from rapidocr_onnxruntime import RapidOCR
+        except ImportError:
+            return None
+        # ONNX-runtime port of PaddleOCR. Apache 2.0, no VN-specific
+        # recognizer either — uses the same generic Latin recognizer.
+        # Docling delegates to this engine when ocr_engine='rapidocr'.
+        reader = RapidOCR()
+
+        def run(p: Path) -> str:
+            res, _ = reader(str(p))
+            if not res:
+                return ""
+            return " ".join(t[1] for t in res if len(t) >= 2)
 
         return run
 
