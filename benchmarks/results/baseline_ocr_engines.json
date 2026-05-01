@@ -1,0 +1,40 @@
+{
+  "n_samples": 200,
+  "seed": 42,
+  "engines": [
+    "tesseract",
+    "easyocr",
+    "vietocr",
+    "trocr-handwritten"
+  ],
+  "results": {
+    "tesseract": {
+      "cer_mean": 0.6934,
+      "cer_p50": 0.6857,
+      "wer_mean": 0.9895,
+      "latency_ms_mean": 84.4,
+      "latency_ms_p50": 80.6
+    },
+    "easyocr": {
+      "cer_mean": 0.7152,
+      "cer_p50": 0.7212,
+      "wer_mean": 1.0024,
+      "latency_ms_mean": 61.1,
+      "latency_ms_p50": 57.5
+    },
+    "vietocr": {
+      "cer_mean": 0.3182,
+      "cer_p50": 0.2987,
+      "wer_mean": 0.6683,
+      "latency_ms_mean": 246.3,
+      "latency_ms_p50": 239.6
+    },
+    "trocr-handwritten": {
+      "cer_mean": 0.7589,
+      "cer_p50": 0.7432,
+      "wer_mean": 1.0927,
+      "latency_ms_mean": 247.7,
+      "latency_ms_p50": 250.5
+    }
+  }
+}
