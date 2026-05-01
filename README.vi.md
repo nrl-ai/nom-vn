@@ -58,7 +58,7 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 
 - *Cần khôi phục dấu tiếng Việt?* Cài `nom-vn[diacritic-hf]` và dùng mặc định — `nrl-ai/vn-diacritic-vit5-base`. Thắng trên trang trọng + hội thoại + kinh doanh + văn học so với public landscape; bản `-small` đánh đổi 4 pp lấy ~3× tốc độ.
 - *Cần sửa chính tả (lỗi typing + dấu + OCR trong một bước)?* Cùng cách cài, đổi model id sang `nrl-ai/vn-spell-correction-base`. Vượt `bmd1905/vietnamese-correction-v2` 11-25 pp.
-- *Quan tâm độ chính xác thực tế (không chỉ synthetic)?* Đọc [bench ngoài-phân-phối OOD](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md#bench-thực-tế-ngoài-phân-phối-mở-rộng-đo-ngày-2026-04-30) — 150 câu nhiễu tiếng Việt thật được hand-curate, kèm bootstrap 95 % CI. Tóm tắt: số 98.58 % synthetic rớt xuống 77.43 % OOD; chúng tôi ngang `Toshiiiii1` trên tổng hợp (77.40 %). v0.2.29 retrain trên corpus v2 đa register đang chạy để khép khoảng cách OOD.
+- *Quan tâm độ chính xác thực tế (không chỉ synthetic)?* Đọc [bench ngoài-phân-phối OOD](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) — 150 câu nhiễu tiếng Việt thật được hand-curate trên 6 register, kèm bootstrap 95 % CI. Tóm tắt (v0.2.29): synthetic 98.32 % light avg; OOD tổng hợp **79.62 %** — vượt `Toshiiiii1` (77.40 %) và `bmd1905` (49.21 %).
 - *Cần RAG local trên tài liệu tiếng Việt?* Cài `nom-vn[chat,embeddings,nlp]`, đổi embedder mặc định sang `BKaiEmbedder`. +41 pp R@1.
 - *Cần OCR ảnh quét tiếng Việt?* Tesseract `vie` là lựa chọn đúng. Đừng dùng VLM cho OCR — VLM thường ảo giác trên crop dòng hẹp.
 - *Cần trích văn bản PDF không vướng giấy phép?* Dùng `pypdfium2` (đã ship sẵn). Tránh PyMuPDF — AGPL của nó kéo mọi thứ downstream thành AGPL.

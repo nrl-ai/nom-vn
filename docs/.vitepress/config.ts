@@ -78,6 +78,21 @@ export default withMermaid(
       nav: [
         { text: "Bắt đầu", link: "/vi/quickstart" },
         { text: "Tài liệu", link: "/vi/" },
+        {
+          text: "Tác vụ",
+          items: [
+            { text: "Tổng quan", link: "/tasks/" },
+            { text: "Khôi phục dấu", link: "/tasks/diacritic-restoration" },
+            { text: "Sửa chính tả", link: "/tasks/spell-correction" },
+            { text: "Chuẩn hoá văn bản", link: "/tasks/text-normalization" },
+            { text: "Tách từ", link: "/tasks/word-segmentation" },
+            { text: "OCR", link: "/tasks/ocr" },
+            { text: "Trích văn bản PDF", link: "/tasks/pdf-extraction" },
+            { text: "Embedding", link: "/tasks/embedding" },
+            { text: "Reranker", link: "/tasks/reranker" },
+            { text: "RAG end-to-end", link: "/tasks/rag" },
+          ],
+        },
         { text: "Mô hình", link: "/vi/models" },
         { text: "Đánh giá", link: "/benchmark" },
         {
@@ -105,8 +120,16 @@ export default withMermaid(
         {
           text: "Tác vụ",
           items: [
+            { text: "Tổng quan", link: "/tasks/" },
             { text: "Khôi phục dấu", link: "/tasks/diacritic-restoration" },
             { text: "Sửa chính tả", link: "/tasks/spell-correction" },
+            { text: "Chuẩn hoá văn bản", link: "/tasks/text-normalization" },
+            { text: "Tách từ", link: "/tasks/word-segmentation" },
+            { text: "OCR", link: "/tasks/ocr" },
+            { text: "Trích văn bản PDF", link: "/tasks/pdf-extraction" },
+            { text: "Embedding", link: "/tasks/embedding" },
+            { text: "Reranker", link: "/tasks/reranker" },
+            { text: "RAG end-to-end", link: "/tasks/rag" },
           ],
         },
         {

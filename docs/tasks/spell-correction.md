@@ -75,23 +75,23 @@ cùng mix lớn).
 
 | Mô hình HF | Giấy phép | Base | Tham số | Disk | Trạng thái |
 |---|---|---|---:|---:|---|
-| [`nrl-ai/vn-spell-correction-base`](https://huggingface.co/nrl-ai/vn-spell-correction-base) | Apache-2.0 | ViT5-base (MIT) | 220 M | 900 MB | đã ship (v0.2.28) |
-| `nrl-ai/vn-spell-correction-small` | Apache-2.0 | BARTpho-syllable (MIT) | 115 M | 530 MB | đang huấn luyện |
+| [`nrl-ai/vn-spell-correction-base`](https://huggingface.co/nrl-ai/vn-spell-correction-base) | Apache-2.0 | ViT5-base (MIT) | 220 M | 900 MB | đã ship (v0.2.29) |
+| [`nrl-ai/vn-spell-correction-small`](https://huggingface.co/nrl-ai/vn-spell-correction-small) | Apache-2.0 | BARTpho-syllable (MIT) | 115 M | 530 MB | đã ship (v0.2.29) |
 
-### v0.2.28 base — đo trên lưới 8 split
+### v0.2.29 base — đo trên lưới 8 split (synthetic)
 
 | Split | Word acc | Sentence exact | ms/câu |
 |---|---:|---:|---:|
-| business_55_light | **98.58 %** | 79.55 % | 147 |
-| business_55_heavy | **98.33 %** | 81.82 % | 145 |
-| formal_72_light | **99.80 %** | 95.38 % | 288 |
-| formal_72_heavy | **99.19 %** | 84.72 % | 274 |
-| conversational_300_light | **97.90 %** | 83.24 % | 107 |
-| conversational_300_heavy | **96.18 %** | 76.31 % | 103 |
-| literary_800_light | **98.02 %** | 77.47 % | 171 |
-| literary_800_heavy | **95.71 %** | 61.04 % | 160 |
+| business_55_light | **98.74 %** | 84.09 % | 152 |
+| business_55_heavy | **98.97 %** | 85.45 % | 146 |
+| formal_72_light | **99.75 %** | 93.85 % | 290 |
+| formal_72_heavy | **99.05 %** | 83.33 % | 273 |
+| conversational_300_light | **97.68 %** | 81.56 % | 106 |
+| conversational_300_heavy | **95.54 %** | 73.52 % | 103 |
+| literary_800_light | **97.11 %** | 73.03 % | 171 |
+| literary_800_heavy | **94.56 %** | 56.85 % | 160 |
 
-**Light avg: 98.58 % · Heavy avg: 97.35 %** (cổng: light ≥ 92, heavy ≥ 80 — qua với khoảng cách rộng).
+**Light avg: 98.32 % · Heavy avg: 97.03 %** (cổng: light ≥ 92, heavy ≥ 80 — qua với khoảng cách rộng). Nhỏ hơn v0.2.28 ~0.3 pp synthetic, nhưng OOD tăng +2.19 pp — trade-off đúng hướng.
 
 > **Lưu ý trung thực: các con số này là trong-phân-phối.** Lưới đánh
 > giá áp cùng các preset `nom.text.noise` lên văn bản sạch mà mô hình
@@ -155,13 +155,13 @@ trong corpus v2 nhắm đến.
    lỗi cấp ký tự, không gặp đủ pattern strip-dấu — nên nó để lại 459
    missed_diacritic của 1058 lỗi. Đây là cảnh báo: chỉ vì một mô hình
    thắng trên synthetic của chính họ không có nghĩa thắng trên thực tế.
-3. **Khoảng cách synthetic vs OOD vẫn lớn** — base chúng tôi đạt 98.58 %
-   light avg trên synthetic rớt xuống 77.43 % OOD (-21 pp). Trên 6 register:
-   legal + news + mobile gần ngưỡng in-distribution (88-96 %), forum +
-   telex là điểm yếu nghiêm trọng (17-59 %).
-4. **spell-base vs spell-small ngang nhau trên tổng hợp** (77.43 vs
-   75.92, KTC chồng nhau). Khác biệt rõ là **spell-small drop trên
-   Telex** (-7.87 pp) và mất nhiều token hơn (`missing_word` = 64 vs 15).
+3. **Khoảng cách synthetic vs OOD đã thu hẹp.** v0.2.29 base đạt 98.32 %
+   light avg synthetic và 79.62 % OOD (-19 pp), tốt hơn v0.2.28 (-21 pp).
+   Trên 6 register: legal + news + mobile + ocr ở 95-97 %, forum 65.84,
+   telex 19.15. Telex vẫn là điểm yếu chung của mọi mô hình.
+4. **spell-base vs spell-small** giờ cách nhau 2.07 pp tổng hợp (79.62
+   vs 77.55) — base nhỉnh hơn nhưng cả hai vẫn vượt Toshiiiii1. Khác
+   biệt rõ vẫn là **spell-small drop trên Telex** (-2.70 pp).
 5. **Telex là điểm yếu chung** — 9-19 % trên cả 5 mô hình (kể cả
    Toshiiiii1 best 18.54 %). Đây chính là gap mà corpus v2 +
    `comprehensive_noise()` đang khắc phục (thêm `telex_grammar_noise()`
