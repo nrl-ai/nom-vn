@@ -89,13 +89,19 @@ def _build_engine(name: str):
             from paddleocr import PaddleOCR
         except ImportError:
             return None
-        ocr = PaddleOCR(use_angle_cls=False, lang="vi", show_log=False)
+        # PP-OCRv5: lang='vi' selects latin_PP-OCRv5_mobile_rec under the
+        # hood (PaddleOCR has no VN-specific recognizer; latin script
+        # supports the Vietnamese alphabet). enable_mkldnn=False works
+        # around a oneDNN ConvertPirAttribute crash on Python 3.13 + CPU
+        # runtime that we hit on 2026-05-01.
+        ocr = PaddleOCR(lang="vi", enable_mkldnn=False, device="cpu")
 
         def run(p: Path) -> str:
-            res = ocr.ocr(str(p), cls=False)
-            if not res or not res[0]:
+            res = ocr.predict(str(p))
+            if not res:
                 return ""
-            return " ".join(seg[1][0] for seg in res[0] if seg and seg[1])
+            texts = res[0].get("rec_texts", []) if isinstance(res[0], dict) else []
+            return " ".join(t for t in texts if t)
 
         return run
 

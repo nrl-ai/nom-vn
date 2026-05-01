@@ -5,7 +5,8 @@
     "tesseract",
     "easyocr",
     "vietocr",
-    "trocr-handwritten"
+    "trocr-handwritten",
+    "paddleocr"
   ],
   "results": {
     "tesseract": {
@@ -35,6 +36,13 @@
       "wer_mean": 1.0927,
       "latency_ms_mean": 247.7,
       "latency_ms_p50": 250.5
+    },
+    "paddleocr": {
+      "cer_mean": 0.5943,
+      "cer_p50": 0.5469,
+      "wer_mean": 0.9606,
+      "latency_ms_mean": 1120.6,
+      "latency_ms_p50": 1109.1
     }
   }
 }
