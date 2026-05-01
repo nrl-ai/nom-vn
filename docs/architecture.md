@@ -1,13 +1,14 @@
 # Nôm — Kiến trúc
 
-Một **thư viện duy nhất** với ranh giới submodule rõ ràng. Một repo,
-một package PyPI (`nom-vn`), một license Apache 2.0. Submodule được
-cài qua extras nên user không phải trả cho cái họ không dùng.
+Một **thư viện duy nhất** với ranh giới giữa các submodule rõ ràng.
+Một repo, một package PyPI (`nom-vn`), một license Apache 2.0.
+Submodule được cài qua extras để người dùng không phải trả cho thứ
+mình không dùng.
 
-Kiến trúc theo hai nguyên tắc bất di bất dịch trong manual vận hành nội bộ:
+Kiến trúc đi theo hai nguyên tắc bất di bất dịch trong sổ tay vận hành nội bộ:
 
-- **Nguyên tắc 11 — Audit dependency trước khi adopt.** Dep pickle/binary opaque auto-reject. Ưu tiên tự re-implement in-tree khi khả thi. Document license, format, và phát hiện audit của mỗi dep trong `BENCHMARK.md`.
-- **Nguyên tắc 12 — Verified benchmarks only.** Mọi metric trong tài liệu user-facing đều phải truy ngược về một script chạy được (có warmup + best-of-N cho throughput) hoặc một nguồn công khai có citation.
+- **Nguyên tắc 11 — Kiểm tra dependency trước khi áp dụng.** Dep dạng pickle hay binary mờ bị tự động từ chối. Ưu tiên tự cài đặt lại trong cây mã nguồn khi khả thi. Ghi rõ license, định dạng và kết quả kiểm tra của mỗi dep trong `BENCHMARK.md`.
+- **Nguyên tắc 12 — Chỉ dùng benchmark đã kiểm chứng.** Mọi số liệu trong tài liệu hướng tới người dùng đều phải truy được về một script chạy được (có warmup + best-of-N cho throughput) hoặc một nguồn công khai có trích dẫn.
 
 ---
 
@@ -15,17 +16,17 @@ Kiến trúc theo hai nguyên tắc bất di bất dịch trong manual vận hà
 
 ```mermaid
 flowchart TB
-    NOM["<b>nom</b><br/>core · Nôm brand"]
-    NOM --> TEXT["<b>nom.text</b><br/>pure-py · no deps"]
-    NOM --> DOC["<b>nom.doc</b><br/>Pipeline · PDF/OCR"]
-    NOM --> LLM["<b>nom.llm</b><br/>Ollama · OpenAI · Anthropic"]
-    NOM --> EMB["<b>nom.embeddings</b><br/>VN-aware models"]
-    NOM --> CHUNK["<b>nom.chunking</b><br/>VN-aware splitter"]
-    NOM --> RET["<b>nom.retrieve</b><br/>BM25 + dense + hybrid"]
-    NOM --> RAG["<b>nom.rag</b><br/>one-shot · chat"]
-    NOM --> CHAT["<b>nom.chat</b><br/>FastAPI + React UI"]
+    NOM["nom-vn"]
+    NOM --> TEXT["nom.text"]
+    NOM --> DOC["nom.doc"]
+    NOM --> LLM["nom.llm"]
+    NOM --> EMB["nom.embeddings"]
+    NOM --> CHUNK["nom.chunking"]
+    NOM --> RET["nom.retrieve"]
+    NOM --> RAG["nom.rag"]
+    NOM --> CHAT["nom.chat"]
 
-    TEXT --> PKG[/"One repo · github.com/nrl-ai/nom-vn<br/>One package · nom-vn · Apache 2.0"/]
+    TEXT --> PKG[/"Một repo · github.com/nrl-ai/nom-vn<br/>Một package · nom-vn · Apache 2.0"/]
     DOC --> PKG
     LLM --> PKG
     EMB --> PKG
@@ -41,6 +42,8 @@ flowchart TB
     class TEXT,DOC,LLM,EMB,CHUNK,RET,RAG,CHAT module
     class PKG pkg
 ```
+
+(Mỗi module mục đích đầy đủ ở bảng phía dưới.)
 
 | Submodule | Mục đích | Trạng thái | Hard deps | Extras |
 |---|---|---|---|---|
@@ -88,10 +91,10 @@ Cách này cũng đơn giản hoá:
 
 Mọi ranh giới có ý nghĩa trong `nom-vn` đều là `typing.Protocol` (chỗ
 hợp lý thì `runtime_checkable`). Đường nhanh là single-process Python;
-đường cloud thay ba implementation Protocol và không đổi gì ở tầng
-ứng dụng. State sống ở storage; computation stateless. Caching có
-chọn lọc — chỉ cache cái đắt để tính lại (embedding), không cache
-cái không đắt (BM25, parsing).
+đường cloud chỉ cần thay ba bản hiện thực Protocol và không đổi gì ở
+tầng ứng dụng. Trạng thái sống ở lớp lưu trữ; tính toán không có
+trạng thái. Cache có chọn lọc — chỉ cache thứ đắt phải tính lại
+(embedding), không cache thứ rẻ (BM25, parsing).
 
 ### Bảy lớp
 
@@ -120,16 +123,16 @@ cái không đắt (BM25, parsing).
 
 ```mermaid
 flowchart TB
-    IN[bytes / paths / strings] --> P1
-    P1[nom.doc.Pipeline<br/>Load → Parse → OCR → Normalize<br/>Stage Protocol · swap Tesseract/dots.mocr/Qwen3-VL] -->|text per doc| P2
-    P2[nom.chunking · smart_chunk<br/>pure Python] -->|list of Chunk| P3
-    P3[nom.embeddings · embed_batch<br/>Embedder Protocol] -->|N×D float32 + texts| P4
-    P4[EmbeddingsCache · put<br/>Protocol · swap LocalDisk/S3/Memory] --> R1
-    R1[BM25Retriever · lexical] --> RR
+    IN[bytes / path / chuỗi] --> P1
+    P1[nom.doc.Pipeline<br/>Load → Parse → OCR → Normalize] -->|text mỗi tài liệu| P2
+    P2[nom.chunking<br/>smart_chunk] -->|list Chunk| P3
+    P3[nom.embeddings<br/>embed_batch] -->|N×D float32| P4
+    P4[EmbeddingsCache<br/>LocalDisk · S3 · Memory] --> R1
+    R1[BM25Retriever<br/>lexical] --> RR
     P4 --> R2
-    R2[DenseRetriever · cosine] --> RR
-    RR[hybrid_score · RRF fusion] -->|ranked context| L
-    L[nom.llm.LLM · complete<br/>Ollama / OpenAI / Anthropic] --> ANS[Answer + citations]
+    R2[DenseRetriever<br/>cosine] --> RR
+    RR[hybrid_score<br/>RRF fusion] -->|ngữ cảnh xếp hạng| L
+    L[nom.llm.LLM.complete<br/>Ollama · OpenAI · Anthropic] --> ANS[Câu trả lời + citation]
 
     classDef stage fill:#f1ede3,stroke:#141414,stroke-width:1px,color:#141414
     classDef io fill:#e8e3d4,stroke:#141414,stroke-width:1px,color:#141414
@@ -367,12 +370,12 @@ nom space ask <id> "Bao nhiêu hợp đồng có phạt vi phạm trên 10%?"
 
 ```mermaid
 flowchart TB
-    BR[Browser · ShadCN UI · React + Tailwind] -->|HTTPS · REST + SSE streaming| API
-    API[FastAPI · nom.chat.server<br/>/api/spaces · /materials · /ask]
-    API -->|uses| RAG2[nom.rag · IngestPipeline · RAGSession]
-    API -->|uses| AUTH[Auth / Sessions<br/>passlib + JWT]
-    RAG2 --> CORE[nom.text/doc/llm/embeddings<br/>chunking/retrieve/index]
-    AUTH --> DB[SQLite mặc định hoặc Postgres<br/>users · spaces · history]
+    BR[Browser<br/>ShadCN UI · React + Tailwind] -->|HTTPS · REST + SSE| API
+    API[FastAPI<br/>nom.chat.server]
+    API -->|gọi| RAG2[nom.rag<br/>IngestPipeline · RAGSession]
+    API -->|gọi| AUTH[Auth · Session<br/>passlib + JWT]
+    RAG2 --> CORE[nom.text · doc · llm · embeddings<br/>chunking · retrieve · index]
+    AUTH --> DB[SQLite mặc định<br/>hoặc Postgres]
 
     classDef ext fill:#e8e3d4,stroke:#141414,stroke-width:1px,color:#141414
     classDef int fill:#f1ede3,stroke:#141414,stroke-width:1px,color:#141414

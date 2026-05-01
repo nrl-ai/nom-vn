@@ -64,7 +64,7 @@ export default withMermaid(
         {
           property: "og:description",
           content:
-            "Khôi phục dấu, sửa chính tả, OCR, RAG cục bộ — mã nguồn mở, ưu tiên tiếng Việt.",
+            "Khôi phục dấu, sửa chính tả, OCR, RAG cục bộ — mã nguồn mở, dành cho tiếng Việt.",
         },
       ],
     ],
@@ -120,7 +120,6 @@ export default withMermaid(
             { text: "SOTA tiếng Việt 2026Q2", link: "/sota_vn_2026q2" },
             { text: "Bức tranh OSS 2026Q2", link: "/oss_landscape_2026q2" },
             { text: "Kế hoạch huấn luyện 2026Q2", link: "/training_plan_2026q2" },
-            { text: "Phát hành", link: "/release" },
           ],
         },
       ],

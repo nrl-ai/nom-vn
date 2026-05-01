@@ -7,7 +7,7 @@ titleTemplate: Bộ công cụ AI tiếng Việt
 hero:
   name: Nôm 喃
   text: Bộ công cụ AI tiếng Việt
-  tagline: Khôi phục dấu, sửa chính tả, OCR, RAG cục bộ — mã nguồn mở, ưu tiên tiếng Việt.
+  tagline: Khôi phục dấu, sửa chính tả, OCR, RAG cục bộ — mã nguồn mở, dành cho tiếng Việt.
   image:
     src: /logo.svg
     alt: Nôm — chữ 喃

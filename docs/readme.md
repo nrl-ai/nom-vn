@@ -34,7 +34,6 @@ trang per-task.
 - **[recipes.md](recipes.md)** — cookbook task-oriented "tôi muốn X, làm Y" với code copy-paste được.
 - **[benchmark.md](benchmark.md)** — số liệu đo theo từng module + lựa chọn component có nguồn nghiên cứu. Đang được chuyển sang trang per-task.
 - **[datasets.md](datasets.md)** — corpus tiếng Việt ship kèm dưới `benchmarks/data/`, cộng các dataset `nrl-ai/*` công khai trên HF.
-- **[release.md](release.md)** — cách cắt một bản release PyPI (Trusted Publishing qua GitHub Actions).
 - **[sota_vn_2026q2.md](sota_vn_2026q2.md)** — lựa chọn LLM, embedding, OCR hiện tại với citation đã verify. Đang deprecate; trang per-task là source live.
 - **[oss_landscape_2026q2.md](oss_landscape_2026q2.md)** — bức tranh OSS tiếng Việt rộng hơn. Đang deprecate; trang per-task là source live.
 - **[training_plan_2026q2.md](training_plan_2026q2.md)** — khi nào fine-tune và khi nào dùng model có sẵn, theo từng component.

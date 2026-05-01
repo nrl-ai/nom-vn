@@ -81,7 +81,7 @@ body {
 /* Editorial meta row above the hero title — attached to .main so it stacks
    above the name, not as a flex sibling to the left of it */
 .VPHero .main::before {
-  content: "Ngoại tuyến  ·  Ưu tiên tiếng Việt  ·  Mã nguồn mở  ·  Apache 2.0";
+  content: "Ngoại tuyến  ·  Tiếng Việt  ·  Mã nguồn mở  ·  Apache 2.0";
   display: block;
   font-family: var(--vp-font-family-mono);
   font-size: 11px;
@@ -298,7 +298,8 @@ body {
 }
 
 .VPNavBarMenuLink,
-.VPNavBarMenuGroup .button {
+.VPNavBarMenuGroup .button,
+.VPNavBarMenuGroup .button .text {
   font-family: var(--vp-font-family-mono) !important;
   font-size: 12px !important;
   letter-spacing: 0.08em !important;
