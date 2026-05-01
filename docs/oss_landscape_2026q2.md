@@ -25,7 +25,7 @@ Cho mỗi dự án: license, pattern đáng mượn, cạm bẫy nên tránh, UR
 ### Haystack v2
 - **License:** Apache 2.0. Repo: <https://github.com/deepset-ai/haystack>
 - **Mượn:** Component IO có type — "Every Component declares its input and output types." <https://github.com/deepset-ai/haystack/blob/main/haystack/core/pipeline/pipeline.py> Việc viết lại v1→v2 được drive bởi việc pipeline không có type trở nên không thể bảo trì. Giữ chặt input/output type của Protocol; không có hatch `dict[str, Any]`.
-- **Tránh:** Runner `Pipeline` directed-multigraph với loop/branch. Hầu hết RAG flow là tuyến tính; runner đồ thị thêm phức tạp mà 90% user không cần (discussion #7623 của họ cho thấy user xây graph-of-graph). `nom.doc.Pipeline` của chúng tôi là một list — cố ý.
+- **Tránh:** Runner `Pipeline` directed-multigraph với loop/branch. Hầu hết RAG flow là tuyến tính; runner đồ thị thêm phức tạp mà 90% người dùng không cần (discussion #7623 của họ cho thấy user xây graph-of-graph). `nom.doc.Pipeline` của chúng tôi là một list — cố ý.
 
 ### DSPy
 - **License:** MIT. Repo: <https://github.com/stanfordnlp/dspy> ("160k monthly downloads, 16k stars" theo <https://dspy.ai/roadmap/>).
@@ -68,7 +68,7 @@ Cho mỗi dự án: license, pattern đáng mượn, cạm bẫy nên tránh, UR
 
 ### Doc parsing — Unstructured / Marker / Docling / PaddleOCR
 - **Unstructured** (Apache 2.0 core, <https://github.com/Unstructured-IO/unstructured>): "ranks #1" trong benchmark bên thứ ba về chất lượng nhưng "51s for 1 page, 141s for 50 pages" — không dùng được cho ingestion ở quy mô.
-- **Marker** (GPL-3.0 / commercial, <https://github.com/datalab-to/marker>): "500 PDFs in 2 hours, 1-2s per page." Batch nhanh. **License GPL — chúng tôi có thể nghiên cứu nhưng không copy code, và phải giữ là adapter user tự cài, không bundle.**
+- **Marker** (GPL-3.0 / commercial, <https://github.com/datalab-to/marker>): "500 PDFs in 2 hours, 1-2s per page." Batch nhanh. **License GPL — chúng tôi có thể nghiên cứu nhưng không copy code, và phải giữ là adapter người dùng tự cài, không bundle.**
 - **Docling** (MIT, IBM, <https://github.com/docling-project/docling>): "better for complex documents needing metadata... TableFormer model handled merged cells correctly." Đây là partner OSS đúng cho parsing tài liệu của nom-vn trên PDF kỹ thuật/pháp lý. Paper arXiv: <https://arxiv.org/pdf/2501.17887>.
 - **PaddleOCR** (Apache 2.0, <https://github.com/PaddlePaddle/PaddleOCR>): đã có trong roadmap như một option OCR nặng.
 
@@ -83,7 +83,7 @@ Cho mỗi dự án: license, pattern đáng mượn, cạm bẫy nên tránh, UR
 
 **Phát hiện trung thực** (đã trích): "all tools separate relevant from irrelevant contexts more than 91% of the time, but **none verify factual accuracy** — a passage with the right entities and wrong answer scores high across every tool tested." <https://research.aimultiple.com/rag-evaluation-tools/>
 **Mượn:** tên metric của RAGAS làm contract (để user plug judge của riêng họ), tích hợp pytest của DeepEval làm developer ergonomics. **Đừng chọn một cái làm mặc định blessed của chúng tôi** — `benchmarks/rag/` của chúng tôi nên tự tính metric để chúng tôi sở hữu phép toán.
-**Cạm bẫy:** tin LLM-as-judge dashboard làm ground truth. Luôn ghép với example human-labeled hold-out.
+**Cạm bẫy:** tin LLM-as-judge dashboard làm nhãn thật. Luôn ghép với example human-labeled hold-out.
 
 ### Observability — OpenInference / OpenLLMetry / Phoenix
 - **Phoenix** (Elastic v2, <https://github.com/Arize-ai/phoenix>): "fully open source and self-hostable — no feature gates." Build trên OpenTelemetry.
@@ -147,8 +147,8 @@ Cho mỗi dự án: license, pattern đáng mượn, cạm bẫy nên tránh, UR
 | Anti-Manager-class | Hầu hết org thất bại; chúng tôi cấm | Rule #2 trong `ARCHITECTURE.md` | Bảo vệ được — Verba là tale cảnh báo. |
 | Không ORM | sqlite-vec direct, txtai direct, SqliteStore của chúng tôi | `sqlite3` direct | Bảo vệ được — phê bình của Eshwaran Venkat <https://eash98.medium.com/why-sqlalchemy-should-no-longer-be-your-orm-of-choice-for-python-projects-b823179fd2fb> ủng hộ ta. |
 | Không framework DI | LlamaIndex hối hận ServiceContext, LangChain hối hận globals | Constructor args + dataclass Config | Bảo vệ được — mọi lead introduce một cái sau đó đều viết doc migration. |
-| Không event bus | Ollama, llama.cpp, txtai không có | Ta không có | Bảo vệ được — call stack là event log. |
-| Single repo (không phải monorepo of services) | LlamaIndex tách thành 300+ pkg nhưng core là monorepo | Single `nom-vn` | Bảo vệ được ở quy mô của ta; revisit nếu `nom.chat` quá nặng cho user `nom.text`. |
+| Không event bus | Ollama, llama.cpp, txtai không có | Ta không có | Bảo vệ được — call stack là log sự kiện. |
+| Single repo (không phải monorepo of services) | LlamaIndex tách thành 300+ pkg nhưng core là monorepo | Single `nom-vn` | Bảo vệ được ở quy mô của ta; revisit nếu `nom.chat` quá nặng cho người dùng `nom.text`. |
 | Apache 2.0, không carve-out | Hầu hết lead; Dify và Verba bẻ | Pure Apache 2.0 | Bảo vệ được — chúng tôi cược vào open source bền vững. |
 
 ---
@@ -207,5 +207,5 @@ Xếp theo impact / cost.
 
 - **Số star** trích trong doc này từ blog bên thứ ba hoặc doc dự án; chúng tôi không tự resolve mọi badge GitHub stars. Chỗ không verify được, chúng tôi nói. Số star di chuyển; sự thật kiến trúc thì không.
 - **Không có số benchmark bịa.** Mọi số chất lượng / latency trích đều từ nguồn công khai có URL trích. Nghiên cứu eval-tool của AImultiple (trích trên) là so sánh công khai nghiêm ngặt nhất chúng tôi tìm được.
-- **Audit license** là best-effort từ file LICENSE đã trích. Trước khi vendor code, re-check ở commit bạn vendor từ.
+- **Audit license** là cố gắng nhất từ file LICENSE đã trích. Trước khi vendor code, re-check ở commit bạn vendor từ.
 - **Cố ý không đào sâu** (intentionally): Milvus, Weaviate-the-DB (vs Verba), Helicone, Langfuse, LangSmith, LM Studio (closed), Cortex/Jan, Flowise, PrivateGPT, h2oGPT — đều khảo sát qua, không cái nào đổi khuyến nghị của chúng tôi. Nếu ADR tương lai cần một cái, kéo lên sau.

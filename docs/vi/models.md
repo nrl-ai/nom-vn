@@ -14,7 +14,7 @@ Tác giả chính: Viet-Anh Nguyen ([vietanh@nrl.ai](mailto:vietanh@nrl.ai))
 
 * `vn-diacritic-vit5-base` là mô hình mặc định cho production.
 * `vn-diacritic-small` chạy ~3× nhanh hơn trên cùng phần cứng,
-  trade-off ~3-4 pp word accuracy. Phù hợp cho mobile / browser
+  đánh đổi ~3-4 pp word accuracy. Phù hợp cho mobile / browser
   inference khi đã quantize int8.
 
 Chi tiết kỹ thuật + kết quả trên 4 register: [Khôi phục dấu](/tasks/diacritic-restoration).

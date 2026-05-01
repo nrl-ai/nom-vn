@@ -23,7 +23,7 @@ trích. **Số không có citation hoặc script bench chạy được là khôn
 ## Pipeline của chúng tôi
 
 `nom.{module}` giải quyết task này như thế nào. Chỉ ra đường nối
-Protocol, backend mặc định, và đường swap cho user muốn model khác.
+Protocol, backend mặc định, và đường swap cho người dùng muốn model khác.
 
 ```python
 # Use case điển hình 3 dòng

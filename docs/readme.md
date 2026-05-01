@@ -4,7 +4,7 @@ Tài liệu chi tiết cho **nom-vn**. Các file ở repo root (`README.md`, `CH
 
 ## Trang cho từng task
 
-Cấu trúc chính: một trang gộp cho mỗi task user-facing, gồm bức tranh
+Cấu trúc chính: một trang gộp cho mỗi task hướng tới người dùng, gồm bức tranh
 công khai + pipeline của chúng tôi + mô hình đã huấn luyện + dataset +
 kết quả + cách tái lập. Mỗi trang theo
 [`tasks/_template.md`](tasks/_template.md) để đọc một trang là biết
@@ -47,7 +47,7 @@ trang per-task.
 | `LICENSE` | repo root | quy ước toolchain + license-detection |
 | `CHANGELOG.md` | repo root | GitHub releases tự đọc file này |
 | `CONTRIBUTING.md` | repo root | GitHub auto-surface khi tạo PR/issue |
-| Chi tiết user-facing per-task | `docs/tasks/<name>.md` | một trang gộp cho mỗi task |
+| Chi tiết hướng tới người dùng per-task | `docs/tasks/<name>.md` | một trang gộp cho mỗi task |
 | Thiết kế xuyên suốt / pipeline | `docs/<topic>.md` | dễ phát hiện cho người đọc; không nằm trong "đường nhìn đầu tiên" trên GitHub |
 | API doc auto-generated | `docs/api/` (dự kiến v0.2+) | sinh bởi Sphinx/mkdocs trong CI |
 

@@ -59,7 +59,7 @@ Việt formal/business hiện đại (khớp dữ liệu training) nhưng vẫn 
 
 #### Thay thế cân bằng register — `nrl-ai/vn-diacritic-vit5-base`
 
-Nếu workload nặng về **hành chính/pháp lý** hoặc **hội thoại** tiếng
+Nếu khối lượng công việc nặng về **hành chính/pháp lý** hoặc **hội thoại** tiếng
 Việt, fine-tune ViT5-base in-house của chúng tôi thắng các register đó:
 
 | Register | Toshiiiii1 | `nrl-ai/vn-diacritic-vit5-base` |
@@ -237,7 +237,7 @@ pdf.close()
 `pypdfium2` (BSD-3 wrapper trên PDFium Apache-2.0) là mặc định trong
 `nom-vn[doc]`. **Nhanh hơn pdfplumber 46×** trên PDF text thuần ở
 fidelity y hệt. Ship trong extra của chúng tôi đặc biệt vì chúng tôi
-không ship PyMuPDF — AGPL ép mọi downstream sang AGPL.
+không ship PyMuPDF — AGPL ép mọi phía sau sang AGPL.
 
 ### Trích text *kèm bảng* từ PDF
 
@@ -457,7 +457,7 @@ rag = RAG.from_documents(
 ```
 
 Bản major 0.3.x sẽ đổi mặc định sang bkai. Chúng tôi không lật
-mid-version vì sẽ silently invalidate cache embedding đã persist của
+mid-version vì sẽ âm thầm vô hiệu hoá cache embedding đã persist của
 user.
 
 ### Trích xuất có cấu trúc (không RAG)
@@ -599,7 +599,7 @@ pip-licenses --format=markdown --packages nom-vn pypdfium2 pdfplumber \
 ```
 
 Chúng tôi từ chối AGPL (PyMuPDF, Surya), GPL (code Surya), và dep
-ship pickle (PyVi). List auto-reject ở chính sách component-build.
+ship pickle (PyVi). List tự động từ chối ở chính sách component-build.
 
 ---
 
@@ -607,6 +607,6 @@ ship pickle (PyVi). List auto-reject ở chính sách component-build.
 
 - [`docs/architecture.md`](architecture.md) — model 7 lớp + đường nối Protocol
 - [`docs/benchmark.md`](benchmark.md) — mọi con số đo trong tài liệu này, kèm methodology
-- [`docs/training_plan_2026q2.md`](training_plan_2026q2.md) — khi nào fine-tune vs adopt off-the-shelf
+- [`docs/training_plan_2026q2.md`](training_plan_2026q2.md) — khi nào fine-tune vs adopt có sẵn
 - [`docs/sota_vn_2026q2.md`](sota_vn_2026q2.md) — lựa chọn SOTA VN hiện tại theo task có citation
 - [`CHANGELOG.md`](../CHANGELOG.md) — chi tiết per-version

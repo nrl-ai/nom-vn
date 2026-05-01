@@ -66,7 +66,7 @@ Lớp lộn xộn nhất. **Không có VLM-as-OCR license Apache nào có benchm
 |---|---|---|---|---|
 | **One down (CPU)** | Tesseract 5 + `vie` | Apache 2.0 | ~30 MB, CPU | Không có số SOTA; baseline ~70–97 % phụ thuộc đầu vào. Lỗi stacked-diacritic đã được tài liệu hoá. |
 | **Mặc định** | PaddleOCR PP-OCRv5 | Apache 2.0 | <100 MB det+rec, CPU/GPU | VN nằm trong list 106 ngôn ngữ; **>30 %** gain nhận dạng multilingual so với PP-OCRv3, +13 % so với PP-OCRv4 (không có số VN per-language) |
-| **Mặc định thay thế** | VietOCR (pbcquoc) | Apache 2.0 | ~100 MB, recommend GPU | Train trên **10 M ảnh VN**; không có benchmark peer-reviewed; repo dormant 2025–2026 |
+| **Mặc định thay thế** | VietOCR (pbcquoc) | Apache 2.0 | ~100 MB, recommend GPU | Train trên **10 M ảnh VN**; không có benchmark peer-reviewed; repo không hoạt động 2025–2026 |
 | **Accurate** | `rednote-hilab/dots.ocr` (3 B VLM) | **MIT** | 3 B, safetensors, ~6 GB, vừa 8–12 GB VRAM | OmniDocBench-EN edit **0.125** (thắng Gemini-2.5-Pro 0.148, MinerU 2 0.139); bench in-house 100 ngôn ngữ **nhưng không có điểm VN per-language** |
 | **Accurate thay thế** | `Qwen/Qwen3-VL-8B-Instruct` | Apache 2.0 | 9 B, safetensors, ~18 GB BF16 / ~6 GB Q4 | Officially support **32 ngôn ngữ gồm tiếng Việt** (tăng từ 19 ở Qwen2.5-VL); robust với blur/tilt; không có số OCR VN-specific trên card |
 | **Reference (closed)** | Datalab Chandra ("Accurate") | proprietary | API hoặc self-host | Datalab tổng **1798**, vs dots.ocr **1489**, olmOCR 2 **1387**, DeepSeek-OCR **1336** — VN không có trong các bảng per-language nhìn thấy được |
@@ -77,7 +77,7 @@ Nguồn: [dots.ocr HF](https://huggingface.co/rednote-hilab/dots.ocr), [blog dot
 
 **Surya.** Sản phẩm flagship của Datalab nay là Chandra (proprietary). Surya vẫn open và hỗ trợ 90+ ngôn ngữ kể cả VN nhưng không còn là sản phẩm chủ lực.
 
-**VietOCR (pbcquoc).** Không có commit nào nhìn thấy được trong 2025–2026. Ổn định nhưng dormant; không có giá trị thêm so với PP-OCRv5 hôm nay.
+**VietOCR (pbcquoc).** Không có commit nào nhìn thấy được trong 2025–2026. Ổn định nhưng không hoạt động; không có giá trị thêm so với PP-OCRv5 hôm nay.
 
 **PaddleOCR PP-OCRv5.** Format gốc là `inference.pdmodel` + `inference.pdiparams` — binary nhưng **không phải pickle** (qua được nguyên tắc 11). Paper fine-tune Hán-Nôm [arXiv 2510.04003](https://arxiv.org/html/2510.04003v1) (10/2025) cho thấy pipeline mở rộng được: **37.5 % → 50.0 %** trên Hán-Nôm chữ viết tay.
 

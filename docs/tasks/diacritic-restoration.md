@@ -225,7 +225,7 @@ Pipeline huấn luyện đầy đủ ở [`training/diacritic/`](../../training/
 - `train.py` — HF `Seq2SeqTrainer` cosine LR, early stopping tuỳ chọn, eval 4 register hậu huấn luyện.
 - `eval_checkpoint.py` — re-eval độc lập từ một checkpoint dir hoặc HF repo id.
 - `publish_hf.py` — publish HF Hub có gate-check + tự sinh model card.
-- `post_train.sh` — rsync từ host GPU → re-eval local (lệch >0.5 pp là fail) → publish dry-run.
+- `post_train.sh` — rsync từ host GPU → re-eval local (lệch >0.5 pp là fail) → publish chạy thử.
 
 Lịch sử thí nghiệm (đến nay 5 lượt) ở [`training/diacritic/README.md`](../../training/diacritic/README.md).
 

@@ -2,7 +2,7 @@
 
 Tài liệu này đặc tả luồng dữ liệu đầy đủ cho `nom.doc.extract`. Mỗi
 stage có lựa chọn primary, một alternative đã test, và kế hoạch
-benchmark. Số liệu hoặc **đo tại đây** hoặc **trích từ upstream** —
+benchmark. Số liệu hoặc **đo tại đây** hoặc **trích từ phía trên** —
 không bao giờ tự nghĩ ra.
 
 ```mermaid
@@ -25,7 +25,7 @@ flowchart TB
 ```
 
 Hình dạng: `bytes/Path → Pipeline.run(schema) → dict typed`. Mỗi stage
-là một `Stage` protocol; user có thể thay implementation hoặc chèn
+là một `Stage` protocol; người dùng có thể thay implementation hoặc chèn
 thêm stage của riêng mình.
 
 ## Stage 1 · Load
@@ -85,7 +85,7 @@ nay, số thực ở v0.1).**
 
 ## Stage 5 · Extract (LLM + schema)
 
-**Lựa chọn: [Instructor](https://github.com/567-labs/instructor)** wrap quanh LLM của user.
+**Lựa chọn: [Instructor](https://github.com/567-labs/instructor)** wrap quanh LLM của người dùng.
 
 | Thư viện | Cách tiếp cận | Star | Lợi | Bất lợi |
 |---|---|---:|---|---|

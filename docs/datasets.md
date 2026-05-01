@@ -42,7 +42,7 @@ Tổng dung lượng commit: **~2.8 MB**.
 | `nom.retrieve` (BM25, dense, hybrid) | corpus `wiki_vi` + query handcrafted | Topic bách khoa đa dạng cho IR |
 | `nom.rag` | `wiki_vi` (corpus) + `tatoeba_vi` (query) | Retrieval + generation end-to-end |
 | `nom.doc` (trích xuất text từ PDF) | `udhr_vi/udhr_vie.pdf` | Baseline PDF born-digital |
-| `nom.doc` (OCR trên ảnh) | `synthetic_ocr_vi` (clean + noisy) | Ground truth chuẩn xác, an toàn cho regression |
+| `nom.doc` (OCR trên ảnh) | `synthetic_ocr_vi` (clean + noisy) | Nhãn thật chuẩn xác, an toàn cho regression |
 
 ## Đã publish trên Hugging Face Hub
 

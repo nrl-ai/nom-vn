@@ -2,13 +2,13 @@
 
 *Cập nhật lần cuối: 2026-04-26.*
 
-Tài liệu này khép lại workstream "cải tiến pipeline hiện tại tới
+Tài liệu này khép lại mảng việc "cải tiến pipeline hiện tại tới
 chính xác tối đa trước, sau đó mới đề xuất tuning" từ đợt v0.2.5 →
 v0.2.11. Nó tổng hợp mọi bench đã đo và đưa một quyết định rõ ràng
 cho mỗi component: **train, fine-tune, distil hay không làm gì.**
 
 Định hướng là bảo thủ. Trước khi đề xuất một run training tuỳ biến,
-ta hỏi: (1) có khoảng cách độ chính xác đo được mà user thực sự cảm
+ta hỏi: (1) có khoảng cách độ chính xác đo được mà người dùng thực sự cảm
 nhận không, và (2) khoảng cách đó có khép được bằng một mô hình công
 khai có sẵn mà ta chưa thử không? Nếu đáp án nào là "có", training
 là quá sớm.
@@ -17,9 +17,9 @@ là quá sớm.
 
 | Component | Best hiện tại | Gap so với lý tưởng | Khuyến nghị | Ước tính chi phí |
 |---|---|---|---|---|
-| Khôi phục dấu | **Toshiiiii1 T5 200M 97.81% (off-the-shelf) ⭐** | không (thắng cloud +2.44 pp) | **Adopt Toshiiiii1/Vietnamese_diacritics_restoration_5th.** Khuyến nghị distil RÚT 2026-04-26. | $0 |
+| Khôi phục dấu | **Toshiiiii1 T5 200M 97.81% (có sẵn) ⭐** | không (thắng cloud +2.44 pp) | **Adopt Toshiiiii1/Vietnamese_diacritics_restoration_5th.** Khuyến nghị distil RÚT 2026-04-26. | $0 |
 | OCR (in sạch) | Tesseract `vie` 5.5% CER | không | **Không làm gì.** Tesseract nhanh hơn VLM 10× và chính xác hơn 4×. | $0 |
-| OCR (scan / nhiễu / chữ viết tay) | chưa đo in-house | có thể lớn | **Fine-tune VietOCR trên corpus scan thực** khi unblock | ~$80–150 (H100, 24h) |
+| OCR (scan / nhiễu / chữ viết tay) | chưa đo in-house | có thể lớn | **Fine-tune VietOCR trên corpus scan thực** khi gỡ chặn | ~$80–150 (H100, 24h) |
 | Tách từ | underthesea CRF F1 95.7% | không | **Không làm gì.** CRF đã ở trần cho corpus này. | $0 |
 | Dense embedder | bkai-foundation-models/vietnamese-bi-encoder ⭐ | không (model công khai thắng +41 pp R@1 so với mặc định trước) | **Adopt bkai** làm mặc định mới ở 0.3.x. Có sẵn ở 0.2.15 dạng opt-in `BKaiEmbedder`. | $0 |
 | Reranker | BAAI/bge-reranker-v2-m3 | không cho rerank VN chung | **Không làm gì.** | $0 |
@@ -27,9 +27,9 @@ là quá sớm.
 | LLM cho task VN chung | gemma3:4b / gemma4:e4b / qwen3:8b | nhỏ | **Không làm gì.** Coverage multilingual base mạnh; chi phí fine-tune ≫ cải thiện biên. | $0 |
 
 **Cập nhật 2026-04-26:** trước đây đề xuất hai run training; distil
-diacritic đã rút sau khi bench ứng viên off-the-shelf `Toshiiiii1`
+diacritic đã rút sau khi bench ứng viên có sẵn `Toshiiiii1`
 (97.81 % word acc ở 1 GB, thắng cloud `gpt-4o-mini`). **Net: còn lại
-một run training** (fine-tune VietOCR scan, vẫn block do upstream
+một run training** (fine-tune VietOCR scan, vẫn block do phía trên
 chưa fix package Python 3.13).
 
 ## Phân tích từng component
@@ -42,7 +42,7 @@ diacritic VN Apache-licensed công khai trên Hugging Face trước khi
 đề xuất. Audit ngày 2026-04-26 tìm được một mô hình thắng trên mọi
 metric.
 
-**Phát hiện off-the-shelf — register-conditional (đo 2026-04-26):**
+**Phát hiện có sẵn — register-conditional (đo 2026-04-26):**
 
 | Model | License | Disk | Word acc · 55 câu business | Word acc · 800 câu UD-VTB literary |
 |---|---|---:|---:|---:|
@@ -90,8 +90,8 @@ adapter `HFDiacriticModel` (v0.2.14). Cài:
 `pip install "nom-vn[diacritic-hf]"`.
 
 **Sửa quy trình đã ghi.** Theo rule multi-corpus register-coverage:
-"off-the-shelf trước khi train" — bench mọi ứng viên công khai
-*trước* khi đề xuất fine-tune. Đã document cú catch của user và
+"có sẵn trước khi train" — bench mọi ứng viên công khai
+*trước* khi đề xuất fine-tune. Đã document cú catch của người dùng và
 thêm rule dự án.
 
 #### Cái ta giữ mở cho khả năng tương lai
@@ -99,13 +99,13 @@ thêm rule dự án.
 Một mô hình **nhỏ hơn** (ví dụ head token-classification của
 `xlm-roberta-base`, ~280 MB disk) có thể match độ chính xác
 Toshiiiii1 nếu nó tồn tại công khai hoặc được distil. Không ưu tiên
-khi mô hình Toshiiiii1 1 GB vừa target user-machine. Trigger
+khi mô hình Toshiiiii1 1 GB vừa target máy người dùng. Trigger
 re-review: một mô hình diacritic Apache/MIT công khai xuất hiện ở
 <500 MB với độ chính xác tương đương.
 
 #### Các thí nghiệm training đã chạy 2026-04-27 (kết quả âm)
 
-Theo chỉ đạo "publish nếu kết quả tốt" của user, ta thử hai run
+Theo chỉ đạo "publish nếu kết quả tốt" của người dùng, ta thử hai run
 fine-tune trên corpus 200 K cặp Wikipedia VN
 (`hirine/wikipedia-vietnamese-1M296K-dataset`, CC-BY-SA-4.0). Mỗi
 run 3 epoch trên RTX 3090, bf16 + grad-checkpointing. Eval đa-corpus
@@ -114,7 +114,7 @@ mà không mất >2 pp ở cái còn lại. Không run nào qua.
 
 | Run | Base | Tham số | business_55 | literary_udvtb | Phán quyết |
 |---|---|---:|---:|---:|---|
-| Toshiiiii1 (off-the-shelf reference) | T5 (VN ft) | 200 M | **97.81 %** | 89.40 % | đã adopt |
+| Toshiiiii1 (có sẵn reference) | T5 (VN ft) | 200 M | **97.81 %** | 89.40 % | đã adopt |
 | #1 mT5-small / 200 K / 3 ep | mT5-small | 300 M tổng / 60 M VN | 89.58 % | 84.14 % | -8.23 pp / -5.26 pp — KHÔNG SHIP |
 | #2 vit5-base / 200 K / 3 ep | VietAI/vit5-base | 220 M | 93.69 % | **89.47 %** | -4.12 pp / +0.07 pp — KHÔNG SHIP (cổng không chặt) |
 
@@ -137,7 +137,7 @@ qua, nhưng methodology + scaffold training ship trong
    sẻ làm loãng signal VN-specific; vit5-base purpose-built và đã
    tốt hơn +4 pp.
 
-**Hàng đợi follow-up (deferred sang v0.3.x):**
+**Hàng đợi theo dõi tiếp (deferred sang v0.3.x):**
 
 - Train vit5-base trên 1 M cặp 5+ epoch.
 - Thử `VietAI/vit5-large` (770 M) — capacity representation lớn hơn.
@@ -162,14 +162,14 @@ của "sở hữu" một mô hình tệ hơn là âm.
 | Local `qwen3:1.7b` | 18.15% | 1.4 GB | Dưới rule baseline — quá nhỏ |
 | Local `gemma3:1b` | 15.32% | 0.8 GB | Dưới rule baseline |
 
-**Gap:** mô hình off-the-shelf nhỏ nhất thắng rule baseline (40%)
+**Gap:** mô hình có sẵn nhỏ nhất thắng rule baseline (40%)
 là **3 GB+ disk và cần 4 GB+ VRAM**. Cho deploy mobile / browser
 đó là deal-breaker — cả qwen3:1.7b và gemma3:1b rớt *xuống dưới*
 rule baseline, cho thấy task này yêu cầu trôi chảy chính tả VN mà
 không sống được với compress sub-2 GB.
 
 **Vì sao training fit ở đây:** task khôi phục dấu có không gian
-output hẹp, well-defined (thay ASCII bằng tập đóng các dạng có
+output hẹp, được định nghĩa rõ (thay ASCII bằng tập đóng các dạng có
 dấu). Đây là một trong vài task VN mà **mô hình sub-100 M
 purpose-built có thể thắng LLM 8 B chung**, vì:
 
@@ -233,12 +233,12 @@ finetune VLM-OCR sẽ đuổi gain 1–2 pp với latency 10× và disk
 
 **Trạng thái:** chưa đo in-house. VietOCR (`pip install vietocr`)
 lỗi trên Python 3.13 (`KeyError: '__version__'` trong setup.py);
-upstream cần modernize sang `pyproject.toml`. Khi unblock, đường đi:
+phía trên cần modernize sang `pyproject.toml`. Khi gỡ chặn, đường đi:
 
-1. **Bench trọng số VietOCR off-the-shelf** (`vgg_transformer`)
+1. **Bench trọng số VietOCR có sẵn** (`vgg_transformer`)
    trên cùng slice 50 ảnh `vn_ocr_subset` để so trực tiếp với
    Tesseract.
-2. **Nếu VietOCR underperform trên scan nhiễu** (kiểu fail điển
+2. **Nếu VietOCR kém trên scan nhiễu** (kiểu fail điển
    hình của mọi OCR chung trên dấu thanh dưới baseline glyph),
    fine-tune trên corpus scan VN thực. Nguồn hứa hẹn:
    - `linhdoan/vietnamese-handwriting` (công khai trên HF, ~10 k mẫu)
@@ -250,7 +250,7 @@ upstream cần modernize sang `pyproject.toml`. Khi unblock, đường đi:
 **Chi phí compute:** 1× H100 ~24 h ≈ $80–150. Inference: GPU
 khuyến nghị.
 
-**Vì sao đáng (khi unblock):** tài liệu VN scan là workflow sản
+**Vì sao đáng (khi gỡ chặn):** tài liệu VN scan là workflow sản
 phẩm thực (legal, medical, banking). CER của Tesseract trên các
 scan này được báo là 12–15% (chưa đo ở đây); đẩy xuống <8% trên
 scan VN-specific là một sản phẩm thắng đo được.
@@ -299,7 +299,7 @@ xứng). Mismatch phân phối training là headline.
 
 **Hành động:** v0.2.15 ship `nom.embeddings.BKaiEmbedder` dạng
 opt-in. Bản major 0.3.x sẽ đổi mặc định. Cache invalidation
-mid-version là UX tệ — index vector đã persist của user hiện tại
+mid-version là UX tệ — index vector đã persist của người dùng hiện tại
 build trên dangvantuan và sẽ rớt chất lượng âm thầm nếu lật mặc
 định mid-stream.
 
@@ -331,11 +331,11 @@ ta không có. Defer.
 Họ `gemma3` / `gemma4` / `qwen3` có coverage VN base tốt (xem
 lưới diacritic LLM local trong `docs/benchmark.md`). Fine-tune
 một LLM chung cho "thêm tiếng Việt" là run $1k+ mang lại <5 pp
-trên hầu hết task VN so với base off-the-shelf. Đơn vị work đúng
+trên hầu hết task VN so với base có sẵn. Đơn vị work đúng
 là **mô hình nhỏ task-specific** (theo §1) hoặc **prompting
 task-specific**.
 
-Nếu một task downstream không thể làm bằng LLM off-the-shelf ở
+Nếu một task phía sau không thể làm bằng LLM có sẵn ở
 chất lượng chấp nhận được sau một pass prompt-engineering nghiêm
 túc, đó là lúc cân nhắc LoRA — và lựa chọn nên là base nhỏ nhất
 mà target deploy hỗ trợ (gemma3:4b cho laptop, qwen3:1.7b chỉ khi
@@ -347,23 +347,23 @@ Mỗi khuyến nghị "không làm gì" có một trigger lật:
 
 | Component | Trigger re-review |
 |---|---|
-| Khôi phục dấu | Nếu một mô hình diacritic VN sub-1 GB off-the-shelf công khai xuất hiện với độ chính xác tương đương, skip distillation. |
+| Khôi phục dấu | Nếu một mô hình diacritic VN sub-1 GB có sẵn công khai xuất hiện với độ chính xác tương đương, skip distillation. |
 | OCR (sạch) | Một mô hình OCR VN open-weight mới thắng Tesseract ≥3 pp CER ở latency tương đương. |
 | OCR (scan) | Fix VietOCR Python 3.13 land, HOẶC một corpus VN scan có nhãn xuất hiện. |
 | Tách từ | Một user báo bug thực truy về gap 19 pp F1 giữa `nom.text` và `underthesea` — cho đến lúc đó, split tốc độ/chính xác là đúng. |
 | Embedder | Một dataset STS / retrieval VN có nhãn cho domain của ta xuất hiện. |
 | Reranker | Giống embedder — cần dataset domain. |
-| LLM | Một task off-the-shelf không cover được; chỉ LoRA base nhỏ nhất khả thi. |
+| LLM | Một task có sẵn không cover được; chỉ LoRA base nhỏ nhất khả thi. |
 
 ## Ghi chú quy trình
 
 - Mọi đo lường ở trên đến từ script trong `benchmarks/` chạy được
   từ một bản clone sạch (rule verified-benchmarks).
-- Cross-check số đã công bố làm khi upstream có báo — độ chính xác
+- Cross-check số đã công bố làm khi phía trên có báo — độ chính xác
   diacritic so với khả năng chung của OpenAI; underthesea so với
   số VLSP 2013 của chính nó; Tesseract so với dải độ chính xác
   `vie` đã công bố. Không có bất đồng âm thầm.
-- Việc auto-reject PyVi (chính sách no-pickle, ship `.pkl`) và
+- Việc tự động từ chối PyVi (chính sách no-pickle, ship `.pkl`) và
   exclude AGPL (PyMuPDF, Surya) ràng buộc surface khuyến nghị và
   được phản ánh trong các lựa chọn.
 
