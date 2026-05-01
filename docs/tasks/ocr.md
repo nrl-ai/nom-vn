@@ -80,6 +80,53 @@ ký tự đã NFC. Diacritic-CER tính riêng cho combining marks (xem
 
 JSON baseline: `benchmarks/results/baseline_ocr_*.json`.
 
+## Post-correct với `vn-spell-correction-base` (opt-in)
+
+Một thí nghiệm đã đo: chạy mô hình sửa chính tả trên output Tesseract
+để cố gắng giảm CER. **Kết quả mixed** — gain WER ~5 pp tuyệt đối / 8 %
+tương đối trên ảnh khó (CER ~30 %), gần wash trên ảnh sạch (Tesseract
+< 1 % CER thì post-correct là no-op). Per-image: 11/30 ảnh được giúp,
+12/30 bị hại trên ảnh khó.
+
+| Variant | n | CER raw | CER post-correct | Δ CER | Δ WER |
+|---|---:|---:|---:|---:|---:|
+| `synthetic_ocr_vi/clean` | 20 | 0.00 % | 0.00 % | 0.00 | 0.00 |
+| `synthetic_ocr_vi/noisy` | 20 | 0.70 % | 0.60 % | -0.10 | -0.38 |
+| `synthetic_ocr_vi/hard` | 30 | 30.34 % | 29.91 % | -0.43 | **-5.22** |
+
+Lý do gain nhỏ hơn literature (ByT5 fine-tune báo cáo 33-67 % giảm CER):
+mô hình của ta train trên nhiễu synthetic kiểu typing, không phải lỗi
+OCR-specific; tokenizer SentencePiece phân tách output Tesseract bị
+corrupt thành garbage. Literature
+([Tran et al. 2024](https://arxiv.org/html/2410.13305)) báo cáo
+WER 27 % → 18 % khi train trực tiếp trên cặp `(Tesseract, GT)` —
+tức là gain 5 lần khi data khớp. Future work: build OCR-specific
+post-correct corpus + cân nhắc base byte-level (ByT5) cho robustness.
+
+**Quyết định:** không bật mặc định (gain không đáng phức tạp), nhưng
+làm sẵn như opt-in cho ai có ảnh quét xấu thực sự (CER ≥ 20 %).
+
+```python
+import pytesseract
+from PIL import Image
+from nom.text.diacritic_models import HFDiacriticModel
+
+tess_text = pytesseract.image_to_string(Image.open("scan.png"), lang="vie")
+
+# Opt-in post-correct (chậm thêm ~150 ms/dòng GPU, ~400 ms CPU)
+corrector = HFDiacriticModel(model_id="nrl-ai/vn-spell-correction-base")
+clean = corrector(tess_text)
+```
+
+Reproduce:
+
+```bash
+python benchmarks/data/synthetic_ocr_vi/render_hard.py --n 30
+python benchmarks/accuracy/bench_ocr_post_correct.py \
+    --variants hard \
+    --json benchmarks/results/baseline_ocr_post_correct_hard.json
+```
+
 ## Mô hình `nrl-ai/*` đã huấn luyện
 
 Hiện chưa có. Chúng tôi đã audit nhiều phương án custom OCR:

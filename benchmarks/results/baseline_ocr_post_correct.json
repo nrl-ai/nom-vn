@@ -1,0 +1,477 @@
+{
+  "ocr_engine": "tesseract-vie",
+  "post_correct_model": "nrl-ai/vn-spell-correction-base",
+  "data_dir": "benchmarks/data/synthetic_ocr_vi",
+  "variants": [
+    "clean",
+    "noisy"
+  ],
+  "summary": {
+    "clean": {
+      "n_images": 20,
+      "cer_raw_mean": 0.0,
+      "cer_post_correct_mean": 0.0,
+      "cer_delta_mean": 0.0,
+      "wer_raw_mean": 0.0,
+      "wer_post_correct_mean": 0.0,
+      "n_helped": 0,
+      "n_neutral": 20,
+      "n_hurt": 0,
+      "per_image": [
+        {
+          "id": "000",
+          "gold": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+          "ocr_raw": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+          "ocr_post_correct": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "001",
+          "gold": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+          "ocr_raw": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+          "ocr_post_correct": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "002",
+          "gold": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+          "ocr_raw": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+          "ocr_post_correct": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "003",
+          "gold": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+          "ocr_raw": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+          "ocr_post_correct": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "004",
+          "gold": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+          "ocr_raw": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+          "ocr_post_correct": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "005",
+          "gold": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+          "ocr_raw": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+          "ocr_post_correct": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "006",
+          "gold": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+          "ocr_raw": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+          "ocr_post_correct": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "007",
+          "gold": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+          "ocr_raw": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+          "ocr_post_correct": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "008",
+          "gold": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "ocr_raw": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "ocr_post_correct": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "009",
+          "gold": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+          "ocr_raw": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+          "ocr_post_correct": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "010",
+          "gold": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+          "ocr_raw": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+          "ocr_post_correct": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "011",
+          "gold": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+          "ocr_raw": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+          "ocr_post_correct": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "012",
+          "gold": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+          "ocr_raw": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+          "ocr_post_correct": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "013",
+          "gold": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+          "ocr_raw": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+          "ocr_post_correct": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "014",
+          "gold": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+          "ocr_raw": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+          "ocr_post_correct": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "015",
+          "gold": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+          "ocr_raw": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+          "ocr_post_correct": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "016",
+          "gold": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+          "ocr_raw": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+          "ocr_post_correct": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "017",
+          "gold": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+          "ocr_raw": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+          "ocr_post_correct": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "018",
+          "gold": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+          "ocr_raw": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+          "ocr_post_correct": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "019",
+          "gold": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+          "ocr_raw": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+          "ocr_post_correct": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        }
+      ]
+    },
+    "noisy": {
+      "n_images": 20,
+      "cer_raw_mean": 0.007,
+      "cer_post_correct_mean": 0.006,
+      "cer_delta_mean": -0.001,
+      "wer_raw_mean": 0.0372,
+      "wer_post_correct_mean": 0.0334,
+      "n_helped": 1,
+      "n_neutral": 19,
+      "n_hurt": 0,
+      "per_image": [
+        {
+          "id": "000",
+          "gold": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+          "ocr_raw": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+          "ocr_post_correct": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "001",
+          "gold": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+          "ocr_raw": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+          "ocr_post_correct": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "002",
+          "gold": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+          "ocr_raw": "Cuối tuần này tôi muốn.về thăm bố.mẹ ở quê.",
+          "ocr_post_correct": "Cuối tuần này tôi muốn.về thăm bố.mẹ ở quê.",
+          "cer_raw": 0.0465,
+          "cer_post_correct": 0.0465,
+          "wer_raw": 0.3636,
+          "wer_post_correct": 0.3636,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "003",
+          "gold": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+          "ocr_raw": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội:",
+          "ocr_post_correct": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội:",
+          "cer_raw": 0.0154,
+          "cer_post_correct": 0.0154,
+          "wer_raw": 0.0667,
+          "wer_post_correct": 0.0667,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "004",
+          "gold": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+          "ocr_raw": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+          "ocr_post_correct": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "005",
+          "gold": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+          "ocr_raw": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+          "ocr_post_correct": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "006",
+          "gold": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+          "ocr_raw": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+          "ocr_post_correct": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "007",
+          "gold": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+          "ocr_raw": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc:",
+          "ocr_post_correct": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc:",
+          "cer_raw": 0.0179,
+          "cer_post_correct": 0.0179,
+          "wer_raw": 0.0769,
+          "wer_post_correct": 0.0769,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "008",
+          "gold": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "ocr_raw": "Hề này giá đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "ocr_post_correct": "Hề này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "cer_raw": 0.04,
+          "cer_post_correct": 0.02,
+          "wer_raw": 0.1538,
+          "wer_post_correct": 0.0769,
+          "cer_delta": -0.02
+        },
+        {
+          "id": "009",
+          "gold": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+          "ocr_raw": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng. mai.",
+          "ocr_post_correct": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng. mai.",
+          "cer_raw": 0.0196,
+          "cer_post_correct": 0.0196,
+          "wer_raw": 0.0833,
+          "wer_post_correct": 0.0833,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "010",
+          "gold": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+          "ocr_raw": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+          "ocr_post_correct": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "011",
+          "gold": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+          "ocr_raw": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+          "ocr_post_correct": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "012",
+          "gold": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+          "ocr_raw": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+          "ocr_post_correct": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "013",
+          "gold": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+          "ocr_raw": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+          "ocr_post_correct": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "014",
+          "gold": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+          "ocr_raw": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+          "ocr_post_correct": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "015",
+          "gold": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+          "ocr_raw": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+          "ocr_post_correct": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "016",
+          "gold": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+          "ocr_raw": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+          "ocr_post_correct": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "017",
+          "gold": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+          "ocr_raw": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+          "ocr_post_correct": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "018",
+          "gold": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+          "ocr_raw": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+          "ocr_post_correct": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "019",
+          "gold": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+          "ocr_raw": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+          "ocr_post_correct": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+          "cer_raw": 0.0,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.0,
+          "wer_post_correct": 0.0,
+          "cer_delta": 0.0
+        }
+      ]
+    }
+  }
+}

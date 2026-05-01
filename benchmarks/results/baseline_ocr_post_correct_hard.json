@@ -1,0 +1,353 @@
+{
+  "ocr_engine": "tesseract-vie",
+  "post_correct_model": "nrl-ai/vn-spell-correction-base",
+  "data_dir": "benchmarks/data/synthetic_ocr_vi",
+  "variants": [
+    "hard"
+  ],
+  "summary": {
+    "hard": {
+      "n_images": 30,
+      "cer_raw_mean": 0.3034,
+      "cer_post_correct_mean": 0.2991,
+      "cer_delta_mean": -0.0043,
+      "wer_raw_mean": 0.6464,
+      "wer_post_correct_mean": 0.5942,
+      "n_helped": 11,
+      "n_neutral": 7,
+      "n_hurt": 12,
+      "per_image": [
+        {
+          "id": "000",
+          "gold": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+          "ocr_raw": "tr chúp Ga GÓI gu) thông qua Gương lượng và bọà gửi",
+          "ocr_post_correct": "tr chụp Ga GÓI gu) thông qua Gương lượng và bọ gửi",
+          "cer_raw": 0.4091,
+          "cer_post_correct": 0.4242,
+          "wer_raw": 0.6923,
+          "wer_post_correct": 0.6923,
+          "cer_delta": 0.0152
+        },
+        {
+          "id": "001",
+          "gold": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+          "ocr_raw": "'Vên bên này được ben hành theo thám quyền của Qiêm đác $ở.",
+          "ocr_post_correct": "'Vên bên này được ban hành theo thẩm quyền của Quiêm đác ở.",
+          "cer_raw": 0.1552,
+          "cer_post_correct": 0.1379,
+          "wer_raw": 0.5385,
+          "wer_post_correct": 0.3846,
+          "cer_delta": -0.0172
+        },
+        {
+          "id": "002",
+          "gold": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+          "ocr_raw": "Chữ tiên shụ gi suẩn về tiêm bố nụ 2 gu",
+          "ocr_post_correct": "Chữ tiên sụ gi chuẩn về tiêm bố nụ 2 gu",
+          "cer_raw": 0.4651,
+          "cer_post_correct": 0.4884,
+          "wer_raw": 0.8182,
+          "wer_post_correct": 0.8182,
+          "cer_delta": 0.0233
+        },
+        {
+          "id": "003",
+          "gold": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+          "ocr_raw": "Theo B sỹ nô Gc d Vào cục tạ Bào ứng MỘ du Nà Mộc",
+          "ocr_post_correct": "Theo B sỹ nô Gc d Vào cục tạ Bào ứng MỘ du Nà Mộc",
+          "cer_raw": 0.5692,
+          "cer_post_correct": 0.5692,
+          "wer_raw": 1.0,
+          "wer_post_correct": 1.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "004",
+          "gold": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+          "ocr_raw": "®óng nay tải độy sónm đổ đ táo thể đục cùng con.",
+          "ocr_post_correct": "óng này tại độ nóng đổ đã tạo thể đục cùng con.",
+          "cer_raw": 0.25,
+          "cer_post_correct": 0.3333,
+          "wer_raw": 0.6667,
+          "wer_post_correct": 0.75,
+          "cer_delta": 0.0833
+        },
+        {
+          "id": "005",
+          "gold": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+          "ocr_raw": "ii bên đã đọc. iu về đồng ý ký vào hợp đáng này",
+          "ocr_post_correct": "ii bên đã đọc. yêu về đồng ý ký vào hợp đáng này",
+          "cer_raw": 0.1569,
+          "cer_post_correct": 0.1765,
+          "wer_raw": 0.4615,
+          "wer_post_correct": 0.4615,
+          "cer_delta": 0.0196
+        },
+        {
+          "id": "006",
+          "gold": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+          "ocr_raw": "ˆ Bản cơng cấp địch vụ caê bế hoàn thành đồng tiền độ đã hoi thun.",
+          "ocr_post_correct": "Bản cơng cấp dịch vụ các bế hoàn thành đồng tiền độ đã hồi thu.",
+          "cer_raw": 0.194,
+          "cer_post_correct": 0.194,
+          "wer_raw": 0.6667,
+          "wer_post_correct": 0.5333,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "007",
+          "gold": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+          "ocr_raw": "Test den cha ny khm sp sâm Ông dp sp đ đc",
+          "ocr_post_correct": "Test đến cha này khám so sâm Ông đổ sp đ được",
+          "cer_raw": 0.5893,
+          "cer_post_correct": 0.6071,
+          "wer_raw": 1.0,
+          "wer_post_correct": 1.0,
+          "cer_delta": 0.0179
+        },
+        {
+          "id": "008",
+          "gold": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "ocr_raw": "Hè này gia đình tối sẽ đi nghĩ ở Đà Nẵng một tuần.",
+          "ocr_post_correct": "Hè này gia đình tối sẽ đi nghỉ ở Đà Nẵng một tuần.",
+          "cer_raw": 0.04,
+          "cer_post_correct": 0.02,
+          "wer_raw": 0.1538,
+          "wer_post_correct": 0.0769,
+          "cer_delta": -0.02
+        },
+        {
+          "id": "009",
+          "gold": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+          "ocr_raw": "'WØ nợ chứng to sản họn “hưu cô phó vào sống “sói.",
+          "ocr_post_correct": "'W nợ chứng tỏ sản họ hưu cô phó vào sống sói.",
+          "cer_raw": 0.3725,
+          "cer_post_correct": 0.3725,
+          "wer_raw": 0.9167,
+          "wer_post_correct": 0.9167,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "010",
+          "gold": "Đề nghị Quý Phòng Tổ chức Cán bộ duyệt và phản hồi sớm.",
+          "ocr_raw": "nơ Quý Phòng Tố chức Căn bộ đưyệt và phản hời so,",
+          "ocr_post_correct": "nơ Quý Phòng Tổ chức Cán bộ duyệt và phản hồi số,",
+          "cer_raw": 0.2545,
+          "cer_post_correct": 0.1636,
+          "wer_raw": 0.5385,
+          "wer_post_correct": 0.2308,
+          "cer_delta": -0.0909
+        },
+        {
+          "id": "011",
+          "gold": "Năm nay con bé học lớp năm, kết quả khá tốt.",
+          "ocr_raw": "\"Năm cay sao bé bạc lập sina, bt quá khả tấn,",
+          "ocr_post_correct": "\"Năm cây sao bé bạc lập sina, bớt quá khả tấn,",
+          "cer_raw": 0.4318,
+          "cer_post_correct": 0.4545,
+          "wer_raw": 0.9091,
+          "wer_post_correct": 0.9091,
+          "cer_delta": 0.0227
+        },
+        {
+          "id": "012",
+          "gold": "Đại học Quốc gia thành phố Hồ Chí Minh tuyển sinh đại trà từ tháng ba.",
+          "ocr_raw": "\"Đại học Quốc gia thìành phố Hồ Chủ Minh tuyến si đợi trà tà táng bà,",
+          "ocr_post_correct": "\"Đại học Quốc gia thì thành phố Hồ Chủ Minh tuyến đi đợi trà tà táng bà,",
+          "cer_raw": 0.1571,
+          "cer_post_correct": 0.2143,
+          "wer_raw": 0.5625,
+          "wer_post_correct": 0.5625,
+          "cer_delta": 0.0571
+        },
+        {
+          "id": "013",
+          "gold": "Đường này hôm nay tắc lắm, đi đường khác cho nhanh đi.",
+          "ocr_raw": "Đường này hôm nay tác lắm, đi đường khác cho nhanh đi.",
+          "ocr_post_correct": "Đường này hôm nay tác lắm, đi đường khác cho nhanh đi.",
+          "cer_raw": 0.0185,
+          "cer_post_correct": 0.0185,
+          "wer_raw": 0.0833,
+          "wer_post_correct": 0.0833,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "014",
+          "gold": "Trời đẹp quá, mình đi dạo công viên một chút nhé.",
+          "ocr_raw": "Trời đẹp Quá. mừnh đi đạo công viên một chút ryê.",
+          "ocr_post_correct": "Trời đẹp Quá. mừng đi đạo công viên một chút tên.",
+          "cer_raw": 0.1429,
+          "cer_post_correct": 0.1633,
+          "wer_raw": 0.3636,
+          "wer_post_correct": 0.3636,
+          "cer_delta": 0.0204
+        },
+        {
+          "id": "015",
+          "gold": "Mình đang đi học về, sẽ ghé qua nhà bạn vào lúc bảy giờ tối.",
+          "ocr_raw": "hen ng tr ghi gm da hn do My pm",
+          "ocr_post_correct": "hen ng tr ghi gm da hn do My pm",
+          "cer_raw": 0.7,
+          "cer_post_correct": 0.7,
+          "wer_raw": 1.0,
+          "wer_post_correct": 1.0,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "016",
+          "gold": "Kính gửi Quý Sở Lao động Thương binh và Xã hội thành phố.",
+          "ocr_raw": "Kinh gủi Quý Sở Lo động Thoơng linh và Xã với hành phế,",
+          "ocr_post_correct": "Kinh gửi Quý Sở Lao động Thương binh và Xã với hành phế,",
+          "cer_raw": 0.1754,
+          "cer_post_correct": 0.1053,
+          "wer_raw": 0.6154,
+          "wer_post_correct": 0.3077,
+          "cer_delta": -0.0702
+        },
+        {
+          "id": "017",
+          "gold": "Hợp đồng số 02/HĐ/2025 được lập ngày 14 tháng 3 năm 2025 tại Hà Nội.",
+          "ocr_raw": "\"ho đồng số 6224/2025 được lặo ngày 3⁄4 thông 3 năm 2039 tại Hà gạo, %",
+          "ocr_post_correct": "\"họ đồng số 6224/2025 được lập ngày 34 thông 3 năm 2039 tại Hà gạo, %",
+          "cer_raw": 0.2941,
+          "cer_post_correct": 0.25,
+          "wer_raw": 0.5333,
+          "wer_post_correct": 0.4667,
+          "cer_delta": -0.0441
+        },
+        {
+          "id": "018",
+          "gold": "Phương thức thanh toán bằng chuyển khoản, chia làm ba đợt.",
+          "ocr_raw": "Pu ung Ghi Ben tín bông can bao, z/elo thơm àẹ đợi.",
+          "ocr_post_correct": "Pu ung Ghi Bên tín bông cần bao, z/elo thơm mẹ đợi.",
+          "cer_raw": 0.5517,
+          "cer_post_correct": 0.5517,
+          "wer_raw": 1.0909,
+          "wer_post_correct": 1.0909,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "019",
+          "gold": "Khoảng năm ngoái, công nghệ trí tuệ nhân tạo đã thay đổi nhiều ngành nghề.",
+          "ocr_raw": "hoảng con ngơi, công nghệ tí tuệ nhân to đề đhơy đấu shuêu ngành nghị.",
+          "ocr_post_correct": "hoảng con ngơi, công nghệ trí tuệ nhân tố để chơi đấu siêu ngành nghị.",
+          "cer_raw": 0.2297,
+          "cer_post_correct": 0.2432,
+          "wer_raw": 0.6667,
+          "wer_post_correct": 0.6,
+          "cer_delta": 0.0135
+        },
+        {
+          "id": "020",
+          "gold": "Đề nghị Quý cơ quan xem xét và phản hồi trong thời gian sớm nhất.",
+          "ocr_raw": "”É nghi Quý cơ quan xem sút và phản hốt trong thời gian sảm nhấy.",
+          "ocr_post_correct": "É nghi Quý cơ quan xem sút và phản hốt trong thời gian giảm nhất.",
+          "cer_raw": 0.1385,
+          "cer_post_correct": 0.1538,
+          "wer_raw": 0.4,
+          "wer_post_correct": 0.3333,
+          "cer_delta": 0.0154
+        },
+        {
+          "id": "021",
+          "gold": "Một số tỉnh miền núi phía bắc đang chịu ảnh hưởng nặng do mưa lớn kéo dài.",
+          "ocr_raw": "Một số tỉnh muốn núi phía bắc đang chịu ảnh hưởng nộng đo mưa lớn kéo đài.",
+          "ocr_post_correct": "Một số tỉnh muốn núi phía bắc đang chịu ảnh hưởng nồng độ mưa lớn kéo dài.",
+          "cer_raw": 0.0676,
+          "cer_post_correct": 0.0676,
+          "wer_raw": 0.2353,
+          "wer_post_correct": 0.1765,
+          "cer_delta": 0.0
+        },
+        {
+          "id": "022",
+          "gold": "Đội tuyển bóng đá quốc gia chuẩn bị bước vào vòng loại giải đấu khu vực.",
+          "ocr_raw": "Đội tuyến thông đ$ quớớc ga chuâên bị bước vào vững loại giải đấu: k#mu vực.",
+          "ocr_post_correct": "Đội tuyến thông đ quốc ga chuẩn bị bước vào vững loại giải đấu: kmu vực.",
+          "cer_raw": 0.1944,
+          "cer_post_correct": 0.125,
+          "wer_raw": 0.5625,
+          "wer_post_correct": 0.4375,
+          "cer_delta": -0.0694
+        },
+        {
+          "id": "023",
+          "gold": "Bạn có biết nhà hàng nào ngon ở khu này không?",
+          "ocr_raw": "TP <2 vn bơ cào gợn 9 in gn tiếng”",
+          "ocr_post_correct": "TP 2 vũng bờ cào gợn 9 in nổi tiếng",
+          "cer_raw": 0.6522,
+          "cer_post_correct": 0.6304,
+          "wer_raw": 1.0,
+          "wer_post_correct": 1.0,
+          "cer_delta": -0.0217
+        },
+        {
+          "id": "024",
+          "gold": "Hà Nội đang triển khai các tuyến xe buýt điện nhằm giảm ô nhiễm không khí.",
+          "ocr_raw": "Hà Một đang triển khai các tryớa se buýt điện nhàm giảm 6 nhướnn không kế.",
+          "ocr_post_correct": "Hà Một đang triển khai các tryớa sẽ buýt điện nhàm giảm 6 nhướng không kế.",
+          "cer_raw": 0.1892,
+          "cer_post_correct": 0.2027,
+          "wer_raw": 0.4375,
+          "wer_post_correct": 0.4375,
+          "cer_delta": 0.0135
+        },
+        {
+          "id": "025",
+          "gold": "Năm nay là dịp kỷ niệm năm mươi năm ngày thống nhất đất nước.",
+          "ocr_raw": "Ni nây lò đẹp ky nuậm nêm muam nám ngày tăng nưưết đốt nước.",
+          "ocr_post_correct": "Nơi này lò đẹp kỹ nậm nêm màu nám ngày tăng nưết đốt nước.",
+          "cer_raw": 0.3279,
+          "cer_post_correct": 0.3115,
+          "wer_raw": 0.8571,
+          "wer_post_correct": 0.8571,
+          "cer_delta": -0.0164
+        },
+        {
+          "id": "026",
+          "gold": "Người ký tên dưới đây xin cam đoan các thông tin đã khai là đúng sự thật.",
+          "ocr_raw": "G0 0n 0y nh con đoạn các thông th đã lên là đăng sự học",
+          "ocr_post_correct": "G0 On On On y nh còn đoạn các thông th đã lên là đăng sự học",
+          "cer_raw": 0.4658,
+          "cer_post_correct": 0.4384,
+          "wer_raw": 0.7059,
+          "wer_post_correct": 0.7059,
+          "cer_delta": -0.0274
+        },
+        {
+          "id": "027",
+          "gold": "Doanh nghiệp công nghệ Việt Nam đang đẩy mạnh xuất khẩu phần mềm sang thị trường Nhật.",
+          "ocr_raw": "“hon CƯ ng chn (g9 Vi Nho ng đếy canh mứt kiến cha êm co â ưng Món",
+          "ocr_post_correct": "hơn CƯ ng chn (g9 Vị Nho ng đến canh mứt kiến chả êm có â ưng Món",
+          "cer_raw": 0.5814,
+          "cer_post_correct": 0.6047,
+          "wer_raw": 1.0588,
+          "wer_post_correct": 1.0588,
+          "cer_delta": 0.0233
+        },
+        {
+          "id": "028",
+          "gold": "Em ăn cơm chưa, nếu chưa thì cùng đi ăn phở với chị nhé.",
+          "ocr_raw": "Em án con chưa, nớn chơn tài cùng đ ăn phố với ch hề:",
+          "ocr_post_correct": "Em án còn chưa, nớn chơn tài cùng đã ăn phố với chị hề:",
+          "cer_raw": 0.2679,
+          "cer_post_correct": 0.25,
+          "wer_raw": 0.6429,
+          "wer_post_correct": 0.5714,
+          "cer_delta": -0.0179
+        },
+        {
+          "id": "029",
+          "gold": "Bên thuê có trách nhiệm bảo quản tài sản trong suốt thời gian thuê.",
+          "ocr_raw": "Bên thuê có trách nhưệm bào quản tài sản trong sướt thời gian thuê.",
+          "ocr_post_correct": "Bên thuê có trách nhiệm bảo quản tài sản trong suốt thời gian thuê.",
+          "cer_raw": 0.0597,
+          "cer_post_correct": 0.0,
+          "wer_raw": 0.2143,
+          "wer_post_correct": 0.0,
+          "cer_delta": -0.0597
+        }
+      ]
+    }
+  }
+}
