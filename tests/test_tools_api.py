@@ -296,3 +296,71 @@ class TestTranslate:
         )
         assert r.status_code == 200
         assert r.json()["translation"] == "Hello world."
+
+
+class TestTranslateFileUpload:
+    """File upload → walked .docx → translated .docx flow.
+
+    Skips cleanly when python-docx is not installed (the walker raises
+    a clear ImportError that the route would translate to 500). The
+    docx extra is in [chat] which the integration tier installs.
+    """
+
+    @pytest.fixture
+    def docx_bytes(self) -> bytes:
+        pytest.importorskip("docx")
+        import io
+
+        from docx import Document
+
+        doc = Document()
+        doc.add_paragraph("alpha")
+        doc.add_paragraph("beta")
+        buf = io.BytesIO()
+        doc.save(buf)
+        return buf.getvalue()
+
+    def _client(self, response: str) -> TestClient:
+        store = MemoryStore(embedder=FakeEmbedder(), llm=FakeLLM(response=response))
+        return TestClient(build_app(store=store))
+
+    def test_uploads_returns_translated_docx(self, docx_bytes: bytes) -> None:
+        import io
+        import json as _json
+
+        pytest.importorskip("docx")
+        from docx import Document
+
+        client = self._client('{"translation": "ALPHA"}')
+        r = client.post(
+            "/api/tools/translate/file",
+            files={"file": ("source.docx", docx_bytes, "application/octet-stream")},
+            data={"source": "vi", "target": "en", "backend": "llm"},
+        )
+        assert r.status_code == 200
+        assert r.headers["content-type"].startswith("application/vnd.openxmlformats-officedocument")
+        assert "source.en.docx" in r.headers["content-disposition"]
+        stats = _json.loads(r.headers["x-translation-stats"])
+        assert stats["paragraphs_translated"] == 2
+        out = Document(io.BytesIO(r.content))
+        texts = [p.text for p in out.paragraphs if p.text]
+        assert texts == ["ALPHA", "ALPHA"]
+
+    def test_rejects_non_docx_file(self) -> None:
+        client = self._client('{"translation": "X"}')
+        r = client.post(
+            "/api/tools/translate/file",
+            files={"file": ("source.txt", b"hello", "text/plain")},
+            data={"source": "vi", "target": "en"},
+        )
+        assert r.status_code == 422
+        assert "docx" in r.json()["detail"]
+
+    def test_rejects_same_source_and_target(self, docx_bytes: bytes) -> None:
+        client = self._client('{"translation": "X"}')
+        r = client.post(
+            "/api/tools/translate/file",
+            files={"file": ("source.docx", docx_bytes, "application/octet-stream")},
+            data={"source": "en", "target": "en"},
+        )
+        assert r.status_code == 422

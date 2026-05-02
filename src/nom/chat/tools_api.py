@@ -12,12 +12,22 @@ cached: first call may take ~10-30 s while weights download, subsequent
 calls reuse the in-memory model. The chat-LLM path reuses whatever LLM
 was passed into ``build_app``.
 
-Each handler returns NFC-normalized strings — see CLAUDE.md NFC rule.
+Each handler returns NFC-normalized strings (text routes); the file
+upload route returns the translated ``.docx`` as raw bytes.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+# Module-level import: FastAPI needs runtime access to ``UploadFile``
+# / ``File`` / ``Form`` to wire multipart dependency injection on the
+# file-upload route. With ``from __future__ import annotations`` these
+# would be unresolvable string forward refs unless they live in module
+# globals.
+import contextlib
+from typing import TYPE_CHECKING, Annotated, Any
+
+with contextlib.suppress(ImportError):  # fastapi is a [chat] extra
+    from fastapi import File, Form, UploadFile
 
 if TYPE_CHECKING:
     from fastapi import FastAPI
@@ -50,6 +60,7 @@ def _get_hf_model(model_id: str) -> Any:
 def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
     """Mount /api/tools/* on ``app``. Idempotent against re-registration."""
     from fastapi import HTTPException
+    from fastapi.responses import Response
 
     @app.post("/api/tools/diacritic/restore")
     def restore_diacritics(payload: dict[str, Any]) -> dict[str, Any]:
@@ -350,6 +361,136 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             "backend": backend,
             "model_id": used_model,
         }
+
+    @app.post("/api/tools/translate/file")
+    async def translate_file_upload(
+        file: Annotated[UploadFile, File()],
+        source: Annotated[str, Form()] = "vi",
+        target: Annotated[str, Form()] = "en",
+        backend: Annotated[str, Form()] = "llm",
+        model_id: Annotated[str | None, Form()] = None,
+    ) -> Response:
+        """Translate an uploaded ``.docx``; respond with the translated
+        ``.docx`` plus per-paragraph stats in the ``X-Translation-Stats``
+        header.
+
+        Multipart form fields:
+
+        - ``file`` — the source ``.docx`` (only format supported in v0.1).
+        - ``source`` / ``target`` — language codes ``en``|``vi``. Must differ.
+        - ``backend`` — ``llm`` (default, uses the server's chat LLM) or
+          ``hf`` (loads an HF seq2seq specialist).
+        - ``model_id`` — optional HF model id when ``backend=hf``;
+          defaults to ``google/madlad400-3b-mt``.
+        """
+        import json
+        import tempfile
+        from pathlib import Path
+
+        filename = file.filename or "uploaded.docx"
+        if not filename.lower().endswith(".docx"):
+            raise HTTPException(
+                status_code=422,
+                detail="only .docx is supported in v0.1",
+            )
+        source_lc = source.lower()
+        target_lc = target.lower()
+        if source_lc == target_lc:
+            raise HTTPException(
+                status_code=422,
+                detail="`source` and `target` must differ",
+            )
+
+        from nom.translate import LLMTranslator, Translator
+
+        translator: Translator
+        used_model: str | None
+        if backend == "llm":
+            if llm is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail="LLM backend unavailable (server started without an LLM)",
+                )
+            try:
+                translator = LLMTranslator(
+                    llm=llm,
+                    source_lang=source_lc,
+                    target_lang=target_lc,
+                )
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            used_model = getattr(llm, "name", None)
+        elif backend == "hf":
+            from nom.translate.hf import HFTranslator
+
+            resolved_model = model_id or "google/madlad400-3b-mt"
+            try:
+                translator = HFTranslator(
+                    model_id=resolved_model,
+                    source_lang=source_lc,
+                    target_lang=target_lc,
+                )
+            except ImportError as exc:
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"HF backend unavailable: {exc}",
+                ) from exc
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            used_model = resolved_model
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unknown backend {backend!r}; expected llm|hf",
+            )
+
+        contents = await file.read()
+        # Walker reads + writes via Path; use temp files rather than
+        # holding the whole zip in memory twice.
+        with tempfile.TemporaryDirectory() as td:
+            src_path = Path(td) / "source.docx"
+            dst_path = Path(td) / "translated.docx"
+            src_path.write_bytes(contents)
+
+            from nom.translate.formats.docx import translate_docx
+
+            try:
+                stats = translate_docx(src_path, dst_path, translator)
+            except Exception as exc:
+                cls = type(exc).__name__
+                if "HTTPStatusError" in cls or "ConnectError" in cls or "Timeout" in cls:
+                    from nom.chat.server import _llm_error_to_503
+
+                    raise _llm_error_to_503(exc) from exc
+                raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+            output_bytes = dst_path.read_bytes()
+
+        stem = filename.rsplit(".", 1)[0]
+        out_filename = f"{stem}.{target_lc}.docx"
+
+        stats_json = json.dumps(
+            {
+                "paragraphs_translated": stats.paragraphs_translated,
+                "paragraphs_skipped": stats.paragraphs_skipped,
+                "paragraphs_failed": stats.paragraphs_failed,
+                "chars_in": stats.chars_in,
+                "chars_out": stats.chars_out,
+                "source": source_lc,
+                "target": target_lc,
+                "backend": backend,
+                "model_id": used_model,
+            }
+        )
+
+        return Response(
+            content=output_bytes,
+            media_type=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+            headers={
+                "Content-Disposition": f'attachment; filename="{out_filename}"',
+                "X-Translation-Stats": stats_json,
+            },
+        )
 
     @app.get("/api/tools/translate/models")
     def list_translate_models() -> dict[str, Any]:
