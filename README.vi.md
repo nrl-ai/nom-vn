@@ -5,9 +5,9 @@
 > Đặt theo tên *chữ Nôm* — bộ chữ Việt Nam dùng suốt một thiên niên kỷ.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/nrl-ai/nom-vn/blob/main/LICENSE)
-[![Trạng thái](https://img.shields.io/badge/status-v0.2.27-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
+[![Trạng thái](https://img.shields.io/badge/status-v0.2.33-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
-[![Tests](https://img.shields.io/badge/tests-354%20passing-brightgreen)](https://github.com/nrl-ai/nom-vn/tree/main/tests)
+[![Tests](https://img.shields.io/badge/tests-406%20passing-brightgreen)](https://github.com/nrl-ai/nom-vn/tree/main/tests)
 
 Bộ công cụ ưu tiên local. **Dữ liệu không rời khỏi máy của bạn.** Dùng bất kỳ LLM nào (mặc định Ollama), bất kỳ embedder nào, bất kỳ định dạng tài liệu nào — Nôm gói chúng vào pipeline RAG hiểu tiếng Việt mà bạn có thể ship dưới dạng thư viện Python hoặc web app chat triển khai sẵn.
 
@@ -33,7 +33,7 @@ Bấm `Cmd/Ctrl + Enter` để chạy ở bất kỳ trang công cụ nào.
 
 ---
 
-## Cấu hình khuyến nghị — *đo ngày 2026-04-30*
+## Cấu hình khuyến nghị — *đo ngày 2026-05-02*
 
 Mỗi đề xuất đều có số đo từ script trong
 [`benchmarks/`](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks) chạy được trên bản clone sạch. Không có số ước tính.
@@ -48,10 +48,11 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 | **Sửa chính tả (mặc định)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) | [`nrl-ai/vn-spell-correction-base`](https://huggingface.co/nrl-ai/vn-spell-correction-base) v0.2.29 (ViT5 220 M, của chúng tôi) | Apache 2.0 | 900 MB | **98.32 %** light avg synthetic · **79.62 %** OOD tổng hợp | vượt Toshiiiii1 +2.22 pp trên OOD thực tế; sửa cả lỗi chính tả + dấu + OCR |
 | **Sửa chính tả (fast tier)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) | [`nrl-ai/vn-spell-correction-small`](https://huggingface.co/nrl-ai/vn-spell-correction-small) v0.2.29 (BARTpho-syllable 115 M, của chúng tôi) | Apache 2.0 | 530 MB | 94.59 % light avg synthetic · 77.55 % OOD tổng hợp | nửa số params so với base, ~3× nhanh hơn; vẫn vượt Toshiiiii1 trên OOD |
 | **Khôi phục dấu (zero-dep dự phòng)** | bảng quy tắc (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
-| **Khôi phục dấu (LLM local)** | `gemma3:4b` Q4 qua Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` cao hơn +5pp nhưng lớn 3× |
+| **Khôi phục dấu (LLM local)** | `gemma3:4b` Q4 qua Ollama | Apache 2.0 | 3.3 GB | **89.06 %** trên 55 câu kinh doanh-mixed · 81.26 % trang trọng · 79.70 % hội thoại · 62.05 % văn học · 0.91 s p50 GPU | `qwen3:1.7b` 16.60 % (dưới rule baseline). Nhạy register-shift — chọn ViT5 fine-tune cho ngữ liệu văn học. |
 | **Tách từ (tốc độ)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |
 | **Tách từ (chất lượng)** | `underthesea` 9.4.0 (CRF, opt-in) | Apache 2.0 | <10 MB | F1 95.70 % · 38 k tok/s | khớp với số liệu VLSP 2013 đã công bố |
-| **OCR (dòng in sạch)** | Tesseract 5 + `vie` traineddata | Apache 2.0 | ~30 MB | CER 5.53 % · 80 ms p50 | EasyOCR (9.39 %), `qwen2.5vl:7b` (31.07 %) |
+| **OCR (dòng văn bản in)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/ocr.md) | Tesseract 5 + `vie` traineddata | Apache 2.0 | ~30 MB | **CER 0.00 %** in sạch · 0.70 % nhiễu nhẹ · 30.34 % scan kém · 80 ms p50 | EasyOCR (1.42/4.87/87.09 %), VietOCR (1.41/3.37/29.00 %), PaddleOCR PP-OCRv5 (24.70/31.33/86.13 %), RapidOCR (63.97/77.83/100 %) |
+| **OCR (dòng chữ viết tay)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/ocr.md) | VietOCR `vgg_transformer` (pbcquoc/vietocr) | Apache 2.0 | ~110 MB | **CER 31.82 %** trên `brianhuster/VietnameseOCRdataset` test 200 · 246 ms p50 GPU | Tesseract (69.34 %), PaddleOCR PP-OCRv5 (59.43 %, không có recognizer VN-specific), TrOCR-handwritten EN-only (75.89 %), EasyOCR (71.52 %) |
 | **Trích văn bản PDF** | `pypdfium2` (BSD-3 wrap PDFium Apache-2.0) | BSD-3 / Apache | <10 MB | 99.81 % char overlap · 2.35 M chars/s | `pdfplumber` (51 k chars/s), Docling (15 k chars/s) |
 | **Dense embedder (RAG)** | `bkai-foundation-models/vietnamese-bi-encoder` (opt-in) | Apache 2.0 | 383 MB | R@1 76.25 % · R@10 98.75 % trên Zalo Legal QA 5 k | `dangvantuan/vietnamese-embedding` (35.00 % R@1) hơn +41.25 pp |
 | **Dense embedder (mặc định, ổn định)** | `dangvantuan/vietnamese-embedding` | Apache 2.0 | 440 MB | R@1 35.00 % trên Zalo Legal QA 5 k | — |
@@ -64,7 +65,7 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 - *Cần sửa chính tả (lỗi typing + dấu + OCR trong một bước)?* Cùng cách cài, đổi model id sang `nrl-ai/vn-spell-correction-base`. Vượt `bmd1905/vietnamese-correction-v2` 11-25 pp.
 - *Quan tâm độ chính xác thực tế (không chỉ synthetic)?* Đọc [bench ngoài-phân-phối OOD](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) — 150 câu nhiễu tiếng Việt thật được hand-curate trên 6 register, kèm bootstrap 95 % CI. Tóm tắt (v0.2.29): synthetic 98.32 % light avg; OOD tổng hợp **79.62 %** — vượt `Toshiiiii1` (77.40 %) và `bmd1905` (49.21 %).
 - *Cần RAG local trên tài liệu tiếng Việt?* Cài `nom-vn[chat,embeddings,nlp]`, đổi embedder mặc định sang `BKaiEmbedder`. +41 pp R@1.
-- *Cần OCR ảnh quét tiếng Việt?* Tesseract `vie` là lựa chọn đúng. Đừng dùng VLM cho OCR — VLM thường ảo giác trên crop dòng hẹp.
+- *Cần OCR ảnh quét tiếng Việt?* Hai câu trả lời tuỳ vào loại đầu vào: **Tesseract `vie`** đúng cho dòng in (0.00 % CER trên ảnh in sạch). **VietOCR** đúng cho chữ viết tay (31.82 % CER vs Tesseract 69.34 % — khoảng cách 37.5 pp này là phát hiện OCR lớn nhất của repo). PaddleOCR PP-OCRv5 chỉ thứ 3 ở mọi register vì không ship recognizer VN-specific; `lang='vi'` chỉ load `latin_PP-OCRv5_mobile_rec` chung và làm rớt dấu thanh. Đừng dùng VLM cho crop dòng đơn — VLM ảo giác ở mức dòng (chỉ dùng VLM khi có context tài liệu đầy đủ như form / hoá đơn).
 - *Cần trích văn bản PDF không vướng giấy phép?* Dùng `pypdfium2` (đã ship sẵn). Tránh PyMuPDF — AGPL của nó kéo mọi thứ downstream thành AGPL.
 
 ## Đang ship hôm nay
