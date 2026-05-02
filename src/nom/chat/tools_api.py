@@ -45,6 +45,24 @@ __all__ = ["register_tool_routes"]
 _HF_CACHE: dict[str, Any] = {}
 
 
+_OOXML_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+_OOXML_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+_OOXML_PPTX = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+
+
+def _media_type_for_suffix(suffix: str) -> str:
+    """MIME type for the file-translation download response."""
+    return {
+        ".docx": _OOXML_DOCX,
+        ".xlsx": _OOXML_XLSX,
+        ".pptx": _OOXML_PPTX,
+        ".txt": "text/plain; charset=utf-8",
+        ".md": "text/markdown; charset=utf-8",
+        ".markdown": "text/markdown; charset=utf-8",
+        ".rst": "text/x-rst; charset=utf-8",
+    }.get(suffix.lower(), "application/octet-stream")
+
+
 def _get_hf_model(model_id: str) -> Any:
     """Lazy + memoize a `HFDiacriticModel` per repo id."""
     cached = _HF_CACHE.get(model_id)
@@ -370,13 +388,13 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
         backend: Annotated[str, Form()] = "llm",
         model_id: Annotated[str | None, Form()] = None,
     ) -> Response:
-        """Translate an uploaded ``.docx``; respond with the translated
-        ``.docx`` plus per-paragraph stats in the ``X-Translation-Stats``
-        header.
+        """Translate an uploaded document; respond with the translated
+        file plus per-unit stats in the ``X-Translation-Stats`` header.
 
         Multipart form fields:
 
-        - ``file`` — the source ``.docx`` (only format supported in v0.1).
+        - ``file`` — source document. Supported: ``.docx``, ``.xlsx``,
+          ``.pptx``, ``.txt``, ``.md``, ``.markdown``, ``.rst``.
         - ``source`` / ``target`` — language codes ``en``|``vi``. Must differ.
         - ``backend`` — ``llm`` (default, uses the server's chat LLM) or
           ``hf`` (loads an HF seq2seq specialist).
@@ -387,11 +405,16 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
         import tempfile
         from pathlib import Path
 
+        from nom.translate.formats import SUPPORTED_FORMATS
+
         filename = file.filename or "uploaded.docx"
-        if not filename.lower().endswith(".docx"):
+        suffix = Path(filename).suffix.lower()
+        if suffix not in SUPPORTED_FORMATS:
             raise HTTPException(
                 status_code=422,
-                detail="only .docx is supported in v0.1",
+                detail=(
+                    f"unsupported source format {suffix!r}; supported: {sorted(SUPPORTED_FORMATS)}"
+                ),
             )
         source_lc = source.lower()
         target_lc = target.lower()
@@ -445,17 +468,15 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             )
 
         contents = await file.read()
-        # Walker reads + writes via Path; use temp files rather than
-        # holding the whole zip in memory twice.
         with tempfile.TemporaryDirectory() as td:
-            src_path = Path(td) / "source.docx"
-            dst_path = Path(td) / "translated.docx"
+            src_path = Path(td) / f"source{suffix}"
+            dst_path = Path(td) / f"translated{suffix}"
             src_path.write_bytes(contents)
 
-            from nom.translate.formats.docx import translate_docx
+            from nom.translate.formats import translate_file as _translate_file
 
             try:
-                stats = translate_docx(src_path, dst_path, translator)
+                stats = _translate_file(src_path, dst_path, translator)
             except Exception as exc:
                 cls = type(exc).__name__
                 if "HTTPStatusError" in cls or "ConnectError" in cls or "Timeout" in cls:
@@ -467,25 +488,41 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             output_bytes = dst_path.read_bytes()
 
         stem = filename.rsplit(".", 1)[0]
-        out_filename = f"{stem}.{target_lc}.docx"
+        out_filename = f"{stem}.{target_lc}{suffix}"
+
+        # Stats fields differ by format (paragraphs_* for docx/pptx/text,
+        # cells_* for xlsx). Normalize to "units_*" for the JSON header.
+        units_translated = getattr(stats, "paragraphs_translated", None)
+        if units_translated is None:
+            units_translated = getattr(stats, "cells_translated", 0)
+        units_skipped = getattr(stats, "paragraphs_skipped", None)
+        if units_skipped is None:
+            units_skipped = getattr(stats, "cells_skipped", 0)
+        units_failed = getattr(stats, "paragraphs_failed", None)
+        if units_failed is None:
+            units_failed = getattr(stats, "cells_failed", 0)
 
         stats_json = json.dumps(
             {
-                "paragraphs_translated": stats.paragraphs_translated,
-                "paragraphs_skipped": stats.paragraphs_skipped,
-                "paragraphs_failed": stats.paragraphs_failed,
+                "units_translated": units_translated,
+                "units_skipped": units_skipped,
+                "units_failed": units_failed,
+                "paragraphs_translated": units_translated,
+                "paragraphs_skipped": units_skipped,
+                "paragraphs_failed": units_failed,
                 "chars_in": stats.chars_in,
                 "chars_out": stats.chars_out,
                 "source": source_lc,
                 "target": target_lc,
                 "backend": backend,
                 "model_id": used_model,
+                "format": suffix.lstrip("."),
             }
         )
 
         return Response(
             content=output_bytes,
-            media_type=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+            media_type=_media_type_for_suffix(suffix),
             headers={
                 "Content-Disposition": f'attachment; filename="{out_filename}"',
                 "X-Translation-Stats": stats_json,

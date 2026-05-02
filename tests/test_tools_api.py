@@ -346,15 +346,26 @@ class TestTranslateFileUpload:
         texts = [p.text for p in out.paragraphs if p.text]
         assert texts == ["ALPHA", "ALPHA"]
 
-    def test_rejects_non_docx_file(self) -> None:
+    def test_rejects_unsupported_format(self) -> None:
         client = self._client('{"translation": "X"}')
         r = client.post(
             "/api/tools/translate/file",
-            files={"file": ("source.txt", b"hello", "text/plain")},
+            files={"file": ("source.csv", b"a,b,c\n", "text/csv")},
             data={"source": "vi", "target": "en"},
         )
         assert r.status_code == 422
-        assert "docx" in r.json()["detail"]
+        assert "unsupported source format" in r.json()["detail"]
+
+    def test_accepts_txt_format(self) -> None:
+        client = self._client('{"translation": "Hello"}')
+        r = client.post(
+            "/api/tools/translate/file",
+            files={"file": ("notes.txt", "xin chào".encode(), "text/plain")},
+            data={"source": "vi", "target": "en"},
+        )
+        assert r.status_code == 200
+        assert r.headers["content-type"].startswith("text/plain")
+        assert "notes.en.txt" in r.headers["content-disposition"]
 
     def test_rejects_same_source_and_target(self, docx_bytes: bytes) -> None:
         client = self._client('{"translation": "X"}')

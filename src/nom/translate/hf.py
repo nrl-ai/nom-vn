@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import threading
 import unicodedata
-from typing import Any, cast
+from typing import Any
 
 from nom.translate.base import Translator
 
@@ -97,8 +97,8 @@ class HFTranslator(Translator):
                     "HFTranslator requires transformers + torch. "
                     "Install with: pip install 'transformers>=4.45' 'torch>=2.0' sentencepiece"
                 ) from exc
-            tokenizer = cast(Any, AutoTokenizer.from_pretrained(self._model_id))
-            model = cast(Any, AutoModelForSeq2SeqLM.from_pretrained(self._model_id))
+            tokenizer: Any = AutoTokenizer.from_pretrained(self._model_id)  # type: ignore[no-untyped-call,unused-ignore]
+            model: Any = AutoModelForSeq2SeqLM.from_pretrained(self._model_id)  # type: ignore[no-untyped-call,unused-ignore]
             _MODEL_CACHE[self._model_id] = (tokenizer, model)
             return tokenizer, model
 

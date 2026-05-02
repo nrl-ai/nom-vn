@@ -1,11 +1,11 @@
 """``nom translate <file>`` — format-preserving file translation.
 
-v0.1 supports ``.docx``. Other formats are scaffolded in
-``nom.translate.formats`` but not wired into the CLI yet.
-
-Wired into the top-level ``nom`` dispatcher via
-:func:`add_subparser` and :func:`run`, called from
-``nom.chat.cli.main``.
+Supports ``.docx``, ``.xlsx``, ``.pptx``, ``.txt``, ``.md`` /
+``.markdown``, ``.rst`` via the per-format walkers in
+``nom.translate.formats``. Each walker preserves the format's
+structure (heading levels, table layout, slide arrangement, paragraph
+breaks); intra-paragraph styling collapses to the first run for
+docx/pptx (v0 trade-off).
 """
 
 from __future__ import annotations
@@ -24,9 +24,12 @@ def add_subparser(subparsers: argparse._SubParsersAction[Any]) -> None:
     """Register the ``translate`` subcommand on a top-level parser."""
     p = subparsers.add_parser(
         "translate",
-        help="Translate a .docx file preserving formatting (v0.1)",
+        help="Translate a .docx / .xlsx / .pptx / .txt / .md file preserving formatting",
     )
-    p.add_argument("input", help="Path to a .docx file.")
+    p.add_argument(
+        "input",
+        help="Path to a .docx, .xlsx, .pptx, .txt, .md, .markdown, or .rst file.",
+    )
     p.add_argument(
         "--source",
         "--src",
@@ -47,7 +50,7 @@ def add_subparser(subparsers: argparse._SubParsersAction[Any]) -> None:
         "--output",
         "-o",
         default=None,
-        help="Output .docx path. Default: <input-stem>.<tgt>.docx next to source.",
+        help="Output path. Default: <input-stem>.<tgt><ext> next to source.",
     )
     p.add_argument(
         "--backend",
@@ -76,38 +79,47 @@ def run(args: argparse.Namespace) -> int:
         print(f"input not found: {src_path}", file=sys.stderr)
         return 2
 
+    from nom.translate.formats import SUPPORTED_FORMATS, translate_file
+
     suffix = src_path.suffix.lower()
-    if suffix != ".docx":
+    if suffix not in SUPPORTED_FORMATS:
         print(
-            f"only .docx is supported in v0.1; got '{suffix}'. "
-            f"Other formats land after the docx walker has user feedback.",
+            f"unsupported source format {suffix!r}; supported: {sorted(SUPPORTED_FORMATS)}",
             file=sys.stderr,
         )
         return 2
 
-    if args.output:
-        dst_path = Path(args.output).expanduser()
-    else:
-        dst_path = src_path.with_name(f"{src_path.stem}.{args.target}{src_path.suffix}")
+    dst_path = (
+        Path(args.output).expanduser()
+        if args.output
+        else src_path.with_name(f"{src_path.stem}.{args.target}{src_path.suffix}")
+    )
 
     translator = _build_translator(args)
-    from nom.translate.formats.docx import translate_docx
 
     print(
         f"translating {src_path.name} ({args.source}→{args.target}) "
         f"via {args.backend}:{translator.name} → {dst_path.name} ...",
         file=sys.stderr,
     )
-    stats = translate_docx(src_path, dst_path, translator)
+    stats = translate_file(src_path, dst_path, translator)
+
+    # Stats fields differ by format; xlsx uses cells_*, others use
+    # paragraphs_*. Read whichever is present.
+    translated = getattr(stats, "paragraphs_translated", None) or getattr(
+        stats, "cells_translated", 0
+    )
+    skipped = getattr(stats, "paragraphs_skipped", None) or getattr(stats, "cells_skipped", 0)
+    failed = getattr(stats, "paragraphs_failed", None) or getattr(stats, "cells_failed", 0)
 
     print(
-        f"done: {stats.paragraphs_translated} translated, "
-        f"{stats.paragraphs_skipped} skipped, "
-        f"{stats.paragraphs_failed} failed "
+        f"done: {translated} translated, "
+        f"{skipped} skipped, "
+        f"{failed} failed "
         f"({stats.chars_in:,} → {stats.chars_out:,} chars).",
         file=sys.stderr,
     )
-    return 0 if stats.paragraphs_failed == 0 else 1
+    return 0 if failed == 0 else 1
 
 
 def _build_translator(args: argparse.Namespace) -> Translator:
