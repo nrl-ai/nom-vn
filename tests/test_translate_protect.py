@@ -106,7 +106,7 @@ def test_detect_length_warning_under_threshold() -> None:
 def test_detect_length_warning_over_threshold() -> None:
     msg = detect_length_warning(100, 200)
     assert msg is not None
-    assert "2.0×" in msg
+    assert "2.0x" in msg
 
 
 def test_detect_length_warning_zero_source() -> None:

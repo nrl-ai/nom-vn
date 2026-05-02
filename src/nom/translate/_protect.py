@@ -163,7 +163,7 @@ def detect_length_warning(
     *,
     threshold: float = 1.5,
 ) -> str | None:
-    """Return a one-line warning when ``target`` is more than ``threshold``×
+    """Return a one-line warning when ``target`` is more than ``threshold``x
     longer than ``source``. Used to flag paragraphs that may overflow
     fixed-width containers (table cells, bordered text boxes).
     """
@@ -173,7 +173,7 @@ def detect_length_warning(
     if ratio < threshold:
         return None
     return (
-        f"target is {ratio:.1f}× source ({source_chars}→{target_chars} chars); "
+        f"target is {ratio:.1f}x source ({source_chars}→{target_chars} chars); "
         f"may overflow fixed-width containers"
     )
 

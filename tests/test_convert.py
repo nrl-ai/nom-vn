@@ -115,3 +115,99 @@ def test_convert_dispatcher_creates_destination_parent(tmp_path: Path) -> None:
     _make_text_image(src, "Hello")
     convert_to_docx(src, dst, ocr_language="eng")
     assert dst.exists()
+
+
+# ---------------------------------------------------------------------------
+# PDF → DOCX paths
+# ---------------------------------------------------------------------------
+
+
+def _make_text_layer_pdf(path: Path, body: str) -> None:
+    """Create a one-page PDF with a real text layer via reportlab."""
+    rl = pytest.importorskip("reportlab.pdfgen.canvas")
+    canvas = rl.Canvas(str(path))
+    text_obj = canvas.beginText(72, 720)
+    for line in body.splitlines():
+        text_obj.textLine(line)
+    canvas.drawText(text_obj)
+    canvas.showPage()
+    canvas.save()
+
+
+def test_pdf_text_layer_extracted_directly(tmp_path: Path) -> None:
+    """Born-digital PDF (text layer present) → DOCX without OCR."""
+    pytest.importorskip("reportlab")
+    pytest.importorskip("pdfplumber")
+    pytest.importorskip("pypdfium2")
+
+    from nom.convert import pdf_to_docx
+
+    src = tmp_path / "src.pdf"
+    dst = tmp_path / "out.docx"
+    _make_text_layer_pdf(src, "Hello world\nThis is a born-digital PDF.")
+
+    stats = pdf_to_docx(src, dst, ocr_language="eng")
+
+    assert isinstance(stats, ConversionStats)
+    assert stats.n_pages == 1
+    assert stats.pages_text_extracted == 1
+    assert stats.pages_ocred == 0
+    assert dst.exists()
+
+    out = Document(str(dst))
+    full = "\n".join(p.text for p in out.paragraphs)
+    assert "born-digital" in full.lower()
+
+
+def test_pdf_dispatcher_routes_to_pdf_handler(tmp_path: Path) -> None:
+    pytest.importorskip("reportlab")
+    pytest.importorskip("pdfplumber")
+    pytest.importorskip("pypdfium2")
+
+    src = tmp_path / "doc.pdf"
+    dst = tmp_path / "doc.docx"
+    _make_text_layer_pdf(
+        src,
+        "dispatcher test — long enough text to pass the 32-char text-layer threshold.",
+    )
+
+    stats = convert_to_docx(src, dst, ocr_language="eng")
+    assert stats.n_pages == 1
+    assert stats.pages_text_extracted == 1
+
+
+def test_pdf_missing_source_raises(tmp_path: Path) -> None:
+    pytest.importorskip("pdfplumber")
+    pytest.importorskip("pypdfium2")
+
+    from nom.convert import pdf_to_docx
+
+    with pytest.raises(FileNotFoundError):
+        pdf_to_docx(tmp_path / "nope.pdf", tmp_path / "out.docx")
+
+
+@needs_tesseract
+def test_pdf_with_no_text_layer_falls_back_to_ocr(tmp_path: Path) -> None:
+    """Image-only PDF (rendered from a PIL image) — pdfplumber yields
+    nothing, so the walker must OCR every page."""
+    pytest.importorskip("pdfplumber")
+    pytest.importorskip("pypdfium2")
+    pytest.importorskip("reportlab")
+
+    from reportlab.pdfgen import canvas as rl_canvas
+
+    from nom.convert import pdf_to_docx
+
+    src = tmp_path / "scan.pdf"
+    dst = tmp_path / "scan.docx"
+
+    _make_text_image(tmp_path / "page.png", "Hello world")
+    pdf_canvas = rl_canvas.Canvas(str(src), pagesize=(640, 200))
+    pdf_canvas.drawImage(str(tmp_path / "page.png"), 0, 0, 640, 200)
+    pdf_canvas.showPage()
+    pdf_canvas.save()
+
+    stats = pdf_to_docx(src, dst, ocr_language="eng")
+    assert stats.pages_text_extracted == 0
+    assert stats.pages_ocred == 1
+    assert dst.exists()

@@ -270,11 +270,14 @@ async def _run_ollama_pull(state: _PullState, ollama_url: str) -> None:
 
     state.status = "downloading"
     try:
-        async with httpx.AsyncClient(timeout=None) as client, client.stream(
-            "POST",
-            f"{ollama_url}/api/pull",
-            json={"name": state.model, "stream": True},
-        ) as response:
+        async with (
+            httpx.AsyncClient(timeout=None) as client,
+            client.stream(
+                "POST",
+                f"{ollama_url}/api/pull",
+                json={"name": state.model, "stream": True},
+            ) as response,
+        ):
             if response.status_code != 200:
                 state.status = "error"
                 state.error = f"ollama returned HTTP {response.status_code}"
