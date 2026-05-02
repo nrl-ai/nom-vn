@@ -266,7 +266,7 @@ function labelForKind(kind: string): string {
 }
 
 function summariseEvent(ev: TraceEvent): string {
-  const p = ev.payload;
+  const p = ev.payload ?? {};
   switch (ev.kind) {
     case "start":
       return typeof p.agent === "string" ? `tác tử ${p.agent}` : "";

@@ -59,6 +59,7 @@ class BearerTokenAuth:
     token: str
     user_id: str = "anonymous"
     tenant_id: str = "default"
+    roles: tuple[str, ...] = ("workspace.editor",)
     name: str = "bearer"
 
     def authenticate(self, *, credentials: Credentials) -> User:
@@ -75,5 +76,5 @@ class BearerTokenAuth:
         return User(
             id=self.user_id,
             tenant_id=self.tenant_id,
-            roles=("workspace.editor",),
+            roles=tuple(self.roles),
         )

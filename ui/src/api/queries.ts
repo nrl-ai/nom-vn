@@ -213,14 +213,22 @@ export function useTranslateModels() {
 }
 
 // Placeholder for the in-progress AgentRunPage. Returns an empty list
-// so the UI renders the "no agents registered" empty state. Real
-// /api/agents endpoint + recipe registry is being wired by a parallel
-// track; once that lands, swap to api.agents.list().
+// Wire to api.agents.list. The endpoint may not be mounted (no
+// nom-vn-enterprise installed; no agents registered) so we wrap in
+// try/catch and surface an empty list — the UI's "(chưa có tác tử)"
+// state covers that case.
 export function useAgents() {
   return useQuery({
     queryKey: ["agents"],
-    queryFn: () => Promise.resolve({ agents: [] as Array<{ name: string; type: string }> }),
-    staleTime: Infinity,
+    queryFn: async () => {
+      try {
+        return await api.agents.list();
+      } catch {
+        return { agents: [] as Array<{ name: string; type: string }> };
+      }
+    },
+    staleTime: 30_000,
+    retry: 0,
   });
 }
 

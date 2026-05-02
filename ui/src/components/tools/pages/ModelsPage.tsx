@@ -60,9 +60,7 @@ export function ModelsPage() {
 
   const data = modelsQ.data;
   const pulls = pullsQ.data?.pulls ?? [];
-  const activePulls = pulls.filter(
-    (p) => p.status === "pending" || p.status === "downloading",
-  );
+  const activePulls = pulls.filter((p) => p.status === "pending" || p.status === "downloading");
 
   const installed = useMemo<Set<string>>(
     () => new Set((data?.ollama.models ?? []).map((m) => m.name)),
@@ -189,8 +187,8 @@ export function ModelsPage() {
           <div>
             <strong>Không kết nối được Ollama</strong> tại{" "}
             <code className="font-mono text-[12px]">{data.ollama.url}</code>. Hãy chắc chắn rằng{" "}
-            <code className="font-mono">ollama serve</code> đang chạy. Danh sách dưới đây sẽ
-            trống cho đến khi kết nối lại.
+            <code className="font-mono">ollama serve</code> đang chạy. Danh sách dưới đây sẽ trống
+            cho đến khi kết nối lại.
           </div>
         </div>
       )}
@@ -211,11 +209,10 @@ export function ModelsPage() {
       )}
 
       {/* Recently completed pulls */}
-      {pulls.some((p) => p.status === "success" || p.status === "error" || p.status === "cancelled") && (
-        <Panel
-          label="Gần đây"
-          hint="lịch sử tải gần đây — tự xoá sau 10 phút"
-        >
+      {pulls.some(
+        (p) => p.status === "success" || p.status === "error" || p.status === "cancelled",
+      ) && (
+        <Panel label="Gần đây" hint="lịch sử tải gần đây — tự xoá sau 10 phút">
           <ul className="space-y-1">
             {pulls
               .filter((p) => p.status !== "pending" && p.status !== "downloading")
@@ -257,10 +254,7 @@ export function ModelsPage() {
       </Panel>
 
       {/* Installed models */}
-      <Panel
-        label="Đã cài đặt"
-        hint={`${data?.ollama.models.length ?? 0} mô hình`}
-      >
+      <Panel label="Đã cài đặt" hint={`${data?.ollama.models.length ?? 0} mô hình`}>
         {data?.ollama.models.length === 0 ? (
           <EmptyHint>
             Chưa có mô hình nào. Chọn từ danh sách <em>Đề xuất</em> ở trên rồi bấm Tải.
@@ -345,13 +339,7 @@ function CatalogRow({
   );
 }
 
-function InstalledRow({
-  model,
-  onDelete,
-}: {
-  model: OllamaModelInfo;
-  onDelete: () => void;
-}) {
+function InstalledRow({ model, onDelete }: { model: OllamaModelInfo; onDelete: () => void }) {
   return (
     <li className="flex items-center justify-between gap-3 border-l-2 border-accent bg-paper px-3 py-2">
       <div className="min-w-0 flex-1">
@@ -361,7 +349,9 @@ function InstalledRow({
         </div>
         <p className="mt-0.5 font-mono text-[11px] text-ink-soft">
           {formatBytes(model.size_bytes)}
-          {model.modified_at ? ` · cập nhật ${new Date(model.modified_at).toLocaleDateString()}` : ""}
+          {model.modified_at
+            ? ` · cập nhật ${new Date(model.modified_at).toLocaleDateString()}`
+            : ""}
         </p>
       </div>
       <Button variant="outline" size="sm" onClick={onDelete}>
@@ -372,13 +362,7 @@ function InstalledRow({
   );
 }
 
-function PullProgressRow({
-  pull,
-  onCancel,
-}: {
-  pull: PullState;
-  onCancel: () => void;
-}) {
+function PullProgressRow({ pull, onCancel }: { pull: PullState; onCancel: () => void }) {
   const pct = Math.round(pull.progress * 100);
   return (
     <li className="border-l-2 border-accent bg-paper px-3 py-2">
@@ -393,10 +377,7 @@ function PullProgressRow({
         </Button>
       </div>
       <div className="mt-1.5 h-1.5 w-full overflow-hidden bg-bg-soft">
-        <div
-          className="h-full bg-accent transition-all"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="h-full bg-accent transition-all" style={{ width: `${pct}%` }} />
       </div>
       <p className="mt-1 font-mono text-[11px] text-ink-soft">
         {pct}% · {formatBytes(pull.downloaded_bytes)} / {formatBytes(pull.total_bytes)}

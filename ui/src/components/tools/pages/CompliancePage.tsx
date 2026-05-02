@@ -253,14 +253,25 @@ function ResultView({ result }: { result: Result }) {
 
       <div>
         <h4 className="mb-1 font-mono text-[11px] uppercase tracking-widest text-ink-mute">
-          Lý luận (rule {result.fired_rule_ids.length} fire)
+          Lý luận ({result.fired_rule_ids.length} rule fire)
         </h4>
-        <ol className="space-y-1 text-xs text-ink/80">
-          {result.reasoning.map((r, i) => (
-            <li key={i} className="border-l-2 border-line pl-2">
-              {r}
-            </li>
-          ))}
+        <ol className="space-y-2 text-xs text-ink/80">
+          {result.reasoning.map((r, i) => {
+            // Server emits "[<rule-id>] <description>" — split for cleaner rendering.
+            const m = /^\[([^\]]+)\]\s*(.*)$/.exec(r);
+            const ruleId = m ? m[1] : null;
+            const body = m ? m[2] : r;
+            return (
+              <li key={i} className="border-l-2 border-line pl-2 leading-relaxed">
+                {ruleId && (
+                  <span className="mr-1.5 inline-block border border-ink bg-bg-soft px-1.5 py-0 font-mono text-[10px] text-ink">
+                    {ruleId}
+                  </span>
+                )}
+                {body}
+              </li>
+            );
+          })}
         </ol>
       </div>
     </div>

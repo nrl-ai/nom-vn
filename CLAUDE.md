@@ -396,6 +396,28 @@ plus ui-* (prettier, eslint, tsc no-emit). Never `--no-verify`.
 | Office fixtures | `python benchmarks/data/office_vi/_generate.py` |
 | Seed demo spaces | `python scripts/seed_demo.py` |
 
+## Screenshots — capture at desktop width
+
+UI screenshots that land in `docs/` must be captured at a desktop
+viewport (≥ 1440 × 900). The chat app's editorial 2-column layout
+collapses to a single stack below ~1024 px, which makes the result
+hidden behind the form on the Compliance / Admin pages and looks
+cramped on the Translate / Models pages. Marketing-grade shots
+require the side-by-side layout.
+
+Concrete rules when scripting Playwright (manual or via the
+`mcp__playwright__browser_resize` tool):
+
+- Default viewport: **1440 × 900** for app pages.
+- Use **1920 × 1080** when capturing pages with three or more
+  columns (admin + audit, model catalog) so nothing is cropped.
+- VitePress doc pages are reader-grade — capture at 1440 × 900 and
+  let the `.vp-doc` 728 px max-width center naturally.
+- After resizing, scroll to top before `screenshot()` so the
+  header is visible.
+- Save under `docs/screenshots/` with a 2-digit numeric prefix and
+  copy to `docs/public/screenshots/` so VitePress serves them.
+
 ## Other reading
 
 - [`docs/architecture.md`](docs/architecture.md) — module map

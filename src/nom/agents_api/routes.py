@@ -121,13 +121,15 @@ def register_agent_routes(app: "Any", *, agents: Mapping[str, Agent]) -> None:
         threading.Thread(target=_runner, daemon=True).start()
 
         def _gen() -> Any:
-            yield sse_event(
-                {"kind": "stream_open", "agent": name, "run_id": trace.run_id},
-                event="stream_open",
-            )
+            # NB: do NOT set ``event=…`` per emission. Default events
+            # surface via the browser's ``EventSource.onmessage``;
+            # named events would need a separate addEventListener per
+            # kind, which complicates the client. We carry the kind
+            # in the JSON payload instead.
+            yield sse_event({"kind": "stream_open", "agent": name, "run_id": trace.run_id})
             for ev in trace.iter_events(timeout=120):
-                yield sse_event(trace_event_to_sse(ev), event=ev.kind)
-            yield sse_event({"kind": "stream_close", "run_id": trace.run_id}, event="stream_close")
+                yield sse_event(trace_event_to_sse(ev))
+            yield sse_event({"kind": "stream_close", "run_id": trace.run_id})
 
         return StreamingResponse(
             _gen(),
