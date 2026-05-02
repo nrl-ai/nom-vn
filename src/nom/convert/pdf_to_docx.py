@@ -109,12 +109,8 @@ def pdf_to_docx(
                 # uses subset fonts without a ToUnicode CMap (UDHR is
                 # the canonical example). The string is long but not
                 # readable — force the OCR fallback for those pages.
-                cid_glyph_ratio = (
-                    text.count("(cid:") / max(len(text) // 8, 1) if text else 0.0
-                )
-                usable_text_layer = (
-                    len(text) >= min_chars_text_layer and cid_glyph_ratio < 0.05
-                )
+                cid_glyph_ratio = text.count("(cid:") / max(len(text) // 8, 1) if text else 0.0
+                usable_text_layer = len(text) >= min_chars_text_layer and cid_glyph_ratio < 0.05
                 if usable_text_layer:
                     pages_text_extracted += 1
                 else:
