@@ -28,9 +28,9 @@ out = fix_diacritics("Hop dong nay duoc lap ngay 14/3/2025", model=restorer)
 
 | Mô hình | Giấy phép | Format | light avg | heavy avg | Kết luận |
 |---|---|---|---:|---:|---|
-| [`bmd1905/vietnamese-correction-v2`](https://huggingface.co/bmd1905/vietnamese-correction-v2) | Apache 2.0 | safetensors | 86.7 % | 72.6 % | baseline tốt nhất chưa được fine-tune; mBART 400M |
-| [`iAmHieu2012/vit5-vietnamese-spelling-correction`](https://huggingface.co/iAmHieu2012/vit5-vietnamese-spelling-correction) | MIT | safetensors | chưa đo | chưa đo | tokenizer cần convert slow→fast; tạm hoãn |
-| [`chamdentimem/ViT5_Vietnamese_Correction`](https://huggingface.co/chamdentimem/ViT5_Vietnamese_Correction) | MIT | safetensors | chưa đo | chưa đo | tương tự iAmHieu, tạm hoãn |
+| [`bmd1905/vietnamese-correction-v2`](https://huggingface.co/bmd1905/vietnamese-correction-v2) | Apache 2.0 | safetensors | 86.95 % | 72.62 % | baseline tốt nhất chưa được fine-tune; mBART 400M |
+| [`chamdentimem/ViT5_Vietnamese_Correction`](https://huggingface.co/chamdentimem/ViT5_Vietnamese_Correction) | MIT | safetensors | 93.45 % | 75.95 % | ViT5 fine-tune; mạnh hơn bmd1905 trên light noise (+6.5 pp), tương đương heavy (+3.3 pp). 220M, slow tokenizer. |
+| [`iAmHieu2012/vit5-vietnamese-spelling-correction`](https://huggingface.co/iAmHieu2012/vit5-vietnamese-spelling-correction) | MIT | safetensors | 80.72 % | 56.55 % | ViT5 220M; yếu nhất nhóm benched, đặc biệt trên register literary (61.81 % light, 42.11 % heavy). Slow tokenizer. |
 | Quy tắc (không có nhánh sửa chính tả) | — | — | — | — | Nhánh chỉ-quy-tắc trong `nom.text.fix_diacritics` chỉ khôi phục dấu — không sửa cấp ký tự. |
 
 Chi tiết bmd1905 trên 8 split:
@@ -190,8 +190,9 @@ với `light_noise` / `telex_typo_noise` / `heavy_noise` áp round-robin.
 | Mô hình | light avg | heavy avg | Δ vs base của chúng tôi |
 |---|---:|---:|---:|
 | **`nrl-ai/vn-spell-correction-base`** (chúng tôi) | **98.58 %** | **97.35 %** | — |
+| `chamdentimem/ViT5_Vietnamese_Correction` (220 M) | 93.45 % | 75.95 % | **-5.1 / -21.4** pp |
 | `bmd1905/vietnamese-correction-v2` (400 M) | 86.95 % | 72.62 % | **-11.6 / -24.7** pp |
-| `iAmHieu2012/vit5-vietnamese-spelling-correction` (220 M) | 80.31 % | 56.55 % | **-18.3 / -40.8** pp |
+| `iAmHieu2012/vit5-vietnamese-spelling-correction` (220 M) | 80.72 % | 56.55 % | **-17.9 / -40.8** pp |
 
 Bản base của chúng tôi thắng mọi split 7-29 pp. Lợi thế kích thước của
 bmd1905 (400M vs 220M của chúng tôi) không đáng kể — fine-tune có

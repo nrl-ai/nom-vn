@@ -86,8 +86,8 @@ keyword-heavy queries).
 |---|---:|---:|---:|---|
 | `qwen3:8b` Q4_K_M | 4.7 GB | 6 GB | 87.26 % | mặc định, máy laptop discrete GPU |
 | `gemma3:4b` Q4_K_M | 3.3 GB | 4 GB | 87.90 % | máy yếu hơn (Apple Silicon, integrated GPU) |
-| `qwen3:1.7b` Q4_K_M | 1.4 GB | 2 GB | — | rất yếu, embedded device |
-| `phi4` (14B) Q4 | 8.4 GB | 12 GB | — | có VRAM thoải mái, độ chính xác cao hơn |
+| `qwen3:1.7b` Q4_K_M | 1.4 GB | 2 GB | 16.60 % | rất yếu (dưới rule baseline 41 %); chỉ chạy được ở embedded device, không khuyến nghị cho VN |
+| `phi4` (14B) Q4 | 8.4 GB | 12 GB | chưa đo | có VRAM thoải mái; cần pull qua Ollama trước khi đo |
 
 Adapter `nom.llm.Ollama` mặc định `think=False` — bắt buộc cho
 Qwen3 (CoT của nó emit vào field `thinking` riêng, để `content`
