@@ -1,40 +1,37 @@
-# Multi-agent runtime
+# Multi-agent — chạy nhiều tác tử AI phối hợp
 
 ## TL;DR — gợi ý của chúng tôi
 
-`nom.agents` cung cấp 6 mẫu agent (Single, Chain, Route, Parallel,
-Voting, OrchestratorWorkers, EvaluatorOptimizer) chạy trên bất kỳ
-LLM nào theo `nom.llm.LLM` Protocol, mọi lệnh gọi LLM đi qua
-`AuditedLLM` để vào nhật ký kiểm toán Đ14.1.c. Built-in tools
-(RAGTool, PythonEvalTool, HTTPGetTool, FileReadTool) đủ cho phần
-lớn use case "trả lời từ tài liệu + thực hiện hành động". Chọn mẫu
-theo bài toán: `SingleAgent` cho 90% case, các mẫu phức tạp hơn khi
-cần phân rã / song song / tự đánh giá.
+Mô-đun `nom.agents` cung cấp **6 kiểu tác tử** (Single, Chain, Route,
+Parallel, Voting, OrchestratorWorkers, EvaluatorOptimizer) chạy được
+trên bất kỳ mô hình ngôn ngữ nào theo giao thức `nom.llm.LLM`. Mọi
+lượt gọi mô hình đều đi qua `AuditedLLM` để ghi vào nhật ký kiểm
+toán theo Đ14.1.c — không có cửa hậu nào bỏ qua được lớp này.
 
-## Bức tranh công khai
+Bốn công cụ tích hợp sẵn (`RAGTool`, `PythonEvalTool`, `HTTPGetTool`,
+`FileReadTool`) đủ cho hầu hết nhu cầu "trả lời từ tài liệu + thực
+hiện hành động". Chọn kiểu tác tử theo bài toán: dùng `SingleAgent`
+cho 90 % trường hợp; chỉ chuyển sang các kiểu phức tạp hơn khi thật
+sự cần phân rã, chạy song song hoặc tự đánh giá.
 
-| Framework | License | Format | Pickle? | Trace audit | Kết luận |
-|---|---|---|---|---|---|
-| LangChain / LangGraph | MIT | Mixed | **Có** (cache, checkpoint) | Có (LangSmith cloud) | Bỏ qua — vi phạm policy không-pickle, breaking-change ~2 tuần |
-| Pydantic AI | MIT | Pure-Python | Không | OTel | Học pattern (typed Agent) — không phụ thuộc trực tiếp |
-| Google ADK | Apache 2.0 | Mixed | Mixed | OTel | Dep tree quá nặng để embed; học workflow primitive |
-| OpenAI Agents SDK | MIT | Pure-Python | Không | OpenAI cloud (default) | Pre-1.0, default tracing về cloud OpenAI — bỏ qua |
-| AutoGen | CC-BY-4.0 | Pure-Python | Không | Optional OTel | **Maintenance mode** từ 2026 — bỏ qua |
-| CrewAI | MIT | Pure-Python | Không | PostHog (default-on) | PostHog default-on = data egress — bỏ qua |
-| Smolagents | Apache 2.0 | Pure-Python | 4 hits | OpenInference | Code-as-action sai cho compliance — học minimalism |
+## Vì sao xây thuần thay vì dùng khung làm việc khác
 
-Anthropic (tác giả Claude) tổng kết: *"the most successful
-implementations weren't using complex frameworks or specialized
-libraries"*. Chúng tôi xây native — surface ~1.5k LOC, mọi LLM call
-đi qua `AuditedLLM`.
+Anthropic (tác giả của Claude) khuyến nghị: *"Những triển khai
+thành công nhất không dùng khung làm việc phức tạp hay thư viện
+chuyên biệt"* — các khung sẵn có thường thêm cấu trúc khiến mã khó
+truy vết và phụ thuộc nặng. `nom.agents` xây thuần, bề mặt gọn,
+mọi lượt gọi mô hình đều ghi vào nhật ký kiểm toán; phù hợp với
+yêu cầu truy vết Luật 134/2025 và chính sách bảo mật của ngân
+hàng / y tế.
 
-## Pipeline của chúng tôi
+## Cách dùng
 
-`nom.agents.protocol` định nghĩa 3 Protocol nhỏ: `Tool` (callable +
-JSON-Schema), `Agent` (`run(task) -> AgentResult`), `Trace`
-(append-only event log). 6 mẫu pattern composable — orchestrator có
-thể route đến single, single's tool có thể bao chain. Mỗi pattern
-độc lập trong file ≤200 dòng.
+`nom.agents.protocol` định nghĩa 3 giao thức nhỏ: `Tool` (hàm gọi
+được kèm JSON-Schema), `Agent` (`run(task) -> AgentResult`), `Trace`
+(nhật ký sự kiện chỉ ghi-thêm). 6 kiểu tác tử lồng ghép tự do —
+một `Orchestrator` có thể chuyển hướng cho `Single`, công cụ của
+`Single` lại có thể bao một `Chain`. Mỗi kiểu tác tử nằm gọn trong
+một file ≤200 dòng.
 
 ```python
 from nom.llm import Ollama
@@ -55,73 +52,62 @@ result = agent.run("Câu hỏi của bạn?")
 print(result.output)
 ```
 
-## Agent recipes — factories có sẵn
+## Các "công thức" tác tử có sẵn
 
-`nom.agents.recipes` ship 4 mẫu sẵn dùng — operator gọi một dòng:
+`nom.agents.recipes` đóng gói 4 mẫu sẵn dùng — nhà triển khai gọi
+một dòng là chạy:
 
-| Recipe | Compose | Use case |
+| Công thức | Ghép từ | Dùng cho |
 |---|---|---|
-| `vn_doc_analyser(llm)` | Lang detect + NER + sentiment | Phân tích văn bản đầu vào (feedback, hồ sơ) |
-| `legal_qa(rag, llm)` | RAGTool + cite-first prompt | Hỏi-đáp pháp luật có trích dẫn |
-| `deep_research(llm, search_tools)` | OrchestratorWorkers + searcher | Nghiên cứu sâu đa nguồn |
-| `compliance_screener(inner)` | PII redact wrapper | Bọc bất kỳ agent nào để chặn / che PII trước LLM |
+| `vn_doc_analyser(llm)` | nhận diện ngôn ngữ + nhận diện thực thể + cảm xúc | Phân tích văn bản đầu vào (góp ý, hồ sơ) |
+| `legal_qa(rag, llm)` | `RAGTool` + lời nhắc bắt buộc trích dẫn | Hỏi-đáp pháp luật có dẫn nguồn |
+| `deep_research(llm, search_tools)` | `OrchestratorWorkers` + nhân viên tra cứu | Nghiên cứu sâu nhiều nguồn |
+| `compliance_screener(inner)` | Lớp che dữ liệu cá nhân quanh tác tử | Bọc bất kỳ tác tử nào để chặn / che dữ liệu cá nhân trước khi gọi mô hình |
 
-Demo chạy được không cần Ollama: `examples/recipes_demo.py`.
+Bản trình diễn chạy được không cần Ollama: `examples/recipes_demo.py`.
 
-## HTTP & SSE — agent2ui
+## API HTTP và truyền sự kiện thời gian thực (`agent2ui`)
 
-`nom.agents_api.register_agent_routes(app, agents=…)` thêm 2 endpoint
-vào FastAPI app:
+Hàm `nom.agents_api.register_agent_routes(app, agents=…)` thêm 2
+điểm cuối vào ứng dụng FastAPI:
 
-- `POST /api/agents/{name}/run` — đồng bộ, trả `output` + `trace`
-- `GET /api/agents/{name}/stream?task=…` — SSE, mỗi event là một
-  trace step (start, think, tool_call, tool_result, final, end)
+- `POST /api/agents/{name}/run` — đồng bộ, trả về `output` và `trace`
+- `GET /api/agents/{name}/stream?task=…` — luồng sự kiện SSE; mỗi
+  sự kiện là một bước trong nhật ký (`start`, `think`, `tool_call`,
+  `tool_result`, `final`, `end`)
 
-UI subscribe SSE → render thời gian thực việc agent suy luận / gọi
-tool / trả lời. Đây là protocol "agent2ui" — UI viewer page sẽ ship
-trong wave kế tiếp.
+Giao diện đăng ký luồng SSE để hiển thị tác tử đang suy luận, gọi
+công cụ và trả lời theo thời gian thực.
 
 ## MCP — Model Context Protocol
 
-Tất cả 4 built-in tool tự động trở thành MCP tool qua `nom mcp-serve`:
+Cả 4 công cụ tích hợp sẵn tự động trở thành công cụ MCP qua lệnh
+`nom mcp-serve`:
 
 ```bash
 nom mcp-serve --include nlp,builtin,integrations
-# Trong Claude Desktop / Cursor config, thêm command này; client tự
-# discover các tool và gọi qua JSON-RPC stdio.
+# Cấu hình lệnh này trong Claude Desktop / Cursor; chương trình
+# khách tự khám phá danh sách công cụ và gọi qua JSON-RPC stdio.
 ```
 
-Theo chiều ngược lại, agents trong nom có thể consume MCP server bên
-ngoài qua `nom.mcp.MCPClient` + `make_remote_tools()` — mỗi remote
-tool xuất hiện như một local Tool.
-
-## Đo và benchmark
-
-OSS suite hiện có 691 test, trong đó 32 test cho `nom.agents` +
-recipes. Patterns được verify với scripted LLM (deterministic) +
-smoke test chạy được với Ollama local.
-
-Benchmark thực trên Ollama qwen3:8b: TBD — sẽ thêm khi có corpus
-chuẩn (tương tự benchmarks/rag/ pattern).
+Theo chiều ngược lại, tác tử trong Nôm có thể tiêu thụ máy chủ
+MCP bên ngoài qua `nom.mcp.MCPClient` cộng với `make_remote_tools()` —
+mỗi công cụ ở xa hiện ra như một công cụ cục bộ.
 
 ## Bẫy thường gặp
 
-- **Không dùng `from __future__ import annotations` trong file route
-  FastAPI** — FastAPI resolve type hint runtime để wire DI; stringized
-  annotations làm `Request` bị treat như query param.
-- **Step budget mặc định 8** — đủ cho hầu hết RAG + 1-2 tool
-  follow-up. Tăng khi agent cần khám phá nhiều bước (deep research).
-- **JSON action protocol** đôi khi LLM trả markdown fence — runtime
-  có salvage logic nhưng prompt ngắn gọn vẫn tốt hơn.
-- **Tool trả `ToolError`** thì agent loop tự retry; lỗi exception
-  khác propagate. Phân biệt rõ: expected vs unexpected.
-- **`current_user` ContextVar** không tự propagate qua ThreadPool —
-  mẫu Parallel / Voting tự xử lý; custom worker pool cần
-  `copy_context()` thủ công.
+- **Ngân sách số bước mặc định** đủ cho phần lớn truy hồi tài liệu
+  kèm 1-2 lần gọi công cụ kế tiếp. Tăng ngân sách khi tác tử cần
+  khám phá nhiều bước (ví dụ nghiên cứu sâu).
+- **Công cụ trả về `ToolError`** thì vòng lặp tác tử tự thử lại;
+  các ngoại lệ khác sẽ truyền tiếp ra ngoài. Hãy phân biệt rõ "lỗi
+  mong đợi có thể tự sửa" và "lỗi bất ngờ phải dừng".
+- **Mô hình đôi khi trả về JSON kèm dấu fence Markdown** — thư
+  viện có cơ chế khôi phục, nhưng lời nhắc gọn rõ vẫn cho kết quả
+  ổn định hơn.
 
 ## Đọc thêm
 
 - [Building Effective Agents — Anthropic](https://www.anthropic.com/engineering/building-effective-agents)
 - [How Claude Code works](https://code.claude.com/docs/en/how-claude-code-works)
-- `examples/recipes_demo.py` — demo chạy được 4 recipe
-- `tests/test_agents.py`, `tests/test_agent_recipes.py` — contract tests
+- `examples/recipes_demo.py` — bản trình diễn chạy được 4 công thức

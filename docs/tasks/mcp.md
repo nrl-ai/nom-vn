@@ -1,38 +1,45 @@
-# MCP — Model Context Protocol bridge
+# MCP — cầu nối với Model Context Protocol
 
 ## TL;DR — gợi ý của chúng tôi
 
-`nom.mcp` là cầu MCP hai chiều: server expose `nom.agents.Tool` cho
-client (Claude Desktop, Cursor, Zed, agent framework khác) qua
-JSON-RPC 2.0; client wrap MCP server bên ngoài thành local Tool để
-`nom.agents` tiêu thụ. Native impl, không phụ thuộc `mcp` SDK —
-giữ dep surface mỏng và audit trace owned end-to-end. Mọi tool call
-qua server có thể audit qua chuỗi ký HMAC của `nom.compliance`.
+Mô-đun `nom.mcp` là cây cầu MCP hai chiều:
+
+- **Máy chủ** mở các công cụ `nom.agents.Tool` cho chương trình
+  khách (Claude Desktop, Cursor, Zed, các khung tác tử khác) qua
+  JSON-RPC 2.0.
+- **Chương trình khách** bọc máy chủ MCP bên ngoài thành công cụ
+  cục bộ để `nom.agents` tiêu thụ.
+
+Triển khai thuần — không phụ thuộc gói `mcp` SDK — giúp giữ bề mặt
+phụ thuộc nhỏ và toàn quyền kiểm soát chuỗi nhật ký kiểm toán. Mọi
+lượt gọi công cụ qua máy chủ đều ghi vào chuỗi ký HMAC của
+`nom.compliance`.
 
 ## Bức tranh công khai
 
-| SDK / Server | License | Format | Kết luận |
+| SDK / Máy chủ | Giấy phép | Định dạng | Kết luận |
 |---|---|---|---|
-| Anthropic `mcp` Python SDK | MIT | safetensors-irrelevant | Tốt, nhưng kéo theo pydantic-settings + WS stack — không dùng default |
-| `mcp-server-everything` (TS) | MIT | N/A | Reference; không dùng làm dep |
-| `mcp-server-filesystem` (TS) | MIT | N/A | Tham khảo design; ta build native FileGlob/JSON tools |
+| `mcp` SDK Python (Anthropic) | MIT | Không liên quan safetensors | Tốt, nhưng kéo theo pydantic-settings + ngăn xếp WebSocket — không dùng làm phụ thuộc mặc định |
+| `mcp-server-everything` (TS) | MIT | Không áp dụng | Tham khảo; không dùng làm phụ thuộc |
+| `mcp-server-filesystem` (TS) | MIT | Không áp dụng | Tham khảo thiết kế; chúng ta xây thuần `FileGlob` / `JSONField` |
 
-Native impl là 4 file ngắn: `types.py` (envelope), `server.py`
-(JSON-RPC dispatcher), `client.py` (transport-agnostic caller),
-`integrations/builtin.py` (3 starter tool credential-free).
+Triển khai thuần gồm 4 file ngắn: `types.py` (vỏ tin nhắn),
+`server.py` (bộ phân tải JSON-RPC), `client.py` (lớp gọi không phụ
+thuộc loại đường truyền), `integrations/builtin.py` (3 công cụ
+khởi đầu không cần khoá truy cập).
 
-## Pipeline của chúng tôi
+## Đường ống của chúng tôi
 
 ```
 nom.mcp
 ├── types.py             ── MCPRequest, MCPResponse, MCPTool, MCPToolResult
 ├── server.py            ── MCPServer.handle_message + serve_stdio
 ├── client.py            ── MCPClient + MCPRemoteTool + http_transport
-└── integrations/        ── built-in credential-free tools
+└── integrations/        ── công cụ khởi đầu không cần khoá truy cập
     └── builtin.py       ── FileGlobTool, JSONFieldTool, CurrentTimeTool
 ```
 
-### Server — expose tools to MCP clients
+### Máy chủ — mở công cụ cho chương trình khách MCP
 
 ```python
 from nom.compliance import AuditLog
@@ -45,16 +52,17 @@ server = MCPServer(
     tools=default_catalog(file_root=Path("./project")),
     audit_log=audit,
 )
-server.serve_stdio()  # blocks; Claude Desktop / Cursor talk over stdin/stdout
+server.serve_stdio()  # vòng lặp dừng-luồng; Claude Desktop / Cursor
+                      # giao tiếp qua đầu vào / đầu ra chuẩn
 ```
 
-CLI shortcut:
+Lệnh tắt:
 
 ```bash
 nom mcp-serve --include nlp,builtin,integrations --file-root ./project
 ```
 
-Claude Desktop config:
+Cấu hình Claude Desktop:
 
 ```json
 {
@@ -67,7 +75,7 @@ Claude Desktop config:
 }
 ```
 
-### Client — consume external MCP servers from agents
+### Chương trình khách — gọi máy chủ MCP từ tác tử
 
 ```python
 from nom.agents import SingleAgent
@@ -75,37 +83,39 @@ from nom.mcp import MCPClient
 from nom.mcp.client import http_transport, make_remote_tools
 
 client = MCPClient(transport=http_transport("https://mcp.example.vn/rpc"))
-tools = make_remote_tools(client)  # discover via tools/list
+tools = make_remote_tools(client)  # khám phá danh sách qua tools/list
 
 agent = SingleAgent(name="hybrid", llm=my_llm, tools=tools)
-# Agent calls remote tools as if they were local — runtime doesn't know.
+# Tác tử gọi công cụ ở xa giống hệt công cụ cục bộ — runtime không
+# biết khác biệt.
 ```
 
-## Built-in integrations
+## Bộ tích hợp có sẵn
 
-`nom.mcp.integrations.default_catalog()` ship 3 tool không cần
-credential, an toàn để bật trên fresh install:
+Hàm `nom.mcp.integrations.default_catalog()` đóng gói 3 công cụ
+không cần khoá truy cập, an toàn để bật trên cài đặt mới:
 
-| Tool | Schema | Use case |
+| Công cụ | Tham số | Dùng cho |
 |---|---|---|
-| `file_glob` | `{pattern}` | Liệt kê file khớp glob trong allow-listed root (path traversal blocked) |
-| `json_field` | `{path, field}` | Đọc một field JSON theo dotted path; tránh nuốt cả file lớn vào LLM context |
-| `current_time` | `{}` | Trả ISO 8601 UTC + epoch seconds; vá lỗi LLM hallucinate ngày |
+| `file_glob` | `{pattern}` | Liệt kê file khớp mẫu glob trong thư mục được phép (chặn vượt qua thư mục cha) |
+| `json_field` | `{path, field}` | Đọc một trường JSON theo đường dẫn dấu chấm; tránh nuốt cả file lớn vào ngữ cảnh mô hình |
+| `current_time` | `{}` | Trả về thời điểm hiện tại theo ISO 8601 và số giây Unix; vá lỗi mô hình ngôn ngữ tự bịa ngày |
 
-Production deployments thêm credentialed integration qua
-`nom-vn-enterprise`:
+Triển khai sản xuất bổ sung các bộ tích hợp cần khoá truy cập qua
+gói `nom-vn-enterprise`:
 
-| EE Tool | Plugin | Use case |
+| Công cụ doanh nghiệp | Plugin | Dùng cho |
 |---|---|---|
 | Office (DOCX/XLSX/PPTX/Outlook/Teams) | `nom_ee.connectors.office` | Trả lời từ tài liệu Microsoft 365 |
-| GitHub PR/issue | `nom_ee.connectors.github` | Triage PR, tóm tắt issue thread |
-| SharePoint search | `nom_ee.connectors.sharepoint` | Hỏi-đáp trên kho tài liệu nội bộ |
+| GitHub PR / issue | `nom_ee.connectors.github` | Triage PR, tóm tắt thread issue |
+| Tìm kiếm SharePoint | `nom_ee.connectors.sharepoint` | Hỏi-đáp trên kho tài liệu nội bộ |
 
-(Wave kế tiếp — chưa ship.)
+(Đợt phát hành kế tiếp — chưa ra mắt.)
 
-## Audit & compliance
+## Kiểm toán và tuân thủ
 
-`MCPServer(audit_log=…)` ghi mỗi `tools/call` vào chuỗi ký HMAC:
+Tham số `MCPServer(audit_log=…)` ghi mỗi lần `tools/call` vào chuỗi
+ký HMAC:
 
 ```python
 event = audit_log.emit(
@@ -115,38 +125,32 @@ event = audit_log.emit(
 )
 ```
 
-Inspector replay được toàn bộ traffic MCP cùng lúc với traffic LLM,
-chuỗi ký phát hiện sửa đổi sau-thì-thật. Đây là điểm khác chính so
-với việc gọi `mcp` SDK trực tiếp — audit là trunk, không phải
-decoration.
+Người kiểm toán phát lại được toàn bộ lưu lượng MCP cùng với lưu
+lượng gọi mô hình ngôn ngữ; chuỗi ký phát hiện được mọi sửa đổi
+hậu kỳ. Đây là điểm khác chính so với việc gọi `mcp` SDK trực tiếp:
+nhật ký kiểm toán là trục chính, không phải lớp gắn thêm.
 
 ## Bẫy thường gặp
 
-- **Stdio không buffer** — Claude Desktop expect line-delimited
-  JSON. Đảm bảo `sys.stdout.flush()` sau mỗi response (server đã
-  xử lý sẵn).
-- **JSON-RPC notification (no `id`)** → server return None, không
-  ghi response — đúng spec.
-- **Tool error vs RPC error** — Tool error (`isError: true`) cho
-  predictable failure (file not found, validation reject). RPC
-  error (`error: {code, message}`) cho protocol error (invalid
-  params, method not found).
-- **HTTP transport** — endpoint phải accept JSON-RPC envelope
-  (`POST /rpc`, content-type `application/json`). Không phải mọi
-  MCP server expose HTTP — Claude Desktop chỉ dùng stdio.
-- **Schema validation** — server không validate args bằng JSON-Schema
-  runtime (giữ dep nhỏ); tool tự validate trong `call()`. Anthropic
-  guide khuyến nghị tool tự defensive trên args.
-
-## Đo và benchmark
-
-14 test cho `nom.mcp` core (server + client + round-trip với
-SingleAgent), 19 test cho `nom.mcp.integrations` (FileGlob, JSONField,
-CurrentTime). Tổng 33 test.
+- **Đầu ra chuẩn không bộ đệm** — Claude Desktop chờ JSON theo từng
+  dòng. Cần `sys.stdout.flush()` sau mỗi phản hồi (máy chủ đã xử
+  lý sẵn).
+- **Thông báo JSON-RPC không có `id`** → máy chủ trả về `None`,
+  không ghi phản hồi — đúng đặc tả.
+- **Lỗi công cụ vs lỗi giao thức** — Lỗi công cụ (`isError: true`)
+  dành cho thất bại có thể đoán trước (không tìm thấy file, validate
+  không qua). Lỗi RPC (`error: {code, message}`) dành cho lỗi giao
+  thức (sai tham số, không tìm thấy phương thức).
+- **HTTP transport** — điểm cuối phải nhận vỏ JSON-RPC (`POST /rpc`,
+  `content-type: application/json`). Không phải mọi máy chủ MCP đều
+  mở HTTP — Claude Desktop chỉ dùng đầu vào / đầu ra chuẩn.
+- **Validate JSON-Schema** — máy chủ không tự kiểm tra tham số theo
+  JSON-Schema lúc chạy (giữ cho phụ thuộc nhỏ); công cụ tự kiểm tra
+  trong `call()`. Hướng dẫn của Anthropic cũng đề nghị công cụ tự
+  phòng vệ trên đầu vào.
 
 ## Đọc thêm
 
-- [Anthropic MCP spec](https://modelcontextprotocol.io)
-- `examples/recipes_demo.py` — agent compose + tool dispatch
-- `tests/test_mcp.py`, `tests/test_mcp_integrations.py` — contract tests
-- `docs/tasks/agents.md` — cách agent consume MCP tool
+- [Đặc tả MCP của Anthropic](https://modelcontextprotocol.io)
+- `examples/recipes_demo.py` — soạn tác tử và phân phối công cụ.
+- [Trang tác tử](/tasks/agents) — cách tác tử dùng công cụ MCP.

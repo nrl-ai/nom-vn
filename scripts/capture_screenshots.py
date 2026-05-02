@@ -129,14 +129,11 @@ def capture_all(url: str, out: Path) -> None:
         page.wait_for_selector("main >> text=§ đã bỏ dấu", timeout=8000)
         shoot(page, out, "11-playground-strip")
 
-        # 08 — noise generator
-        click_task(page, r"Sinh nhiễu")
-        page.wait_for_selector("main >> text=§ reproducible noise generator", timeout=5000)
-        click_sample(page, "Business")
-        page.wait_for_timeout(200)
-        page.keyboard.press("Control+Enter")
-        page.wait_for_selector("main >> text=§ văn bản đã nhiễu", timeout=8000)
-        shoot(page, out, "08-playground-noise")
+        # NOTE: noise generator UI page was removed (was a training-data
+        # tool, not user value). The underlying nom.text.noise module
+        # stays for training pipelines. Slot 08 is intentionally vacant
+        # so subsequent screenshot numbers stay stable; rerun the
+        # capture to produce a refreshed numbered set if you want.
 
         # 12 — API & Setup page (top of page, install + LLM backends visible)
         click_task(page, r"API và cài đặt")

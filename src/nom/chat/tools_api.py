@@ -18,14 +18,14 @@ upload route returns the translated ``.docx`` as raw bytes.
 
 from __future__ import annotations
 
+import contextlib
+from typing import TYPE_CHECKING, Annotated, Any
+
 # Module-level import: FastAPI needs runtime access to ``UploadFile``
 # / ``File`` / ``Form`` to wire multipart dependency injection on the
 # file-upload route. With ``from __future__ import annotations`` these
 # would be unresolvable string forward refs unless they live in module
 # globals.
-import contextlib
-from typing import TYPE_CHECKING, Annotated, Any
-
 with contextlib.suppress(ImportError):  # fastapi is a [chat] extra
     from fastapi import File, Form, UploadFile
 

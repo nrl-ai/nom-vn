@@ -14,6 +14,7 @@ Bộ công cụ xử lý tiếng Việt mã nguồn mở mà cộng đồng đan
 
 <div class="ev-enterprise-actions">
 <a href="#lien-he" class="ev-btn ev-btn-brand">Đặt lịch trao đổi 30 phút</a>
+<a href="/doanh-nghiep/so-sanh-oss-ee" class="ev-btn ev-btn-alt">So sánh OSS vs Doanh nghiệp</a>
 <a href="#cach-trien-khai" class="ev-btn ev-btn-alt">Xem các cách triển khai</a>
 </div>
 
