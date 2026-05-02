@@ -265,5 +265,6 @@ module = [
   "torch.*",
   "transformers.*",
   "bm25s.*",
+  "llama_cpp.*",
 ]
 ignore_missing_imports = true
