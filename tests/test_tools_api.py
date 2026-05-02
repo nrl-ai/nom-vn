@@ -223,3 +223,76 @@ class TestNLP:
     def test_language_empty_input_422(self, client: TestClient) -> None:
         r = client.post("/api/tools/nlp/language", json={"text": ""})
         assert r.status_code == 422
+
+
+class TestTranslate:
+    """LLMTranslator path goes through the same FakeLLM the diacritic
+    tests use. The fake returns canned JSON; the translator parses
+    ``translation`` out and NFC-normalizes it."""
+
+    def _client(self, response: str) -> TestClient:
+        store = MemoryStore(embedder=FakeEmbedder(), llm=FakeLLM(response=response))
+        return TestClient(build_app(store=store))
+
+    def test_llm_backend_returns_translation(self) -> None:
+        client = self._client('{"translation": "Hello world."}')
+        r = client.post(
+            "/api/tools/translate",
+            json={"text": "Xin chào thế giới.", "source": "vi", "target": "en"},
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert body["translation"] == "Hello world."
+        assert body["source"] == "vi"
+        assert body["target"] == "en"
+        assert body["backend"] == "llm"
+
+    def test_missing_text_422(self) -> None:
+        client = self._client('{"translation": "X"}')
+        r = client.post("/api/tools/translate", json={"text": ""})
+        assert r.status_code == 422
+
+    def test_same_source_and_target_422(self) -> None:
+        client = self._client('{"translation": "X"}')
+        r = client.post(
+            "/api/tools/translate",
+            json={"text": "Hello", "source": "en", "target": "en"},
+        )
+        assert r.status_code == 422
+
+    def test_unknown_backend_422(self) -> None:
+        client = self._client('{"translation": "X"}')
+        r = client.post(
+            "/api/tools/translate",
+            json={"text": "Hello", "source": "en", "target": "vi", "backend": "magic"},
+        )
+        assert r.status_code == 422
+
+    def test_unsupported_language_pair_422(self) -> None:
+        client = self._client('{"translation": "X"}')
+        r = client.post(
+            "/api/tools/translate",
+            json={"text": "Hello", "source": "ja", "target": "vi"},
+        )
+        assert r.status_code == 422
+
+    def test_models_listing(self) -> None:
+        client = self._client('{"translation": "X"}')
+        r = client.get("/api/tools/translate/models")
+        assert r.status_code == 200
+        body = r.json()
+        assert body["default_backend"] == "llm"
+        assert "en2vi" in body["directions"]
+        assert "vi2en" in body["directions"]
+        ids = [m["id"] for m in body["hf_models"]]
+        assert "google/madlad400-3b-mt" in ids
+        assert "facebook/m2m100_418M" in ids
+
+    def test_falls_back_to_raw_when_llm_returns_non_json(self) -> None:
+        client = self._client("Hello world.")
+        r = client.post(
+            "/api/tools/translate",
+            json={"text": "Xin chào thế giới.", "source": "vi", "target": "en"},
+        )
+        assert r.status_code == 200
+        assert r.json()["translation"] == "Hello world."

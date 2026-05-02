@@ -263,6 +263,136 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
         d = detect_language(text)
         return {"input": text, "language": d.code, "confidence": d.confidence}
 
+    @app.post("/api/tools/translate")
+    def translate(payload: dict[str, Any]) -> dict[str, Any]:
+        """Translate a single string between EN and VN.
+
+        Backends:
+
+        - ``llm`` (default): defers to the chat LLM via
+          :class:`~nom.translate.LLMTranslator`. Already in the stack;
+          no extra download. Quality scales with model size.
+        - ``hf``: HF seq2seq via :class:`~nom.translate.hf.HFTranslator`.
+          ``model_id`` defaults to ``google/madlad400-3b-mt`` (Apache,
+          safetensors, MT specialist). First call may take 30-60 s
+          while weights load.
+        """
+        text = str(payload.get("text", ""))
+        source = str(payload.get("source", "vi")).lower()
+        target = str(payload.get("target", "en")).lower()
+        backend = str(payload.get("backend", "llm")).lower()
+        if not text:
+            raise HTTPException(status_code=422, detail="`text` is required")
+        if source == target:
+            raise HTTPException(
+                status_code=422,
+                detail="`source` and `target` must differ",
+            )
+
+        from nom.translate import LLMTranslator, Translator
+
+        translator: Translator
+        used_model: str | None
+        if backend == "llm":
+            if llm is None:
+                raise HTTPException(
+                    status_code=503,
+                    detail="LLM backend unavailable (server started without an LLM)",
+                )
+            try:
+                translator = LLMTranslator(
+                    llm=llm,
+                    source_lang=source,
+                    target_lang=target,
+                )
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            used_model = getattr(llm, "name", None)
+        elif backend == "hf":
+            from nom.translate.hf import HFTranslator
+
+            model_id = str(payload.get("model_id", "google/madlad400-3b-mt"))
+            try:
+                translator = HFTranslator(
+                    model_id=model_id,
+                    source_lang=source,
+                    target_lang=target,
+                )
+            except ImportError as exc:
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"HF backend unavailable: {exc}",
+                ) from exc
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            used_model = model_id
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unknown backend {backend!r}; expected llm|hf",
+            )
+
+        try:
+            translated = translator.translate(text)
+        except Exception as exc:
+            cls = type(exc).__name__
+            if "HTTPStatusError" in cls or "ConnectError" in cls or "Timeout" in cls:
+                from nom.chat.server import _llm_error_to_503
+
+                raise _llm_error_to_503(exc) from exc
+            raise
+
+        return {
+            "input": text,
+            "translation": translated,
+            "source": source,
+            "target": target,
+            "backend": backend,
+            "model_id": used_model,
+        }
+
+    @app.get("/api/tools/translate/models")
+    def list_translate_models() -> dict[str, Any]:
+        """Curated translation backends + the HF specialist models the
+        UI offers. ``llm`` is always available when the server has a
+        chat LLM configured."""
+        return {
+            "default_backend": "llm",
+            "directions": ["en2vi", "vi2en"],
+            "backends": [
+                {
+                    "id": "llm",
+                    "label": "Chat LLM (Qwen3 / Gemma / Claude / GPT-4)",
+                    "tier": "general",
+                    "license": "depends on backing model",
+                    "notes": "Already loaded — no extra download.",
+                },
+                {
+                    "id": "hf",
+                    "label": "HF seq2seq specialist",
+                    "tier": "specialist",
+                    "license": "varies — see model_id",
+                    "notes": "Lazy-downloads on first call. Default: MADLAD-3B (Apache).",
+                },
+            ],
+            "hf_models": [
+                {
+                    "id": "google/madlad400-3b-mt",
+                    "label": "MADLAD-400-3B (T5 enc-dec, 3 B)",
+                    "tier": "accuracy",
+                    "params_m": 3000,
+                    "license": "Apache 2.0",
+                },
+                {
+                    "id": "facebook/m2m100_418M",
+                    "label": "m2m100-418M (small specialist)",
+                    "tier": "fast",
+                    "params_m": 418,
+                    "license": "MIT",
+                },
+            ],
+        }
+
     @app.get("/api/tools/diacritic/models")
     def list_diacritic_models() -> dict[str, Any]:
         """Curated list of HF diacritic-restoration models the UI offers."""

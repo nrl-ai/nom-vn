@@ -254,16 +254,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     p_mcp.add_argument(
         "--include",
-        default="nlp,builtin",
+        default="nlp,builtin,integrations",
         help=(
-            "Comma-separated tool groups to expose: 'nlp' (NER + sentiment + "
-            "language-detect), 'builtin' (PythonEval, FileRead). Default: both."
+            "Comma-separated tool groups to expose: "
+            "'nlp' (NER + sentiment + language-detect), "
+            "'builtin' (PythonEval, FileRead), "
+            "'integrations' (FileGlob, JSONField, CurrentTime). "
+            "Default: all three."
         ),
     )
     p_mcp.add_argument(
         "--file-root",
         default=".",
-        help="Root directory for the file_read tool (default: cwd)",
+        help="Root directory for file-based tools (default: cwd)",
     )
 
     from nom.translate.cli import add_subparser as _add_translate_subparser
@@ -345,6 +348,10 @@ def _run_mcp_stdio(*, include: str, file_root: str) -> int:
     if "builtin" in groups:
         tools.append(PythonEvalTool())
         tools.append(FileReadTool(root=Path(file_root).resolve()))
+    if "integrations" in groups:
+        from nom.mcp.integrations import default_catalog
+
+        tools.extend(default_catalog(file_root=Path(file_root).resolve()))
 
     server = MCPServer(server_name="nom-vn", tools=tuple(tools))
     server.serve_stdio()

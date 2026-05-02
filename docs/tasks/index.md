@@ -28,6 +28,19 @@ trên cùng register grid, và lệnh tái lập.
 | **Reranker** — xếp lại kết quả retrieval | bge-reranker-v2-m3 | [→](/tasks/reranker) |
 | **RAG end-to-end** — chunk → embed → retrieve → rerank → trả lời | shipped trong `nom serve` | [→](/tasks/rag) |
 
+## Tác vụ phân tích văn bản
+
+| Tác vụ | Trạng thái | Trang |
+|---|---|---|
+| **NER + Sentiment + Lang detect** — entities, cảm xúc, ngôn ngữ | shipped trong `nom.nlp` | [→](/tasks/nlp) |
+
+## Multi-agent & MCP
+
+| Tác vụ | Trạng thái | Trang |
+|---|---|---|
+| **Agent runtime** — 6 pattern Anthropic + 4 recipe sẵn dùng | shipped trong `nom.agents` | [→](/tasks/agents) |
+| **MCP bridge** — server expose tools, client consume external | shipped trong `nom.mcp` | [→](/tasks/mcp) |
+
 ## Quy ước
 
 - Mỗi trang theo [`_template.md`](_template.md) — TL;DR / public landscape
