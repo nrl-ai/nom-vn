@@ -1,0 +1,57 @@
+{# Đ27 state-use impact assessment — MVP skeleton (v0.3). #}
+# Báo cáo đánh giá tác động hệ thống AI trong quản lý nhà nước
+
+**Căn cứ pháp lý:** {{ law }} (Điều 27.3)
+**Ngày lập:** {{ generated_at }}
+
+> ⚠️ **Bộ khung MVP**. Nội dung, quy trình và trách nhiệm chi tiết do
+> Chính phủ quy định (Đ27.5) chưa ban hành. Tài liệu này sử dụng các
+> trường tối thiểu theo Đ27.3 và sẽ được nâng cấp khi nghị định công
+> bố.
+
+---
+
+## 1. Cơ quan vận hành
+
+- **Tên:** {{ agency_name }}
+- **Liên hệ:** {{ agency_contact }}
+
+## 2. Thông tin hệ thống
+
+| Mục | Nội dung |
+|---|---|
+| Mục đích | {{ spec.purpose }} |
+| Lĩnh vực | {{ spec.sector }} |
+| Mức độ tự chủ | {{ spec.automation_level }} |
+| Phạm vi người sử dụng | {{ spec.user_scope }} |
+
+**Mức rủi ro được phân loại:** **{{ classification.tier.value | upper }}**
+
+## 3. Xác định rủi ro (Đ27.3)
+
+{% for r in identified_risks %}
+- {{ r }}
+{% endfor %}
+
+## 4. Biện pháp kiểm soát rủi ro
+
+{% for c in control_measures %}
+- {{ c }}
+{% endfor %}
+
+## 5. Bảo đảm khả năng giám sát + can thiệp của con người
+
+{{ oversight_design }}
+
+## 6. Tuyên bố trách nhiệm
+
+Cơ quan lập báo cáo chịu trách nhiệm về nội dung, tính trung thực và
+đầy đủ của báo cáo (Đ27.4). Báo cáo được công khai theo quy định, trừ
+nội dung thuộc bí mật nhà nước, bí mật kinh doanh hoặc dữ liệu cá
+nhân.
+
+| | |
+|---|---|
+| Người ký | _____________________ |
+| Chức vụ | _____________________ |
+| Ngày ký | _____________________ |

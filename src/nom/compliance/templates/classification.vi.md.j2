@@ -1,0 +1,66 @@
+# Hồ sơ phân loại rủi ro hệ thống trí tuệ nhân tạo
+
+**Căn cứ pháp lý:** {{ law }} (Điều 9, Điều 10)
+**Ngày lập:** {{ generated_at }}
+
+---
+
+## 1. Thông tin chung
+
+| Mục | Nội dung |
+|---|---|
+| Tên / mục đích hệ thống | {{ spec.purpose }} |
+| Lĩnh vực | {{ spec.sector }} |
+| Mức độ tự chủ | {{ spec.automation_level }} |
+| Phạm vi người sử dụng | {{ spec.user_scope }} |
+
+## 2. Nhà cung cấp
+
+- **Tên:** {{ provider_name }}
+- **Liên hệ:** {{ provider_contact }}
+
+{% if deployer_name %}
+## 3. Bên triển khai
+
+- **Tên:** {{ deployer_name }}
+- **Liên hệ:** {{ deployer_contact }}
+{% endif %}
+
+## 4. Kết quả phân loại
+
+**Mức rủi ro:** **{{ classification.tier.value | upper }}**
+
+### Điều khoản áp dụng
+
+{% for art in classification.applicable_articles %}
+- {{ art }}
+{% endfor %}
+
+### Lý do phân loại
+
+{% if classification.reasoning %}
+{% for line in classification.reasoning %}
+- {{ line }}
+{% endfor %}
+{% else %}
+- Không rule nào leo thang tier; mặc định Đ9.1.c (rủi ro thấp).
+{% endif %}
+
+### Rule đã áp dụng
+
+{% for rid in classification.fired_rule_ids %}
+- `{{ rid }}`
+{% endfor %}
+
+## 5. Tuyên bố
+
+Nhà cung cấp tuyên bố kết quả phân loại trên là phù hợp với hiểu biết
+hiện tại của hệ thống tại ngày lập hồ sơ. Cam kết phối hợp với cơ quan
+nhà nước có thẩm quyền trong kiểm tra, đánh giá theo Điều 14.1.g của
+Luật.
+
+| | |
+|---|---|
+| Người ký | _____________________ |
+| Chức vụ | _____________________ |
+| Ngày ký | _____________________ |

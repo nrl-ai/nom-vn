@@ -1,0 +1,88 @@
+# AI System Technical Dossier
+
+**Legal basis:** {{ law }} (Article 14.1.c)
+**Issued:** {{ generated_at }}
+**Risk tier:** **{{ classification.tier.value | upper }}**
+
+---
+
+## 1. System overview
+
+| Item | Value |
+|---|---|
+| Purpose | {{ spec.purpose }} |
+| Sector | {{ spec.sector }} |
+| Automation level | {{ spec.automation_level }} |
+| User scope | {{ spec.user_scope }} |
+
+**Provider:** {{ provider_name }} — {{ provider_contact }}
+{% if deployer_name %}
+**Deployer:** {{ deployer_name }} — {{ deployer_contact }}
+{% endif %}
+
+## 2. Functional description (Art. 14.1.e)
+
+{{ functional_description }}
+
+## 3. Main input data types (Art. 14.1.e)
+
+{% for t in main_input_data_types %}
+- {{ t }}
+{% endfor %}
+
+## 4. Risk management measures (Art. 14.1.a)
+
+{% for m in risk_mitigation_measures %}
+- {{ m }}
+{% endfor %}
+
+## 5. Data governance (Art. 14.1.b)
+
+{{ data_governance_notes }}
+
+## 6. Human oversight + intervention design (Art. 14.1.d)
+
+{{ human_oversight_design }}
+
+## 7. Operational log summary (Art. 14.1.c)
+
+| Item | Value |
+|---|---|
+| Period | {{ log.since }} → {{ log.until }} |
+| Number of events | {{ log.n_events }} |
+| Chain verified | {{ "yes" if log.chain_verified else "NO" }} |
+
+### By actor (top 10)
+
+| Actor | Events |
+|---|---:|
+{% for actor, n in log.by_actor[:10] %}
+| `{{ actor }}` | {{ n }} |
+{% endfor %}
+
+### By action (top 10)
+
+| Action | Events |
+|---|---:|
+{% for action, n in log.by_action[:10] %}
+| `{{ action }}` | {{ n }} |
+{% endfor %}
+
+## 8. Exclusions (Art. 14.1.e)
+
+This dossier does NOT include: detailed source code, detailed
+algorithms, model parameter sets, trade secrets, or technology
+secrets. These items may be provided to the competent state authority
+during inspection (Art. 31.1) upon formal request.
+
+## 9. Cooperation commitment (Art. 14.1.g)
+
+The provider commits to cooperating with the competent state authority
+and the deployer in inspection, evaluation, post-deployment review,
+and incident remediation related to the system.
+
+| | |
+|---|---|
+| Signed by | _____________________ |
+| Title | _____________________ |
+| Date | _____________________ |

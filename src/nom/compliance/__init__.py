@@ -28,6 +28,12 @@ from nom.compliance.audit import (
     Store,
     VerifyResult,
 )
+from nom.compliance.dossier import (
+    ClassificationDossier,
+    ConformityPackage,
+    ImpactAssessment,
+    TechnicalDossier,
+)
 from nom.compliance.incident import (
     IncidentCategory,
     IncidentRecorder,
@@ -55,7 +61,10 @@ __all__ = [
     "AuditLog",
     "AuditedLLM",
     "AuditedRAG",
+    "ClassificationDossier",
     "ClassificationResult",
+    "ConformityPackage",
+    "ImpactAssessment",
     "IncidentCategory",
     "IncidentRecorder",
     "IncidentSeverity",
@@ -68,6 +77,7 @@ __all__ = [
     "Signer",
     "Store",
     "SystemSpec",
+    "TechnicalDossier",
     "VerifyResult",
     "interaction_notice",
     "mark_image",

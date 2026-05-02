@@ -1,0 +1,88 @@
+# Hồ sơ kỹ thuật hệ thống trí tuệ nhân tạo
+
+**Căn cứ pháp lý:** {{ law }} (Điều 14.1.c)
+**Ngày lập:** {{ generated_at }}
+**Mức rủi ro:** **{{ classification.tier.value | upper }}**
+
+---
+
+## 1. Thông tin chung
+
+| Mục | Nội dung |
+|---|---|
+| Mục đích | {{ spec.purpose }} |
+| Lĩnh vực | {{ spec.sector }} |
+| Mức độ tự chủ | {{ spec.automation_level }} |
+| Phạm vi người sử dụng | {{ spec.user_scope }} |
+
+**Nhà cung cấp:** {{ provider_name }} — {{ provider_contact }}
+{% if deployer_name %}
+**Bên triển khai:** {{ deployer_name }} — {{ deployer_contact }}
+{% endif %}
+
+## 2. Mô tả chức năng (Đ14.1.e)
+
+{{ functional_description }}
+
+## 3. Loại dữ liệu đầu vào chính (Đ14.1.e)
+
+{% for t in main_input_data_types %}
+- {{ t }}
+{% endfor %}
+
+## 4. Biện pháp quản lý rủi ro (Đ14.1.a)
+
+{% for m in risk_mitigation_measures %}
+- {{ m }}
+{% endfor %}
+
+## 5. Quản trị dữ liệu (Đ14.1.b)
+
+{{ data_governance_notes }}
+
+## 6. Thiết kế giám sát + can thiệp của con người (Đ14.1.d)
+
+{{ human_oversight_design }}
+
+## 7. Tóm tắt nhật ký hoạt động (Đ14.1.c)
+
+| Mục | Giá trị |
+|---|---|
+| Khoảng thời gian | {{ log.since }} → {{ log.until }} |
+| Số sự kiện | {{ log.n_events }} |
+| Chuỗi đã xác minh | {{ "có" if log.chain_verified else "KHÔNG" }} |
+
+### Theo actor (top 10)
+
+| Actor | Số sự kiện |
+|---|---:|
+{% for actor, n in log.by_actor[:10] %}
+| `{{ actor }}` | {{ n }} |
+{% endfor %}
+
+### Theo action (top 10)
+
+| Action | Số sự kiện |
+|---|---:|
+{% for action, n in log.by_action[:10] %}
+| `{{ action }}` | {{ n }} |
+{% endfor %}
+
+## 8. Loại trừ (Đ14.1.e)
+
+Hồ sơ này KHÔNG bao gồm: mã nguồn chi tiết, thuật toán chi tiết, bộ
+tham số mô hình, bí mật kinh doanh hoặc bí mật công nghệ. Các nội dung
+trên có thể được cung cấp cho cơ quan nhà nước có thẩm quyền trong quá
+trình thanh tra, kiểm tra (Đ31.1) khi có yêu cầu chính thức.
+
+## 9. Cam kết phối hợp (Đ14.1.g)
+
+Nhà cung cấp cam kết phối hợp với cơ quan nhà nước có thẩm quyền và
+bên triển khai trong việc kiểm tra, đánh giá, hậu kiểm và khắc phục sự
+cố liên quan đến hệ thống.
+
+| | |
+|---|---|
+| Người ký | _____________________ |
+| Chức vụ | _____________________ |
+| Ngày ký | _____________________ |

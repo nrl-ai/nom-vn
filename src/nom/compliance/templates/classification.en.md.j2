@@ -1,0 +1,66 @@
+# AI System Risk Classification Dossier
+
+**Legal basis:** {{ law }} (Articles 9, 10)
+**Issued:** {{ generated_at }}
+
+---
+
+## 1. System overview
+
+| Item | Value |
+|---|---|
+| System purpose | {{ spec.purpose }} |
+| Sector | {{ spec.sector }} |
+| Automation level | {{ spec.automation_level }} |
+| User scope | {{ spec.user_scope }} |
+
+## 2. Provider
+
+- **Name:** {{ provider_name }}
+- **Contact:** {{ provider_contact }}
+
+{% if deployer_name %}
+## 3. Deployer
+
+- **Name:** {{ deployer_name }}
+- **Contact:** {{ deployer_contact }}
+{% endif %}
+
+## 4. Classification result
+
+**Risk tier:** **{{ classification.tier.value | upper }}**
+
+### Applicable articles
+
+{% for art in classification.applicable_articles %}
+- {{ art }}
+{% endfor %}
+
+### Reasoning
+
+{% if classification.reasoning %}
+{% for line in classification.reasoning %}
+- {{ line }}
+{% endfor %}
+{% else %}
+- No escalating rule fired; defaults to Article 9.1.c (low risk).
+{% endif %}
+
+### Rules that fired
+
+{% for rid in classification.fired_rule_ids %}
+- `{{ rid }}`
+{% endfor %}
+
+## 5. Declaration
+
+The provider declares that the above classification is correct to the
+best of its knowledge at the issue date. The provider commits to
+cooperating with the competent state authority in inspection and
+evaluation per Article 14.1.g.
+
+| | |
+|---|---|
+| Signed by | _____________________ |
+| Title | _____________________ |
+| Date | _____________________ |
