@@ -161,7 +161,7 @@ body {
 }
 
 .VPHero .actions .VPButton {
-  border-radius: 2px !important;
+  border-radius: 6px !important;
   font-family: var(--vp-font-family-mono) !important;
   font-weight: 500 !important;
   font-size: 13px !important;
@@ -385,7 +385,7 @@ body {
 }
 
 .vp-doc div[class*="language-"] > button.copy {
-  border-radius: 2px;
+  border-radius: 6px;
 }
 
 /* Tables — editorial */
@@ -490,7 +490,7 @@ body {
 /* ===== SEARCH ===== */
 
 .DocSearch-Button {
-  border-radius: 2px !important;
+  border-radius: 6px !important;
   border: 1px solid var(--vp-c-border) !important;
   background: transparent !important;
 }
@@ -878,7 +878,7 @@ body {
 .ev-btn,
 .vp-doc a.ev-btn,
 button.ev-btn {
-  border-radius: 2px;
+  border-radius: 6px;
   font-family: var(--vp-font-family-mono) !important;
   font-weight: 500 !important;
   font-size: 12px !important;
@@ -976,7 +976,7 @@ button.ev-btn-brand:hover {
   color: var(--vp-c-text-1);
   background: var(--vp-c-bg);
   border: 1px solid var(--vp-c-border);
-  border-radius: 2px;
+  border-radius: 6px;
   padding: 10px 12px;
   width: 100%;
   box-sizing: border-box;

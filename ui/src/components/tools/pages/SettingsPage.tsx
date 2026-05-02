@@ -369,7 +369,7 @@ export function SettingsPage() {
               step={1}
               value={defaultTopK}
               onChange={(e) => saveTopK(Number(e.target.value))}
-              className="flex-1 accent-[#c46a37]"
+              className="flex-1 accent-[#b5563a]"
               aria-label="default top_k"
             />
             <span className="w-8 text-right font-mono text-sm text-ink">{defaultTopK}</span>

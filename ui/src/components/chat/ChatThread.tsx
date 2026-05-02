@@ -155,7 +155,7 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
               step={1}
               value={topK}
               onChange={(e) => setTopK(Number(e.target.value))}
-              className="flex-1 accent-[#c46a37]"
+              className="flex-1 accent-[#b5563a]"
               aria-label="top_k"
             />
             <span className="w-8 text-right font-mono text-sm text-ink">{topK}</span>

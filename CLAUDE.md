@@ -348,9 +348,13 @@ nom serve --in-memory                 # then localhost:8080
 - **Functional components only.** State via `useState` / `useReducer`;
   data via TanStack Query.
 - **No new global state libs** (Zustand / Redux / Jotai off the table).
-- **Tailwind** with tokens in `ui/tailwind.config.ts`: cream `#f1ede3`,
-  ink `#141414`, accent `#c46a37`. Sharp corners. Editorial palette
-  non-negotiable.
+- **Tailwind** with tokens in `ui/tailwind.config.ts`: cream
+  `#faf6ec`, ink `#141414`, accent `#b5563a` (terracotta). Structural
+  surfaces (cards, dialogs, tables, code blocks) stay sharp; only
+  interactive controls (button, input, textarea) round 6px via
+  `rounded-md`. Tokens stay in lockstep with the website palette in
+  `docs/.vitepress/theme/custom.css` so screenshots and live UI read
+  as the same product.
 - **Radix primitives** copied into `ui/src/components/ui/` (ShadCN
   pattern); don't depend on `@shadcn/ui` runtime.
 - **Bundle ~125 KB gzip.** Keep <200 KB unless the feature earns the

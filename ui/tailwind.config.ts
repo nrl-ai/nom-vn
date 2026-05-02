@@ -1,25 +1,28 @@
 import type { Config } from "tailwindcss";
 
 // Editorial / parchment design language.
-// - Cream paper background, deep ink text, burnt orange accent.
-// - Sharp corners (no border-radius) — bookprint vibe.
+// - Cream paper background, deep ink text, terracotta accent.
+// - Sharp corners on structural surfaces (cards, dialogs, tables);
+//   slight 6px round on interactive controls (buttons, inputs) so the
+//   click / type targets feel tappable. Use `rounded-md` for those.
 // - Type pairing: Space Grotesk (display) + Inter (body) + ui-monospace (meta).
-// All values are direct color tokens (no CSS variables) so the theme is
-// readable at a glance and survives ShadCN updates.
+// Colors stay in lockstep with the website palette
+// (docs/.vitepress/theme/custom.css) so screenshots and live UI read
+// as the same product.
 const config: Config = {
   darkMode: "class",
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        bg: "#f1ede3",
-        "bg-soft": "#e8e2d3",
+        bg: "#faf6ec",
+        "bg-soft": "#f1ece0",
         paper: "#ffffff",
         ink: "#141414",
         "ink-soft": "#2a2a28",
         "ink-mute": "#6a6a66",
-        accent: "#c46a37",
-        "accent-soft": "#e9a577",
+        accent: "#b5563a",
+        "accent-soft": "#d68870",
         "accent-ink": "#1a0f06",
         line: "rgba(20,20,20,0.15)",
         "line-soft": "rgba(20,20,20,0.08)",
@@ -40,13 +43,16 @@ const config: Config = {
         serif: ["Crimson Pro", "Georgia", "serif"],
       },
       borderRadius: {
+        // Structural surfaces stay sharp (cards, dialogs, tables, code).
         none: "0",
         sm: "0",
         DEFAULT: "0",
-        md: "0",
         lg: "0",
         xl: "0",
         "2xl": "0",
+        // Interactive controls round slightly via `rounded-md`. Mirror the
+        // 6px the website uses on hero buttons / form inputs.
+        md: "6px",
       },
       boxShadow: {
         // Hard editorial shadow — no soft gaussian.

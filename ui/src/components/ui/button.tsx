@@ -1,6 +1,7 @@
 // ShadCN Button — adapted to our editorial design tokens.
-// Variants follow the cream/ink/orange palette; sharp corners (no
-// border-radius); editorial hard shadow on the primary action.
+// Variants follow the cream / ink / terracotta palette; slight 6px round
+// on the click target (rounded-md) so the button reads as tappable, with
+// the rest of the surface system staying sharp.
 
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
@@ -8,7 +9,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors disabled:pointer-events-none disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2",
   {
     variants: {
       variant: {

@@ -20,7 +20,7 @@ body,
 
 body {
   margin: 0;
-  background: #f1ede3;
+  background: #faf6ec;
   color: #141414;
   font-family:
     "Inter",
@@ -62,13 +62,13 @@ body {
 
 /* Selection styling — burnt orange tint. */
 ::selection {
-  background: #c46a37;
+  background: #b5563a;
   color: #1a0f06;
 }
 
 /* Focus ring — sharp single-stroke, accent color. */
 :focus-visible {
-  outline: 2px solid #c46a37;
+  outline: 2px solid #b5563a;
   outline-offset: 2px;
 }
 
@@ -144,20 +144,20 @@ a,
   font-style: italic;
 }
 .md-content a {
-  color: #c46a37;
+  color: #b5563a;
   text-decoration: underline;
   text-underline-offset: 2px;
   text-decoration-thickness: 1px;
 }
 .md-content a:hover {
   color: #1a0f06;
-  background: #c46a37;
+  background: #b5563a;
 }
 .md-content .md-code,
 .md-content code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.88em;
-  background: #e8e2d3;
+  background: #f1ece0;
   padding: 1px 5px;
   white-space: pre-wrap;
 }
@@ -166,7 +166,7 @@ a,
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12.5px;
   background: #141414;
-  color: #f1ede3;
+  color: #faf6ec;
   padding: 10px 12px;
   margin: 0.6em 0;
   overflow-x: auto;
@@ -193,7 +193,7 @@ a,
 .md-content .md-ul > li::before,
 .md-content ul > li::before {
   content: "▸";
-  color: #c46a37;
+  color: #b5563a;
   margin-left: -1.1em;
   margin-right: 0.4em;
   font-size: 0.85em;
