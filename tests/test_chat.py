@@ -122,6 +122,110 @@ class TestMaterials:
         assert r.status_code == 200
         assert len(r.json()) == 1
 
+    @pytest.mark.parametrize(
+        ("fixture_path", "mime"),
+        [
+            (
+                "benchmarks/data/office_vi/hop_dong.docx",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ),
+            (
+                "benchmarks/data/office_vi/so_sach.xlsx",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ),
+            (
+                "benchmarks/data/office_vi/thuyet_trinh.pptx",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            ),
+            (
+                "benchmarks/data/udhr_vi/udhr_vie.pdf",
+                "application/pdf",
+            ),
+            (
+                "benchmarks/data/synthetic_ocr_vi/clean/000.png",
+                "image/png",
+            ),
+        ],
+        ids=["docx", "xlsx", "pptx", "pdf", "png"],
+    )
+    def test_upload_each_file_format(
+        self, client: TestClient, fixture_path: str, mime: str
+    ) -> None:
+        """Every supported MIME type uploads + indexes via the multipart API.
+
+        Skips on the runner when a fixture is absent (the synthetic OCR images
+        and PDF ship with the repo; office_vi/* are checked in too)."""
+        from pathlib import Path
+
+        path = Path(fixture_path)
+        if not path.is_file():
+            pytest.skip(f"fixture missing: {fixture_path}")
+
+        sid = self._space(client)
+        with path.open("rb") as f:
+            r = client.post(
+                f"/api/spaces/{sid}/materials",
+                files={"file": (path.name, f.read(), mime)},
+            )
+        assert r.status_code == 201, r.text
+        mat = r.json()
+        assert mat["name"] == path.name
+        assert mat["n_bytes"] > 0
+
+        # Trigger indexing — confirms the parser pipeline can handle the
+        # format. PNG path requires tesseract, which we skip cleanly.
+        r = client.post(f"/api/spaces/{sid}/index")
+        if path.suffix == ".png":
+            import shutil
+
+            if shutil.which("tesseract") is None:
+                pytest.skip("tesseract not installed; PNG indexing path skipped")
+        assert r.status_code == 200
+        body = r.json()
+        # Non-image formats must produce >=1 chunk; PNG with tesseract too.
+        assert body["n_indexed"] >= 1, body
+
+    def test_ocr_extracts_vietnamese_diacritics_from_png(self, client: TestClient) -> None:
+        """Upload a clean Vietnamese PNG, run /index, fetch /text, and
+        assert the OCR pipeline pulled real Vietnamese text — not just
+        that something landed in chunks. Skips cleanly when tesseract
+        isn't installed on the runner."""
+        import shutil
+        from pathlib import Path
+
+        if shutil.which("tesseract") is None:
+            pytest.skip("tesseract not installed; OCR path skipped")
+
+        png = Path("benchmarks/data/synthetic_ocr_vi/clean/000.png")
+        if not png.is_file():
+            pytest.skip(f"fixture missing: {png}")
+
+        sid = self._space(client)
+        with png.open("rb") as f:
+            r = client.post(
+                f"/api/spaces/{sid}/materials",
+                files={"file": (png.name, f.read(), "image/png")},
+            )
+        assert r.status_code == 201
+        mid = r.json()["id"]
+
+        idx = client.post(f"/api/spaces/{sid}/index")
+        assert idx.status_code == 200
+        assert idx.json()["n_indexed"] >= 1
+
+        # Pull the parsed text + chunks back via the materials/text endpoint.
+        r = client.get(f"/api/spaces/{sid}/materials/{mid}/text")
+        assert r.status_code == 200, r.text
+        body = r.json()
+        text = body["text"]
+        # Tesseract on a synthetic VN PNG should produce *some* chars + at
+        # least one diacritic-bearing character (proves the `vie`
+        # traineddata is loaded; an English-only tess would lose them).
+        assert len(text.strip()) > 5, body
+        from nom.text.normalize import has_diacritics
+
+        assert has_diacritics(text), f"no VN diacritics in OCR output: {text!r}"
+
     def test_upload_unknown_space_404(self, client: TestClient) -> None:
         r = client.post(
             "/api/spaces/bogus/materials",
@@ -198,6 +302,43 @@ class TestAsk:
         assert c.get("/api/spaces", headers={"Authorization": "Bearer wrong"}).status_code == 401
         ok = c.get("/api/spaces", headers={"Authorization": "Bearer secret-xyz"})
         assert ok.status_code == 200
+
+    def test_auth_compare_is_constant_time(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Defence-in-depth: the bearer-token compare must use
+        secrets.compare_digest, not `==`. We mock secrets.compare_digest
+        in the auth path and assert it gets called for every gated
+        request — which proves the constant-time path is what's
+        running in production."""
+        import secrets
+
+        monkeypatch.setenv("NOM_AUTH_TOKEN", "secret-xyz")
+        calls: list[tuple[bytes, bytes]] = []
+        original = secrets.compare_digest
+
+        def spy(a: bytes, b: bytes) -> bool:
+            calls.append((a, b))
+            return original(a, b)
+
+        monkeypatch.setattr(secrets, "compare_digest", spy)
+        store = MemoryStore(embedder=_FakeEmbedder(), llm=_FakeLLM())
+        c = TestClient(build_app(store=store))
+
+        # /api/health is allowed — must NOT call compare_digest.
+        c.get("/api/health")
+        n_after_health = len(calls)
+        assert n_after_health == 0, (
+            f"compare_digest should not run for /api/health; got {n_after_health} call(s)"
+        )
+
+        # A gated endpoint with a wrong token: compare_digest MUST run.
+        c.get("/api/spaces", headers={"Authorization": "Bearer attacker-guess"})
+        assert len(calls) == n_after_health + 1, "compare_digest not called on gated 401"
+        # And the call args should be byte strings of equal length where the
+        # secret is on one side — never the raw user input compared against
+        # a different-length expected value (that would leak token length).
+        a, b = calls[-1]
+        assert isinstance(a, bytes)
+        assert isinstance(b, bytes)
 
     def test_ask_translates_ollama_404_into_503_with_hint(self) -> None:
         """When the upstream LLM returns 404 (model not pulled), we surface

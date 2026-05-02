@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.36] — 2026-05-02
+
+### Hardening + reproducible smoke tests
+
+Four small but high-leverage refinements after the live-deployment
+smoke pass on v0.2.35:
+
+1. **Constant-time bearer-token compare.** The auth middleware
+   used `header != f"Bearer {_auth_token}"`, which short-circuits
+   at the first mismatching byte and leaks the token via response
+   timing. Switched to `secrets.compare_digest` over a pre-encoded
+   expected header. New regression test
+   `test_auth_compare_is_constant_time` patches `secrets.compare_digest`
+   and asserts the auth path actually goes through it (so a future
+   refactor that drops back to `==` fails CI).
+
+2. **File-format upload coverage.** `tests/test_chat.py` previously
+   only covered `.txt`. Now parametrized over DOCX/XLSX/PPTX/PDF/PNG
+   using `benchmarks/data/office_vi/`, `benchmarks/data/udhr_vi/`,
+   `benchmarks/data/synthetic_ocr_vi/` fixtures. Each variant uploads
+   via the multipart `/api/spaces/{id}/materials` endpoint, then runs
+   `/index` and asserts `n_indexed >= 1`. Skips cleanly on the runner
+   when tesseract isn't installed (PNG path) or fixtures are missing.
+
+3. **Reproducible deployment smoke test.** Promoted the in-memory
+   harness used during the v0.2.34→v0.2.35 verification into a
+   first-class `scripts/e2e_smoke.py` (point at any URL, runs the
+   full 6-section + 30-something assertion matrix) and
+   `scripts/e2e_persistence.py` (drives two server boots end-to-end
+   to prove `--data-dir` survives restart). Anyone can validate a
+   deployment with `python scripts/e2e_smoke.py http://localhost:8080`.
+
+4. **OCR end-to-end assertion.** New
+   `test_ocr_extracts_vietnamese_diacritics_from_png` uploads a
+   synthetic Vietnamese PNG, runs `/index`, then fetches
+   `/api/spaces/{id}/materials/{mid}/text` and asserts the result
+   contains real Vietnamese diacritics — proves Tesseract's `vie`
+   traineddata is loaded. Skip-on-missing.
+
+Test count: **406 pytest + 37 vitest = 443 passing**, up from 436
+in v0.2.35. No code-surface changes for users; all four items
+strengthen guarantees.
+
 ## [0.2.35] — 2026-05-02
 
 ### Fix: 503 (not 500) when llama-server is unreachable

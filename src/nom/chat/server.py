@@ -85,8 +85,19 @@ def build_app(
 
     _auth_token = _os.environ.get("NOM_AUTH_TOKEN") or None
     if _auth_token:
+        import secrets as _secrets
+
         from fastapi import Request
         from fastapi.responses import JSONResponse as AuthJSONResponse
+
+        # Pre-encode the expected header value once so the per-request
+        # compare is byte-identical to whatever the client sent. We use
+        # `secrets.compare_digest` rather than `==` to avoid leaking
+        # the token via the response-time side channel: `==` short-
+        # circuits at the first mismatching byte, so an attacker can
+        # binary-search the token by timing the 401s. compare_digest
+        # is constant-time over equal-length inputs.
+        _expected_header = f"Bearer {_auth_token}".encode()
 
         @app.middleware("http")
         async def _bearer_auth(request: Request, call_next: Any) -> Any:
@@ -96,8 +107,8 @@ def build_app(
             # without being authenticated yet.
             if request.url.path == "/api/health":
                 return await call_next(request)
-            header = request.headers.get("authorization", "")
-            if header != f"Bearer {_auth_token}":
+            header = request.headers.get("authorization", "").encode("utf-8")
+            if not _secrets.compare_digest(header, _expected_header):
                 return AuthJSONResponse(
                     status_code=401,
                     content={"detail": "Authentication required (Authorization: Bearer …)"},
