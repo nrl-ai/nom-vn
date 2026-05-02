@@ -65,7 +65,7 @@ def main() -> int:
         type=Path,
         default=Path("benchmarks/data/ud_vi_vtb/test.conllu"),
     )
-    p.add_argument("--backend", choices=["ollama", "openai"], default="ollama")
+    p.add_argument("--backend", choices=["ollama", "openai", "anthropic"], default="ollama")
     p.add_argument("--model", required=True)
     p.add_argument("--limit", type=int, default=0, help="Cap sentences (0 = full corpus).")
     p.add_argument("--warmup", type=int, default=2)
@@ -95,9 +95,14 @@ def main() -> int:
             load_dotenv(REPO / ".env")
         except ImportError:
             pass
-        from nom.llm import OpenAI
+        if args.backend == "openai":
+            from nom.llm import OpenAI
 
-        llm = OpenAI(model=args.model)
+            llm = OpenAI(model=args.model)
+        else:
+            from nom.llm import Anthropic
+
+            llm = Anthropic(model=args.model)
 
     print(f"warming up {args.warmup} call(s) ...")
     for _ in range(args.warmup):
