@@ -6,10 +6,6 @@ run offline. Pull-progress streaming is exercised end-to-end.
 
 from __future__ import annotations
 
-import asyncio
-import json
-from collections.abc import Iterator
-
 import pytest
 
 fastapi = pytest.importorskip("fastapi")

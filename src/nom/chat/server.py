@@ -532,7 +532,9 @@ def _register_admin_routes_if_available(app: Any) -> None:
     otherwise — OSS deployments don't get admin endpoints.
     """
     try:
-        from nom_ee.admin import register_admin_routes
+        from nom_ee.admin import (  # type: ignore[import-untyped, unused-ignore]
+            register_admin_routes,
+        )
     except ImportError:
         return  # nom-vn-enterprise not installed; skip.
     try:
@@ -550,7 +552,7 @@ def _register_compliance_routes(app: Any) -> None:
 
     from nom.compliance.risk import RiskClassifier, SystemSpec
 
-    @app.post("/api/compliance/classify")  # type: ignore[misc]
+    @app.post("/api/compliance/classify")  # type: ignore[misc, untyped-decorator, unused-ignore]
     def classify(payload: dict[str, Any]) -> dict[str, Any]:
         try:
             spec = SystemSpec(

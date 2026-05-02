@@ -82,9 +82,7 @@ def test_convert_rejects_unsupported_format(
     assert "unsupported source format" in err
 
 
-def test_convert_rejects_missing_input(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_convert_rejects_missing_input(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     from nom.chat.cli import main
 
     rc = main(["convert", str(tmp_path / "nope.pdf")])
@@ -92,9 +90,7 @@ def test_convert_rejects_missing_input(
 
 
 @pytest.mark.skipif(_TESSERACT_BIN is None, reason="tesseract not installed")
-def test_convert_image_end_to_end(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_convert_image_end_to_end(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     """Real Tesseract OCR via the CLI on a PIL-rendered image."""
     pytest.importorskip("PIL")
     from PIL import Image, ImageDraw, ImageFont
@@ -122,7 +118,6 @@ def test_translate_with_explicit_output_path(
 ) -> None:
     """Use --output to control the destination path."""
     pytest.importorskip("docx")
-    from docx import Document
 
     from nom.chat.cli import main
 
@@ -143,9 +138,7 @@ def test_translate_with_explicit_output_path(
         def translate(self, text: str, *, hint: str | None = None) -> str:
             return text
 
-    monkeypatch.setattr(
-        cli_mod, "_build_translator", lambda args: IdentityLLMTranslator()
-    )
+    monkeypatch.setattr(cli_mod, "_build_translator", lambda args: IdentityLLMTranslator())
 
     rc = main(["translate", str(src), "--output", str(custom_dst)])
     assert rc == 0

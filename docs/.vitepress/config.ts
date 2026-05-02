@@ -181,6 +181,8 @@ export default withMermaid(
           text: "Tác vụ",
           items: [
             { text: "Tổng quan", link: "/tasks/" },
+            { text: "Dịch thuật", link: "/tasks/translate" },
+            { text: "Chuyển định dạng", link: "/tasks/convert" },
             { text: "Khôi phục dấu", link: "/tasks/diacritic-restoration" },
             { text: "Sửa chính tả", link: "/tasks/spell-correction" },
             { text: "Chuẩn hoá văn bản", link: "/tasks/text-normalization" },
@@ -223,6 +225,8 @@ export default withMermaid(
           text: "Tác vụ",
           items: [
             { text: "Tổng quan", link: "/tasks/" },
+            { text: "Dịch thuật", link: "/tasks/translate" },
+            { text: "Chuyển định dạng", link: "/tasks/convert" },
             { text: "Khôi phục dấu", link: "/tasks/diacritic-restoration" },
             { text: "Sửa chính tả", link: "/tasks/spell-correction" },
             { text: "Chuẩn hoá văn bản", link: "/tasks/text-normalization" },

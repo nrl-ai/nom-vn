@@ -55,7 +55,7 @@ def register_agent_routes(app: "Any", *, agents: Mapping[str, Agent]) -> None:
     from fastapi import HTTPException, Request
     from fastapi.responses import JSONResponse, StreamingResponse
 
-    @app.get("/api/agents")  # type: ignore[misc]
+    @app.get("/api/agents")  # type: ignore[misc, untyped-decorator, unused-ignore]
     def list_agents() -> dict[str, Any]:
         return {
             "agents": [
@@ -67,7 +67,7 @@ def register_agent_routes(app: "Any", *, agents: Mapping[str, Agent]) -> None:
             ]
         }
 
-    @app.post("/api/agents/{name}/run")  # type: ignore[misc]
+    @app.post("/api/agents/{name}/run")  # type: ignore[misc, untyped-decorator, unused-ignore]
     def run_agent(name: str, body: Mapping[str, Any]) -> Any:
         agent = agents.get(name)
         if agent is None:
@@ -92,7 +92,7 @@ def register_agent_routes(app: "Any", *, agents: Mapping[str, Agent]) -> None:
             "run_id": trace.run_id,
         }
 
-    @app.get("/api/agents/{name}/stream")  # type: ignore[misc]
+    @app.get("/api/agents/{name}/stream")  # type: ignore[misc, untyped-decorator, unused-ignore]
     def stream_agent(request: Request, name: str, task: str) -> Any:
         agent = agents.get(name)
         if agent is None:

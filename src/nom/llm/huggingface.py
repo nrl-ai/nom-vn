@@ -109,7 +109,7 @@ class HuggingFace:
             return
         from transformers import AutoModelForCausalLM, AutoTokenizer
 
-        self._tok = AutoTokenizer.from_pretrained(
+        self._tok = AutoTokenizer.from_pretrained(  # type: ignore[no-untyped-call,unused-ignore]
             self.model_id, trust_remote_code=self.trust_remote_code
         )
         kwargs: dict[str, Any] = {"trust_remote_code": self.trust_remote_code}
@@ -117,7 +117,7 @@ class HuggingFace:
             try:
                 from transformers import BitsAndBytesConfig
 
-                kwargs["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True)
+                kwargs["quantization_config"] = BitsAndBytesConfig(load_in_4bit=True)  # type: ignore[no-untyped-call,unused-ignore]
             except ImportError as exc:
                 raise ImportError(
                     "load_in_4bit=True requires bitsandbytes. "
@@ -128,8 +128,8 @@ class HuggingFace:
 
         m = AutoModelForCausalLM.from_pretrained(self.model_id, **kwargs)
         if not self.load_in_4bit:
-            m = m.to(self.device)
-        m.eval()
+            m = m.to(self.device)  # type: ignore[arg-type,unused-ignore]
+        m.eval()  # type: ignore[no-untyped-call,unused-ignore]
         self._model = m
 
     def complete(

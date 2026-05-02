@@ -426,9 +426,7 @@ class TestConvertFileUpload:
             data={"ocr_language": "eng"},
         )
         assert r.status_code == 200
-        assert r.headers["content-type"].startswith(
-            "application/vnd.openxmlformats-officedocument"
-        )
+        assert r.headers["content-type"].startswith("application/vnd.openxmlformats-officedocument")
         assert "scan.docx" in r.headers["content-disposition"]
         stats = _json.loads(r.headers["x-convert-stats"])
         assert stats["pages_ocred"] == 1
@@ -456,4 +454,3 @@ class TestConvertFileUpload:
             data={"ocr_language": "eng"},
         )
         assert r.status_code == 422
-

@@ -121,8 +121,10 @@ class HFDiacriticModel:
             return
         from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
-        self._tok = AutoTokenizer.from_pretrained(self.model_id)
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(self.model_id).to(self.device).eval()
+        self._tok = AutoTokenizer.from_pretrained(self.model_id)  # type: ignore[no-untyped-call,unused-ignore]
+        self._model = (
+            AutoModelForSeq2SeqLM.from_pretrained(self.model_id).to(self.device).eval()  # type: ignore[no-untyped-call,unused-ignore]
+        )
 
     def predict(self, text: str) -> str:
         """Restore diacritics on ``text``. Pure transformation; no caching."""

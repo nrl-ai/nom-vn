@@ -88,6 +88,13 @@ features:
 </figure>
 
 <figure class="ev-shot">
+<a href="/screenshots/22-translate.png" target="_blank" rel="noopener">
+<img src="/screenshots/22-translate.png" alt="Dịch thuật giữ nguyên định dạng .docx, .xlsx, .pptx, .txt" loading="lazy" />
+</a>
+<figcaption><strong>Dịch thuật giữ nguyên định dạng.</strong> Việt ↔ Anh cho <code>.docx</code> / <code>.xlsx</code> / <code>.pptx</code> / <code>.txt</code> — giữ nguyên tiêu đề, bảng, cấu trúc. Chuyển đổi PDF / ảnh sang DOCX qua OCR rồi dịch tiếp.</figcaption>
+</figure>
+
+<figure class="ev-shot">
 <a href="/screenshots/12-playground-api.png" target="_blank" rel="noopener">
 <img src="/screenshots/12-playground-api.png" alt="Tài liệu API và ví dụ cURL" loading="lazy" />
 </a>
@@ -96,7 +103,7 @@ features:
 
 </div>
 
-<p class="ev-shots-foot"><a href="/vi/quickstart">Cài và mở thử trong 2 phút →</a></p>
+<p class="ev-shots-foot"><a href="/tasks/translate">Xem dịch thuật</a> · <a href="/tasks/convert">Xem chuyển định dạng</a> · <a href="/vi/quickstart">Cài và mở thử trong 2 phút →</a></p>
 
 <div class="ev-section">
 <h2>§ 03 · Pipeline RAG</h2>

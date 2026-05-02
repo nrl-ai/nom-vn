@@ -389,7 +389,9 @@ def _build_complex_pptx(path: Path) -> None:
 
     # Slide with table
     s3 = prs.slides.add_slide(blank_layout)
-    tbl_shape = s3.shapes.add_table(rows=2, cols=2, left=Inches(1), top=Inches(1), width=Inches(4), height=Inches(2))
+    tbl_shape = s3.shapes.add_table(
+        rows=2, cols=2, left=Inches(1), top=Inches(1), width=Inches(4), height=Inches(2)
+    )
     tbl = tbl_shape.table
     tbl.cell(0, 0).text = "Chỉ số"
     tbl.cell(0, 1).text = "Giá trị"
@@ -464,9 +466,7 @@ def test_text_paragraph_count_invariant(tmp_path: Path) -> None:
     assert stats.paragraphs_translated == 4
 
     n_src_paras = len([p for p in body.split("\n\n") if p.strip()])
-    n_dst_paras = len(
-        [p for p in dst.read_text(encoding="utf-8").split("\n\n") if p.strip()]
-    )
+    n_dst_paras = len([p for p in dst.read_text(encoding="utf-8").split("\n\n") if p.strip()])
     assert n_src_paras == n_dst_paras
 
 
@@ -492,7 +492,9 @@ def test_markdown_headers_round_trip(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
-def _make_text_image(path: Path, text: str = "Hello world", *, size: tuple[int, int] = (640, 200)) -> None:
+def _make_text_image(
+    path: Path, text: str = "Hello world", *, size: tuple[int, int] = (640, 200)
+) -> None:
     from PIL import Image, ImageDraw, ImageFont
 
     img = Image.new("L", size, 255)
