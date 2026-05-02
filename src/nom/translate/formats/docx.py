@@ -89,7 +89,12 @@ def translate_docx(
 
     doc = Document(str(src_path))
     counts = _Counts()
-    seen: set[int] = set()
+    # lxml-backed XML elements are hashable by underlying C-node address,
+    # which is stable across Python wrapper recreation — `id()` on the
+    # python-docx wrapper is NOT (proxies get GC'd between iterations,
+    # reusing memory). Dedup is needed for merged cells, which expose
+    # the same <w:p> via multiple <w:tc> handles.
+    seen: set[Any] = set()
 
     for para in doc.paragraphs:
         _translate_paragraph(para, translator, counts, seen)
@@ -143,18 +148,17 @@ def _translate_paragraph(
     paragraph: Paragraph,
     translator: Translator,
     counts: _Counts,
-    seen: set[int],
+    seen: set[Any],
 ) -> None:
-    para_id = id(paragraph._element)
-    if para_id in seen:
+    element = paragraph._element
+    if element in seen:
         return
-    seen.add(para_id)
+    seen.add(element)
 
     runs = _all_runs_in_order(paragraph)
-    if not runs:
+    source = "".join(r.text for r in runs) if runs else ""
+    if not source:
         return
-
-    source = "".join(r.text for r in runs)
     if not source.strip():
         counts.skipped += 1
         return
@@ -177,7 +181,7 @@ def _translate_table(
     table: Table,
     translator: Translator,
     counts: _Counts,
-    seen: set[int],
+    seen: set[Any],
 ) -> None:
     for row in table.rows:
         for cell in row.cells:

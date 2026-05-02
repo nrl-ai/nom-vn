@@ -266,6 +266,10 @@ def main(argv: list[str] | None = None) -> int:
         help="Root directory for the file_read tool (default: cwd)",
     )
 
+    from nom.translate.cli import add_subparser as _add_translate_subparser
+
+    _add_translate_subparser(sub)
+
     args = parser.parse_args(argv)
 
     if args.cmd == "serve":
@@ -286,6 +290,11 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "mcp-serve":
         return _run_mcp_stdio(include=args.include, file_root=args.file_root)
+
+    if args.cmd == "translate":
+        from nom.translate.cli import run as _run_translate
+
+        return _run_translate(args)
 
     parser.print_help()
     return 1
