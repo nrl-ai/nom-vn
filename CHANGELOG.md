@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.37] — 2026-05-02
+
+### Fix: skip PNG upload-format test when tesseract is missing
+
+Same content as v0.2.36; CI publish workflow caught a test-runner
+issue that v0.2.36 hit. The new
+`test_upload_each_file_format[png]` parametrized variant runs
+`/index` which shells out to tesseract — the skip-on-missing was
+placed *after* the index call, so on CI runners without tesseract
+the index raised `TesseractNotFoundError` before reaching the
+skip. Moved the check above the upload + index so the parametrize
+case skips cleanly. v0.2.36 wheel is functionally identical to
+v0.2.37 — the bump exists so the publish workflow re-runs against
+a green tests gate and ships to PyPI.
+
 ## [0.2.36] — 2026-05-02
 
 ### Hardening + reproducible smoke tests
