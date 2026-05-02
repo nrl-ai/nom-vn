@@ -37,9 +37,11 @@ và giấy phép.
 | `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | safetensors | 83.92 % | — | — | — | yếu nhất trong số đã audit; bỏ qua |
 | `yammdd/vietnamese-diacritic-restoration-v2` | MIT | tf_model.h5 | chưa đo | — | — | — | chỉ TF; chi phí chuyển đổi cao, để sau |
 | Bảng quy tắc (`nom.text.fix_diacritics`) | Apache 2.0 | none | 41.06 % | — | — | — | dự phòng zero-deps |
-| LLM cục bộ (`gemma3:4b` Q4 qua Ollama) | Apache 2.0 | gguf | 89.06 % | 62.05 % | 79.70 % | 81.26 % | mạnh ở register hiện đại, sụt 27 pp ở literary; ~0.9 s/câu trên RTX 3090 |
-| LLM cục bộ (`gemma4:e4b` Q4 qua Ollama) | Apache 2.0 | gguf | 93.18 % | 77.78 % | 87.91 % | 92.71 % | tốt nhất trong nhóm LLM local, chỉ sau ViT5 fine-tune ~5-12 pp; ~0.9 s/câu trên RTX 3090 |
-| LLM cục bộ (`qwen3:1.7b` Q4 qua Ollama) | Apache 2.0 | gguf | 16.60 % | — | — | — | dưới rule baseline 41 %; bỏ qua, dùng gemma4:e4b nếu cần local LLM |
+| LLM cục bộ (`gemma4:e4b` Q4 qua Ollama) | Apache 2.0 | gguf | 93,18 % | 77,78 % | 87,91 % | 92,71 % | Tốt nhất trong nhóm LLM cục bộ, chỉ sau ViT5 fine-tune 5-12 pp; ~0,9 s/câu trên RTX 3090. Cần ≥10 GB VRAM. |
+| LLM cục bộ (`qwen3:8b` Q4 qua Ollama) | Apache 2.0 | gguf | Chưa đo | 61,40 % | 75,29 % | 88,43 % | Đứng giữa gemma3:4b và gemma4:e4b; ~0,6 s/câu trên RTX 3090. Cần ~5 GB VRAM. |
+| LLM cục bộ (`gemma3:4b` Q4 qua Ollama) | Apache 2.0 | gguf | 89,06 % | 62,05 % | 79,70 % | 81,26 % | Mạnh ở văn bản hiện đại, sụt 27 pp ở văn học; ~0,9 s/câu trên RTX 3090 |
+| LLM cục bộ (`phi4-mini` Q4 qua Ollama) | MIT | gguf | Chưa đo | Chưa đo | 10,48 % | 8,24 % | **Hỏng** trên tiếng Việt — dưới sàn quy tắc 41 %, kém cả qwen3:1.7b; bỏ qua. |
+| LLM cục bộ (`qwen3:1.7b` Q4 qua Ollama) | Apache 2.0 | gguf | 16,60 % | — | — | — | Dưới sàn quy tắc 41 %; bỏ qua, dùng gemma4:e4b nếu cần LLM cục bộ |
 | LLM đám mây (`gpt-4o-mini`) | Độc quyền | — | 95,37 % | 81,84 % | 89,51 % | 95,79 % | 0,15 USD vào / 0,60 USD ra mỗi 1M token; điểm cân bằng chi phí–chất lượng của OpenAI; **thắng gpt-5.4-mini ở văn học** (+3,16 pp) |
 | LLM đám mây (`gpt-5.4-mini`) | Độc quyền | — | 94,85 % | 78,68 % | 92,06 % | 96,12 % | 0,75 USD vào / 4,50 USD ra mỗi 1M token (gấp 5 lần gpt-4o-mini); hơn 0,3-2,6 pp ở văn bản hành chính/hội thoại nhưng kém ở văn học |
 | LLM đám mây (`gpt-5.4-nano`) | Độc quyền | — | 92,92 % | 73,18 % | 85,15 % | 93,82 % | 0,20 USD vào / 1,25 USD ra mỗi 1M token; **kém gpt-4o-mini ở cả 3 loại văn bản dù mới hơn**; bỏ qua, dùng gpt-4o-mini |

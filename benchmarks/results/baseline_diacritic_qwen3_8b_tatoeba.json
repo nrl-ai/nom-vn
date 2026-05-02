@@ -1,0 +1,11 @@
+{
+  "backend": "ollama",
+  "model": "qwen3:8b",
+  "corpus": "benchmarks/data/tatoeba_vi/diacritic_eval_300.txt",
+  "n_sentences": 300,
+  "warmup_calls": 2,
+  "word_accuracy": 0.7529,
+  "sentence_exact": 0.2933,
+  "latency_ms_p50": 448.2,
+  "latency_ms_mean": 458.7
+}
