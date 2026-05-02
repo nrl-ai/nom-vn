@@ -1,0 +1,35 @@
+{
+  "data_root": "/home/vietanhdev/nom-vn-bench/benchmarks/data/synthetic_ocr_vi",
+  "results": {
+    "clean": {
+      "n": 20,
+      "engines": {
+        "qwen2.5vl:7b": {
+          "cer_mean": 0.3317,
+          "wer_mean": 0.4346,
+          "latency_ms_mean": 606.2
+        }
+      }
+    },
+    "noisy": {
+      "n": 20,
+      "engines": {
+        "qwen2.5vl:7b": {
+          "cer_mean": 0.299,
+          "wer_mean": 0.4294,
+          "latency_ms_mean": 317.5
+        }
+      }
+    },
+    "hard": {
+      "n": 30,
+      "engines": {
+        "qwen2.5vl:7b": {
+          "cer_mean": 0.8137,
+          "wer_mean": 0.9214,
+          "latency_ms_mean": 365.6
+        }
+      }
+    }
+  }
+}

@@ -66,7 +66,7 @@ text = predictor.predict(Image.open("handwriting_line.png").convert("RGB"))
 | PaddleOCR PP-OCRv5 (latin_mobile_rec) | Apache 2.0 | 24.70 % | 31.33 % | 86.13 % | 59.43 % | 1170-1260 ms |
 | RapidOCR (ONNX, PaddleOCR port) | Apache 2.0 | 63.97 % | 77.83 % | 100.00 % | 97.20 % | 130-250 ms |
 | TrOCR base-handwritten (English-only baseline) | MIT | 32.89 % | 38.07 % | 93.76 % | 75.89 % | 180-280 ms |
-| `qwen2.5vl:7b` (VLM) | Apache 2.0 (model) | 31.07 % | not benched (no Ollama VLM cached on bench host) | not benched | not benched | 1.4 s |
+| `qwen2.5vl:7b` (VLM, qua Ollama) | Apache 2.0 (model) | 33.17 % | 29.90 % | 81.37 % | 67.53 % | 320-610 ms |
 | Surya OCR | open-RAIL-M | not benched (license fails audit) | — | — | — | — |
 
 **Phát hiện quan trọng 2026-05-01:**

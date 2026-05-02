@@ -27,7 +27,7 @@ mô hình của chúng tôi [`nrl-ai/vn-diacritic-vit5-base`](https://huggingfac
 hơn +1.29 pp trên formal / +0.18 pp trên hội thoại với cùng kích thước
 và giấy phép.
 
-## Bức tranh công khai — đo ngày 2026-04-30
+## Bức tranh công khai — đo ngày 2026-05-02
 
 | Mô hình | Giấy phép | Format | business 55 | literary 800 | conv 300 | formal 72 | Kết luận |
 |---|---|---|---:|---:|---:|---:|---|
@@ -38,6 +38,8 @@ và giấy phép.
 | `yammdd/vietnamese-diacritic-restoration-v2` | MIT | tf_model.h5 | chưa đo | — | — | — | chỉ TF; chi phí chuyển đổi cao, để sau |
 | Bảng quy tắc (`nom.text.fix_diacritics`) | Apache 2.0 | none | 41.06 % | — | — | — | dự phòng zero-deps |
 | LLM cục bộ (`gemma3:4b` Q4 qua Ollama) | Apache 2.0 | gguf | 89.06 % | 62.05 % | 79.70 % | 81.26 % | mạnh ở register hiện đại, sụt 27 pp ở literary; ~0.9 s/câu trên RTX 3090 |
+| LLM cục bộ (`gemma4:e4b` Q4 qua Ollama) | Apache 2.0 | gguf | 93.18 % | 77.78 % | 87.91 % | 92.71 % | tốt nhất trong nhóm LLM local, chỉ sau ViT5 fine-tune ~5-12 pp; ~0.9 s/câu trên RTX 3090 |
+| LLM cục bộ (`qwen3:1.7b` Q4 qua Ollama) | Apache 2.0 | gguf | 16.60 % | — | — | — | dưới rule baseline 41 %; bỏ qua, dùng gemma4:e4b nếu cần local LLM |
 | LLM đám mây (`gpt-4o-mini`) | proprietary | — | 95.37 % | — | — | — | thắng về chi phí chỉ khi batch nhỏ |
 
 Khoảng cách 8.7 pp giữa các register trên Toshiiiii1 xác nhận mô hình

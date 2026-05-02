@@ -1,0 +1,16 @@
+{
+  "n_samples": 200,
+  "seed": 42,
+  "engines": [
+    "qwen2.5vl:7b"
+  ],
+  "results": {
+    "qwen2.5vl:7b": {
+      "cer_mean": 0.6753,
+      "cer_p50": 0.4148,
+      "wer_mean": 0.8238,
+      "latency_ms_mean": 339.5,
+      "latency_ms_p50": 309.3
+    }
+  }
+}

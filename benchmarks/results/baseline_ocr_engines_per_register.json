@@ -7,7 +7,8 @@
       "vietocr_cer": 0.0141,
       "paddleocr_cer": 0.247,
       "rapidocr_cer": 0.6397,
-      "trocr_handwritten_cer": 0.3289
+      "trocr_handwritten_cer": 0.3289,
+      "qwen2_5vl_7b_cer": 0.3317
     },
     "printed_noisy_n20": {
       "tesseract_cer": 0.007,
@@ -15,7 +16,8 @@
       "vietocr_cer": 0.0337,
       "paddleocr_cer": 0.3133,
       "rapidocr_cer": 0.7783,
-      "trocr_handwritten_cer": 0.3807
+      "trocr_handwritten_cer": 0.3807,
+      "qwen2_5vl_7b_cer": 0.299
     },
     "printed_hard_n30": {
       "tesseract_cer": 0.3034,
@@ -23,7 +25,8 @@
       "vietocr_cer": 0.29,
       "paddleocr_cer": 0.8613,
       "rapidocr_cer": 1.0,
-      "trocr_handwritten_cer": 0.9376
+      "trocr_handwritten_cer": 0.9376,
+      "qwen2_5vl_7b_cer": 0.8137
     },
     "handwriting_brianhuster_n200": {
       "tesseract_cer": 0.6934,
@@ -31,7 +34,8 @@
       "vietocr_cer": 0.3182,
       "paddleocr_cer": 0.5943,
       "rapidocr_cer": 0.972,
-      "trocr_handwritten_cer": 0.7589
+      "trocr_handwritten_cer": 0.7589,
+      "qwen2_5vl_7b_cer": 0.6753
     }
   },
   "recommendation": {
