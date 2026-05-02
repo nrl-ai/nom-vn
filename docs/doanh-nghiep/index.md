@@ -1,5 +1,6 @@
 ---
 description: Triển khai Nôm trên hạ tầng nội bộ — bảo mật theo Nghị định 13/2023, tuỳ biến mô hình theo dữ liệu của bạn, hỗ trợ trực tiếp từ Neural Research Lab.
+outline: false
 ---
 
 <div class="ev-enterprise-hero">

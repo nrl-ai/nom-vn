@@ -59,12 +59,6 @@ features:
 
 <div class="vp-doc home-extra">
 
-<div class="ev-marquee" aria-hidden="true">
-<div class="ev-marquee-track">
-<span>hỏi đáp tài liệu</span><span>khôi phục dấu</span><span>sửa chính tả</span><span>ocr tiếng việt</span><span>đọc pdf · word · excel · ppt</span><span>tách từ</span><span>chunking</span><span>embedder bkai</span><span>reranker bge-m3</span><span>tesseract vie</span><span>ollama</span><span>fastapi + react</span><span>apache 2.0</span><span>hỏi đáp tài liệu</span><span>khôi phục dấu</span><span>sửa chính tả</span><span>ocr tiếng việt</span><span>đọc pdf · word · excel · ppt</span><span>tách từ</span><span>chunking</span><span>embedder bkai</span><span>reranker bge-m3</span><span>tesseract vie</span><span>ollama</span><span>fastapi + react</span><span>apache 2.0</span>
-</div>
-</div>
-
 <div class="ev-section">
 <h2>§ 02 · Sản phẩm thấy được</h2>
 <p class="lede">Một lệnh <code>nom serve</code> là có giao diện web đầy đủ chạy ngay trên máy của bạn — không phải chỉ một thư viện trong terminal.</p>
@@ -105,44 +99,7 @@ features:
 <p class="ev-shots-foot"><a href="/vi/quickstart">Cài và mở thử trong 2 phút →</a></p>
 
 <div class="ev-section">
-<h2>§ 03 · Bốn việc bạn có thể làm ngay</h2>
-<p class="lede">Mỗi khả năng đều có script đo trong <code>benchmarks/</code> — chạy được từ một bản clone sạch, không có số phỏng đoán.</p>
-</div>
-
-<div class="ev-corners">
-
-<div class="ev-corner featured">
-<div class="ev-corner-head"><span class="marker">01 · phổ biến nhất</span></div>
-<h3>Hỏi đáp trên kho tài liệu nội bộ</h3>
-<p>Hợp đồng, báo cáo, PDF scan, biểu mẫu, công văn — toàn bộ ở lại trong máy của bạn. Pipeline tra cứu đo trên Zalo Legal QA: bkai bi-encoder + bge-reranker → <strong>R@1 86.3 %</strong>. Có UI hỏi đáp và trích dẫn sẵn.</p>
-<a href="/tasks/rag" class="ev-corner-link">tài liệu RAG</a>
-</div>
-
-<div class="ev-corner">
-<div class="ev-corner-head"><span class="marker">02 · sửa văn bản</span></div>
-<h3>Khôi phục dấu, sửa chính tả</h3>
-<p>Một lượt cho cả lỗi gõ Telex, lỗi OCR, viết tắt teen-code và mất dấu. <code>nrl-ai/vn-spell-correction-base</code> v0.2.29: <strong>98.32 % light · 97.03 % heavy</strong> trên 8 tập kiểm thử; <strong>79.62 %</strong> trên tập ngoài phân phối.</p>
-<a href="/tasks/spell-correction" class="ev-corner-link">tài liệu sửa chính tả</a>
-</div>
-
-<div class="ev-corner">
-<div class="ev-corner-head"><span class="marker">03 · giấy thành chữ</span></div>
-<h3>OCR tiếng Việt cho tài liệu scan</h3>
-<p>Tesseract <code>vie</code> cho ảnh / PDF scan, kết hợp sửa chính tả sau OCR để đỡ lỗi máy quét. PDF born-digital đi qua pypdfium2 — không OCR thừa, không mất bố cục bảng.</p>
-<a href="/tasks/ocr" class="ev-corner-link">tài liệu OCR</a>
-</div>
-
-<div class="ev-corner">
-<div class="ev-corner-head"><span class="marker">04 · tích hợp</span></div>
-<h3>Lập trình ghép vào hệ thống có sẵn</h3>
-<p>Thư viện Python type-annotated, Protocol-based — không khoá vào lớp cụ thể. REST API theo OpenAPI 3.1. <code>pip install nom-vn[chat]</code> đầy đủ web app + parser + retrieval + rerank.</p>
-<a href="/vi/quickstart" class="ev-corner-link">cài đặt</a>
-</div>
-
-</div>
-
-<div class="ev-section">
-<h2>§ 04 · Pipeline RAG</h2>
+<h2>§ 03 · Pipeline RAG</h2>
 <p class="lede">Sáu bước, mỗi bước là một module thay thế được qua <code>Protocol</code> — không khoá vào nhà cung cấp nào.</p>
 </div>
 
@@ -166,7 +123,7 @@ flowchart LR
 <div class="vp-doc home-extra">
 
 <div class="ev-section">
-<h2>§ 05 · Triết lý vận hành</h2>
+<h2>§ 04 · Triết lý vận hành</h2>
 <p class="lede">Bốn nguyên tắc bất di bất dịch — đã thấm vào mọi commit và mọi con số trên trang này.</p>
 </div>
 
@@ -199,7 +156,7 @@ flowchart LR
 </div>
 
 <div class="ev-section">
-<h2>§ 06 · Đi đâu tiếp</h2>
+<h2>§ 05 · Đi đâu tiếp</h2>
 <p class="lede">Tuỳ bạn đang ở vai gì — học hỏi, tự cài, hay đánh giá cho doanh nghiệp.</p>
 </div>
 
