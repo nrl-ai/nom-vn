@@ -1,0 +1,110 @@
+{
+  "data_root": "/home/vietanhdev/Workspaces/PPlanning/WORKSPACE/nom-vn/benchmarks/data/synthetic_ocr_vi",
+  "results": {
+    "clean": {
+      "n": 20,
+      "engines": {
+        "tesseract": {
+          "cer_mean": 0.0,
+          "wer_mean": 0.0,
+          "latency_ms_mean": 69.9
+        },
+        "easyocr": {
+          "cer_mean": 0.0142,
+          "wer_mean": 0.0593,
+          "latency_ms_mean": 55.3
+        },
+        "vietocr": {
+          "cer_mean": 0.0141,
+          "wer_mean": 0.0542,
+          "latency_ms_mean": 180.6
+        },
+        "paddleocr": {
+          "cer_mean": 0.247,
+          "wer_mean": 0.6647,
+          "latency_ms_mean": 1170.3
+        },
+        "rapidocr": {
+          "cer_mean": 0.6397,
+          "wer_mean": 1.0059,
+          "latency_ms_mean": 133.8
+        },
+        "trocr-handwritten": {
+          "cer_mean": 0.3289,
+          "wer_mean": 1.0069,
+          "latency_ms_mean": 279.0
+        }
+      }
+    },
+    "noisy": {
+      "n": 20,
+      "engines": {
+        "tesseract": {
+          "cer_mean": 0.007,
+          "wer_mean": 0.0372,
+          "latency_ms_mean": 80.5
+        },
+        "easyocr": {
+          "cer_mean": 0.0487,
+          "wer_mean": 0.2022,
+          "latency_ms_mean": 39.7
+        },
+        "vietocr": {
+          "cer_mean": 0.0337,
+          "wer_mean": 0.1332,
+          "latency_ms_mean": 231.2
+        },
+        "paddleocr": {
+          "cer_mean": 0.3133,
+          "wer_mean": 0.7395,
+          "latency_ms_mean": 1260.9
+        },
+        "rapidocr": {
+          "cer_mean": 0.7783,
+          "wer_mean": 1.0091,
+          "latency_ms_mean": 248.8
+        },
+        "trocr-handwritten": {
+          "cer_mean": 0.3807,
+          "wer_mean": 1.0331,
+          "latency_ms_mean": 263.7
+        }
+      }
+    },
+    "hard": {
+      "n": 30,
+      "engines": {
+        "tesseract": {
+          "cer_mean": 0.3034,
+          "wer_mean": 0.6464,
+          "latency_ms_mean": 80.6
+        },
+        "easyocr": {
+          "cer_mean": 0.8709,
+          "wer_mean": 1.0,
+          "latency_ms_mean": 34.8
+        },
+        "vietocr": {
+          "cer_mean": 0.29,
+          "wer_mean": 0.6289,
+          "latency_ms_mean": 284.0
+        },
+        "paddleocr": {
+          "cer_mean": 0.8613,
+          "wer_mean": 0.9746,
+          "latency_ms_mean": 1192.9
+        },
+        "rapidocr": {
+          "cer_mean": 1.0,
+          "wer_mean": 1.0,
+          "latency_ms_mean": 181.3
+        },
+        "trocr-handwritten": {
+          "cer_mean": 0.9376,
+          "wer_mean": 1.1001,
+          "latency_ms_mean": 178.8
+        }
+      }
+    }
+  }
+}
