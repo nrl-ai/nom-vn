@@ -124,6 +124,41 @@ def _build_engine(name: str):
 
         return run
 
+    if name == "qwen2.5vl:7b":
+        try:
+            import base64
+            import io
+
+            import ollama
+            from PIL import Image
+        except ImportError:
+            return None
+
+        # Single-line OCR prompt (VN). Keep it terse so the VLM doesn't
+        # ramble explanations into the output. Per the OCR doc, VLMs
+        # hallucinate on tight line crops — we still bench it as a
+        # data point for users with full-document images.
+        prompt = (
+            "Trích xuất chính xác đoạn văn bản tiếng Việt trong ảnh. "
+            "Chỉ trả về văn bản, không thêm giải thích, không thêm dấu nháy."
+        )
+
+        def run(p: Path) -> str:
+            with Image.open(p) as im:
+                buf = io.BytesIO()
+                im.convert("RGB").save(buf, format="PNG")
+                b64 = base64.b64encode(buf.getvalue()).decode()
+            res = ollama.generate(
+                model="qwen2.5vl:7b",
+                prompt=prompt,
+                images=[b64],
+                options={"temperature": 0, "num_predict": 256},
+                think=False,
+            )
+            return res.get("response", "").strip()
+
+        return run
+
     if name == "trocr-handwritten":
         try:
             import torch
