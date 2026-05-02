@@ -108,10 +108,18 @@ def _build_hf_translator(model_id: str, direction: str) -> Callable[[str], str]:
     Handles MADLAD's ``<2vi>`` / ``<2en>`` prefix and m2m100's
     ``forced_bos_token_id`` lang switch.
     """
+    import torch
     from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_id)
+    # Default load is on CPU — explicitly move to CUDA when available.
+    # Without this, MADLAD-3B runs ~140x slower than necessary AND
+    # produces "e e e e e ..." garbage on some configs (root cause
+    # under investigation; see commit aae6a01).
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    dtype = torch.float16 if device == "cuda" else torch.float32
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_id, torch_dtype=dtype).to(device)
+    print(f"  loaded {model_id} on {device} ({dtype})", flush=True)
     src, tgt = direction.split("2")  # "en2vi" -> ("en", "vi")
 
     is_madlad = "madlad" in model_id.lower()
@@ -120,18 +128,18 @@ def _build_hf_translator(model_id: str, direction: str) -> Callable[[str], str]:
     def translate(text: str) -> str:
         if is_madlad:
             prompt = f"<2{tgt}> {text}"
-            inputs = tok(prompt, return_tensors="pt")
+            inputs = tok(prompt, return_tensors="pt").to(device)
             out = model.generate(**inputs, max_new_tokens=512)
         elif is_m2m100:
             tok.src_lang = src
-            inputs = tok(text, return_tensors="pt")
+            inputs = tok(text, return_tensors="pt").to(device)
             out = model.generate(
                 **inputs,
                 forced_bos_token_id=tok.get_lang_id(tgt),
                 max_new_tokens=512,
             )
         else:
-            inputs = tok(text, return_tensors="pt")
+            inputs = tok(text, return_tensors="pt").to(device)
             out = model.generate(**inputs, max_new_tokens=512)
         return tok.batch_decode(out, skip_special_tokens=True)[0].strip()
 
