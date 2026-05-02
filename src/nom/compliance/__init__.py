@@ -28,16 +28,20 @@ from nom.compliance.audit import (
     Store,
     VerifyResult,
 )
+from nom.compliance.risk import ClassificationResult, RiskClassifier, SystemSpec
 from nom.compliance.types import RiskTier
 
 __all__ = [
     "AuditChainTamperedError",
     "AuditEvent",
     "AuditLog",
+    "ClassificationResult",
     "JSONLStore",
+    "RiskClassifier",
     "RiskTier",
     "SQLiteStore",
     "Signer",
     "Store",
+    "SystemSpec",
     "VerifyResult",
 ]
