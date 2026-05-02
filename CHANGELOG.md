@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.33] — 2026-05-02
+
+### Publish-workflow fix — first release that can actually go to PyPI
+
+Two CI bugs caught + fixed in this round:
+
+- **Mypy `llama_cpp` import-not-found** (caught after 0.2.31). Optional
+  dep, lazy-imported at runtime; CI doesn't install
+  `[llamacpp-python]`, so mypy needs `llama_cpp.*` in
+  `ignore_missing_imports`. Fixed in 856af51.
+- **Publish workflow tests-gate failure** (caught on the v0.2.32
+  release-trigger). The job ran `pip install -e .`, but the wheel
+  target's `force-include "src/nom/chat/ui_dist"` trips on a fresh
+  checkout because `ui_dist/` is a build artifact that's gitignored.
+  We now stage a minimal `Nôm`-branded `index.html` placeholder
+  before the editable install (4f6b57d, f6da1f5). The real React
+  bundle still ships via the existing `build-ui` → `build` job
+  chain that gates the wheel/sdist artifacts uploaded to PyPI; the
+  wheel-content sanity check (`assert any('chat/ui_dist/index.html'
+  in n)`) keeps that honest.
+
+These were the last code-side blockers. The publish workflow now
+gets through tests-gate → build-ui → build sdist + wheel cleanly;
+the only step that still fails is the OIDC handshake to PyPI/
+TestPyPI itself, which needs a one-time **Trusted Publisher**
+configuration on the PyPI side
+([pypi.org/manage/account/publishing](https://pypi.org/manage/account/publishing/)
+— project `nom-vn`, owner `nrl-ai`, repo `nom-vn`, workflow
+`publish.yml`, environment `pypi`).
+
+### Verified end-to-end (clean venv, `/tmp/nom-clean`)
+
+- 28/28 endpoint checks against the installed wheel:
+  `/api/health`, `/api/llm/backends`, all 7 stateless `/api/tools/*`
+  endpoints, validation 422s, spaces CRUD + multipart upload,
+  `/docs` Swagger, bundled UI at `/`.
+- Auth gating (`NOM_AUTH_TOKEN`): `/api/health` stays open;
+  `/api/spaces` + `/api/tools/*` return 401 without/wrong token,
+  200 with correct token.
+- All 6 LLM adapters import: Ollama, LlamaCpp, LlamaCppPython,
+  HuggingFace, OpenAI, Anthropic.
+
+No code-surface changes since 0.2.32 — this release exists to make
+the publish workflow runnable on tag push.
+
 ## [0.2.32] — 2026-05-02
 
 ### Refreshed screenshot set + Vietnamese-only normalize hint
