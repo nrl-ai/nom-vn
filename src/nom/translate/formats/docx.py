@@ -65,6 +65,8 @@ def translate_docx(
     src: Path | str,
     dst: Path | str,
     translator: Translator,
+    *,
+    preserve_runs: bool = False,
 ) -> DocxTranslationStats:
     """Translate a ``.docx`` file from ``src`` to ``dst``.
 
@@ -74,6 +76,20 @@ def translate_docx(
     Walks: body paragraphs, body tables (recursively for nested
     tables), and header / footer paragraphs and tables across every
     section (default, first-page, even-page).
+
+    Args:
+        src: input ``.docx``.
+        dst: output ``.docx`` (parent created if missing; overwritten
+            if it exists).
+        translator: any :class:`~nom.translate.Translator`.
+        preserve_runs: if ``True``, attempt v1 tag-protection — wrap
+            run boundaries with ``⟦N⟧`` placeholders, ask the translator
+            to preserve them, and redistribute target text into the
+            original runs so intra-paragraph styling (mid-sentence bold,
+            italic, hyperlinks) survives. Falls back transparently to
+            v0 paragraph-level styling per paragraph when the
+            placeholders don't round-trip cleanly. Default ``False``
+            keeps the proven v0 behaviour.
     """
     try:
         from docx import Document
@@ -97,9 +113,9 @@ def translate_docx(
     seen: set[Any] = set()
 
     for para in doc.paragraphs:
-        _translate_paragraph(para, translator, counts, seen)
+        _translate_paragraph(para, translator, counts, seen, preserve_runs=preserve_runs)
     for tbl in doc.tables:
-        _translate_table(tbl, translator, counts, seen)
+        _translate_table(tbl, translator, counts, seen, preserve_runs=preserve_runs)
 
     for section in doc.sections:
         for region in (
@@ -113,9 +129,9 @@ def translate_docx(
             if region is None:
                 continue
             for para in region.paragraphs:
-                _translate_paragraph(para, translator, counts, seen)
+                _translate_paragraph(para, translator, counts, seen, preserve_runs=preserve_runs)
             for tbl in region.tables:
-                _translate_table(tbl, translator, counts, seen)
+                _translate_table(tbl, translator, counts, seen, preserve_runs=preserve_runs)
 
     dst_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(dst_path))
@@ -149,6 +165,8 @@ def _translate_paragraph(
     translator: Translator,
     counts: _Counts,
     seen: set[Any],
+    *,
+    preserve_runs: bool = False,
 ) -> None:
     element = paragraph._element
     if element in seen:
@@ -164,6 +182,35 @@ def _translate_paragraph(
         return
 
     counts.chars_in += len(source)
+
+    if preserve_runs and len(runs) > 1:
+        from nom.translate._protect import translate_with_tag_protection
+
+        try:
+            result = translate_with_tag_protection(
+                [r.text for r in runs],
+                translator,
+            )
+        except Exception:
+            counts.failed += 1
+            return
+
+        if result.protected:
+            for run, new_text in zip(runs, result.run_texts, strict=False):
+                run.text = new_text
+            counts.chars_out += sum(len(t) for t in result.run_texts)
+            counts.translated += 1
+            return
+        # Tag protection round-trip failed — fall through to v0 collapse
+        # using the cleaned fallback text the protector returned.
+        runs[0].text = result.fallback_text
+        for run in runs[1:]:
+            run.text = ""
+        counts.chars_out += len(result.fallback_text)
+        counts.translated += 1
+        return
+
+    # v0 collapse — single-run paragraph, or preserve_runs disabled.
     try:
         translated = translator.translate(source)
     except Exception:
@@ -182,13 +229,15 @@ def _translate_table(
     translator: Translator,
     counts: _Counts,
     seen: set[Any],
+    *,
+    preserve_runs: bool = False,
 ) -> None:
     for row in table.rows:
         for cell in row.cells:
             for para in cell.paragraphs:
-                _translate_paragraph(para, translator, counts, seen)
+                _translate_paragraph(para, translator, counts, seen, preserve_runs=preserve_runs)
             for nested in cell.tables:
-                _translate_table(nested, translator, counts, seen)
+                _translate_table(nested, translator, counts, seen, preserve_runs=preserve_runs)
 
 
 def _all_runs_in_order(paragraph: Paragraph) -> list[Run]:
