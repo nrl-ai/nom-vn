@@ -1,0 +1,51 @@
+{
+  "config": {
+    "ocr_language": "vie+eng",
+    "limit": 0,
+    "tesseract": "/home/vietanhdev/miniconda3/bin/tesseract"
+  },
+  "flows": [
+    {
+      "flow": "image_to_docx",
+      "corpus": "clean",
+      "n_samples": 20,
+      "cer_mean": 0.0016,
+      "cer_median": 0.0,
+      "latency_ms_p50": 135.4,
+      "latency_ms_mean": 151.5,
+      "throughput_chars_per_sec": 361.4,
+      "total_seconds": 3.17
+    },
+    {
+      "flow": "image_to_docx",
+      "corpus": "noisy",
+      "n_samples": 20,
+      "cer_mean": 0.0107,
+      "cer_median": 0.0,
+      "latency_ms_p50": 148.2,
+      "latency_ms_mean": 152.3,
+      "throughput_chars_per_sec": 361.7,
+      "total_seconds": 3.16
+    },
+    {
+      "flow": "pdf_to_docx_text_layer",
+      "corpus": "udhr_vie.pdf",
+      "n_pages": 5,
+      "pages_text_extracted": 5,
+      "pages_ocred": 0,
+      "chars_out": 87952,
+      "elapsed_seconds": 0.278,
+      "throughput_chars_per_sec": 316258.6,
+      "first_200_chars": "(cid:55)(cid:88)(cid:92)(cid:122)(cid:81)(cid:3)(cid:81)(cid:74)(cid:123)(cid:81)(cid:3)(cid:87)(cid:82)(cid:127)(cid:81)(cid:3)(cid:87)(cid:75)(cid:155)(cid:3)(cid:74)(cid:76)(cid:177)(cid:76)(cid:3)"
+    },
+    {
+      "flow": "pdf_to_docx_ocr_fallback",
+      "n_pages": 1,
+      "pages_text_extracted": 0,
+      "pages_ocred": 1,
+      "elapsed_seconds": 0.224,
+      "cer": 0.6818,
+      "first_200_chars": "Mota doe glue hang ou hung gv a"
+    }
+  ]
+}
