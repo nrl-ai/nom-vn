@@ -75,45 +75,21 @@ def build_app(
         description="Vietnamese document Q&A — local-first, open-source.",
     )
 
-    # Optional bearer-token auth on /api/* — opt-in via NOM_AUTH_TOKEN.
-    # When unset, the API is open (matches the original local-first
-    # behaviour). When set, every /api/* request must include a
-    # `Authorization: Bearer <token>` header that exact-matches the env
-    # value. Static UI assets and the /docs / /redoc surfaces are NOT
-    # gated — the UI needs them to render.
-    import os as _os
+    # Authentication: routed through the ``nom.platform.Authenticator``
+    # Protocol. The env-var paths kept for backward compatibility:
+    #
+    #   NOM_AUTH_TOKEN=<token>       → built-in BearerTokenAuth
+    #   NOM_AUTH_PLUGIN=<name>       → load via entry-point group
+    #                                  ``nom.platform.authenticators``
+    #                                  (used by EE OIDC/SAML/LDAP)
+    #
+    # When neither is set the API is open (preserves the local-first
+    # behaviour `nom serve` had since v0.1).
+    _authenticator = _resolve_authenticator()
+    if _authenticator is not None:
+        from nom.chat.auth_middleware import install_auth_middleware
 
-    _auth_token = _os.environ.get("NOM_AUTH_TOKEN") or None
-    if _auth_token:
-        import secrets as _secrets
-
-        from fastapi import Request
-        from fastapi.responses import JSONResponse as AuthJSONResponse
-
-        # Pre-encode the expected header value once so the per-request
-        # compare is byte-identical to whatever the client sent. We use
-        # `secrets.compare_digest` rather than `==` to avoid leaking
-        # the token via the response-time side channel: `==` short-
-        # circuits at the first mismatching byte, so an attacker can
-        # binary-search the token by timing the 401s. compare_digest
-        # is constant-time over equal-length inputs.
-        _expected_header = f"Bearer {_auth_token}".encode()
-
-        @app.middleware("http")
-        async def _bearer_auth(request: Request, call_next: Any) -> Any:
-            if not request.url.path.startswith("/api/"):
-                return await call_next(request)
-            # /api/health stays open so the UI can detect the auth state
-            # without being authenticated yet.
-            if request.url.path == "/api/health":
-                return await call_next(request)
-            header = request.headers.get("authorization", "").encode("utf-8")
-            if not _secrets.compare_digest(header, _expected_header):
-                return AuthJSONResponse(
-                    status_code=401,
-                    content={"detail": "Authentication required (Authorization: Bearer …)"},
-                )
-            return await call_next(request)
+        install_auth_middleware(app, authenticator=_authenticator)
 
     # OpenTelemetry — opt-in via env vars. No-op when OTEL_* unset or
     # the [otel] extra isn't installed. Wires FastAPI HTTP spans;
@@ -268,7 +244,7 @@ def build_app(
             "embedder": _safe_attr(getattr(store, "_embedder", None), "name")
             or "VietnameseEmbedder (lazy)",
             "ocr_available": shutil.which("tesseract") is not None,
-            "auth_required": bool(_auth_token),
+            "auth_required": _authenticator is not None,
         }
 
     # ------------------------------------------------------------------
@@ -452,6 +428,34 @@ def build_app(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _resolve_authenticator() -> Any:
+    """Pick the active ``Authenticator`` from environment.
+
+    Priority: an explicit plugin name beats the bearer-token shortcut.
+    Returns ``None`` when the operator hasn't asked for any auth — in
+    that case ``build_app`` skips middleware entirely (open API,
+    matches single-user local-first deployments).
+    """
+    import os
+
+    plugin_name = os.environ.get("NOM_AUTH_PLUGIN") or None
+    if plugin_name:
+        from nom.platform import load_plugin
+
+        cls = load_plugin("auth", plugin_name)
+        # The plugin is responsible for reading its own config from
+        # env vars or a config file; we just instantiate.
+        return cls()
+
+    token = os.environ.get("NOM_AUTH_TOKEN") or None
+    if token:
+        from nom.platform import BearerTokenAuth
+
+        return BearerTokenAuth(token=token)
+
+    return None
 
 
 def _space_to_dict(space: Any) -> dict[str, Any]:
