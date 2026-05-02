@@ -60,11 +60,22 @@ jobs:
           version: 10
           run_install: false
 
+      - name: Stub ui_dist for pip install
+        # The wheel target force-includes src/nom/chat/ui_dist/ (built
+        # later in this job). pip install -e validates the include
+        # eagerly, so we drop a placeholder first; the real bundle
+        # overwrites it in the next step before PyInstaller picks it up.
+        shell: bash
+        run: |
+          mkdir -p src/nom/chat/ui_dist
+          echo '<!doctype html><meta charset="utf-8"><title>Nôm</title>' \
+            > src/nom/chat/ui_dist/index.html
+
       - name: Install pip deps
-        # Pull [chat] for FastAPI + uvicorn + ML deps and [desktop] for
-        # PyInstaller + pywebview. tests/ aren't bundled, so [dev] is
-        # not strictly required — but pulling it keeps mypy happy if we
-        # ever add a CI lint step here.
+        # Pull [chat] for FastAPI + uvicorn + parsers and [desktop] for
+        # PyInstaller + pywebview. ML deps (torch / transformers) are
+        # excluded — see desktop/nom-app.spec; users install them
+        # post-launch if they want HF-backed translation.
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[chat,desktop]"
