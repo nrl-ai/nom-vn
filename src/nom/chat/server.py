@@ -105,6 +105,13 @@ def build_app(
 
     register_tool_routes(app, llm=getattr(store, "_llm", None))
 
+    # /api/agents/* — optional. Registers built-in demo agents only when
+    # ``NOM_DEMO_AGENTS=1`` is set, so production deployments stay
+    # silent until the operator wires their own agent registry. The
+    # routes mount unconditionally so the UI's "(no agents)" state
+    # works even on a fresh install.
+    _register_agent_routes(app, store=store)
+
     # ------------------------------------------------------------------
     # Static UI
     # ------------------------------------------------------------------
@@ -456,6 +463,38 @@ def _resolve_authenticator() -> Any:
         return BearerTokenAuth(token=token)
 
     return None
+
+
+def _register_agent_routes(app: Any, *, store: Any) -> None:
+    """Mount /api/agents/* with an optional demo registry.
+
+    Registry sources, in priority order:
+
+    1. ``NOM_DEMO_AGENTS=1`` — register the built-in `vn_doc_analyser`
+       recipe wired to the chat LLM. Useful for quick-start demos.
+    2. Empty registry otherwise — the routes still mount so the UI's
+       "(no agents)" state works.
+
+    Production deployments build their own registry and call
+    ``register_agent_routes(app, agents=…)`` directly from a wrapper
+    around ``build_app``.
+    """
+    import os
+
+    from nom.agents_api import register_agent_routes
+
+    agents: dict[str, Any] = {}
+    if os.environ.get("NOM_DEMO_AGENTS") == "1":
+        try:
+            from nom.agents.recipes import vn_doc_analyser
+
+            llm = getattr(store, "_llm", None)
+            if llm is not None:
+                agents["vn_doc_analyser"] = vn_doc_analyser(llm=llm)
+        except Exception:
+            pass
+
+    register_agent_routes(app, agents=agents)
 
 
 def _space_to_dict(space: Any) -> dict[str, Any]:
