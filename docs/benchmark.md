@@ -99,32 +99,32 @@ Chúng tôi không ship bước export ONNX trong `nom-vn[diacritic-hf]`. User t
 
 ### Mô hình seq2seq diacritic VN có sẵn — *đo 2026-05-02*
 
-Nguyên tắc tracking: chúng tôi không bench các mô hình diacritic VN Apache-licensed công khai trước khi đề xuất distillation 100M-param. User flag việc này; đo lại. **Một mô hình có sẵn thắng mọi lựa chọn ta đã test, kể cả cloud `gpt-4o-mini`.**
+Bài học rút ra: chúng tôi từng bỏ qua bước đo các mô hình khôi phục dấu tiếng Việt giấy phép Apache công khai trước khi đề xuất chưng cất một mô hình 100M tham số riêng. Người dùng đã chỉ ra; đo lại. **Một mô hình có sẵn vượt mọi lựa chọn từng thử, kể cả `gpt-4o-mini` trên cloud.**
 
-Cùng corpus 55 câu (CC0). Bench harness: `benchmarks/accuracy/bench_diacritic_hf.py`. Hardware: RTX 3090.
+Cùng ngữ liệu 55 câu (CC0). Bộ đo: `benchmarks/accuracy/bench_diacritic_hf.py`. Phần cứng: RTX 3090.
 
-| Mô hình | License | Disk | Word acc | Mean s/câu | Ghi chú |
+| Mô hình | Giấy phép | Disk | Độ chính xác từ | Trung bình giây/câu | Ghi chú |
 |---|---|---:|---:|---:|---|
-| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** ⭐ | Apache 2.0 | ~1 GB | **97.81%** | **0.152** | T5 200 M, safetensors |
-| (cloud `gpt-5.4-mini`) | proprietary | — | 96.12% / 92.06% / 78.68% | 1.13 | $0.75/$4.50 per 1M; thắng `gpt-4o-mini` ở formal/conversational nhưng kém literary |
-| (cloud `gpt-4o-mini`) | proprietary | — | 95.37% / 89.51% / 81.84% | 1.27 | $0.15/$0.60 per 1M; **cost/quality sweet spot của OpenAI** |
-| (cloud `gpt-5.4-nano`) | proprietary | — | 93.82% / 85.15% / 73.18% | 1.27 | $0.20/$1.25 per 1M; mới hơn nhưng kém `gpt-4o-mini` mọi register; bỏ qua |
-| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18% / 87.91% / 77.78% | 0.88 | LLM local mạnh nhất; cần ≥10 GB VRAM |
-| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 89.06% / 79.70% / 62.05% | 0.91 | -3 đến -16 pp so với gemma4:e4b; cho máy yếu hơn |
-| local `qwen3:1.7b` Q4 | Apache 2.0 | 1.4 GB | 16.60% | 0.43 | dưới rule baseline 41 %; bỏ qua |
-| `bmd1905/vietnamese-correction` | Apache 2.0 | ~1.6 GB | 15.57% | 0.301 | Fail — train cho spelling, không phải diacritic-only |
-| `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | ~1.6 GB | chưa đo | — | CER tự báo 38.85 % dưới rule baseline; skip |
-| (rule baseline) | — | 0 | 41.06% | <0.001 | sàn tham chiếu |
+| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** ⭐ | Apache 2.0 | ~1 GB | **97,81 %** | **0,152** | T5 200 M, safetensors |
+| (cloud `gpt-5.4-mini`) | proprietary | — | 96,12 % / 92,06 % / 78,68 % | 1,13 | 0,75 USD vào / 4,50 USD ra mỗi 1M token; thắng `gpt-4o-mini` ở văn bản hành chính/hội thoại nhưng kém ở văn học |
+| (cloud `gpt-4o-mini`) | proprietary | — | 95,37 % / 89,51 % / 81,84 % | 1,27 | 0,15 USD vào / 0,60 USD ra mỗi 1M token; **điểm cân bằng chi phí–chất lượng của OpenAI** |
+| (cloud `gpt-5.4-nano`) | proprietary | — | 93,82 % / 85,15 % / 73,18 % | 1,27 | 0,20 USD vào / 1,25 USD ra mỗi 1M token; mới hơn nhưng kém `gpt-4o-mini` ở mọi loại văn bản; bỏ qua |
+| local `gemma4:e4b` Q4 | Apache 2.0 | 9,6 GB | 93,18 % / 87,91 % / 77,78 % | 0,88 | LLM local mạnh nhất; cần ≥10 GB VRAM |
+| local `gemma3:4b` Q4 | Apache 2.0 | 3,3 GB | 89,06 % / 79,70 % / 62,05 % | 0,91 | -3 đến -16 pp so với gemma4:e4b; cho máy yếu hơn |
+| local `qwen3:1.7b` Q4 | Apache 2.0 | 1,4 GB | 16,60 % | 0,43 | Dưới sàn quy tắc 41 %; bỏ qua |
+| `bmd1905/vietnamese-correction` | Apache 2.0 | ~1,6 GB | 15,57 % | 0,301 | Thất bại — huấn luyện cho sửa chính tả, không cho khôi phục dấu thuần |
+| `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | ~1,6 GB | Chưa đo | — | Tác giả tự báo CER 38,85 %, dưới sàn quy tắc; bỏ qua |
+| (sàn quy tắc) | — | 0 | 41,06 % | <0,001 | Mức sàn tham chiếu |
 
-Cloud / LLM cells in `business 55 / formal 72 + Tatoeba 300 + UDVTB 800` ordered as: `business / conversational / literary`. Đo 2026-05-02 trên RTX 3090 (LLM local) hoặc qua API (cloud). Full per-register grid trong [`docs/tasks/diacritic-restoration.md`](/tasks/diacritic-restoration).
+Ô của các mô hình cloud / LLM ghi 3 số theo thứ tự `kinh doanh 55 + UDHR 72 → hội thoại Tatoeba 300 → văn học UD-VTB 800`. Đo 2026-05-02 trên RTX 3090 (LLM local) hoặc qua API (cloud). Bảng đầy đủ theo từng loại văn bản nằm trong [`docs/tasks/diacritic-restoration.md`](/tasks/diacritic-restoration).
 
-**Toshiiiii1 thắng quyết định:**
+**Toshiiiii1 thắng dứt khoát:**
 
-- **+2.44 pp** so với cloud `gpt-4o-mini` (97.81 % vs 95.37 %).
-- **+9.91 pp** so với best local LLM (`gemma3:4b` 87.90 %).
-- **Nhanh hơn 8×** so với cloud LLM (0.152 s vs 1.27 s) và **nhanh hơn 7×** so với local LLM.
-- **Apache 2.0 + safetensors** — ship được hoàn toàn theo chính sách no-pickle.
-- **Nhỏ hơn ~10 ×** trên disk so với `gemma4:e4b` (1 GB vs 9.6 GB).
+- **+2,44 pp** so với `gpt-4o-mini` trên cloud (97,81 % vs 95,37 %).
+- **+9,91 pp** so với LLM local mạnh nhất (`gemma3:4b` 87,90 %).
+- **Nhanh gấp 8 lần** so với LLM cloud (0,152 s vs 1,27 s) và **gấp 7 lần** so với LLM local.
+- **Apache 2.0 và định dạng safetensors** — phát hành được trọn vẹn theo nguyên tắc không dùng pickle.
+- **Nhỏ hơn ~10 lần** trên disk so với `gemma4:e4b` (1 GB vs 9,6 GB).
 
 **Hành động:** rút khuyến nghị "distil mô hình diacritic VN 100 M" trong `docs/training_plan_2026q2.md` (v0.2.12) — không có gì để distil *tới* mà mô hình Apache công khai chưa cover. Thêm như đường production khuyến nghị:
 
@@ -366,37 +366,37 @@ Baseline: `benchmarks/results/baseline_segment_ud_vtb_test.json`
 
 OCR là primitive leverage cao nhất và bị fail nhiều nhất trong AI tiếng Việt. Chúng tôi ship ba backend với cùng interface; default switch theo phần cứng có sẵn.
 
-### So sánh backend — đo 2026-05-02 (in-house)
+### So sánh các engine — đo nội bộ 2026-05-02
 
-Đo trên 4 register: `synthetic_ocr_vi/{clean,noisy,hard}` (printed) +
-`brianhuster/VietnameseOCRdataset` test split 200 ảnh (handwriting).
-Metric: CER (NFC normalize). Lưới benchmark commit trong repo;
+Đo trên 4 loại văn bản: `synthetic_ocr_vi/{clean,noisy,hard}` (chữ in)
+và 200 ảnh thử nghiệm của `brianhuster/VietnameseOCRdataset` (chữ
+viết tay). Chỉ số: CER, có chuẩn hoá NFC. Tệp kết quả lưu trong
 `benchmarks/results/baseline_ocr_engines_per_register.json`.
 
-| Engine | License | CER printed clean | CER printed noisy | CER printed hard | CER handwriting | Latency p50 |
+| Engine | Giấy phép | CER in sạch | CER in nhiễu | CER quét kém | CER viết tay | Độ trễ p50 |
 |---|---|---:|---:|---:|---:|---:|
-| **Tesseract 5 + `vie`** | Apache 2.0 | **0.00 %** ⭐ | **0.70 %** ⭐ | 30.34 % | 69.34 % | 80 ms |
-| **VietOCR vgg_transformer** | Apache 2.0 | 1.41 % | 3.37 % | **29.00 %** ⭐ | **31.82 %** ⭐ | 240 ms |
-| EasyOCR | Apache 2.0 | 1.42 % | 4.87 % | 87.09 % | 71.52 % | 35-60 ms |
-| PaddleOCR PP-OCRv5 (latin_mobile_rec) | Apache 2.0 | 24.70 % | 31.33 % | 86.13 % | 59.43 % | 1170 ms |
-| RapidOCR (ONNX, PaddleOCR port) | Apache 2.0 | 63.97 % | 77.83 % | 100.00 % | 97.20 % | 130-250 ms |
-| TrOCR base-handwritten (English baseline) | MIT | 32.89 % | 38.07 % | 93.76 % | 75.89 % | 180-280 ms |
-| `qwen2.5vl:7b` (VLM via Ollama) | Apache 2.0 | 33.17 % | 29.90 % | 81.37 % | 67.53 % | 320-610 ms |
-| Surya OCR | open-RAIL-M | not benched (license) | — | — | — | — |
+| **Tesseract 5 + `vie`** | Apache 2.0 | **0,00 %** ⭐ | **0,70 %** ⭐ | 30,34 % | 69,34 % | 80 ms |
+| **VietOCR vgg_transformer** | Apache 2.0 | 1,41 % | 3,37 % | **29,00 %** ⭐ | **31,82 %** ⭐ | 240 ms |
+| EasyOCR | Apache 2.0 | 1,42 % | 4,87 % | 87,09 % | 71,52 % | 35-60 ms |
+| PaddleOCR PP-OCRv5 (latin_mobile_rec) | Apache 2.0 | 24,70 % | 31,33 % | 86,13 % | 59,43 % | 1170 ms |
+| RapidOCR (bản port ONNX của PaddleOCR) | Apache 2.0 | 63,97 % | 77,83 % | 100,00 % | 97,20 % | 130-250 ms |
+| TrOCR base-handwritten (chỉ tiếng Anh, làm tham chiếu) | MIT | 32,89 % | 38,07 % | 93,76 % | 75,89 % | 180-280 ms |
+| `qwen2.5vl:7b` (VLM qua Ollama) | Apache 2.0 | 33,17 % | 29,90 % | 81,37 % | 67,53 % | 320-610 ms |
+| Surya OCR | open-RAIL-M | Chưa đo (giấy phép không đạt) | — | — | — | — |
 
 **Phát hiện chính:**
 
-- **VietOCR thắng tuyệt đối trên handwriting** — 31.82 % CER vs Tesseract 69.34 % (-37.5 pp tuyệt đối, -54 % tương đối). Đây là phát hiện OCR lớn nhất của repo.
-- **Tesseract thắng trên printed** — 0.00 % CER trên clean printed, 0.70 % trên noisy. Không backend nào khác lại gần.
-- **PaddleOCR PP-OCRv5 đứng thứ 3-4 mọi register tiếng Việt** — không phải config, mà là cấu trúc: `lang='vi'` chỉ load `latin_PP-OCRv5_mobile_rec` (recognizer Latin generic không train cho VN). Re-test 2026-05-01 sau khi user yêu cầu kiểm tra lại; verified.
-- **RapidOCR cùng failure mode** — port ONNX của PaddleOCR cùng dùng recognizer Latin generic; không viable cho VN. Docling default `ocr_engine='rapidocr'` cũng không viable cho VN.
-- **VLM hallucinate trên crop dòng đơn** — `qwen2.5vl:7b` 33.17 % CER trên printed clean (vs Tesseract 0 %). VLM là tool cho document understanding (form, hoá đơn, layout), không phải dòng chữ in sạch.
+- **VietOCR thắng tuyệt đối với chữ viết tay** — 31,82 % CER so với Tesseract 69,34 % (giảm 37,5 pp tuyệt đối, -54 % tương đối). Đây là phát hiện OCR lớn nhất của dự án.
+- **Tesseract thắng với chữ in** — 0,00 % CER trên ảnh in sạch, 0,70 % trên ảnh nhiễu. Không engine nào khác đến gần.
+- **PaddleOCR PP-OCRv5 đứng thứ 3-4 ở mọi loại văn bản tiếng Việt.** Không phải vấn đề cấu hình, mà ở thiết kế: `lang='vi'` chỉ tải `latin_PP-OCRv5_mobile_rec` — mô hình nhận diện Latin chung không được huấn luyện cho tiếng Việt. Đo lại 2026-05-01 sau khi người dùng yêu cầu kiểm tra; xác nhận.
+- **RapidOCR cùng kiểu lỗi** — bản port ONNX của PaddleOCR dùng chung mô hình nhận diện Latin chung, không khả thi cho tiếng Việt. Mặc định của Docling `ocr_engine='rapidocr'` cũng vậy.
+- **VLM ảo giác trên ảnh cắt dòng đơn** — `qwen2.5vl:7b` cho CER 33,17 % trên ảnh in sạch (so với Tesseract 0 %). VLM là công cụ cho hiểu tài liệu (biểu mẫu, hoá đơn, bố cục), không cho dòng chữ in.
 
-Full landscape + recipe selection theo loại dữ liệu trong [`docs/tasks/ocr.md`](/tasks/ocr).
+Bảng đầy đủ và hướng dẫn chọn engine theo từng loại dữ liệu nằm trong [`docs/tasks/ocr.md`](/tasks/ocr).
 
 ### Khuyến nghị cho `nom.doc`
 
-**Backend mặc định: Tesseract `vie`** cho printed (0-1 % CER, 80 ms p50), **VietOCR `vgg_transformer`** cho handwriting (31.82 % CER, 246 ms p50 GPU).
+**Mặc định: Tesseract `vie`** cho chữ in (CER 0-1 %, 80 ms p50). **VietOCR `vgg_transformer`** cho chữ viết tay (CER 31,82 %, 246 ms p50 trên GPU).
 
 ```python
 # API dự kiến v0.1
