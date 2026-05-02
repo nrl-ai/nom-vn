@@ -1,0 +1,11 @@
+{
+  "backend": "openai",
+  "model": "gpt-5.4-nano",
+  "corpus": "benchmarks/data/udhr_vi/diacritic_eval_udhr.txt",
+  "n_sentences": 72,
+  "warmup_calls": 2,
+  "word_accuracy": 0.9382,
+  "sentence_exact": 0.5139,
+  "latency_ms_p50": 1502.1,
+  "latency_ms_mean": 1507.6
+}

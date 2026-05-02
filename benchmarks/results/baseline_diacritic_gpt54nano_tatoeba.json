@@ -1,0 +1,11 @@
+{
+  "backend": "openai",
+  "model": "gpt-5.4-nano",
+  "corpus": "benchmarks/data/tatoeba_vi/diacritic_eval_300.txt",
+  "n_sentences": 300,
+  "warmup_calls": 2,
+  "word_accuracy": 0.8515,
+  "sentence_exact": 0.4367,
+  "latency_ms_p50": 1188.8,
+  "latency_ms_mean": 1326.7
+}

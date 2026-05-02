@@ -1,0 +1,11 @@
+{
+  "backend": "openai",
+  "model": "gpt-4o-mini",
+  "corpus": "benchmarks/data/ud_vi_vtb/test.conllu",
+  "n_sentences": 800,
+  "warmup_calls": 2,
+  "word_accuracy": 0.8184,
+  "sentence_exact": 0.2,
+  "latency_ms_p50": 1127.5,
+  "latency_ms_mean": 1245.0
+}

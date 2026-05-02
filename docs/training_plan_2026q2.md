@@ -72,7 +72,9 @@ metric.
 | Model | License | Disk | Word acc · 55 câu business | Word acc · 800 câu UD-VTB literary |
 |---|---|---:|---:|---:|
 | **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** | Apache 2.0 | ~1 GB | **97.81 %** | **54.14 %** |
-| (cloud `gpt-4o-mini`) | proprietary | — | 95.37 % | chưa đo (cần API key + ngân sách ~$0.30 cho 800 câu) |
+| (cloud `gpt-4o-mini`) | proprietary | — | 95.37 % | **81.84 %** (đo 2026-05-02 trên 800 câu UD-VTB; ~$0.02 spend) |
+| (cloud `gpt-5.4-mini`) | proprietary | — | chưa đo | 78.68 % (đo 2026-05-02; mới hơn nhưng kém gpt-4o-mini trên literary +3.16 pp) |
+| (cloud `gpt-5.4-nano`) | proprietary | — | chưa đo | 73.18 % (đo 2026-05-02; rẻ nhưng kém gpt-4o-mini trên mọi register) |
 | local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18 % | **77.78 %** (đo 2026-05-02 trên RTX 3090) |
 | local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 89.06 % | **62.05 %** (đo 2026-05-02 trên RTX 3090) |
 | (rule baseline) | — | 0 | 41.06 % | ~41 % (không phụ thuộc register) |

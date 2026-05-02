@@ -40,7 +40,9 @@ và giấy phép.
 | LLM cục bộ (`gemma3:4b` Q4 qua Ollama) | Apache 2.0 | gguf | 89.06 % | 62.05 % | 79.70 % | 81.26 % | mạnh ở register hiện đại, sụt 27 pp ở literary; ~0.9 s/câu trên RTX 3090 |
 | LLM cục bộ (`gemma4:e4b` Q4 qua Ollama) | Apache 2.0 | gguf | 93.18 % | 77.78 % | 87.91 % | 92.71 % | tốt nhất trong nhóm LLM local, chỉ sau ViT5 fine-tune ~5-12 pp; ~0.9 s/câu trên RTX 3090 |
 | LLM cục bộ (`qwen3:1.7b` Q4 qua Ollama) | Apache 2.0 | gguf | 16.60 % | — | — | — | dưới rule baseline 41 %; bỏ qua, dùng gemma4:e4b nếu cần local LLM |
-| LLM đám mây (`gpt-4o-mini`) | proprietary | — | 95.37 % | — | — | — | thắng về chi phí chỉ khi batch nhỏ |
+| LLM đám mây (`gpt-4o-mini`) | proprietary | — | 95.37 % | 81.84 % | 89.51 % | 95.79 % | $0.15/$0.60 per 1M token; điểm cân bằng cost/quality của OpenAI; **thắng gpt-5.4-mini ở register literary** (+3.16 pp) |
+| LLM đám mây (`gpt-5.4-mini`) | proprietary | — | chưa đo | 78.68 % | **92.06 %** | **96.12 %** | $0.75/$4.50 per 1M token (5× gpt-4o-mini); hơn 0.3-2.6 pp ở register hiện đại nhưng kém ở literary |
+| LLM đám mây (`gpt-5.4-nano`) | proprietary | — | chưa đo | 73.18 % | 85.15 % | 93.82 % | $0.20/$1.25 per 1M token; **kém gpt-4o-mini trên cả 3 register dù mới hơn**; bỏ qua, dùng gpt-4o-mini |
 
 Khoảng cách 8.7 pp giữa các register trên Toshiiiii1 xác nhận mô hình
 này over-fit về tiếng Việt formal/business hiện đại. Bản fine-tune
