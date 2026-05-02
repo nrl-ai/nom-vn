@@ -37,7 +37,7 @@ và giấy phép.
 | `qthuan2604/BARTPho_Syllable_Restore_Diacritics_Vietnamese` | MIT | safetensors | 83.92 % | — | — | — | yếu nhất trong số đã audit; bỏ qua |
 | `yammdd/vietnamese-diacritic-restoration-v2` | MIT | tf_model.h5 | chưa đo | — | — | — | chỉ TF; chi phí chuyển đổi cao, để sau |
 | Bảng quy tắc (`nom.text.fix_diacritics`) | Apache 2.0 | none | 41.06 % | — | — | — | dự phòng zero-deps |
-| LLM cục bộ (`gemma3:4b` Q4 qua Ollama) | Apache 2.0 | gguf | — | — | — | — | 87.90 % trên `diacritic_eval_v0` mixed; ~1 s/câu |
+| LLM cục bộ (`gemma3:4b` Q4 qua Ollama) | Apache 2.0 | gguf | 89.06 % | 62.05 % | 79.70 % | 81.26 % | mạnh ở register hiện đại, sụt 27 pp ở literary; ~0.9 s/câu trên RTX 3090 |
 | LLM đám mây (`gpt-4o-mini`) | proprietary | — | 95.37 % | — | — | — | thắng về chi phí chỉ khi batch nhỏ |
 
 Khoảng cách 8.7 pp giữa các register trên Toshiiiii1 xác nhận mô hình

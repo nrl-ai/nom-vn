@@ -5,9 +5,9 @@
 > Named after *chữ Nôm* — the script Vietnam wrote in for a millennium.
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/nrl-ai/nom-vn/blob/main/LICENSE)
-[![Status](https://img.shields.io/badge/status-v0.2.27-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-v0.2.33-orange)](https://github.com/nrl-ai/nom-vn/blob/main/CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue)](https://www.python.org)
-[![Tests](https://img.shields.io/badge/tests-354%20passing-brightgreen)](https://github.com/nrl-ai/nom-vn/tree/main/tests)
+[![Tests](https://img.shields.io/badge/tests-406%20passing-brightgreen)](https://github.com/nrl-ai/nom-vn/tree/main/tests)
 
 A local-first toolkit. **No data leaves your machine.** Use any LLM (Ollama by default), any embedder, any document type — Nôm wires them into a Vietnamese-aware RAG pipeline you can ship as either a Python library or a deployable chat web app.
 
@@ -33,7 +33,7 @@ noise generator for training. `Cmd/Ctrl + Enter` runs from anywhere.
 
 ---
 
-## Recommended stack — *measured 2026-04-30*
+## Recommended stack — *measured 2026-05-02*
 
 Every recommendation has a measured number from a script in
 [`benchmarks/`](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks) that runs on a clean clone. No projected
@@ -49,10 +49,11 @@ on real Vietnamese corpora, this week.
 | **Diacritic restoration (formal text only)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) v0.2.29 (ViT5 220 M, ours) | Apache 2.0 | 900 MB | 99.52 % formal · 96.14 % business · 94.16 % conversational · 89.97 % literary | for input known to be strip-only ASCII (legal docs, ASCII pipes); spell-correction-base is the universal default |
 | **Diacritic restoration (fast tier)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/diacritic-restoration.md) | [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) (BARTpho-syllable 115 M, ours) | Apache 2.0 | 530 MB | 94.44 % business · 86.33 % literary · 90.68 % conv · 91.51 % formal · ~50-100 ms/sent | half the params of the base, ~2× faster |
 | **Diacritic (zero-dep fallback)** | rule-based table (`nom.text.fix_diacritics`) | Apache 2.0 | 0 | 41.06 % word acc · <1 ms | — |
-| **Diacritic (local LLM)** | `gemma3:4b` Q4 via Ollama | Apache 2.0 | 3.3 GB | 87.90 % word acc · 1.10 s | `qwen3:8b` (87.26 %), `gemma4:e4b` is +5pp better but 3× larger |
+| **Diacritic (local LLM)** | `gemma3:4b` Q4 via Ollama | Apache 2.0 | 3.3 GB | **89.06 %** business-mixed · 81.26 % formal · 79.70 % conv · 62.05 % literary · 0.91 s p50 GPU | `qwen3:1.7b` 16.60 % (sub-rule-baseline). Sensitive to register shift — use ViT5 fine-tune for literary corpora. |
 | **Word segmentation (speed)** | `nom.text.word_tokenize` (rule, zero deps) | Apache 2.0 | 0 | F1 76.46 % · 747 k tok/s | — |
 | **Word segmentation (quality)** | `underthesea` 9.4.0 (CRF, opt-in) | Apache 2.0 | <10 MB | F1 95.70 % · 38 k tok/s | matches its own published VLSP 2013 numbers |
-| **OCR (printed clean lines)** | Tesseract 5 + `vie` traineddata | Apache 2.0 | ~30 MB | CER 5.53 % · 80 ms p50 | EasyOCR (9.39 %), `qwen2.5vl:7b` (31.07 %) |
+| **OCR (printed clean lines)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/ocr.md) | Tesseract 5 + `vie` traineddata | Apache 2.0 | ~30 MB | **CER 0.00 %** clean · 0.70 % noisy · 30.34 % hard scan · 80 ms p50 | EasyOCR (1.42/4.87/87.09 %), VietOCR (1.41/3.37/29.00 %), PaddleOCR PP-OCRv5 (24.70/31.33/86.13 %), RapidOCR (63.97/77.83/100 %) |
+| **OCR (handwritten lines)** [→](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/ocr.md) | VietOCR `vgg_transformer` (pbcquoc/vietocr) | Apache 2.0 | ~110 MB | **CER 31.82 %** on `brianhuster/VietnameseOCRdataset` test 200 · 246 ms p50 GPU | Tesseract (69.34 %), PaddleOCR PP-OCRv5 (59.43 %, no VN-specific recognizer), TrOCR-handwritten EN-only (75.89 %), EasyOCR (71.52 %) |
 | **PDF text extraction** | `pypdfium2` (BSD-3 wrap of PDFium Apache-2.0) | BSD-3 / Apache | <10 MB | 99.81 % char overlap · 2.35 M chars/s | `pdfplumber` (51 k chars/s), Docling (15 k chars/s) |
 | **Dense embedder (RAG retrieval)** | `bkai-foundation-models/vietnamese-bi-encoder` (opt-in) | Apache 2.0 | 383 MB | R@1 76.25 % · R@10 98.75 % on Zalo Legal QA 5 k | `dangvantuan/vietnamese-embedding` (35.00 % R@1) by +41.25 pp |
 | **Dense embedder (default, cache-stable)** | `dangvantuan/vietnamese-embedding` | Apache 2.0 | 440 MB | R@1 35.00 % on Zalo Legal QA 5 k | — |
@@ -65,7 +66,7 @@ on real Vietnamese corpora, this week.
 - *Want spell correction (typos + accents + OCR errors in one pass)?* Same install, swap the model id to `nrl-ai/vn-spell-correction-base`. Beats `bmd1905/vietnamese-correction-v2` by 11-25 pp.
 - *Care about real-world (not just synthetic) accuracy?* Read the [out-of-distribution OOD bench](https://github.com/nrl-ai/nom-vn/blob/main/docs/tasks/spell-correction.md) — 150 hand-curated real Vietnamese typos across 6 registers, with bootstrap 95 % CI. Headline (v0.2.29): synthetic 98.32 % light avg, OOD aggregate **79.62 %** — beats `Toshiiiii1` (77.40 %) and `bmd1905` (49.21 %).
 - *Want local RAG over Vietnamese documents?* Install `nom-vn[chat,embeddings,nlp]`, swap the default embedder to `BKaiEmbedder`. +41 pp R@1.
-- *Need OCR on Vietnamese scans?* Tesseract `vie` is the right call. Don't reach for VLM OCR — VLMs hallucinate on tight line crops.
+- *Need OCR on Vietnamese scans?* Two answers depending on what you have: **Tesseract `vie`** is the right call for printed lines (0.00 % CER on clean printed). **VietOCR** is the right call for handwriting (31.82 % CER vs Tesseract 69.34 % — the 37.5 pp gap is the biggest single OCR finding in the repo). PaddleOCR PP-OCRv5 ranks 3rd everywhere because it ships no VN-specific recognizer; `lang='vi'` loads generic `latin_PP-OCRv5_mobile_rec` which strips diacritics. Don't reach for VLM OCR on tight line crops — VLMs hallucinate at line scale (use a VLM only when you have full-document context like forms or invoices).
 - *Need PDF text extraction in a license-clean way?* Use `pypdfium2` (we ship it). Skip PyMuPDF — its AGPL forces every downstream into AGPL.
 
 ## What ships today

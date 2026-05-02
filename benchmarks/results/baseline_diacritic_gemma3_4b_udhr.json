@@ -1,0 +1,11 @@
+{
+  "backend": "ollama",
+  "model": "gemma3:4b",
+  "corpus": "benchmarks/data/udhr_vi/diacritic_eval_udhr.txt",
+  "n_sentences": 72,
+  "warmup_calls": 2,
+  "word_accuracy": 0.8126,
+  "sentence_exact": 0.3056,
+  "latency_ms_p50": 985.0,
+  "latency_ms_mean": 992.2
+}

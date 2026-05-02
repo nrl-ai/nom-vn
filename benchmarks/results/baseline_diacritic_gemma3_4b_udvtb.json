@@ -1,0 +1,11 @@
+{
+  "backend": "ollama",
+  "model": "gemma3:4b",
+  "corpus": "benchmarks/data/ud_vi_vtb/test.conllu",
+  "n_sentences": 800,
+  "warmup_calls": 2,
+  "word_accuracy": 0.6205,
+  "sentence_exact": 0.0725,
+  "latency_ms_p50": 908.2,
+  "latency_ms_mean": 976.0
+}
