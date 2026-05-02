@@ -19,6 +19,8 @@ trên cùng register grid, và lệnh tái lập.
 |---|---|---|
 | **OCR** — text từ ảnh / PDF scan | Tesseract `vie` (best printed); VLM cảnh báo | [→](/tasks/ocr) |
 | **PDF text extraction** — text-layer cho PDF born-digital | pypdfium2 (BSD-3) | [→](/tasks/pdf-extraction) |
+| **Chuyển định dạng** — PDF / ảnh → DOCX có thể chỉnh sửa | shipped trong `nom.convert` | [→](/tasks/convert) |
+| **Dịch thuật** — Việt ↔ Anh, giữ định dạng `.docx`/`.xlsx`/`.pptx`/`.txt` | shipped trong `nom.translate` v0.1 | [→](/tasks/translate) |
 
 ## Tác vụ về retrieval / RAG
 

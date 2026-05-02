@@ -367,7 +367,7 @@ class TestTranslateFileUpload:
         assert r.headers["content-type"].startswith("text/plain")
         assert "notes.en.txt" in r.headers["content-disposition"]
 
-    def test_rejects_same_source_and_target(self, docx_bytes: bytes) -> None:
+    def test_rejects_same_source_and_target_file(self, docx_bytes: bytes) -> None:
         client = self._client('{"translation": "X"}')
         r = client.post(
             "/api/tools/translate/file",
@@ -375,3 +375,85 @@ class TestTranslateFileUpload:
             data={"source": "en", "target": "en"},
         )
         assert r.status_code == 422
+
+
+class TestConvertFileUpload:
+    """Tests for /api/tools/convert/file (PDF / image → DOCX).
+
+    Skips cleanly when Tesseract isn't installed. The image flow uses
+    a small in-process PIL fixture; the dispatcher rejection paths are
+    deterministic (no OCR).
+    """
+
+    @staticmethod
+    def _client() -> TestClient:
+        store = MemoryStore(embedder=FakeEmbedder(), llm=FakeLLM())
+        return TestClient(build_app(store=store))
+
+    @pytest.fixture
+    def image_bytes(self) -> bytes:
+        pytest.importorskip("PIL")
+        import io
+
+        from PIL import Image, ImageDraw, ImageFont
+
+        img = Image.new("L", (640, 200), 255)
+        drawer = ImageDraw.Draw(img)
+        try:
+            font = ImageFont.truetype("DejaVuSans.ttf", 36)
+        except OSError:
+            font = ImageFont.load_default()
+        drawer.text((20, 60), "Hello world", fill=0, font=font)
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+
+    def test_convert_image_returns_docx(self, image_bytes: bytes) -> None:
+        import shutil
+
+        if shutil.which("tesseract") is None:
+            pytest.skip("tesseract not installed")
+        import io
+        import json as _json
+
+        pytest.importorskip("docx")
+        from docx import Document
+
+        client = self._client()
+        r = client.post(
+            "/api/tools/convert/file",
+            files={"file": ("scan.png", image_bytes, "image/png")},
+            data={"ocr_language": "eng"},
+        )
+        assert r.status_code == 200
+        assert r.headers["content-type"].startswith(
+            "application/vnd.openxmlformats-officedocument"
+        )
+        assert "scan.docx" in r.headers["content-disposition"]
+        stats = _json.loads(r.headers["x-convert-stats"])
+        assert stats["pages_ocred"] == 1
+        assert stats["chars_out"] > 0
+
+        out = Document(io.BytesIO(r.content))
+        full = "\n".join(p.text for p in out.paragraphs)
+        assert "hello" in full.lower()
+
+    def test_rejects_unsupported_extension(self) -> None:
+        client = self._client()
+        r = client.post(
+            "/api/tools/convert/file",
+            files={"file": ("data.csv", b"a,b,c\n", "text/csv")},
+            data={"ocr_language": "eng"},
+        )
+        assert r.status_code == 422
+        assert "unsupported source format" in r.json()["detail"]
+
+    def test_rejects_unknown_image_extension(self) -> None:
+        client = self._client()
+        r = client.post(
+            "/api/tools/convert/file",
+            files={"file": ("data.xyz", b"\x00\x00", "application/octet-stream")},
+            data={"ocr_language": "eng"},
+        )
+        assert r.status_code == 422
+
