@@ -28,23 +28,49 @@ from nom.compliance.audit import (
     Store,
     VerifyResult,
 )
+from nom.compliance.incident import (
+    IncidentCategory,
+    IncidentRecorder,
+    IncidentSeverity,
+    SeriousIncident,
+)
 from nom.compliance.risk import ClassificationResult, RiskClassifier, SystemSpec
+from nom.compliance.transparency import (
+    AI_INTERACTION_NOTICE_EN,
+    AI_INTERACTION_NOTICE_VI,
+    ProvenanceManifest,
+    interaction_notice,
+    mark_image,
+    mark_text_html,
+    write_sidecar,
+)
 from nom.compliance.types import RiskTier
 from nom.compliance.wrappers import AuditedLLM, AuditedRAG
 
 __all__ = [
+    "AI_INTERACTION_NOTICE_EN",
+    "AI_INTERACTION_NOTICE_VI",
     "AuditChainTamperedError",
     "AuditEvent",
     "AuditLog",
     "AuditedLLM",
     "AuditedRAG",
     "ClassificationResult",
+    "IncidentCategory",
+    "IncidentRecorder",
+    "IncidentSeverity",
     "JSONLStore",
+    "ProvenanceManifest",
     "RiskClassifier",
     "RiskTier",
     "SQLiteStore",
+    "SeriousIncident",
     "Signer",
     "Store",
     "SystemSpec",
     "VerifyResult",
+    "interaction_notice",
+    "mark_image",
+    "mark_text_html",
+    "write_sidecar",
 ]
