@@ -68,6 +68,22 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 - *Cần OCR ảnh quét tiếng Việt?* Hai câu trả lời tuỳ vào loại đầu vào: **Tesseract `vie`** đúng cho dòng in (0.00 % CER trên ảnh in sạch). **VietOCR** đúng cho chữ viết tay (31.82 % CER vs Tesseract 69.34 % — khoảng cách 37.5 pp này là phát hiện OCR lớn nhất của repo). PaddleOCR PP-OCRv5 chỉ thứ 3 ở mọi register vì không ship recognizer VN-specific; `lang='vi'` chỉ load `latin_PP-OCRv5_mobile_rec` chung và làm rớt dấu thanh. Đừng dùng VLM cho crop dòng đơn — VLM ảo giác ở mức dòng (chỉ dùng VLM khi có context tài liệu đầy đủ như form / hoá đơn).
 - *Cần trích văn bản PDF không vướng giấy phép?* Dùng `pypdfium2` (đã ship sẵn). Tránh PyMuPDF — AGPL của nó kéo mọi thứ downstream thành AGPL.
 
+## Phiên bản doanh nghiệp
+
+Phần lõi mã nguồn mở đã đủ để dựng một pipeline RAG nội bộ. Phiên bản doanh nghiệp bổ sung những thứ một triển khai được kiểm soát thực sự cần — và chỉ vậy thôi. **Open core, một chiều**: mọi tính năng EE cắm vào lõi OSS qua các Protocol trong `nom.platform` (Authenticator / RBAC / PIIDetector / Redactor / AuditForwarder), nên phần lõi vẫn rà soát được và có thể thay thế.
+
+| Khả năng | OSS | Doanh nghiệp |
+|---|---|---|
+| Xác thực | bearer token | OIDC (Keycloak / Azure AD / Okta), SAML 2.0, LDAP/AD |
+| Phân quyền | không có | RBAC theo tenant (`tenant.admin`, `compliance.officer`, `workspace.editor`) |
+| Nhật ký kiểm toán | HMAC-chained, trong process | + forwarder (Splunk HEC, ELK, Loki qua syslog/OTel) |
+| PII | regex 8 thực thể VN (CCCD, MST, số điện thoại, email…) | + bộ phát hiện nâng cao + tokenize có thể hoàn nguyên |
+| Tuân thủ | phân loại rủi ro Luật 134/2025 (Đ8–Đ15) | + dấu vết tác tử gắn audit, console quản trị có giấy phép |
+| Đầu nối Office | đọc DOCX / XLSX / PPTX | + Microsoft Graph (SharePoint, OneDrive, Outlook) |
+| Giấy phép | không có — miễn phí mãi mãi | HMAC ký ngoại tuyến (chạy air-gap, không phone-home) |
+
+Thiết kế cho **tự cài / vùng riêng đám mây / mạng cô lập** — xem [trang doanh nghiệp](https://nom-vn.nrl.ai/doanh-nghiep/) để biết cấu hình bảo mật, các kiểu triển khai và biểu mẫu liên hệ. Gửi thư đến `vietanh@nrl.ai` để đặt lịch trao đổi 30 phút.
+
 ## Đang ship hôm nay
 
 | Module | Chức năng | Trạng thái |

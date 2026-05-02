@@ -69,6 +69,22 @@ on real Vietnamese corpora, this week.
 - *Need OCR on Vietnamese scans?* Two answers depending on what you have: **Tesseract `vie`** is the right call for printed lines (0.00 % CER on clean printed). **VietOCR** is the right call for handwriting (31.82 % CER vs Tesseract 69.34 % — the 37.5 pp gap is the biggest single OCR finding in the repo). PaddleOCR PP-OCRv5 ranks 3rd everywhere because it ships no VN-specific recognizer; `lang='vi'` loads generic `latin_PP-OCRv5_mobile_rec` which strips diacritics. Don't reach for VLM OCR on tight line crops — VLMs hallucinate at line scale (use a VLM only when you have full-document context like forms or invoices).
 - *Need PDF text extraction in a license-clean way?* Use `pypdfium2` (we ship it). Skip PyMuPDF — its AGPL forces every downstream into AGPL.
 
+## Enterprise edition
+
+The OSS core is enough to ship an internal RAG pipeline. The enterprise edition adds the things a regulated deployment needs — and nothing else. **Open core, one-way**: every EE feature plugs into the OSS code through `nom.platform` Protocols (Authenticator / RBAC / PIIDetector / Redactor / AuditForwarder), so the core stays auditable and replaceable.
+
+| Capability | OSS | EE |
+|---|---|---|
+| Auth | bearer token | OIDC (Keycloak / Azure AD / Okta), SAML 2.0, LDAP/AD |
+| RBAC | none | tenant-scoped roles (`tenant.admin`, `compliance.officer`, `workspace.editor`) |
+| Audit log | HMAC-chained, in-process | + forwarders (Splunk HEC, ELK, Loki via syslog/OTel) |
+| PII | regex (8 VN entities: CCCD, MST, phone, email, …) | + advanced detector + reversible tokenization |
+| Compliance | Luật 134/2025 rule-based classifier (Đ8–Đ15) | + audit-correlated agent traces, license-gated admin console |
+| Office connectors | DOCX / XLSX / PPTX read | + Microsoft Graph (SharePoint, OneDrive, Outlook) |
+| License | none — free forever | offline HMAC-signed (air-gappable, no phone-home) |
+
+Built for **self-host / private cloud / air-gap** deployments — see [the enterprise page](https://nom-vn.nrl.ai/doanh-nghiep/) for the security posture, deployment modes, and contact form. Email `vietanh@nrl.ai` for a 30-minute scoping call.
+
 ## What ships today
 
 | Module | What it does | Status |
