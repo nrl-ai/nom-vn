@@ -281,6 +281,7 @@ exclude = ["tests/", "benchmarks/", "scripts/"]
 module = [
   "pytesseract.*",
   "pdfplumber.*",
+  "pypdfium2.*",
   "fitz.*",
   "underthesea.*",
   "sentence_transformers.*",

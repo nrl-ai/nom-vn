@@ -492,6 +492,75 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             },
         )
 
+    @app.post("/api/tools/convert/file")
+    async def convert_file_upload(
+        file: Annotated[UploadFile, File()],
+        ocr_language: Annotated[str, Form()] = "vie+eng",
+    ) -> Response:
+        """Convert an uploaded PDF or image to ``.docx``; respond with the
+        converted file plus per-page stats in ``X-Convert-Stats``.
+
+        Supported inputs: ``.pdf``, ``.png``, ``.jpg``, ``.jpeg``, ``.tif``,
+        ``.tiff``, ``.bmp``, ``.webp``. PDF pages with a usable text layer
+        are extracted directly; pages without are rendered and OCR'd via
+        Tesseract using ``ocr_language`` (default ``vie+eng``).
+        """
+        import json
+        import tempfile
+        from pathlib import Path
+
+        from nom.convert import SUPPORTED_INPUTS, convert_to_docx
+
+        filename = file.filename or "upload.pdf"
+        suffix = Path(filename).suffix.lower()
+        if suffix not in SUPPORTED_INPUTS:
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"unsupported source format {suffix!r}; supported: {sorted(SUPPORTED_INPUTS)}"
+                ),
+            )
+
+        contents = await file.read()
+        with tempfile.TemporaryDirectory() as td:
+            src_path = Path(td) / f"source{suffix}"
+            dst_path = Path(td) / "converted.docx"
+            src_path.write_bytes(contents)
+
+            try:
+                stats = convert_to_docx(src_path, dst_path, ocr_language=ocr_language)
+            except ImportError as exc:
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"convert backend unavailable: {exc}",
+                ) from exc
+            except Exception as exc:
+                raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+            output_bytes = dst_path.read_bytes()
+
+        stem = Path(filename).stem
+        out_filename = f"{stem}.docx"
+
+        stats_json = json.dumps(
+            {
+                "n_pages": stats.n_pages,
+                "pages_text_extracted": stats.pages_text_extracted,
+                "pages_ocred": stats.pages_ocred,
+                "chars_out": stats.chars_out,
+                "ocr_language": stats.ocr_language,
+            }
+        )
+
+        return Response(
+            content=output_bytes,
+            media_type=("application/vnd.openxmlformats-officedocument.wordprocessingml.document"),
+            headers={
+                "Content-Disposition": f'attachment; filename="{out_filename}"',
+                "X-Convert-Stats": stats_json,
+            },
+        )
+
     @app.get("/api/tools/translate/models")
     def list_translate_models() -> dict[str, Any]:
         """Curated translation backends + the HF specialist models the

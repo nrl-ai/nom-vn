@@ -273,6 +273,10 @@ def main(argv: list[str] | None = None) -> int:
 
     _add_translate_subparser(sub)
 
+    from nom.convert.cli import add_subparser as _add_convert_subparser
+
+    _add_convert_subparser(sub)
+
     args = parser.parse_args(argv)
 
     if args.cmd == "serve":
@@ -298,6 +302,11 @@ def main(argv: list[str] | None = None) -> int:
         from nom.translate.cli import run as _run_translate
 
         return _run_translate(args)
+
+    if args.cmd == "convert":
+        from nom.convert.cli import run as _run_convert
+
+        return _run_convert(args)
 
     parser.print_help()
     return 1
