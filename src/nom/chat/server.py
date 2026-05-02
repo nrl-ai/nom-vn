@@ -112,6 +112,10 @@ def build_app(
     # works even on a fresh install.
     _register_agent_routes(app, store=store)
 
+    # /api/compliance/* — risk classification API for the compliance
+    # console UI. Always mounted; pure-Python, no extras required.
+    _register_compliance_routes(app)
+
     # ------------------------------------------------------------------
     # Static UI
     # ------------------------------------------------------------------
@@ -495,6 +499,49 @@ def _register_agent_routes(app: Any, *, store: Any) -> None:
             pass
 
     register_agent_routes(app, agents=agents)
+
+
+def _register_compliance_routes(app: Any) -> None:
+    """Mount POST /api/compliance/classify — feed a SystemSpec, get a
+    RiskTier + applicable articles + reasoning back. Drives the
+    compliance console UI.
+    """
+    from fastapi import HTTPException
+
+    from nom.compliance.risk import RiskClassifier, SystemSpec
+
+    @app.post("/api/compliance/classify")  # type: ignore[misc]
+    def classify(payload: dict[str, Any]) -> dict[str, Any]:
+        try:
+            spec = SystemSpec(
+                purpose=str(payload.get("purpose", "")).strip(),
+                sector=str(payload.get("sector", "other")),  # type: ignore[arg-type]
+                automation_level=str(payload.get("automation_level", "advisory")),  # type: ignore[arg-type]
+                user_scope=str(payload.get("user_scope", "individual")),  # type: ignore[arg-type]
+                handles_personal_data=bool(payload.get("handles_personal_data", False)),
+                affects_vulnerable_groups=bool(payload.get("affects_vulnerable_groups", False)),
+                can_generate_synthetic_content=bool(
+                    payload.get("can_generate_synthetic_content", False)
+                ),
+                interacts_directly_with_users=bool(
+                    payload.get("interacts_directly_with_users", True)
+                ),
+            )
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(status_code=422, detail=f"invalid spec: {exc}") from exc
+
+        if not spec.purpose:
+            raise HTTPException(status_code=422, detail="`purpose` is required")
+
+        result = RiskClassifier().classify(spec)
+        return {
+            "tier": result.tier.value,
+            "applicable_articles": list(result.applicable_articles),
+            "reasoning": list(result.reasoning),
+            "fired_rule_ids": list(result.fired_rule_ids),
+            "law_id": result.law_id,
+            "law_version": result.law_version,
+        }
 
 
 def _space_to_dict(space: Any) -> dict[str, Any]:

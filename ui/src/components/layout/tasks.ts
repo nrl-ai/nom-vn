@@ -6,6 +6,7 @@ import {
   MessageSquare,
   Scissors,
   Settings,
+  ShieldCheck,
   Sigma,
   Type,
 } from "lucide-react";
@@ -22,6 +23,7 @@ export type TaskKey =
   | "strip"
   | "translate"
   | "agents"
+  | "compliance"
   | "api"
   | "settings";
 
@@ -81,6 +83,13 @@ export const TASKS: TaskMeta[] = [
     label: "Chạy tác tử",
     blurb: "Theo dõi suy luận và gọi công cụ",
     icon: Bot,
+    category: "rag",
+  },
+  {
+    key: "compliance",
+    label: "Phân loại rủi ro",
+    blurb: "Luật 134/2025 — phân loại 3 mức",
+    icon: ShieldCheck,
     category: "rag",
   },
   {
