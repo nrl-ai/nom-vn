@@ -2,13 +2,13 @@
 
 *Cập nhật lần cuối: 2026-04-26.*
 
-Mỗi recipe là một entry tự đứng "tôi muốn X, làm Y". Code mẫu copy-paste
+Mỗi recipe là một mục tự đứng "tôi muốn X, làm Y". Code mẫu copy-paste
 sạch từ một cài đặt `nom-vn` mới. Mọi khuyến nghị đều trỏ tới hàng
 trong [`docs/benchmark.md`](benchmark.md) đã đo — không recipe nào
-ship lựa chọn chưa đo.
+giới thiệu lựa chọn chưa đo.
 
-Thứ tự recipe theo arc adoption điển hình: text utility → parsing
-tài liệu → retrieval → RAG → chat. Skip xuống.
+Thứ tự recipe theo trình tự áp dụng điển hình: tiện ích văn bản →
+bóc tách tài liệu → tra cứu → RAG → chat. Bỏ qua phần không cần.
 
 ---
 
@@ -164,7 +164,7 @@ out = fix_diacritics(
 )
 ```
 
-Dùng khi đã wire một LLM cho task khác và muốn ít dependency hơn một.
+Dùng khi đã ghép một LLM cho tác vụ khác và muốn ít phụ thuộc hơn một bậc.
 **Adapter `Ollama` mặc định `think=False`** — bắt buộc cho Qwen3,
 vô hại cho mô hình không thinking.
 
@@ -275,7 +275,7 @@ pdf.close()
 `pypdfium2` (BSD-3 wrapper trên PDFium Apache-2.0) là mặc định trong
 `nom-vn[doc]`. **Nhanh hơn pdfplumber 46×** trên PDF text thuần ở
 fidelity y hệt. Ship trong extra của chúng tôi đặc biệt vì chúng tôi
-không ship PyMuPDF — AGPL ép mọi phía sau sang AGPL.
+không kèm PyMuPDF — giấy phép AGPL kéo mọi phía sau sang AGPL.
 
 ### Trích text *kèm bảng* từ PDF
 
@@ -290,7 +290,7 @@ with pdfplumber.open("invoice.pdf") as pdf:
 ```
 
 `pdfplumber` chậm hơn (51 k chars/s vs 2.35 M chars/s của pypdfium2)
-nhưng phát hiện cell bảng mạnh hơn. Cả hai ship cùng trong `nom-vn[doc]`.
+nhưng phát hiện ô bảng tốt hơn. Cả hai có sẵn trong `nom-vn[doc]`.
 
 ### OCR ảnh tiếng Việt (text in)
 
@@ -458,7 +458,7 @@ hits = bm25.search("Trình tự thoả thuận thông số kỹ thuật...", top
 # 0.7 ms mỗi query — backed bởi bm25s (công thức Lucene, scipy.sparse)
 ```
 
-Việc swap v0.2.6 sang `bm25s` là **tăng tốc 607×** với recall y hệt
+Việc đổi v0.2.6 sang `bm25s` cho **tăng tốc 607×** với recall y hệt
 bit so với implementation pure-Python v0.2.5. Không tốn chất lượng.
 
 ---
@@ -526,7 +526,7 @@ nó chỉ thấy text đã dọn + schema.
 ### Dùng provider LLM khác
 
 Protocol `LLM` là một method (`complete(prompt, *, schema=None)`).
-Ba adapter ship sẵn:
+Ba adapter có sẵn:
 
 ```python
 # Ollama (local) — mặc định think=False
@@ -624,12 +624,12 @@ từ một bản clone sạch, không phải screenshot model card.
 ### Xem cái gì đổi giữa các release
 
 ```bash
-git log --oneline v0.2.6..HEAD     # từ swap BM25
+git log --oneline v0.2.6..HEAD     # từ lúc đổi BM25
 ```
 
 CHANGELOG.md có chi tiết per-version với các con số đo dịch chuyển.
 
-### Verify license compliance cho dep ship
+### Kiểm tra tuân thủ giấy phép cho phụ thuộc đi kèm
 
 ```bash
 pip-licenses --format=markdown --packages nom-vn pypdfium2 pdfplumber \
@@ -637,7 +637,7 @@ pip-licenses --format=markdown --packages nom-vn pypdfium2 pdfplumber \
 ```
 
 Chúng tôi từ chối AGPL (PyMuPDF, Surya), GPL (code Surya), và dep
-ship pickle (PyVi). List tự động từ chối ở chính sách component-build.
+kèm pickle (PyVi). Danh sách này tự động bị từ chối theo chính sách xây dựng component.
 
 ---
 
