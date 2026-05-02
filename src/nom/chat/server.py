@@ -116,6 +116,17 @@ def build_app(
     # console UI. Always mounted; pure-Python, no extras required.
     _register_compliance_routes(app)
 
+    # /api/models/* — Ollama tag listing + HF cache scan + async pulls
+    # with progress tracking. Powers the desktop Models tab.
+    from nom.chat.models_api import register_models_routes
+
+    register_models_routes(app)
+
+    # /api/admin/* — opt-in EE feature, auto-mounted when
+    # ``nom-vn-enterprise`` is installed in the same environment.
+    # Silently skipped otherwise so the OSS server still works.
+    _register_admin_routes_if_available(app)
+
     # ------------------------------------------------------------------
     # Static UI
     # ------------------------------------------------------------------
@@ -464,7 +475,21 @@ def _resolve_authenticator() -> Any:
     if token:
         from nom.platform import BearerTokenAuth
 
-        return BearerTokenAuth(token=token)
+        # Optional role override for quick demos / single-tenant ops
+        # who want the bearer user to also hold tenant.admin /
+        # compliance.officer (gates the EE admin + audit endpoints).
+        roles_env = os.environ.get("NOM_AUTH_ROLES", "").strip()
+        roles: tuple[str, ...] = (
+            tuple(r.strip() for r in roles_env.split(",") if r.strip())
+            if roles_env
+            else ("workspace.editor",)
+        )
+        return BearerTokenAuth(
+            token=token,
+            user_id=os.environ.get("NOM_AUTH_USER_ID", "anonymous"),
+            tenant_id=os.environ.get("NOM_AUTH_TENANT_ID", "default"),
+            roles=roles,
+        )
 
     return None
 
@@ -499,6 +524,21 @@ def _register_agent_routes(app: Any, *, store: Any) -> None:
             pass
 
     register_agent_routes(app, agents=agents)
+
+
+def _register_admin_routes_if_available(app: Any) -> None:
+    """Mount /api/admin/* iff the nom-vn-enterprise package is
+    installed AND a valid licence is reachable. Silently no-ops
+    otherwise — OSS deployments don't get admin endpoints.
+    """
+    try:
+        from nom_ee.admin import register_admin_routes
+    except ImportError:
+        return  # nom-vn-enterprise not installed; skip.
+    try:
+        register_admin_routes(app)
+    except Exception:  # noqa: BLE001 — license missing / invalid is OK
+        return
 
 
 def _register_compliance_routes(app: Any) -> None:
