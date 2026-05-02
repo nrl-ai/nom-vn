@@ -11,6 +11,7 @@ import { TokenizePage } from "@/components/tools/pages/TokenizePage";
 import { NormalizePage } from "@/components/tools/pages/NormalizePage";
 import { StripPage } from "@/components/tools/pages/StripPage";
 import { TranslatePage } from "@/components/tools/pages/TranslatePage";
+import { ModelsPage } from "@/components/tools/pages/ModelsPage";
 import { AgentRunPage } from "@/components/tools/pages/AgentRunPage";
 import { CompliancePage } from "@/components/tools/pages/CompliancePage";
 import { AdminPage } from "@/components/tools/pages/AdminPage";
@@ -28,6 +29,7 @@ const TASK_KEYS: ReadonlySet<TaskKey> = new Set([
   "normalize",
   "strip",
   "translate",
+  "models",
   "agents",
   "compliance",
   "admin",
@@ -126,6 +128,9 @@ export default function App() {
       break;
     case "translate":
       centerPane = <TranslatePage />;
+      break;
+    case "models":
+      centerPane = <ModelsPage />;
       break;
     case "agents":
       centerPane = <AgentRunPage />;

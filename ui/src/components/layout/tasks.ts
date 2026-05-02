@@ -5,6 +5,7 @@ import {
   Eraser,
   Languages,
   MessageSquare,
+  Package,
   Scissors,
   Settings,
   ShieldCheck,
@@ -23,6 +24,7 @@ export type TaskKey =
   | "normalize"
   | "strip"
   | "translate"
+  | "models"
   | "agents"
   | "compliance"
   | "admin"
@@ -48,9 +50,16 @@ export const TASKS: TaskMeta[] = [
   {
     key: "translate",
     label: "Dịch thuật",
-    blurb: "Việt ↔ Anh, giữ nguyên định dạng .docx",
+    blurb: "Việt ↔ Anh, giữ định dạng .docx / .xlsx / .pptx / .txt",
     icon: Languages,
     category: "text",
+  },
+  {
+    key: "models",
+    label: "Mô hình",
+    blurb: "quản lý mô hình AI cài đặt cục bộ",
+    icon: Package,
+    category: "dev",
   },
   {
     key: "diacritic",
@@ -83,21 +92,21 @@ export const TASKS: TaskMeta[] = [
   {
     key: "agents",
     label: "Chạy tác tử",
-    blurb: "Theo dõi suy luận và gọi công cụ",
+    blurb: "Theo dõi tác tử thời gian thực",
     icon: Bot,
     category: "rag",
   },
   {
     key: "compliance",
     label: "Phân loại rủi ro",
-    blurb: "Luật 134/2025 — phân loại 3 mức",
+    blurb: "Luật 134/2025 — 3 mức",
     icon: ShieldCheck,
     category: "rag",
   },
   {
     key: "admin",
     label: "Quản trị doanh nghiệp",
-    blurb: "Giấy phép, người dùng, audit — bản EE",
+    blurb: "Giấy phép · audit · người dùng",
     icon: Building2,
     category: "dev",
   },
