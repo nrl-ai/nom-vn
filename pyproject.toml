@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nom-vn"
-version = "0.2.37"
+version = "0.3.0a1"
 description = "Open-source Python toolkit for building Vietnamese AI applications."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -138,8 +138,20 @@ otel = [
   "opentelemetry-exporter-otlp>=1.28",
   "opentelemetry-instrumentation-fastapi>=0.49b0",
 ]
+# Vietnam AI Law 134/2025/QH15 (effective 2026-03-01) compliance toolkit.
+#
+# - HMAC-SHA256 audit chain via `cryptography` (Apache-2.0 OR BSD-3 — dual,
+#   permissive). v0.3.0 default; `Signer` Protocol allows swap to a
+#   quantum-safe ML-DSA-65 backend (planned v0.4 once an upstream like
+#   Asqav clears our maturity gate: ≥6 months track record, ≥500 stars).
+# - Jinja2 (BSD) for VN-first dossier templates (model card, technical
+#   dossier per Đ14.1.c, classification dossier per Đ10, etc.).
+compliance = [
+  "cryptography>=42",
+  "Jinja2>=3",
+]
 all = [
-  "nom-vn[chat,diacritics,doc,embeddings,llm,otel]",
+  "nom-vn[chat,compliance,diacritics,doc,embeddings,llm,otel]",
 ]
 dev = [
   "pytest>=8",

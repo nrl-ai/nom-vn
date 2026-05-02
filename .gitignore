@@ -1,3 +1,6 @@
+# Local-only planning / design docs (not committed)
+_planning/
+
 # Python
 __pycache__/
 *.py[cod]

@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0a1] — 2026-05-02 (in progress)
+
+### Added: `nom.compliance.audit` — HMAC-chained audit log (Đ14.1.c, Đ28.3)
+
+First slice of the new `nom.compliance` module aimed at Luật
+134/2025/QH15 (effective 2026-03-01). This release ships the audit-log
+substrate; risk classifier, transparency / incident handlers, dossier
+generators, and the website hub follow in subsequent 0.3.0 alphas.
+
+- **`nom.compliance.AuditLog`** — append-only, HMAC-SHA256 signed
+  chain. Every entry's signature covers the previous entry's
+  signature, so any tamper anywhere breaks `verify()` cleanly. Sinks:
+  `SQLiteStore` (default, multi-thread safe) and `JSONLStore`
+  (export-friendly).
+- **`Signer` Protocol** — `HMACSigner` is the v0.3 default
+  (`cryptography` lib, Apache-2.0 OR BSD-3). The Protocol lets v0.4
+  swap to a quantum-safe ML-DSA-65 backend without a core change.
+- **`RiskTier`** enum — values map to Đ9.1.a/b/c verbatim
+  (`high`/`medium`/`low`).
+- **`AuditLog.export(path, since=, until=)`** — date-bounded JSONL
+  slice. This is the artifact you hand a Bộ KH&CN inspector under
+  Đ28.3.
+- **OTel span helpers** — `audit_span()` /
+  `annotate_audit_span()` reuse the existing tracer in
+  `nom.chat.observability` so compliance events show up in any
+  OpenInference-aware backend (Phoenix / Langfuse / Arize / Datadog).
+- **New extras**: `pip install nom-vn[compliance]` — pulls
+  `cryptography>=42` and `Jinja2>=3` for the audit primitive and the
+  upcoming dossier templates.
+
+Tests live in `tests/test_compliance_audit.py` covering chain
+integrity, tamper detection in both sinks, multi-thread emit, and
+canonical-JSON determinism on VN/CJK input. Wrong-key verification,
+`raise_if_tampered()`, and concurrent emit are all exercised.
+
+Public landscape comparison and dev-facing guide land with the
+`docs/tasks/compliance.md` page in a later 0.3.0 alpha.
+
 ## [0.2.37] — 2026-05-02
 
 ### Fix: skip PNG upload-format test when tesseract is missing
