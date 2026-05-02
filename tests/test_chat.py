@@ -161,6 +161,15 @@ class TestMaterials:
         if not path.is_file():
             pytest.skip(f"fixture missing: {fixture_path}")
 
+        # PNG indexing shells out to tesseract; skip cleanly when the
+        # binary isn't on the runner. Must run BEFORE /index, otherwise
+        # the index call raises TesseractNotFoundError.
+        if path.suffix == ".png":
+            import shutil
+
+            if shutil.which("tesseract") is None:
+                pytest.skip("tesseract not installed; PNG indexing path skipped")
+
         sid = self._space(client)
         with path.open("rb") as f:
             r = client.post(
@@ -173,17 +182,10 @@ class TestMaterials:
         assert mat["n_bytes"] > 0
 
         # Trigger indexing — confirms the parser pipeline can handle the
-        # format. PNG path requires tesseract, which we skip cleanly.
+        # format end-to-end (parse + chunk + embed).
         r = client.post(f"/api/spaces/{sid}/index")
-        if path.suffix == ".png":
-            import shutil
-
-            if shutil.which("tesseract") is None:
-                pytest.skip("tesseract not installed; PNG indexing path skipped")
         assert r.status_code == 200
-        body = r.json()
-        # Non-image formats must produce >=1 chunk; PNG with tesseract too.
-        assert body["n_indexed"] >= 1, body
+        assert r.json()["n_indexed"] >= 1, r.text
 
     def test_ocr_extracts_vietnamese_diacritics_from_png(self, client: TestClient) -> None:
         """Upload a clean Vietnamese PNG, run /index, fetch /text, and
