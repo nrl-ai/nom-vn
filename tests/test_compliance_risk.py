@@ -274,25 +274,38 @@ def test_system_spec_is_frozen() -> None:
 
 
 def test_classifier_accepts_custom_rules() -> None:
-    """A bank can ship a stricter local table; the classifier honors it."""
-    from nom.compliance.risk.rules import Rule
+    """A bank can ship a stricter local table by deriving a LawSpec
+    with a custom rules tuple. Keeps the law-as-data invariant."""
+    from dataclasses import replace
 
-    custom = Rule(
+    from nom.compliance.laws import LAW_VN_134_2025
+    from nom.compliance.laws._types import RuleSpec
+
+    custom_rule = RuleSpec(
         rule_id="bank-policy-001",
         tier=RiskTier.HIGH,
         articles=("Đ9.1.a", "internal-policy-001"),
-        reason="Bank internal policy: any customer-facing AI is HIGH.",
+        reason_vi="Bank internal policy: any customer-facing AI is HIGH.",
         predicate=lambda s: s.user_scope == "public-mass",
     )
-    cls = RiskClassifier(rules=(custom,))
+    custom_law = replace(LAW_VN_134_2025, rules=(custom_rule,))
+    cls = RiskClassifier(law=custom_law)
     result = cls.classify(base_spec(user_scope="public-mass"))
     assert result.tier is RiskTier.HIGH
     assert "bank-policy-001" in result.fired_rule_ids
     assert "internal-policy-001" in result.applicable_articles
+    # Result pins which law version drove the decision.
+    assert result.law_id == "VN-134/2025"
+    assert result.law_version == "1.0.0"
 
 
 def test_empty_rules_always_low() -> None:
-    cls = RiskClassifier(rules=())
-    # Even healthcare-autonomous returns LOW with no rules.
+    """A LawSpec with no rules always classifies LOW."""
+    from dataclasses import replace
+
+    from nom.compliance.laws import LAW_VN_134_2025
+
+    empty_law = replace(LAW_VN_134_2025, rules=())
+    cls = RiskClassifier(law=empty_law)
     result = cls.classify(base_spec(sector="health", automation_level="autonomous"))
     assert result.tier is RiskTier.LOW

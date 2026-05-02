@@ -1,5 +1,22 @@
+import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { defineConfig } from "vitepress";
 import { withMermaid } from "vitepress-plugin-mermaid";
+
+const require = createRequire(import.meta.url);
+
+// pnpm doesn't hoist these into node_modules/<pkg> at the project root, so
+// Vite's bare-package resolution fails. Resolve each package's entry through
+// Node and walk relative for ESM-shaped sub-paths.
+const resolveEntry = (pkg: string) => require.resolve(pkg);
+const resolveSubpath = (pkg: string, relative: string) => {
+  const entry = require.resolve(pkg);
+  return fileURLToPath(new URL(relative, `file://${entry}`));
+};
+const dayjsEsmEntry = resolveSubpath("dayjs", "./esm/index.js");
+const sanitizeUrlEntry = resolveEntry("@braintree/sanitize-url");
+const dompurifyEntry = resolveEntry("dompurify");
+const cytoscapeEntry = resolveEntry("cytoscape");
 
 // nom-vn documentation site — published at https://nom-vn.nrl.ai
 //
@@ -78,9 +95,80 @@ export default withMermaid(
             "Khôi phục dấu, sửa chính tả, OCR, RAG cục bộ — mã nguồn mở, dành cho tiếng Việt.",
         },
       ],
+      // Formspree — used by the enterprise contact form on /doanh-nghiep/.
+      // VitePress is an SPA, so we listen for navigation and init Formspree
+      // each time the form mounts. We only load the ajax script when at least
+      // one such page actually wants it.
+      [
+        "script",
+        {},
+        `
+          (function () {
+            window.formspree = window.formspree || function () {
+              (formspree.q = formspree.q || []).push(arguments);
+            };
+            var loaded = false;
+            function ensureScript() {
+              if (loaded) return;
+              loaded = true;
+              var s = document.createElement("script");
+              s.src = "https://unpkg.com/@formspree/ajax@1";
+              s.defer = true;
+              document.head.appendChild(s);
+            }
+            function tryInit() {
+              if (!document.getElementById("nom-enterprise-form")) return;
+              ensureScript();
+              window.formspree("initForm", {
+                formElement: "#nom-enterprise-form",
+                formId: "mdabkvky",
+              });
+            }
+            if (document.readyState === "loading") {
+              document.addEventListener("DOMContentLoaded", tryInit);
+            } else {
+              tryInit();
+            }
+            // SPA navigations: re-check on each route change.
+            var origPush = history.pushState;
+            history.pushState = function () {
+              var ret = origPush.apply(this, arguments);
+              setTimeout(tryInit, 50);
+              return ret;
+            };
+            window.addEventListener("popstate", function () {
+              setTimeout(tryInit, 50);
+            });
+          })();
+        `,
+      ],
     ],
 
     appearance: false,
+
+    vite: {
+      resolve: {
+        // Array form so we can use exact-match regexes — object aliases do
+        // prefix-replace which breaks `dayjs/plugin/*` sub-paths.
+        alias: [
+          // vitepress-plugin-mermaid pulls these via optimizeDeps but pnpm
+          // doesn't hoist them to node_modules/<pkg>. Without a root-reachable
+          // path, Vite serves the raw CJS file and named-imports break. Alias
+          // each bare specifier to its absolute entry so Vite's pre-bundler can
+          // perform CJS→ESM interop and expose named exports correctly.
+          { find: /^dayjs$/, replacement: dayjsEsmEntry },
+          { find: /^@braintree\/sanitize-url$/, replacement: sanitizeUrlEntry },
+          { find: /^dompurify$/, replacement: dompurifyEntry },
+          { find: /^cytoscape$/, replacement: cytoscapeEntry },
+        ],
+      },
+      // Force-bundle mermaid so the browser doesn't fan out to hundreds of
+      // individual d3-* requests (ERR_INSUFFICIENT_RESOURCES on the home
+      // page). The mermaid plugin doesn't add mermaid itself; we do.
+      optimizeDeps: {
+        include: ["mermaid"],
+      },
+    },
 
     themeConfig: {
       logo: { src: "/logo.svg", alt: "Nôm" },
@@ -102,10 +190,13 @@ export default withMermaid(
             { text: "Embedding", link: "/tasks/embedding" },
             { text: "Reranker", link: "/tasks/reranker" },
             { text: "RAG end-to-end", link: "/tasks/rag" },
+            { text: "Tuân thủ Luật 134/2025", link: "/tasks/compliance" },
           ],
         },
         { text: "Mô hình", link: "/vi/models" },
         { text: "Đánh giá", link: "/benchmark" },
+        { text: "Tuân thủ", link: "/compliance/" },
+        { text: "Doanh nghiệp", link: "/doanh-nghiep/" },
         {
           text: "Liên kết",
           items: [
@@ -141,6 +232,15 @@ export default withMermaid(
             { text: "Embedding", link: "/tasks/embedding" },
             { text: "Reranker", link: "/tasks/reranker" },
             { text: "RAG end-to-end", link: "/tasks/rag" },
+            { text: "Tuân thủ Luật 134/2025", link: "/tasks/compliance" },
+          ],
+        },
+        {
+          text: "Tuân thủ",
+          items: [
+            { text: "Tổng quan", link: "/compliance/" },
+            { text: "Tóm tắt Luật 134/2025", link: "/compliance/luat-134-2025" },
+            { text: "Chi tiết kỹ thuật", link: "/tasks/compliance" },
           ],
         },
         {
