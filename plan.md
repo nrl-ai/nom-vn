@@ -30,6 +30,16 @@
   frozen value types, JobQueue Protocol with InMemory + SQLite impls,
   JobWorker with exponential backoff retry and audit-chain
   integration. 25 parametrised tests. Commit `686960a`.
+- `nom.nlp` — VN NER (RegexNERModel baseline + safetensors-only
+  HFNERModel), sentiment (LexiconSentimentModel), language detection
+  (Unicode-frequency heuristic). 23 unit tests + 7 REST API tests.
+  Plus `nom worker` and `nom mcp-serve` CLI subcommands. Commit
+  `9db4623`.
+- `nom.agents.recipes` — production-ready agent factories:
+  `vn_doc_analyser` (lang+NER+sentiment pipeline), `legal_qa`
+  (RAG-grounded Q&A with citations), `deep_research`
+  (orchestrator-workers), `compliance_screener` (PII-redact agent
+  wrapper). Demo at `examples/recipes_demo.py`. 11 tests.
 
 **nom-vn-enterprise (private commercial) — 46 tests passing.** At
 `../nom-vn-enterprise/`, single commit `5bf8c5e`:
@@ -49,8 +59,8 @@
 - All five plugins discovered through entry points; OSS imports
   nothing from `nom_ee`
 
-**Total: 696 tests passing across both repos.** Neither pushed to
-remote — awaiting deployment authorisation.
+**Total: 737 tests passing across both repos** (691 OSS + 46 EE).
+Neither pushed to remote — awaiting deployment authorisation.
 
 ## North star
 
