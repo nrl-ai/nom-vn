@@ -1,22 +1,15 @@
-import {
-  MessageSquare,
-  Type,
-  Scissors,
-  Sigma,
-  Beaker,
-  Eraser,
-  Code2,
-  Settings,
-} from "lucide-react";
+import { MessageSquare, Type, Scissors, Sigma, Eraser, Code2, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
+// NLP analysis (NER / sentiment / language detection) is exposed via
+// the API today (`/api/tools/nlp/*`); UI pages for these will land in
+// a follow-up — see plan.md Wave 6.
 export type TaskKey =
   | "chat"
   | "diacritic"
   | "tokenize"
   | "normalize"
   | "strip"
-  | "noise"
   | "api"
   | "settings";
 
@@ -62,13 +55,6 @@ export const TASKS: TaskMeta[] = [
     label: "Bỏ dấu",
     blurb: "Chuyển sang ASCII",
     icon: Eraser,
-    category: "text",
-  },
-  {
-    key: "noise",
-    label: "Sinh nhiễu",
-    blurb: "Tạo cặp dữ liệu cho training",
-    icon: Beaker,
     category: "text",
   },
   {

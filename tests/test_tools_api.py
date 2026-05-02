@@ -174,23 +174,52 @@ class TestNormalizeDetect:
         assert body["has_diacritics"] is False
 
 
-class TestNoise:
-    def test_apply_light_preset_deterministic(self, client: TestClient) -> None:
-        payload = {"text": "Tôi yêu Việt Nam.", "preset": "light", "seed": 42}
-        a = client.post("/api/tools/noise/apply", json=payload).json()
-        b = client.post("/api/tools/noise/apply", json=payload).json()
-        # Same (text, preset, seed) → same output, by design.
-        assert a["noisy"] == b["noisy"]
-
-    def test_unknown_preset_422(self, client: TestClient) -> None:
+class TestNLP:
+    def test_ner_detects_money_and_date(self, client: TestClient) -> None:
         r = client.post(
-            "/api/tools/noise/apply",
-            json={"text": "x", "preset": "extreme"},
+            "/api/tools/nlp/ner",
+            json={"text": "VCB ký hợp đồng 1.500.000 VND ngày 02/05/2026."},
         )
+        assert r.status_code == 200
+        labels = {s["label"] for s in r.json()["spans"]}
+        assert {"MONEY", "DATE", "ORG"}.issubset(labels)
+
+    def test_ner_empty_input_422(self, client: TestClient) -> None:
+        r = client.post("/api/tools/nlp/ner", json={"text": ""})
         assert r.status_code == 422
 
-    def test_presets_listing(self, client: TestClient) -> None:
-        r = client.get("/api/tools/noise/presets")
+    def test_sentiment_positive(self, client: TestClient) -> None:
+        r = client.post(
+            "/api/tools/nlp/sentiment",
+            json={"text": "Sản phẩm này rất tuyệt vời, tôi rất hài lòng."},
+        )
         assert r.status_code == 200
-        ids = [p["id"] for p in r.json()["presets"]]
-        assert {"light", "heavy", "ocr_realistic"}.issubset(ids)
+        body = r.json()
+        assert body["label"] == "positive"
+        assert body["score"] > 0.5
+
+    def test_sentiment_negative(self, client: TestClient) -> None:
+        r = client.post(
+            "/api/tools/nlp/sentiment",
+            json={"text": "Dịch vụ tệ quá, rất thất vọng."},
+        )
+        assert r.json()["label"] == "negative"
+
+    def test_language_vn(self, client: TestClient) -> None:
+        r = client.post(
+            "/api/tools/nlp/language",
+            json={"text": "Đây là một câu tiếng Việt."},
+        )
+        assert r.status_code == 200
+        assert r.json()["language"] == "vi"
+
+    def test_language_en(self, client: TestClient) -> None:
+        r = client.post(
+            "/api/tools/nlp/language",
+            json={"text": "This is plain English."},
+        )
+        assert r.json()["language"] == "en"
+
+    def test_language_empty_input_422(self, client: TestClient) -> None:
+        r = client.post("/api/tools/nlp/language", json={"text": ""})
+        assert r.status_code == 422

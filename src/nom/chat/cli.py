@@ -22,7 +22,7 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 __all__ = ["main", "serve"]
 
@@ -232,6 +232,40 @@ def main(argv: list[str] | None = None) -> int:
         help="Run with an ephemeral in-memory store (no disk persistence)",
     )
 
+    p_worker = sub.add_parser(
+        "worker",
+        help="Run a background-job worker that drains a SQLite job queue",
+    )
+    p_worker.add_argument(
+        "--db",
+        default="~/.nom/jobs.sqlite",
+        help="Path to the SQLite job DB (default: ~/.nom/jobs.sqlite)",
+    )
+    p_worker.add_argument(
+        "--poll-seconds",
+        type=float,
+        default=1.0,
+        help="Sleep between empty polls (default: 1.0)",
+    )
+
+    p_mcp = sub.add_parser(
+        "mcp-serve",
+        help="Run an MCP server over stdio exposing nom.agents tools",
+    )
+    p_mcp.add_argument(
+        "--include",
+        default="nlp,builtin",
+        help=(
+            "Comma-separated tool groups to expose: 'nlp' (NER + sentiment + "
+            "language-detect), 'builtin' (PythonEval, FileRead). Default: both."
+        ),
+    )
+    p_mcp.add_argument(
+        "--file-root",
+        default=".",
+        help="Root directory for the file_read tool (default: cwd)",
+    )
+
     args = parser.parse_args(argv)
 
     if args.cmd == "serve":
@@ -247,8 +281,130 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 0
 
+    if args.cmd == "worker":
+        return _run_worker(db=args.db, poll_seconds=args.poll_seconds)
+
+    if args.cmd == "mcp-serve":
+        return _run_mcp_stdio(include=args.include, file_root=args.file_root)
+
     parser.print_help()
     return 1
+
+
+def _run_worker(*, db: str, poll_seconds: float) -> int:
+    """Drain a SQLite job queue forever. Handlers must be registered
+    by the deploying application; this command is the runtime, not
+    the handler registry."""
+    from nom.jobs import JobWorker, SQLiteJobQueue
+
+    db_path = Path(db).expanduser()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    queue = SQLiteJobQueue(db_path=db_path)
+    worker = JobWorker(
+        queue=queue,
+        handlers={},  # operator extends via Python entry point in v0.4
+        poll_interval_seconds=poll_seconds,
+    )
+    print(
+        f"nom worker: draining {db_path} (poll {poll_seconds}s). Ctrl+C to stop.",
+        file=sys.stderr,
+    )
+    try:
+        worker.run_forever()
+    except KeyboardInterrupt:
+        print("\nnom worker: stopping…", file=sys.stderr)
+    return 0
+
+
+def _run_mcp_stdio(*, include: str, file_root: str) -> int:
+    """Run a stdio MCP server exposing the requested tool groups.
+
+    Used in IDE / desktop-client configs (Claude Desktop, Cursor)
+    to make nom-vn's NLP + safe-action tools available to any MCP
+    client without running a network server.
+    """
+    from nom.agents.tools.builtin import FileReadTool, PythonEvalTool
+    from nom.mcp import MCPServer
+
+    groups = {g.strip() for g in include.split(",") if g.strip()}
+    tools: list[Any] = []
+
+    if "nlp" in groups:
+        # Local construction so the imports stay lazy on hosts that
+        # don't have the agent runtime needed for non-NLP groups.
+        tools.extend(_build_nlp_tools())
+    if "builtin" in groups:
+        tools.append(PythonEvalTool())
+        tools.append(FileReadTool(root=Path(file_root).resolve()))
+
+    server = MCPServer(server_name="nom-vn", tools=tuple(tools))
+    server.serve_stdio()
+    return 0
+
+
+def _build_nlp_tools() -> list[Any]:
+    """Wrap nom.nlp primitives as MCP tools.
+
+    Kept here (not in nom.agents.tools.builtin) because the NLP
+    layer is itself optional and we don't want to leak its imports
+    into the agent-runtime default tool set.
+    """
+    from nom.agents.protocol import ToolError
+    from nom.nlp import LexiconSentimentModel, RegexNERModel, detect_language
+
+    class _NER:
+        name = "vn_extract_entities"
+        description = "Extract VN entities (ORG/DATE/MONEY/...) from text."
+        schema: ClassVar[dict[str, Any]] = {
+            "type": "object",
+            "properties": {"text": {"type": "string"}},
+            "required": ["text"],
+        }
+        _model = RegexNERModel()
+
+        def call(self, args: dict[str, Any]) -> Any:
+            text = args.get("text")
+            if not isinstance(text, str) or not text:
+                raise ToolError("`text` is required")
+            return [
+                {"label": s.label, "text": s.text, "start": s.start, "end": s.end}
+                for s in self._model.tag(text)
+            ]
+
+    class _Sent:
+        name = "vn_sentiment"
+        description = "Classify VN text sentiment (positive/neutral/negative)."
+        schema: ClassVar[dict[str, Any]] = {
+            "type": "object",
+            "properties": {"text": {"type": "string"}},
+            "required": ["text"],
+        }
+        _model = LexiconSentimentModel()
+
+        def call(self, args: dict[str, Any]) -> Any:
+            text = args.get("text")
+            if not isinstance(text, str) or not text:
+                raise ToolError("`text` is required")
+            r = self._model.predict(text)
+            return {"label": r.label.value, "score": r.score}
+
+    class _Lang:
+        name = "detect_language"
+        description = "Detect dominant language code (vi/en/zh/ja/ko/und)."
+        schema: ClassVar[dict[str, Any]] = {
+            "type": "object",
+            "properties": {"text": {"type": "string"}},
+            "required": ["text"],
+        }
+
+        def call(self, args: dict[str, Any]) -> Any:
+            text = args.get("text")
+            if not isinstance(text, str) or not text:
+                raise ToolError("`text` is required")
+            d = detect_language(text)
+            return {"language": d.code, "confidence": d.confidence}
+
+    return [_NER(), _Sent(), _Lang()]
 
 
 if __name__ == "__main__":

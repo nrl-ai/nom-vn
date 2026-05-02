@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { api } from "./client";
-import type { DiacriticBackend, Material, NoisePreset, Space, WordFmt } from "./types";
+import type { DiacriticBackend, Material, Space, WordFmt } from "./types";
 
 const keys = {
   spaces: () => ["spaces"] as const,
@@ -157,17 +157,16 @@ export function useDetect() {
   return useMutation({ mutationFn: (text: string) => api.tools.detect(text) });
 }
 
-export function useNoiseApply() {
-  return useMutation({
-    mutationFn: (vars: { text: string; preset: NoisePreset; seed: number }) =>
-      api.tools.noiseApply(vars.text, vars.preset, vars.seed),
-  });
+export function useNERTag() {
+  return useMutation({ mutationFn: (text: string) => api.tools.nerTag(text) });
 }
 
-export function useNoisePresets() {
-  return useQuery({
-    queryKey: ["tools", "noise-presets"],
-    queryFn: api.tools.noisePresets,
-    staleTime: Infinity,
+export function useSentiment() {
+  return useMutation({ mutationFn: (text: string) => api.tools.sentiment(text) });
+}
+
+export function useDetectLanguage() {
+  return useMutation({
+    mutationFn: (text: string) => api.tools.detectLanguage(text),
   });
 }

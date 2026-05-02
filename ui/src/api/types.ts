@@ -119,23 +119,28 @@ export interface DetectRes {
   reason: string;
 }
 
-export type NoisePreset =
-  | "light"
-  | "heavy"
-  | "telex_typo"
-  | "telex_grammar"
-  | "mobile"
-  | "ocr_realistic"
-  | "comprehensive";
-
-export interface NoisePresetInfo {
-  id: NoisePreset;
+// NLP analysis (NER / sentiment / language detection)
+export interface NERSpan {
+  start: number;
+  end: number;
   label: string;
+  text: string;
+  confidence: number;
 }
 
-export interface NoiseApplyRes {
+export interface NERRes {
   input: string;
-  noisy: string;
-  preset: NoisePreset;
-  seed: number;
+  spans: NERSpan[];
+}
+
+export interface SentimentRes {
+  input: string;
+  label: "negative" | "neutral" | "positive";
+  score: number;
+}
+
+export interface LanguageRes {
+  input: string;
+  language: string;
+  confidence: number;
 }

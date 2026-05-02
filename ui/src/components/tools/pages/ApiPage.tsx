@@ -67,9 +67,15 @@ export function ApiPage() {
   const curlDetect = `curl -s -X POST ${base}/api/tools/text/detect \\
   -H 'content-type: application/json' \\
   -d '{"text":"Hop dong so 02"}'`;
-  const curlNoise = `curl -s -X POST ${base}/api/tools/noise/apply \\
+  const curlNer = `curl -s -X POST ${base}/api/tools/nlp/ner \\
   -H 'content-type: application/json' \\
-  -d '{"text":"Tôi yêu Việt Nam","preset":"light","seed":42}'`;
+  -d '{"text":"VCB ký hợp đồng 1.500.000 VND ngày 02/05/2026."}'`;
+  const curlSentiment = `curl -s -X POST ${base}/api/tools/nlp/sentiment \\
+  -H 'content-type: application/json' \\
+  -d '{"text":"Sản phẩm này rất tuyệt vời, tôi rất hài lòng."}'`;
+  const curlLang = `curl -s -X POST ${base}/api/tools/nlp/language \\
+  -H 'content-type: application/json' \\
+  -d '{"text":"Đây là một câu tiếng Việt."}'`;
   const curlAsk = `curl -s -X POST ${base}/api/spaces/<SPACE_ID>/ask \\
   -H 'content-type: application/json' \\
   -d '{"question":"Hợp đồng có giá bao nhiêu?","top_k":5}'`;
@@ -306,9 +312,19 @@ export function ApiPage() {
             curl={curlDetect}
           />
           <CurlExample
-            title="Sinh nhiễu"
-            description="(văn bản, kiểu, seed) → văn bản nhiễu, có thể tái hiện"
-            curl={curlNoise}
+            title="Trích xuất thực thể (NER)"
+            description="phát hiện ngày, tiền tệ, tổ chức từ văn bản tiếng Việt"
+            curl={curlNer}
+          />
+          <CurlExample
+            title="Phân tích cảm xúc"
+            description="tích cực / trung tính / tiêu cực kèm điểm tin cậy"
+            curl={curlSentiment}
+          />
+          <CurlExample
+            title="Nhận diện ngôn ngữ"
+            description="VN / EN / ZH / JA / KO + độ tự tin"
+            curl={curlLang}
           />
         </div>
       </Panel>

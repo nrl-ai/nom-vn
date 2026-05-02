@@ -4,8 +4,8 @@ The chat app exposes RAG-over-spaces under ``/api/spaces/*``. The
 ``/api/tools/*`` surface here is independent: each route is a pure
 function over text, with no notion of spaces or materials. The UI uses
 these to power the multi-task Playground (diacritic restore, tokenize,
-normalize, detect, strip, noise) without coupling stateless tools to
-the document store.
+normalize, detect, NER, sentiment, language detection) without
+coupling stateless tools to the document store.
 
 Heavy backends (HF seq2seq for diacritic restore) are lazy and process-
 cached: first call may take ~10-30 s while weights download, subsequent
@@ -217,42 +217,51 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             "reason": reason,
         }
 
-    @app.post("/api/tools/noise/apply")
-    def apply_noise(payload: dict[str, Any]) -> dict[str, Any]:
-        """Apply a calibrated noise preset to clean Vietnamese text.
-
-        Presets: ``light``, ``heavy``, ``telex_typo``, ``telex_grammar``,
-        ``mobile``, ``ocr_realistic``, ``comprehensive``. Each is a pure
-        function of (text, preset, seed) — same inputs, same output.
-        """
+    # NLP analysis: NER + sentiment + language detection. These three
+    # cover the canonical "what's in this text" primitives every UI
+    # asks for. Power users compose them via nom.agents (one tool
+    # per modality).
+    @app.post("/api/tools/nlp/ner")
+    def nlp_ner(payload: dict[str, Any]) -> dict[str, Any]:
         text = str(payload.get("text", ""))
-        preset = str(payload.get("preset", "light")).lower()
-        seed = int(payload.get("seed", 42))
         if not text:
             raise HTTPException(status_code=422, detail="`text` is required")
-        from nom.text import noise as noise_mod
+        from nom.nlp import RegexNERModel
 
-        presets: dict[str, Any] = {
-            "light": noise_mod.light_noise,
-            "heavy": noise_mod.heavy_noise,
-            "telex_typo": noise_mod.telex_typo_noise,
-            "telex_grammar": noise_mod.telex_grammar_noise,
-            "mobile": noise_mod.mobile_noise,
-            "ocr_realistic": noise_mod.ocr_realistic_noise,
-            "comprehensive": noise_mod.comprehensive_noise,
-        }
-        if preset not in presets:
-            raise HTTPException(
-                status_code=422,
-                detail=f"unknown preset {preset!r}; expected one of {sorted(presets)}",
-            )
-        gen = noise_mod.NoiseGenerator(presets[preset](), seed=seed)
+        spans = RegexNERModel().tag(text)
         return {
             "input": text,
-            "noisy": gen.noisify(text),
-            "preset": preset,
-            "seed": seed,
+            "spans": [
+                {
+                    "start": s.start,
+                    "end": s.end,
+                    "label": s.label,
+                    "text": s.text,
+                    "confidence": s.confidence,
+                }
+                for s in spans
+            ],
         }
+
+    @app.post("/api/tools/nlp/sentiment")
+    def nlp_sentiment(payload: dict[str, Any]) -> dict[str, Any]:
+        text = str(payload.get("text", ""))
+        if not text:
+            raise HTTPException(status_code=422, detail="`text` is required")
+        from nom.nlp import LexiconSentimentModel
+
+        result = LexiconSentimentModel().predict(text)
+        return {"input": text, "label": result.label.value, "score": result.score}
+
+    @app.post("/api/tools/nlp/language")
+    def nlp_language(payload: dict[str, Any]) -> dict[str, Any]:
+        text = str(payload.get("text", ""))
+        if not text:
+            raise HTTPException(status_code=422, detail="`text` is required")
+        from nom.nlp import detect_language
+
+        d = detect_language(text)
+        return {"input": text, "language": d.code, "confidence": d.confidence}
 
     @app.get("/api/tools/diacritic/models")
     def list_diacritic_models() -> dict[str, Any]:
@@ -290,19 +299,4 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
                 },
             ],
             "presets": ["rule", "hf", "llm"],
-        }
-
-    @app.get("/api/tools/noise/presets")
-    def list_noise_presets() -> dict[str, Any]:
-        """Names + one-line descriptions of every noise preset."""
-        return {
-            "presets": [
-                {"id": "light", "label": "Light typing (~5% edit)"},
-                {"id": "heavy", "label": "Heavy / mid-quality OCR (~15-20%)"},
-                {"id": "telex_typo", "label": "Telex / VNI surface errors"},
-                {"id": "telex_grammar", "label": "Telex keystroke errors"},
-                {"id": "mobile", "label": "Mobile thumbs + slang"},
-                {"id": "ocr_realistic", "label": "Scanned-document OCR"},
-                {"id": "comprehensive", "label": "Mix of every dimension"},
-            ],
         }

@@ -7,12 +7,12 @@ import type {
   DiacriticBackend,
   DiacriticModelsRes,
   DiacriticRestoreRes,
+  LanguageRes,
   Material,
-  NoiseApplyRes,
-  NoisePreset,
-  NoisePresetInfo,
+  NERRes,
   NormalizeRes,
   SentenceTokenizeRes,
+  SentimentRes,
   Space,
   StripRes,
   WordFmt,
@@ -174,11 +174,20 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ text }),
       }),
-    noiseApply: (text: string, preset: NoisePreset, seed: number) =>
-      request<NoiseApplyRes>("/api/tools/noise/apply", {
+    nerTag: (text: string) =>
+      request<NERRes>("/api/tools/nlp/ner", {
         method: "POST",
-        body: JSON.stringify({ text, preset, seed }),
+        body: JSON.stringify({ text }),
       }),
-    noisePresets: () => request<{ presets: NoisePresetInfo[] }>("/api/tools/noise/presets"),
+    sentiment: (text: string) =>
+      request<SentimentRes>("/api/tools/nlp/sentiment", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      }),
+    detectLanguage: (text: string) =>
+      request<LanguageRes>("/api/tools/nlp/language", {
+        method: "POST",
+        body: JSON.stringify({ text }),
+      }),
   },
 };
