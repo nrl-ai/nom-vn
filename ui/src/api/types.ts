@@ -201,3 +201,56 @@ export interface TranslateFileRes {
   filename: string;
   stats: TranslateFileStats;
 }
+
+// Models tab — Ollama tag listing + HF cache + async pulls.
+export interface OllamaModelInfo {
+  name: string;
+  size_bytes: number;
+  modified_at: string | null;
+  digest: string | null;
+}
+
+export interface HFCacheEntry {
+  repo_id: string;
+  repo_type: string;
+  size_bytes: number;
+  last_accessed: number;
+  n_revisions: number;
+}
+
+export interface CuratedModel {
+  id: string;
+  label: string;
+  tier: "light" | "standard" | "power";
+  size_gb: number;
+  needs_ram_gb: number;
+  use_cases: string[];
+  license: string;
+}
+
+export interface ModelsListRes {
+  ollama: {
+    url: string;
+    reachable: boolean;
+    models: OllamaModelInfo[];
+  };
+  hf_cache: HFCacheEntry[];
+  catalog: CuratedModel[];
+}
+
+export interface PullState {
+  pull_id: string;
+  source: string;
+  model: string;
+  status: "pending" | "downloading" | "success" | "error" | "cancelled";
+  downloaded_bytes: number;
+  total_bytes: number;
+  progress: number;
+  error: string | null;
+  started_at: number;
+  completed_at: number | null;
+}
+
+export interface PullsListRes {
+  pulls: PullState[];
+}

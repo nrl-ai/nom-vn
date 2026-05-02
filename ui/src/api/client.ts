@@ -9,8 +9,11 @@ import type {
   DiacriticRestoreRes,
   LanguageRes,
   Material,
+  ModelsListRes,
   NERRes,
   NormalizeRes,
+  PullsListRes,
+  PullState,
   SentenceTokenizeRes,
   SentimentRes,
   Space,
@@ -268,5 +271,29 @@ export const api = {
       const filename = match ? match[1] : `translated.${target}.docx`;
       return { blob, filename, stats };
     },
+  },
+  models: {
+    list: () => request<ModelsListRes>("/api/models"),
+    pulls: () => request<PullsListRes>("/api/models/pulls"),
+    pull: (model: string) =>
+      request<{ pull_id: string; model: string; status: string }>("/api/models/pull", {
+        method: "POST",
+        body: JSON.stringify({ source: "ollama", model }),
+      }),
+    pullBatch: (models: string[]) =>
+      request<{
+        results: Array<{ model: string; status: string; pull_id?: string; error?: string }>;
+      }>("/api/models/pull/batch", {
+        method: "POST",
+        body: JSON.stringify({ models }),
+      }),
+    cancelPull: (pullId: string) =>
+      request<PullState>(`/api/models/pull/${encodeURIComponent(pullId)}/cancel`, {
+        method: "POST",
+      }),
+    deleteOllama: (model: string) =>
+      request<{ deleted: string }>(`/api/models/ollama/${encodeURIComponent(model)}`, {
+        method: "DELETE",
+      }),
   },
 };

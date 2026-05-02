@@ -3,6 +3,8 @@ import { api } from "./client";
 import type {
   DiacriticBackend,
   Material,
+  ModelsListRes,
+  PullsListRes,
   Space,
   TranslateBackend,
   TranslateLang,
@@ -219,5 +221,54 @@ export function useAgents() {
     queryKey: ["agents"],
     queryFn: () => Promise.resolve({ agents: [] as Array<{ name: string; type: string }> }),
     staleTime: Infinity,
+  });
+}
+
+// Models tab — installed list + pull progress.
+export function useModelsList(): UseQueryResult<ModelsListRes> {
+  return useQuery({
+    queryKey: ["models"],
+    queryFn: api.models.list,
+    staleTime: 30_000,
+  });
+}
+
+export function useModelPulls(): UseQueryResult<PullsListRes> {
+  return useQuery({
+    queryKey: ["models", "pulls"],
+    queryFn: api.models.pulls,
+    refetchInterval: 1500, // poll while a pull may be in flight
+  });
+}
+
+export function useStartPull() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (model: string) => api.models.pull(model),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["models", "pulls"] }),
+  });
+}
+
+export function useStartPullBatch() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (models: string[]) => api.models.pullBatch(models),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["models", "pulls"] }),
+  });
+}
+
+export function useCancelPull() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (pullId: string) => api.models.cancelPull(pullId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["models", "pulls"] }),
+  });
+}
+
+export function useDeleteModel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (model: string) => api.models.deleteOllama(model),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["models"] }),
   });
 }

@@ -1,5 +1,6 @@
 import {
   Bot,
+  Building2,
   Code2,
   Eraser,
   Languages,
@@ -24,6 +25,7 @@ export type TaskKey =
   | "translate"
   | "agents"
   | "compliance"
+  | "admin"
   | "api"
   | "settings";
 
@@ -91,6 +93,13 @@ export const TASKS: TaskMeta[] = [
     blurb: "Luật 134/2025 — phân loại 3 mức",
     icon: ShieldCheck,
     category: "rag",
+  },
+  {
+    key: "admin",
+    label: "Quản trị doanh nghiệp",
+    blurb: "Giấy phép, người dùng, audit — bản EE",
+    icon: Building2,
+    category: "dev",
   },
   {
     key: "api",
