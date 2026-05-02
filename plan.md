@@ -4,23 +4,53 @@
 
 ## What's shipped right now (verifiable)
 
-- **`nom.platform`** — Protocol seams: Authenticator, RBAC, PIIDetector,
-  Redactor, AuditForwarder. Default OSS impls. License helper. Plugin
-  discovery via entry points. ContextVar user propagation. **52 OSS
-  unit tests + 5 chat-integration tests passing.**
-- **`nom.chat.server`** refactored — env-driven authenticator (bearer or
-  any registered plugin); existing constant-time auth contract preserved.
-- **`nom-vn-enterprise`** repo created at sibling path
-  `../nom-vn-enterprise/`. Commercial LICENSE, pyproject with 5 entry-point
-  groups registered.
-  - `nom_ee.auth.oidc.OIDCAuthenticator` — discovery + JWKS + JWT verify; license-gated.
-  - `nom_ee.rbac.multi_tenant.MultiTenantRBAC` — SQLite tenant/user/role.
-  - `nom_ee.privacy.vn_advanced.VNAdvancedPIIDetector` — VN proper-name + address heuristics on top of OSS regex.
-  - `nom_ee.privacy.tokenize.TokenizeRedactor` — round-trippable, per-tenant secret.
-  - `nom_ee.audit_forward.otel_forwarder.OTelAuditForwarder` — OTLP log shipper.
-  - License gate scaffolding (`nom_ee.license`).
-  - **46 EE tests passing** including end-to-end plugin-discovery proof.
-- Both repos uncommitted; awaiting user approval before `git init` + push.
+**nom-vn (OSS) — 650 tests passing.** Recent commits:
+
+- `nom.platform` — Protocol seams: Authenticator, RBAC, PIIDetector,
+  Redactor, AuditForwarder. Default OSS impls. HMAC-signed offline
+  license helper. Plugin discovery via entry points. ContextVar user
+  propagation. `chat.server` consumes Authenticator Protocol;
+  constant-time bearer contract preserved. Commit `655d240`.
+- `nom.agents` — typed multi-agent runtime, 6 Anthropic patterns
+  (Single, Chain, Route, Parallel, Voting, OrchestratorWorkers,
+  EvaluatorOptimizer). JSON action protocol; AuditedLLM is the trunk.
+  Built-in tools: RAGTool (file Q&A), PythonEvalTool (sanitised
+  arithmetic), HTTPGetTool (allow-listed), FileReadTool
+  (path-traversal-blocked). 21 tests. Commit `aacb740`.
+- `nom.mcp` — minimal Model Context Protocol bridge. MCPServer
+  exposes any nom.agents.Tool over JSON-RPC; MCPClient +
+  MCPRemoteTool let nom.agents consume external MCP servers.
+  Stdio + HTTP transports; audit hook per call. End-to-end test
+  proves SingleAgent uses a remote MCP tool transparently. 14 tests.
+- `nom.agents_api` — FastAPI routes. POST /api/agents/{name}/run
+  (sync) and GET /api/agents/{name}/stream (SSE / agent2ui).
+  StreamingTrace queues events from the worker thread; UIs subscribe
+  and render in real time. 6 tests. Both in commit `669de4d`.
+- `nom.jobs` — durable background-job runtime. Job / JobAttempt
+  frozen value types, JobQueue Protocol with InMemory + SQLite impls,
+  JobWorker with exponential backoff retry and audit-chain
+  integration. 25 parametrised tests. Commit `686960a`.
+
+**nom-vn-enterprise (private commercial) — 46 tests passing.** At
+`../nom-vn-enterprise/`, single commit `5bf8c5e`:
+
+- `nom_ee.auth.oidc.OIDCAuthenticator` — discovery + JWKS + JWT
+  verify; license-gated; injectable signing key for offline tests
+- `nom_ee.rbac.multi_tenant.MultiTenantRBAC` — SQLite tenant/user/role,
+  honours claims-borne roles
+- `nom_ee.privacy.vn_advanced.VNAdvancedPIIDetector` — VN
+  proper-name + address heuristics on top of OSS regex
+- `nom_ee.privacy.tokenize.TokenizeRedactor` — round-trippable
+  per-tenant token vault
+- `nom_ee.audit_forward.otel_forwarder.OTelAuditForwarder` — OTLP
+  log shipper
+- License gate (`nom_ee.license`) — HMAC-signed JSON, offline
+  verifiable, cached per-process
+- All five plugins discovered through entry points; OSS imports
+  nothing from `nom_ee`
+
+**Total: 696 tests passing across both repos.** Neither pushed to
+remote — awaiting deployment authorisation.
 
 ## North star
 
