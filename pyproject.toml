@@ -150,8 +150,24 @@ compliance = [
   "cryptography>=42",
   "Jinja2>=3",
 ]
+# Desktop app shell — pywebview window over the in-process FastAPI app,
+# packaged as a single distributable directory by PyInstaller. See
+# desktop/README.md for the build flow and per-OS notes.
+#
+# pywebview (BSD-3) wraps the OS-native webview (WKWebView / WebView2 /
+# WebKitGTK) — no Chromium bundled, ~10× lighter than an Electron shell
+# while keeping the dev stack pure-Python. PyInstaller (GPLv2 with
+# bootloader-runtime exception → unrestricted commercial use of frozen
+# apps; itself never linked into the output binary).
+desktop = [
+  "pywebview>=5.0",
+  "pyinstaller>=6.0",
+  # System-tray + icon support; needed once v0.5 adds tray-resident mode.
+  "pystray>=0.19",
+  "pillow>=10",
+]
 all = [
-  "nom-vn[chat,compliance,diacritics,doc,embeddings,llm,otel]",
+  "nom-vn[chat,compliance,desktop,diacritics,doc,embeddings,llm,otel]",
 ]
 dev = [
   "pytest>=8",
@@ -177,6 +193,7 @@ dev = [
 
 [project.scripts]
 nom = "nom.chat.cli:main"
+nom-app = "nom.desktop.main:main"
 
 [project.urls]
 Homepage = "https://nrl.ai/nom"
@@ -278,5 +295,9 @@ module = [
   "transformers.*",
   "bm25s.*",
   "llama_cpp.*",
+  # Desktop shell deps (pywebview, pystray) — lazy-imported in
+  # nom.desktop.main, not in [dev] extra.
+  "webview.*",
+  "pystray.*",
 ]
 ignore_missing_imports = true
