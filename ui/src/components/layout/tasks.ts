@@ -1,4 +1,13 @@
-import { MessageSquare, Type, Scissors, Sigma, Eraser, Code2, Settings } from "lucide-react";
+import {
+  Code2,
+  Eraser,
+  Languages,
+  MessageSquare,
+  Scissors,
+  Settings,
+  Sigma,
+  Type,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 // NLP analysis (NER / sentiment / language detection) is exposed via
@@ -10,6 +19,7 @@ export type TaskKey =
   | "tokenize"
   | "normalize"
   | "strip"
+  | "translate"
   | "api"
   | "settings";
 
@@ -55,6 +65,13 @@ export const TASKS: TaskMeta[] = [
     label: "Bỏ dấu",
     blurb: "Chuyển sang ASCII",
     icon: Eraser,
+    category: "text",
+  },
+  {
+    key: "translate",
+    label: "Dịch thuật",
+    blurb: "Việt ↔ Anh, giữ nguyên định dạng .docx",
+    icon: Languages,
     category: "text",
   },
   {

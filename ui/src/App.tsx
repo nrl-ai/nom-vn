@@ -10,6 +10,7 @@ import { DiacriticPage } from "@/components/tools/pages/DiacriticPage";
 import { TokenizePage } from "@/components/tools/pages/TokenizePage";
 import { NormalizePage } from "@/components/tools/pages/NormalizePage";
 import { StripPage } from "@/components/tools/pages/StripPage";
+import { TranslatePage } from "@/components/tools/pages/TranslatePage";
 import { ApiPage } from "@/components/tools/pages/ApiPage";
 import { SettingsPage } from "@/components/tools/pages/SettingsPage";
 import { useHealth, useSpaces } from "@/api/queries";
@@ -23,6 +24,7 @@ const TASK_KEYS: ReadonlySet<TaskKey> = new Set([
   "tokenize",
   "normalize",
   "strip",
+  "translate",
   "api",
   "settings",
 ]);
@@ -115,6 +117,9 @@ export default function App() {
       break;
     case "strip":
       centerPane = <StripPage />;
+      break;
+    case "translate":
+      centerPane = <TranslatePage />;
       break;
     case "api":
       centerPane = <ApiPage />;

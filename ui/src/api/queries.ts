@@ -1,6 +1,13 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { api } from "./client";
-import type { DiacriticBackend, Material, Space, WordFmt } from "./types";
+import type {
+  DiacriticBackend,
+  Material,
+  Space,
+  TranslateBackend,
+  TranslateLang,
+  WordFmt,
+} from "./types";
 
 const keys = {
   spaces: () => ["spaces"] as const,
@@ -168,5 +175,37 @@ export function useSentiment() {
 export function useDetectLanguage() {
   return useMutation({
     mutationFn: (text: string) => api.tools.detectLanguage(text),
+  });
+}
+
+export function useTranslateText() {
+  return useMutation({
+    mutationFn: (vars: {
+      text: string;
+      source: TranslateLang;
+      target: TranslateLang;
+      backend: TranslateBackend;
+      modelId?: string;
+    }) => api.tools.translate(vars.text, vars.source, vars.target, vars.backend, vars.modelId),
+  });
+}
+
+export function useTranslateFile() {
+  return useMutation({
+    mutationFn: (vars: {
+      file: File;
+      source: TranslateLang;
+      target: TranslateLang;
+      backend: TranslateBackend;
+      modelId?: string;
+    }) => api.tools.translateFile(vars.file, vars.source, vars.target, vars.backend, vars.modelId),
+  });
+}
+
+export function useTranslateModels() {
+  return useQuery({
+    queryKey: ["tools", "translate-models"],
+    queryFn: api.tools.translateModels,
+    staleTime: Infinity,
   });
 }

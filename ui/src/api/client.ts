@@ -15,6 +15,12 @@ import type {
   SentimentRes,
   Space,
   StripRes,
+  TranslateBackend,
+  TranslateFileRes,
+  TranslateFileStats,
+  TranslateLang,
+  TranslateModelsRes,
+  TranslateRes,
   WordFmt,
   WordTokenizeRes,
 } from "./types";
@@ -189,5 +195,63 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ text }),
       }),
+    translate: (
+      text: string,
+      source: TranslateLang,
+      target: TranslateLang,
+      backend: TranslateBackend = "llm",
+      modelId?: string,
+    ) =>
+      request<TranslateRes>("/api/tools/translate", {
+        method: "POST",
+        body: JSON.stringify({
+          text,
+          source,
+          target,
+          backend,
+          ...(modelId ? { model_id: modelId } : {}),
+        }),
+      }),
+    translateModels: () => request<TranslateModelsRes>("/api/tools/translate/models"),
+    translateFile: async (
+      file: File,
+      source: TranslateLang,
+      target: TranslateLang,
+      backend: TranslateBackend = "llm",
+      modelId?: string,
+    ): Promise<TranslateFileRes> => {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("source", source);
+      fd.append("target", target);
+      fd.append("backend", backend);
+      if (modelId) fd.append("model_id", modelId);
+      const token = getAuthToken();
+      const res = await fetch("/api/tools/translate/file", {
+        method: "POST",
+        body: fd,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let detail = text;
+        try {
+          const parsed = JSON.parse(text);
+          if (parsed && typeof parsed.detail === "string") detail = parsed.detail;
+        } catch {
+          // raw text
+        }
+        throw new ApiError(res.status, detail);
+      }
+      const blob = await res.blob();
+      const stats = JSON.parse(
+        res.headers.get("X-Translation-Stats") ?? "{}",
+      ) as TranslateFileStats;
+      // Pull filename from Content-Disposition: attachment; filename="..."
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const match = /filename="?([^";]+)"?/i.exec(cd);
+      const filename = match ? match[1] : `translated.${target}.docx`;
+      return { blob, filename, stats };
+    },
   },
 };

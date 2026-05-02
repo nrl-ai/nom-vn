@@ -144,3 +144,60 @@ export interface LanguageRes {
   language: string;
   confidence: number;
 }
+
+// Translation — single string + file upload. Mirrors
+// /api/tools/translate and /api/tools/translate/file in
+// src/nom/chat/tools_api.py.
+export type TranslateLang = "en" | "vi";
+export type TranslateBackend = "llm" | "hf";
+
+export interface TranslateReq {
+  text: string;
+  source: TranslateLang;
+  target: TranslateLang;
+  backend?: TranslateBackend;
+  model_id?: string;
+}
+
+export interface TranslateRes {
+  input: string;
+  translation: string;
+  source: TranslateLang;
+  target: TranslateLang;
+  backend: TranslateBackend;
+  model_id: string | null;
+}
+
+export interface TranslateModelInfo {
+  id: string;
+  label: string;
+  tier: "accuracy" | "fast" | "specialist" | "general";
+  params_m?: number;
+  license: string;
+  notes?: string;
+}
+
+export interface TranslateModelsRes {
+  default_backend: TranslateBackend;
+  directions: string[];
+  backends: TranslateModelInfo[];
+  hf_models: TranslateModelInfo[];
+}
+
+export interface TranslateFileStats {
+  paragraphs_translated: number;
+  paragraphs_skipped: number;
+  paragraphs_failed: number;
+  chars_in: number;
+  chars_out: number;
+  source: TranslateLang;
+  target: TranslateLang;
+  backend: TranslateBackend;
+  model_id: string | null;
+}
+
+export interface TranslateFileRes {
+  blob: Blob;
+  filename: string;
+  stats: TranslateFileStats;
+}
