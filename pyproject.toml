@@ -189,6 +189,12 @@ dev = [
   "fastapi>=0.115",
   "uvicorn[standard]>=0.32",
   "python-multipart>=0.0.9",
+  # Compliance dossier rendering — needed by tests/test_compliance_*.py
+  # which import nom.compliance.dossier (templated via Jinja2).
+  "Jinja2>=3",
+  "cryptography>=42",
+  # PDF text-layer testing fixtures.
+  "reportlab>=4",
 ]
 
 [project.scripts]
@@ -300,5 +306,12 @@ module = [
   # nom.desktop.main, not in [dev] extra.
   "webview.*",
   "pystray.*",
+  # Compliance dossier templating + HF cache scanner — lazy-imported,
+  # not in [dev] extra.
+  "jinja2.*",
+  "huggingface_hub.*",
+  # EE admin module — only present when nom-vn-enterprise is installed
+  # alongside the OSS package.
+  "nom_ee.*",
 ]
 ignore_missing_imports = true
