@@ -79,10 +79,10 @@ export function DiacriticPage() {
             label="Backend"
             hint={
               backend === "rule"
-                ? "Bảng tra cứu, ~5 ms · không cần model"
+                ? "Bảng tra cứu ~250 từ phổ biến · độ chính xác ~41 % · ~5 ms · không cần model"
                 : backend === "hf"
-                  ? "HF seq2seq, lần đầu mất 10–30s tải model"
-                  : "Dùng LLM (qwen3:8b…) cấu hình trên server"
+                  ? "HF seq2seq · độ chính xác ~97–98 % · lần đầu mất 10–30 giây tải model"
+                  : "LLM (qwen3:8b…) · độ chính xác ~87–95 % tuỳ model · cấu hình ở phía máy chủ"
             }
           >
             <Segmented<DiacriticBackend>
@@ -96,7 +96,7 @@ export function DiacriticPage() {
             />
           </OptionRow>
           {backend === "hf" && (
-            <OptionRow label="HF model" hint="safetensors · Apache 2.0">
+            <OptionRow label="Model HF" hint="safetensors · Apache 2.0">
               <Select
                 value={modelId}
                 onChange={setModelId}
@@ -109,9 +109,10 @@ export function DiacriticPage() {
               />
             </OptionRow>
           )}
-          <OptionRow label="Note">
+          <OptionRow label="Lưu ý">
             <p className="text-[11.5px] leading-snug text-ink-soft">
-              Chỉ truyền văn bản đã bị mất dấu (hoặc một phần). Các từ đã có dấu sẽ giữ nguyên.
+              Chỉ truyền văn bản đã bị mất dấu (hoặc mất một phần). Các từ đã có dấu sẽ được giữ
+              nguyên.
             </p>
           </OptionRow>
         </>
@@ -121,7 +122,7 @@ export function DiacriticPage() {
           <span className="font-mono text-[11px] text-ink-mute">
             {result
               ? `Backend: ${result.backend}${result.model_id ? ` · ${result.model_id}` : ""}`
-              : "Cmd/Ctrl + Enter to run"}
+              : "Bấm ⌘/Ctrl + Enter để chạy"}
           </span>
           <Button
             variant="accent"

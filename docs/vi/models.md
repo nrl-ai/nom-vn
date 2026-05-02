@@ -7,17 +7,17 @@ Tác giả chính: Viet-Anh Nguyen ([vietanh@nrl.ai](mailto:vietanh@nrl.ai))
 
 ## Khôi phục dấu
 
-| Mô hình | Base | Tham số | Dung lượng | In-dist (4 register) | OOD (n=150) |
+| Mô hình | Base | Tham số | Dung lượng | In-dist (4 ngữ vực) | OOD (n=150) |
 |---|---|---:|---:|---:|---:|
 | [`nrl-ai/vn-diacritic-vit5-base`](https://huggingface.co/nrl-ai/vn-diacritic-vit5-base) v0.2.29 | ViT5-base (MIT) | 220 M | 900 MB | **94.95 %** | 71.15 % |
 | [`nrl-ai/vn-diacritic-small`](https://huggingface.co/nrl-ai/vn-diacritic-small) v0.2.28 | BARTpho-syllable (MIT) | 115 M | 530 MB | 90.74 % | 70.27 % |
 
 * `vn-diacritic-vit5-base` là mô hình mặc định cho production.
 * `vn-diacritic-small` chạy ~3× nhanh hơn trên cùng phần cứng,
-  đánh đổi ~3-4 pp word accuracy. Phù hợp cho mobile / browser
+  đánh đổi ~3-4 pp độ chính xác từ. Phù hợp cho mobile / browser
   inference khi đã quantize int8.
 
-Chi tiết kỹ thuật + kết quả trên 4 register: [Khôi phục dấu](/tasks/diacritic-restoration).
+Chi tiết kỹ thuật + kết quả trên 4 ngữ vực: [Khôi phục dấu](/tasks/diacritic-restoration).
 
 ## Sửa chính tả
 
@@ -47,9 +47,9 @@ Chi tiết: [Sửa chính tả](/tasks/spell-correction).
 | Dataset | Mục đích | Bản ghi |
 |---|---|---:|
 | [`nrl-ai/vn-diacritic-train`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-train) | Train khôi phục dấu (Wiki+news, NFC) | 500 K cặp |
-| [`nrl-ai/vn-diacritic-eval`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-eval) | Eval 4 register | 1,227 câu |
-| [`nrl-ai/vn-spell-correction-train`](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-train) | Train sửa chính tả (3 noise preset round-robin) | 459 K cặp |
-| [`nrl-ai/vn-spell-correction-eval`](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-eval) | Eval 8 split (4 register × 2 noise level) | 2,098 cặp |
+| [`nrl-ai/vn-diacritic-eval`](https://huggingface.co/datasets/nrl-ai/vn-diacritic-eval) | Eval 4 ngữ vực | 1,227 câu |
+| [`nrl-ai/vn-spell-correction-train`](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-train) | Train sửa chính tả (3 kiểu nhiễu vòng tròn) | 459 K cặp |
+| [`nrl-ai/vn-spell-correction-eval`](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-eval) | Eval 8 split (4 ngữ vực × 2 mức nhiễu) | 2,098 cặp |
 
 ## Trích dẫn
 

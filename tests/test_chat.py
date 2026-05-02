@@ -179,6 +179,55 @@ class TestAsk:
         r = client.post(f"/api/spaces/{sid}/ask", json={"question": "   "})
         assert r.status_code == 400
 
+    def test_health_reports_auth_required(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("NOM_AUTH_TOKEN", "secret-xyz")
+        store = MemoryStore(embedder=_FakeEmbedder(), llm=_FakeLLM())
+        c = TestClient(build_app(store=store))
+        r = c.get("/api/health")
+        assert r.status_code == 200
+        assert r.json()["auth_required"] is True
+
+    def test_auth_token_blocks_unauthorized_requests(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("NOM_AUTH_TOKEN", "secret-xyz")
+        store = MemoryStore(embedder=_FakeEmbedder(), llm=_FakeLLM())
+        c = TestClient(build_app(store=store))
+        # /api/health stays open so the UI can detect the gated state.
+        assert c.get("/api/health").status_code == 200
+        # Other endpoints require the bearer token.
+        assert c.get("/api/spaces").status_code == 401
+        assert c.get("/api/spaces", headers={"Authorization": "Bearer wrong"}).status_code == 401
+        ok = c.get("/api/spaces", headers={"Authorization": "Bearer secret-xyz"})
+        assert ok.status_code == 200
+
+    def test_ask_translates_ollama_404_into_503_with_hint(self) -> None:
+        """When the upstream LLM returns 404 (model not pulled), we surface
+        a clean 503 with an actionable hint — not a 500 stack trace."""
+
+        class _ExplodingLLM:
+            name = "exploding"
+
+            def complete(self, prompt: str, **_: Any) -> str:
+                # Mimic httpx.HTTPStatusError by class name + message shape;
+                # the helper detects both. Real Ollama 404 looks like:
+                # "Client error '404 Not Found' for url 'http://localhost:11434/api/chat'"
+                err = type("HTTPStatusError", (Exception,), {})(
+                    "Client error '404 Not Found' for url 'http://localhost:11434/api/chat'"
+                )
+                raise err
+
+        store = MemoryStore(embedder=_FakeEmbedder(), llm=_ExplodingLLM())
+        app = build_app(store=store)
+        c = TestClient(app, raise_server_exceptions=False)
+        sid = c.post("/api/spaces", json={"name": "x"}).json()["id"]
+        c.post(
+            f"/api/spaces/{sid}/materials",
+            files={"file": ("d.txt", b"some content", "text/plain")},
+        )
+        r = c.post(f"/api/spaces/{sid}/ask", json={"question": "anything"})
+        assert r.status_code == 503, r.text
+        body = r.json()
+        assert "ollama pull" in body["detail"].lower()
+
 
 # ---------------------------------------------------------------------------
 # MemoryStore — directly tested too

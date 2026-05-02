@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from nom.llm import Anthropic, Ollama, OpenAI
+from nom.llm import Anthropic, LlamaCpp, Ollama, OpenAI
 
 
 class TestOllamaAdapter:
@@ -315,15 +315,90 @@ class TestAnthropicAdapter:
             llm.complete("Hi")
 
 
+class TestLlamaCppAdapter:
+    """LlamaCpp adapter — wraps llama-server's OpenAI-compatible HTTP API."""
+
+    def _patch(self, content: str) -> MagicMock:
+        fake_response = MagicMock()
+        fake_response.json.return_value = {
+            "choices": [{"message": {"role": "assistant", "content": content}}]
+        }
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        return fake_httpx
+
+    def test_construct_default(self) -> None:
+        llm = LlamaCpp()
+        assert llm.name == "llamacpp"
+        assert llm.model == "llamacpp"
+        assert llm.base_url == "http://127.0.0.1:8080/v1"
+
+    def test_env_var_overrides_url(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setenv("NOM_LLAMACPP_URL", "http://gpu:9000/v1")
+        llm = LlamaCpp()
+        assert llm.base_url == "http://gpu:9000/v1"
+
+    def test_complete_returns_choice_content(self) -> None:
+        llm = LlamaCpp()
+        llm._httpx = self._patch("Hợp đồng đã ký.")  # type: ignore[assignment]
+        assert llm.complete("Câu trả lời?") == "Hợp đồng đã ký."
+
+    def test_no_authorization_header(self) -> None:
+        """llama-server doesn't validate bearer tokens — we don't send one."""
+        llm = LlamaCpp()
+        fake = self._patch("ok")
+        llm._httpx = fake  # type: ignore[assignment]
+        llm.complete("Hi")
+        # The call should NOT include a headers kwarg with an Authorization key.
+        kwargs = fake.post.call_args.kwargs
+        if "headers" in kwargs:
+            assert "Authorization" not in kwargs["headers"]
+
+    def test_schema_passes_response_format(self) -> None:
+        llm = LlamaCpp()
+        fake = self._patch('{"x":1}')
+        llm._httpx = fake  # type: ignore[assignment]
+        schema = {"type": "object", "properties": {"x": {"type": "integer"}}}
+        llm.complete("Extract:", schema=schema)
+        body = fake.post.call_args.kwargs["json"]
+        assert body["response_format"]["type"] == "json_schema"
+        assert body["response_format"]["json_schema"]["schema"] == schema
+
+    def test_connect_error_translated_to_helpful_runtime_error(self) -> None:
+        llm = LlamaCpp()
+
+        class FakeConnectError(Exception):
+            pass
+
+        FakeConnectError.__name__ = "ConnectError"
+        fake_httpx = MagicMock()
+        fake_httpx.post.side_effect = FakeConnectError("Connection refused")
+        llm._httpx = fake_httpx  # type: ignore[assignment]
+        with pytest.raises(RuntimeError, match=r"llama-server"):
+            llm.complete("Hi")
+
+    def test_unexpected_shape_raises(self) -> None:
+        llm = LlamaCpp()
+        fake_response = MagicMock()
+        fake_response.json.return_value = {"choices": []}
+        fake_response.raise_for_status.return_value = None
+        fake_httpx = MagicMock()
+        fake_httpx.post.return_value = fake_response
+        llm._httpx = fake_httpx  # type: ignore[assignment]
+        with pytest.raises(RuntimeError, match=r"Unexpected llama-server"):
+            llm.complete("Hi")
+
+
 class TestProtocolConformance:
-    """All three real adapters satisfy the LLM Protocol."""
+    """All four real adapters satisfy the LLM Protocol."""
 
     def test_all_adapters_implement_protocol(self, monkeypatch: pytest.MonkeyPatch) -> None:
         from nom.llm import LLM
 
         monkeypatch.setenv("OPENAI_API_KEY", "x")
         monkeypatch.setenv("ANTHROPIC_API_KEY", "x")
-        for llm in (Ollama(), OpenAI(), Anthropic()):
+        for llm in (Ollama(), LlamaCpp(), OpenAI(), Anthropic()):
             assert isinstance(llm, LLM)
             assert isinstance(llm.name, str)
             assert callable(llm.complete)

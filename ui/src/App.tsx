@@ -11,6 +11,8 @@ import { TokenizePage } from "@/components/tools/pages/TokenizePage";
 import { NormalizePage } from "@/components/tools/pages/NormalizePage";
 import { StripPage } from "@/components/tools/pages/StripPage";
 import { NoisePage } from "@/components/tools/pages/NoisePage";
+import { ApiPage } from "@/components/tools/pages/ApiPage";
+import { SettingsPage } from "@/components/tools/pages/SettingsPage";
 import { useHealth, useSpaces } from "@/api/queries";
 
 const ACTIVE_SPACE_KEY = "nom:active-space";
@@ -23,6 +25,8 @@ const TASK_KEYS: ReadonlySet<TaskKey> = new Set([
   "normalize",
   "strip",
   "noise",
+  "api",
+  "settings",
 ]);
 
 function loadTask(): TaskKey {
@@ -117,6 +121,12 @@ export default function App() {
     case "noise":
       centerPane = <NoisePage />;
       break;
+    case "api":
+      centerPane = <ApiPage />;
+      break;
+    case "settings":
+      centerPane = <SettingsPage />;
+      break;
   }
 
   return (
@@ -125,6 +135,8 @@ export default function App() {
         modelName={healthQ.data?.llm ?? undefined}
         mode={isChat ? "chat" : "tool"}
         onHome={() => setActiveTask("chat")}
+        onSettings={() => setActiveTask("settings")}
+        onApi={() => setActiveTask("api")}
         sidebar={
           <Sidebar
             activeTask={activeTask}

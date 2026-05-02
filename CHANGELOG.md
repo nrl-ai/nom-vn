@@ -5,6 +5,76 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.31] — 2026-05-02
+
+### Multi-backend LLM + API & Settings pages
+
+Three new LLM adapters land alongside the existing `Ollama` /
+`OpenAI` / `Anthropic`, so the chat / RAG / LLM-backed diacritic
+restore are no longer Ollama-only:
+
+- **`nom.llm.LlamaCpp`** — wraps `llama-server`'s OpenAI-compatible
+  HTTP API. No fake API key required; helpful error message when the
+  server isn't running. Optional extra `nom-vn[llm]`.
+- **`nom.llm.LlamaCppPython`** — in-process llama.cpp via the
+  `llama-cpp-python` bindings. No daemon. Auto-pulls GGUFs from
+  HuggingFace via `model="hf:<repo>:<filename>"`. Optional extra
+  `nom-vn[llamacpp-python]`.
+- **`nom.llm.HuggingFace`** — in-process HF transformers. Loads any
+  text-generation model from the Hub on first call. Optional extra
+  `nom-vn[llm-hf]`. Schema-constrained output is left to backends
+  that support `response_format`.
+
+CLI gains `--backend ollama|llamacpp|llamacpp-python|huggingface|openai|anthropic`
+(env override `NOM_LLM_BACKEND`). Per-backend defaults for
+`--model` apply when not explicit.
+
+The `/ask` 500 stack-trace from a missing Ollama model now becomes a
+clean **503** with an actionable hint (`ollama pull qwen3:8b` /
+`set NOM_LLM_MODEL=…`). Mirrored in the LLM-backed diacritic restore
+endpoint.
+
+### New playground tool surfaces
+
+- **API & Setup page** — install / launch / curl examples for every
+  endpoint, plus per-backend setup commands (Ollama, llama.cpp,
+  cloud). Linked from the left rail.
+- **Settings page** — server health snapshot, **bearer-token
+  authentication** toggle (server-side `NOM_AUTH_TOKEN`, client-side
+  token store), backend picker with launch-command generator, default
+  `top_k` slider, and a "reset state" action that clears every
+  `nom:*` key from `localStorage`.
+- New `/api/llm/backends` endpoint reports which adapters are
+  importable in the running process so the picker UI can grey out
+  options the user hasn't installed.
+- New `auth_required` field on `/api/health` so the UI can detect
+  the gated state without first being authenticated.
+
+### Tests
+
+- Backend: 18 → 28 cases under `tests/test_llm.py` (LlamaCpp +
+  HuggingFace + LlamaCppPython smoke + protocol conformance for all
+  six adapters); auth gating + 503-translation cases under
+  `tests/test_chat.py`. **398 pytest passes.**
+- UI: Vitest now covers SettingsPage (server health, auth-token
+  save/clear, backend picker, top_k slider) and ApiPage (sections,
+  curl examples, OpenAPI links). **37 vitest passes.**
+- Total: **435 tests, 0 failures.**
+
+### Repo metadata
+
+`gh repo edit`: description updated, homepage set to
+https://nom-vn.nrl.ai/, topics added (`vietnamese`,
+`vietnamese-nlp`, `rag`, `diacritic-restoration`, `ocr`, `llm`,
+`ollama`, `llama-cpp`, `huggingface`, `fastapi`, `local-first`, …).
+
+### Screenshots
+
+`docs/screenshots/` refreshed to reflect the v0.2.30+ playground UI:
+new `01-welcome.png`, `07-playground-diacritic.png`,
+`08-playground-noise.png`. Older office-viewer screenshots
+(04 / 05 / 06) unchanged — those flows haven't moved.
+
 ## [0.2.30] — 2026-05-01
 
 ### Playground UI: multi-task front-end + stateless `/api/tools/*` surface

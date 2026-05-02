@@ -14,8 +14,8 @@ describe("TextInput", () => {
 
   it("shows char + word counts", () => {
     render(<TextInput value="Hợp đồng số 02" onChange={() => {}} />);
-    expect(screen.getByText(/14 chars/)).toBeInTheDocument();
-    expect(screen.getByText(/4 words/)).toBeInTheDocument();
+    expect(screen.getByText(/14 ký tự/)).toBeInTheDocument();
+    expect(screen.getByText(/4 từ/)).toBeInTheDocument();
   });
 
   it("loads a sample when its button is clicked", async () => {
@@ -34,7 +34,7 @@ describe("TextInput", () => {
   it("clear-input button clears the value", async () => {
     const onChange = vi.fn();
     render(<TextInput value="abc" onChange={onChange} />);
-    await userEvent.click(screen.getByLabelText(/clear input/i));
+    await userEvent.click(screen.getByLabelText(/xoá đầu vào/i));
     expect(onChange).toHaveBeenCalledWith("");
   });
 });

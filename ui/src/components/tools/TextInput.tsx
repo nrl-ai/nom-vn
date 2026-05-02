@@ -17,8 +17,8 @@ export function TextInput({ value, onChange, placeholder, rows = 6, samples }: P
   const wordCount = value.trim() ? value.trim().split(/\s+/).length : 0;
   return (
     <Panel
-      label="input"
-      hint={`${charCount} chars · ${wordCount} words`}
+      label="đầu vào"
+      hint={`${charCount} ký tự · ${wordCount} từ`}
       rightSlot={
         <>
           {samples && samples.length > 0 && (
@@ -31,6 +31,7 @@ export function TextInput({ value, onChange, placeholder, rows = 6, samples }: P
                   className="h-7 px-2"
                   onClick={() => onChange(s.text)}
                   title={s.text.slice(0, 80)}
+                  aria-label={`Dùng mẫu ${s.label}`}
                 >
                   <Sparkles size={11} className="text-accent" />
                   {s.label}
@@ -44,7 +45,7 @@ export function TextInput({ value, onChange, placeholder, rows = 6, samples }: P
             className="h-7 px-2"
             disabled={!value}
             onClick={() => onChange("")}
-            aria-label="Clear input"
+            aria-label="Xoá đầu vào"
           >
             <Eraser size={12} />
           </Button>

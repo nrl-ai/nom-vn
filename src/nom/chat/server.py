@@ -75,6 +75,35 @@ def build_app(
         description="Vietnamese document Q&A — local-first, open-source.",
     )
 
+    # Optional bearer-token auth on /api/* — opt-in via NOM_AUTH_TOKEN.
+    # When unset, the API is open (matches the original local-first
+    # behaviour). When set, every /api/* request must include a
+    # `Authorization: Bearer <token>` header that exact-matches the env
+    # value. Static UI assets and the /docs / /redoc surfaces are NOT
+    # gated — the UI needs them to render.
+    import os as _os
+
+    _auth_token = _os.environ.get("NOM_AUTH_TOKEN") or None
+    if _auth_token:
+        from fastapi import Request
+        from fastapi.responses import JSONResponse as AuthJSONResponse
+
+        @app.middleware("http")
+        async def _bearer_auth(request: Request, call_next: Any) -> Any:
+            if not request.url.path.startswith("/api/"):
+                return await call_next(request)
+            # /api/health stays open so the UI can detect the auth state
+            # without being authenticated yet.
+            if request.url.path == "/api/health":
+                return await call_next(request)
+            header = request.headers.get("authorization", "")
+            if header != f"Bearer {_auth_token}":
+                return AuthJSONResponse(
+                    status_code=401,
+                    content={"detail": "Authentication required (Authorization: Bearer …)"},
+                )
+            return await call_next(request)
+
     # OpenTelemetry — opt-in via env vars. No-op when OTEL_* unset or
     # the [otel] extra isn't installed. Wires FastAPI HTTP spans;
     # custom RAG spans are added at the route level if useful later.
@@ -129,6 +158,81 @@ def build_app(
     # Health / version probe — also feeds the UI header
     # ------------------------------------------------------------------
 
+    @app.get("/api/llm/backends")
+    def llm_backends() -> dict[str, Any]:
+        """Probe which LLM backends are importable in this server process.
+
+        Used by the Settings UI to render an availability matrix and to
+        generate the right launch command for the user's environment.
+        Probing is import-time only — it does NOT contact any service or
+        download a model.
+        """
+        import importlib.util as _imp
+
+        def _has(mod: str) -> bool:
+            return _imp.find_spec(mod) is not None
+
+        return {
+            "active": {
+                "name": _safe_attr(getattr(store, "_llm", None), "name"),
+                "class": type(getattr(store, "_llm", None)).__name__
+                if getattr(store, "_llm", None) is not None
+                else None,
+                "model": _safe_attr(getattr(store, "_llm", None), "model")
+                or _safe_attr(getattr(store, "_llm", None), "model_id"),
+            },
+            "available": [
+                {
+                    "id": "ollama",
+                    "label": "Ollama (local daemon)",
+                    "kind": "local-http",
+                    "available": True,  # adapter has no hard import dep beyond httpx
+                    "model_hint": "qwen3:8b · or hf.co/<repo>:<tag> for HF GGUFs",
+                    "needs": [],
+                },
+                {
+                    "id": "llamacpp",
+                    "label": "llama.cpp via llama-server (HTTP)",
+                    "kind": "local-http",
+                    "available": True,
+                    "model_hint": "label only — GGUF chosen by llama-server -m",
+                    "needs": ["llama-server running externally"],
+                },
+                {
+                    "id": "llamacpp-python",
+                    "label": "llama.cpp via llama-cpp-python (in-process)",
+                    "kind": "local-inproc",
+                    "available": _has("llama_cpp"),
+                    "model_hint": "GGUF path · or hf:<repo>:<filename>",
+                    "needs": ['pip install "nom-vn[llamacpp-python]"'],
+                },
+                {
+                    "id": "huggingface",
+                    "label": "HuggingFace transformers (in-process)",
+                    "kind": "local-inproc",
+                    "available": _has("torch") and _has("transformers"),
+                    "model_hint": "<owner>/<repo> on HF Hub",
+                    "needs": ['pip install "nom-vn[llm-hf]"'],
+                },
+                {
+                    "id": "openai",
+                    "label": "OpenAI (or any compatible HTTP)",
+                    "kind": "cloud",
+                    "available": True,
+                    "model_hint": "gpt-4o-mini · OPENAI_API_KEY required",
+                    "needs": ["OPENAI_API_KEY"],
+                },
+                {
+                    "id": "anthropic",
+                    "label": "Anthropic Claude",
+                    "kind": "cloud",
+                    "available": True,
+                    "model_hint": "claude-haiku-4-5-20251001",
+                    "needs": ["ANTHROPIC_API_KEY"],
+                },
+            ],
+        }
+
     @app.get("/api/health")
     def health() -> dict[str, Any]:
         """Lightweight version + capabilities probe.
@@ -153,6 +257,7 @@ def build_app(
             "embedder": _safe_attr(getattr(store, "_embedder", None), "name")
             or "VietnameseEmbedder (lazy)",
             "ocr_available": shutil.which("tesseract") is not None,
+            "auth_required": bool(_auth_token),
         }
 
     # ------------------------------------------------------------------
@@ -292,6 +397,15 @@ def build_app(
             answer = store.ask(space_id, question, top_k=top_k)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except Exception as exc:
+            # Catch httpx.HTTPStatusError (Ollama 404 / connection refused etc.)
+            # and any other LLM transport failure. We don't import httpx at
+            # the top of the file so the chat module stays cheap; recognise
+            # the error class by name + message instead.
+            cls = type(exc).__name__
+            if "HTTPStatusError" in cls or "ConnectError" in cls or "Timeout" in cls:
+                raise _llm_error_to_503(exc) from exc
+            raise
 
         return JSONResponse(
             {
@@ -324,6 +438,44 @@ def _space_to_dict(space: Any) -> dict[str, Any]:
         "created_at": space.created_at,
         "n_materials": len(space.materials),
     }
+
+
+def _llm_error_to_503(exc: BaseException) -> Any:
+    """Translate an LLM transport error into a clean 503 with a hint.
+
+    The Ollama / OpenAI / Anthropic adapters all raise ``httpx.HTTPStatusError``
+    when the upstream returns a non-2xx. The most common case in
+    development is a 404 because the chosen model isn't pulled. Surfacing
+    that as a 500 leaks an httpx stack trace; surfacing it as a generic
+    "LLM call failed" loses the actionable hint. This helper rewrites
+    common-cause errors into a 503 with a concrete remediation step.
+
+    Returns an HTTPException ready to ``raise``.
+    """
+    from fastapi import HTTPException
+
+    msg = str(exc)
+    msg_l = msg.lower()
+    looks_like_ollama = "ollama" in msg_l or "11434" in msg
+    detail: str
+    if "404" in msg and looks_like_ollama:
+        detail = (
+            "LLM model not available on the local Ollama server. "
+            "Pull it first: `ollama pull qwen3:8b` "
+            "(or set NOM_LLM_MODEL to a model you've already pulled)."
+        )
+    elif ("ConnectError" in type(exc).__name__) or ("connection" in msg_l and looks_like_ollama):
+        detail = (
+            "Could not reach the local Ollama server. "
+            "Start it with `ollama serve` in another terminal."
+        )
+    elif "404" in msg or "not found" in msg_l:
+        detail = f"LLM endpoint returned 404 — model not available. Detail: {msg}"
+    elif "ConnectError" in type(exc).__name__:
+        detail = "Could not reach the LLM service."
+    else:
+        detail = f"LLM call failed: {msg}"
+    return HTTPException(status_code=503, detail=detail)
 
 
 def _safe_attr(obj: Any, attr: str) -> Any:

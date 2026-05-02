@@ -3,7 +3,12 @@
 Nôm does NOT bundle a model. Pick one of the included adapters
 (all implement the :class:`LLM` Protocol):
 
-- :class:`Ollama` — local inference (qwen3, sailor2, vistral, …)
+- :class:`LlamaCpp` — local inference via ``llama-server`` (no daemon
+  manager; just a GGUF + a port). First-class adapter for the most
+  flexible local stack.
+- :class:`Ollama` — local inference (qwen3, sailor2, vistral, …) with
+  built-in model management. Easiest if you don't already run
+  llama.cpp.
 - :class:`OpenAI` — OpenAI cloud **and** any OpenAI-compatible
   endpoint via ``base_url=`` (Azure, DeepSeek, OpenRouter, LiteLLM,
   vLLM, Together, Groq, …) — covers ~90% of hosted models without
@@ -34,7 +39,18 @@ SOTA notes (April 2026, see ``docs/sota_vn_2026q2.md`` for citations):
 
 from nom.llm.anthropic import Anthropic
 from nom.llm.base import LLM
+from nom.llm.huggingface import HuggingFace
+from nom.llm.llamacpp import LlamaCpp
+from nom.llm.llamacpp_python import LlamaCppPython
 from nom.llm.ollama import Ollama
 from nom.llm.openai import OpenAI
 
-__all__ = ["LLM", "Anthropic", "Ollama", "OpenAI"]
+__all__ = [
+    "LLM",
+    "Anthropic",
+    "HuggingFace",
+    "LlamaCpp",
+    "LlamaCppPython",
+    "Ollama",
+    "OpenAI",
+]

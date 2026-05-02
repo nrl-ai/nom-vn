@@ -16,6 +16,15 @@ export function useHealth() {
   });
 }
 
+export function useLlmBackends() {
+  return useQuery({
+    queryKey: ["llm-backends"],
+    queryFn: api.llmBackends,
+    staleTime: Infinity, // probe result is import-time only
+    retry: 0,
+  });
+}
+
 export function useSpaces(): UseQueryResult<Space[]> {
   return useQuery({
     queryKey: keys.spaces(),

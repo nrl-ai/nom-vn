@@ -122,22 +122,22 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
             variant="ghost"
             size="sm"
             onClick={() => setShowOptions((v) => !v)}
-            aria-label="Chat options"
+            aria-label="Tuỳ chọn chat"
             className="text-ink-mute hover:text-ink"
           >
             {showOptions ? <X size={12} /> : <SlidersHorizontal size={12} />}
-            <span className="hidden sm:inline">Options</span>
+            <span className="hidden sm:inline">Tuỳ chọn</span>
           </Button>
           {messages.length > 0 && (
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                if (confirm("Clear the conversation history for this space?")) clear();
+                if (confirm("Xoá toàn bộ lịch sử chat của không gian này?")) clear();
               }}
               className="text-ink-mute hover:text-danger"
             >
-              <Trash2 size={12} /> Clear
+              <Trash2 size={12} /> Xoá
             </Button>
           )}
         </div>
@@ -145,7 +145,7 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
       {showOptions && (
         <div className="shrink-0 border-b border-line bg-bg-soft px-4 py-3 lg:px-6">
           <label className="mb-1 block font-mono text-[11px] uppercase tracking-widest text-ink-mute">
-            top_k retrieval
+            top_k truy hồi
           </label>
           <div className="flex items-center gap-3">
             <input
@@ -161,8 +161,8 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
             <span className="w-8 text-right font-mono text-sm text-ink">{topK}</span>
           </div>
           <p className="mt-1 text-[11.5px] leading-snug text-ink-soft">
-            Số chunk được retrieval đưa vào prompt. Tăng → bao quát hơn nhưng chậm, giảm → nhanh
-            nhưng có thể thiếu ngữ cảnh.
+            Số chunk được truy hồi đưa vào prompt. Tăng → bao quát hơn nhưng chậm hơn, giảm → nhanh
+            hơn nhưng có thể thiếu ngữ cảnh.
           </p>
         </div>
       )}
@@ -188,8 +188,8 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
         pending={ask.isPending}
         placeholder={
           hasMaterials
-            ? "Đặt câu hỏi… (Enter để gửi, Shift+Enter xuống dòng)"
-            : "Upload a material to start asking…"
+            ? "Đặt câu hỏi… (Enter để gửi, Shift+Enter để xuống dòng)"
+            : "Tải tài liệu lên để bắt đầu hỏi đáp…"
         }
       />
     </div>
@@ -201,13 +201,15 @@ function NoSpaceState() {
     <div className="flex h-full items-center justify-center px-6">
       <div className="max-w-sm text-center">
         <div className="mb-4 font-serif text-6xl text-accent">喃</div>
-        <h2 className="mb-2 font-display text-2xl font-semibold tracking-tight">Welcome to Nôm</h2>
+        <h2 className="mb-2 font-display text-2xl font-semibold tracking-tight">
+          Chào mừng đến với Nôm
+        </h2>
         <p className="mb-1 text-sm text-ink-soft">
-          Create a <strong>space</strong> on the left, upload a Vietnamese document, then ask
-          questions of it.
+          Tạo một <strong>không gian</strong> ở cột trái, tải tài liệu tiếng Việt lên, rồi đặt câu
+          hỏi.
         </p>
         <p className="mt-4 font-mono text-xs text-ink-mute">
-          local-first · open-source · no data leaves your machine
+          chạy cục bộ · mã nguồn mở · dữ liệu không rời máy của bạn
         </p>
       </div>
     </div>
@@ -225,9 +227,9 @@ function EmptyChatState({
     return (
       <div className="py-16 text-center">
         <Sparkles size={28} className="mx-auto mb-4 text-accent" />
-        <h3 className="mb-1 font-display text-lg font-semibold">No materials yet</h3>
+        <h3 className="mb-1 font-display text-lg font-semibold">Chưa có tài liệu</h3>
         <p className="text-sm text-ink-soft">
-          Upload a PDF, image, or text file in the right panel. Then come back here to ask.
+          Tải lên file PDF, ảnh, hoặc văn bản ở cột phải. Sau đó quay lại đây để hỏi.
         </p>
       </div>
     );
@@ -237,11 +239,9 @@ function EmptyChatState({
       <div className="mb-6 text-center">
         <Sparkles size={24} className="mx-auto mb-3 text-accent" />
         <h3 className="mb-1 font-display text-lg font-semibold tracking-tight">
-          What would you like to know?
+          Bạn muốn biết điều gì?
         </h3>
-        <p className="font-mono text-xs uppercase tracking-widest text-ink-mute">
-          suggested questions
-        </p>
+        <p className="font-mono text-xs uppercase tracking-widest text-ink-mute">câu hỏi gợi ý</p>
       </div>
       <div className="mx-auto flex max-w-md flex-col gap-2">
         {SUGGESTED_VN.map((q) => (

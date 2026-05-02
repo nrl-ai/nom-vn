@@ -14,10 +14,10 @@ export function TaskNav({ active, onSelect }: Props) {
         <span className="section-mark mt-0.5 block">§ tools</span>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
-        {(["rag", "text"] as const).map((cat) => (
+        {(["rag", "text", "dev"] as const).map((cat) => (
           <div key={cat} className="mb-4 last:mb-0">
             <div className="px-2 py-1 font-mono text-[10px] uppercase tracking-widest text-ink-mute">
-              {cat === "rag" ? "documents" : "text tools"}
+              {cat === "rag" ? "documents" : cat === "text" ? "text tools" : "developer"}
             </div>
             <ul className="space-y-0.5">
               {TASKS.filter((t) => t.category === cat).map((t) => (

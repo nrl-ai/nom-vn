@@ -12,7 +12,7 @@ dẫn cộng đồng cho dự án.
 
 1. **Khôi phục dấu** (`nom.text.fix_diacritics`) — `Toi yu Vit Nam`
    → `Tôi yêu Việt Nam`. Mô hình `nrl-ai/vn-diacritic-vit5-base` đạt
-   97.4 % word accuracy trung bình trên 4 register.
+   97.4 % độ chính xác từ trung bình trên 4 ngữ vực.
 2. **Sửa chính tả** (`nrl-ai/vn-spell-correction-*`) — siêu tập của
    khôi phục dấu, cộng thêm sửa lỗi ký tự, gõ Telex, OCR, viết tắt
    teen-code. 98.58 % light · 97.35 % heavy trên 8-split eval grid
@@ -32,7 +32,7 @@ dẫn cộng đồng cho dự án.
   mô hình bên thứ ba.
 * **Riêng tư.** Không gọi cloud API thuê bao mặc định; dữ liệu nhạy
   cảm không rời máy người dùng.
-* **Đa register.** Mọi mô hình được đo trên ít nhất 2 register khác
+* **Đa ngữ vực.** Mọi mô hình được đo trên ít nhất 2 ngữ vực khác
   nhau (kinh doanh + văn học, hoặc in-domain + out-of-domain).
 
 ## Bắt đầu nhanh

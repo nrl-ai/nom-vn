@@ -355,6 +355,43 @@ Hard rule: **HuggingFace cards are English.** When publishing to
 Citation block (BibTeX, author names) is English. Quoted Vietnamese
 example sentences inside the card are fine and welcome.
 
+### Don't mix English into Vietnamese prose unless the term is established
+
+Vietnamese tech writing is the default voice on Vietnamese-facing
+surfaces (the website at `nom-vn.nrl.ai`, `README.vi.md`, the
+React UI's Vietnamese strings, Vietnamese subsections of
+`docs/`). Inside that voice, only mix English when the term is
+established Vietnamese tech vocabulary OR when the Vietnamese
+translation would be ambiguous / lossy.
+
+**Allowed without translation** (because they read as native VN
+tech vocabulary): `API`, `URL`, `JSON`, `HTTP`, `model`, `server`,
+`client`, `file`, `LLM`, `RAG`, `OCR`, `GGUF`, `GitHub`,
+`HuggingFace`, `Ollama`, `llama.cpp`, `localStorage`, `token`,
+`backend`, `embedding`, `tokenizer`, `dataset`, `chunk`, plus
+identifiers (model IDs, env-var names, code symbols, paths).
+
+**Translate when there's a clean Vietnamese equivalent:** "preset"
+→ "kiểu cấu hình", "input" → "đầu vào", "output" → "đầu ra",
+"sentence" → "câu", "word" → "từ", "settings" → "cài đặt",
+"reset" → "đặt lại", "save" → "lưu", "copy" → "sao chép",
+"options" → "tuỳ chọn", "available" → "có sẵn", "required" →
+"bắt buộc", "Server status" → "trạng thái máy chủ".
+
+**Sentences must scan as Vietnamese, not as bilingual code-switching.**
+If a Vietnamese sentence reads like four Vietnamese words wrapped
+around an English noun phrase, rewrite it. The exception is
+identifiers in code voice (`NOM_LLM_BACKEND`, `top_k`,
+`Authorization: Bearer …`) — those stay verbatim because they're
+literal strings the reader will type or paste.
+
+A short way to test: if the surrounding sentence translates one
+English word at a time and the result is awkward, that English
+word probably belongs as a real Vietnamese term. If the rest of
+the sentence is already Vietnamese and the English word is a
+proper noun (`HuggingFace`, `Ollama`) or a standardised token
+(`JSON`, `API`), leave it.
+
 ## Fast / small / nano tiers train on the SAME corpus as the base
 
 When we train a smaller variant of a model (`-small`, `-nano`,

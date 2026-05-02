@@ -76,7 +76,7 @@ export function NoisePage() {
       pending={noise.isPending}
       options={
         <>
-          <OptionRow label="Preset" hint="Mỗi preset là một phân phối lỗi đã được hiệu chỉnh.">
+          <OptionRow label="Kiểu nhiễu" hint="Mỗi kiểu là một phân phối lỗi đã được hiệu chỉnh.">
             <Select<NoisePreset>
               value={preset}
               onChange={setPreset}
@@ -96,7 +96,7 @@ export function NoisePage() {
           </OptionRow>
           <OptionRow
             label="Seed"
-            hint="Cùng (text, preset, seed) → cùng output. Đảm bảo reproducible."
+            hint="Cùng văn bản + cùng kiểu + cùng seed → cùng kết quả. Bảo đảm tái hiện được."
           >
             <div className="flex items-center gap-1">
               <NumberField value={seed} onChange={setSeed} min={0} className="flex-1" />
@@ -104,18 +104,18 @@ export function NoisePage() {
                 variant="ghost"
                 size="sm"
                 onClick={reroll}
-                aria-label="Re-roll seed"
+                aria-label="Lấy seed ngẫu nhiên"
                 className="h-9 w-9 p-0"
-                title="Random seed"
+                title="Seed ngẫu nhiên"
               >
                 <Dice5 size={14} />
               </Button>
             </div>
           </OptionRow>
-          <OptionRow label="Use case">
+          <OptionRow label="Mục đích">
             <p className="text-[11.5px] leading-snug text-ink-soft">
-              Tạo cặp <code>(noisy → clean)</code> cho fine-tune mô hình khôi phục dấu / sửa lỗi
-              chính tả.
+              Tạo cặp <code className="bg-bg-soft px-1">noisy → clean</code> để fine-tune mô hình
+              khôi phục dấu hoặc sửa lỗi chính tả.
             </p>
           </OptionRow>
         </>
@@ -123,7 +123,7 @@ export function NoisePage() {
       footer={
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono text-[11px] text-ink-mute">
-            {result ? `preset=${result.preset} · seed=${result.seed}` : "Cmd/Ctrl + Enter to run"}
+            {result ? `kiểu=${result.preset} · seed=${result.seed}` : "Bấm ⌘/Ctrl + Enter để chạy"}
           </span>
           <Button
             variant="accent"
@@ -132,7 +132,7 @@ export function NoisePage() {
             disabled={!text.trim() || noise.isPending}
           >
             {noise.isPending ? <Spinner /> : <Play size={14} />}
-            Apply noise
+            Sinh nhiễu
           </Button>
         </div>
       }
@@ -154,19 +154,19 @@ export function NoisePage() {
 
       {result ? (
         <Panel
-          label="noisy output"
-          hint={`${result.noisy.length} chars`}
-          rightSlot={<CopyButton text={result.noisy} label="noisy" />}
+          label="văn bản đã nhiễu"
+          hint={`${result.noisy.length} ký tự`}
+          rightSlot={<CopyButton text={result.noisy} label="văn bản đã nhiễu" />}
         >
           <DiffView before={result.input} after={result.noisy} />
         </Panel>
       ) : (
         !errMsg && (
           <EmptyHint>
-            Chọn preset, seed, rồi
+            Chọn kiểu nhiễu và seed, rồi bấm
             <span className="mx-1 font-mono text-ink">⌘/Ctrl + Enter</span>
-            để sinh phiên bản nhiễu (dùng cho training cặp{" "}
-            <code className="bg-bg-soft px-1">noisy → clean</code>).
+            để sinh ra phiên bản nhiễu (dùng cho cặp dữ liệu{" "}
+            <code className="bg-bg-soft px-1">noisy → clean</code> khi fine-tune mô hình).
           </EmptyHint>
         )
       )}

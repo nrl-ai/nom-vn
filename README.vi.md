@@ -82,15 +82,21 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 
 ---
 
-## Web app Q&A tài liệu kiểu NotebookLM
+## Web app — playground đa nhiệm (từ v0.2.30)
 
-Bố cục biên tập 3 cột: sidebar không gian / luồng chat / nguồn + studio. Bảng màu biên tập tối, góc cạnh sắc, truy vết citation đầy đủ.
+Sidebar trái chuyển giữa **chat (RAG trên tài liệu)** và 5 tool stateless — khôi phục dấu, tách từ/câu, chuẩn hoá / nhận diện, bỏ dấu, sinh nhiễu — cùng trang **API & Setup** và **Cài đặt** (auth, chọn backend LLM, top_k mặc định). Bảng màu biên tập, góc sắc, hỗ trợ phím tắt (`Cmd/Ctrl + Enter` để chạy tool).
 
-Bố cục 3 cột (desktop 1920×1080):
+![Trạng thái welcome — task switcher + spaces sidebar](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
 
-![Khung chat mặc định — chọn space, tài liệu đã index, câu hỏi gợi ý](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
+Tool khôi phục dấu với 3 backend (rule / HF seq2seq / LLM) và highlight thay đổi theo từng từ:
 
-Citation là công dân hạng nhất. Mỗi số chunk là chip có thể click để xem đoạn nguồn:
+![Khôi phục dấu](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/07-playground-diacritic.png)
+
+Sinh nhiễu reproducible cho training (`noisy → clean`):
+
+![Sinh nhiễu](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/08-playground-noise.png)
+
+Citation là công dân hạng nhất trong chat. Mỗi số chunk là chip có thể click để xem đoạn nguồn:
 
 ![Citation mở rộng — chunk tiếng Việt hiển thị inline](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/03-citations-expanded.png)
 

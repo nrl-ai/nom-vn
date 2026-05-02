@@ -83,15 +83,21 @@ on real Vietnamese corpora, this week.
 
 ---
 
-## NotebookLM-style document Q&A web app
+## Multi-task playground web app (since v0.2.30)
 
-Three-pane editorial layout: spaces sidebar / chat thread / sources + studio. Dark editorial palette, sharp corners, citation traceability.
+Left rail switches between **chat (RAG over your docs)** and stateless tools — diacritic restore, tokenize, normalize / detect, strip, noise generator, plus an API & Setup page and a Settings page (auth, backend, top_k). Editorial palette, sharp corners, full keyboard navigation (`Cmd/Ctrl + Enter` runs the active tool).
 
-Three-pane editorial layout (1920×1080 desktop):
+![Welcome state — task switcher and spaces sidebar visible](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
 
-![Default chat view — space selected, materials indexed, suggested questions](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
+Diacritic-restore tool with backend picker (rule / HF seq2seq / LLM) and per-word change highlighting:
 
-Citations are first-class. Every chunk number is a chip you can click to see the source passage:
+![Diacritic restore playground](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/07-playground-diacritic.png)
+
+Reproducible noise generator for training (`noisy → clean` pairs) — pick a preset, set a seed, run:
+
+![Noise generator playground](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/08-playground-noise.png)
+
+Citations are first-class in chat. Every chunk number is a chip you can click to see the source passage:
 
 ![Citations expanded — Vietnamese chunks shown inline](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/03-citations-expanded.png)
 

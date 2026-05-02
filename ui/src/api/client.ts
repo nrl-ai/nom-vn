@@ -29,7 +29,30 @@ export class ApiError extends Error {
   }
 }
 
+/** Local key holding the bearer token used when the server sets
+ *  NOM_AUTH_TOKEN. Plain localStorage is sufficient — auth here is a
+ *  protect-against-LAN-snoops measure, not a hardened authn scheme. */
+const AUTH_TOKEN_KEY = "nom:auth-token";
+
+export function getAuthToken(): string | null {
+  try {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function setAuthToken(token: string | null): void {
+  try {
+    if (token) localStorage.setItem(AUTH_TOKEN_KEY, token);
+    else localStorage.removeItem(AUTH_TOKEN_KEY);
+  } catch {
+    /* localStorage may be unavailable — token won't survive reload */
+  }
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const token = getAuthToken();
   const res = await fetch(path, {
     ...init,
     headers: {
@@ -37,6 +60,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       ...(init.body && !(init.body instanceof FormData)
         ? { "Content-Type": "application/json" }
         : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init.headers ?? {}),
     },
   });
@@ -103,7 +127,20 @@ export const api = {
       llm_class: string | null;
       embedder: string | null;
       ocr_available: boolean;
+      auth_required: boolean;
     }>(`/api/health`),
+  llmBackends: () =>
+    request<{
+      active: { name: string | null; class: string | null; model: string | null };
+      available: Array<{
+        id: string;
+        label: string;
+        kind: "local-http" | "local-inproc" | "cloud";
+        available: boolean;
+        model_hint: string;
+        needs: string[];
+      }>;
+    }>(`/api/llm/backends`),
   // -- Playground tools --------------------------------------------------
   tools: {
     diacriticRestore: (text: string, backend: DiacriticBackend, modelId?: string) =>

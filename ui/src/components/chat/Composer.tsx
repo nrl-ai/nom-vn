@@ -55,14 +55,14 @@ export function Composer({ value, onChange, onSubmit, disabled, pending, placeho
           onClick={onSubmit}
           disabled={disabled || !value.trim() || pending}
           className="h-10 shrink-0"
-          aria-label="Send"
+          aria-label="Gửi"
         >
           {pending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-          <span className="hidden sm:inline">Send</span>
+          <span className="hidden sm:inline">Gửi</span>
         </Button>
       </div>
       <div className="mt-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-mute">
-        Esc to clear · Enter to send
+        Esc để xoá · Enter để gửi
       </div>
     </div>
   );

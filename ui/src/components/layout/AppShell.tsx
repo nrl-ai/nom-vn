@@ -24,6 +24,8 @@ interface AppShellProps {
   /** Layout topology to apply. */
   mode?: "chat" | "tool";
   onHome?: () => void;
+  onSettings?: () => void;
+  onApi?: () => void;
 }
 
 export function AppShell({
@@ -33,6 +35,8 @@ export function AppShell({
   children,
   mode = "chat",
   onHome,
+  onSettings,
+  onApi,
 }: AppShellProps) {
   const [showSidebar, setShowSidebar] = useState(false);
   const [showStudio, setShowStudio] = useState(false);
@@ -66,7 +70,7 @@ export function AppShell({
         </div>
       )}
 
-      <Header modelName={modelName} onHome={onHome} />
+      <Header modelName={modelName} onHome={onHome} onSettings={onSettings} onApi={onApi} />
 
       {/* Desktop layout: resizable panels */}
       <div className="hidden min-h-0 flex-1 lg:block">

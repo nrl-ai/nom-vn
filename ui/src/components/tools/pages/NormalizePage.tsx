@@ -92,7 +92,7 @@ export function NormalizePage() {
       options={
         <>
           <OptionRow
-            label="Why NFC?"
+            label="Vì sao cần NFC?"
             hint="Khác biệt NFD/NFC vô hình bằng mắt nhưng làm hỏng tokenizer."
           >
             <p className="text-[11.5px] leading-snug text-ink-soft">
@@ -101,19 +101,19 @@ export function NormalizePage() {
               <code className="bg-bg-soft px-1">o + U+0309</code> (NFD).
             </p>
           </OptionRow>
-          <OptionRow label="What we run">
+          <OptionRow label="Các phép chạy">
             <ul className="space-y-1 text-[11.5px] leading-snug text-ink-soft">
               <li>
-                <strong>NFC normalize</strong> — Unicode canonical composition.
+                <strong>NFC normalize</strong> — chuẩn hoá Unicode về dạng đã hợp.
               </li>
               <li>
-                <strong>text_normalize</strong> — NFC + dấu câu Latin.
+                <strong>text_normalize</strong> — NFC + chuẩn hoá dấu câu Latin.
               </li>
               <li>
-                <strong>is_vietnamese</strong> — phát hiện kiểu Việt.
+                <strong>is_vietnamese</strong> — nhận diện đoạn văn tiếng Việt.
               </li>
               <li>
-                <strong>has_diacritics</strong> — có ký tự dấu nào không.
+                <strong>has_diacritics</strong> — có ký tự dấu hay không.
               </li>
             </ul>
           </OptionRow>
@@ -123,8 +123,8 @@ export function NormalizePage() {
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono text-[11px] text-ink-mute">
             {normRes
-              ? `${normRes.n_input_codepoints} → ${normRes.n_nfc_codepoints} codepoints`
-              : "Cmd/Ctrl + Enter to run"}
+              ? `${normRes.n_input_codepoints} → ${normRes.n_nfc_codepoints} codepoint`
+              : "Bấm ⌘/Ctrl + Enter để chạy"}
           </span>
           <Button variant="accent" size="md" onClick={onRun} disabled={!text.trim() || pending}>
             {pending ? <Spinner /> : <Play size={14} />}
@@ -149,7 +149,7 @@ export function NormalizePage() {
       )}
 
       {detRes && (
-        <Panel label="detection" hint={detRes.reason}>
+        <Panel label="nhận diện" hint={detRes.reason}>
           <div className="grid grid-cols-2 gap-3">
             <Flag label="is_vietnamese" value={detRes.is_vietnamese} />
             <Flag label="has_diacritics" value={detRes.has_diacritics} />
@@ -159,13 +159,15 @@ export function NormalizePage() {
 
       {normRes && (
         <Panel
-          label="normalized"
-          hint={normRes.is_nfc ? "Input đã ở dạng NFC" : "Input dạng NFD — đã chuyển NFC"}
-          rightSlot={<CopyButton text={normRes.full_normalized} label="normalized" />}
+          label="chuẩn hoá"
+          hint={
+            normRes.is_nfc ? "Đầu vào đã ở dạng NFC" : "Đầu vào ở dạng NFD — đã chuyển sang NFC"
+          }
+          rightSlot={<CopyButton text={normRes.full_normalized} label="văn bản chuẩn hoá" />}
         >
           <div className="grid gap-3 lg:grid-cols-2">
             <div>
-              <div className="section-mark mb-1">§ input</div>
+              <div className="section-mark mb-1">§ đầu vào</div>
               <pre className="vn-text whitespace-pre-wrap break-words border border-line bg-bg-soft p-2 font-mono text-xs text-ink">
                 {normRes.input}
               </pre>
@@ -179,7 +181,7 @@ export function NormalizePage() {
           </div>
           {!normRes.is_nfc && rows.length > 0 && (
             <div className="mt-3">
-              <div className="section-mark mb-1">§ codepoints (first 200)</div>
+              <div className="section-mark mb-1">§ codepoint (200 đầu)</div>
               <div className="flex flex-wrap gap-1 font-mono text-[11px]">
                 {rows.map((r) => (
                   <span
@@ -205,7 +207,7 @@ export function NormalizePage() {
       {!normRes && !detRes && !errMsg && (
         <EmptyHint>
           Bấm <span className="mx-1 font-mono text-ink">Chạy</span>
-          (hoặc <span className="font-mono text-ink">⌘/Ctrl + Enter</span>) để xem kết quả NFC +
+          (hoặc <span className="font-mono text-ink">⌘/Ctrl + Enter</span>) để xem kết quả NFC và
           nhận diện ngôn ngữ.
         </EmptyHint>
       )}

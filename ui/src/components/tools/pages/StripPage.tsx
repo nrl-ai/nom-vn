@@ -52,9 +52,12 @@ export function StripPage() {
       pending={strip.isPending}
       options={
         <>
-          <OptionRow label="Use cases" hint="URL slugs, search keys, hệ thống legacy chỉ ASCII.">
+          <OptionRow
+            label="Dùng cho"
+            hint="Tạo URL slug, khoá tìm kiếm, hoặc hệ thống cũ chỉ chấp nhận ASCII."
+          >
             <p className="text-[11.5px] leading-snug text-ink-soft">
-              <strong>đ</strong> → <strong>d</strong>, dấu kết hợp → bỏ.
+              <strong>đ</strong> → <strong>d</strong>, các dấu kết hợp được bỏ hết.
             </p>
           </OptionRow>
           <OptionRow label="API">
@@ -67,7 +70,7 @@ export function StripPage() {
       footer={
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono text-[11px] text-ink-mute">
-            {result ? `${result.stripped.length} chars` : "Cmd/Ctrl + Enter to run"}
+            {result ? `${result.stripped.length} ký tự` : "Bấm ⌘/Ctrl + Enter để chạy"}
           </span>
           <Button
             variant="accent"
@@ -98,9 +101,9 @@ export function StripPage() {
 
       {result ? (
         <Panel
-          label="stripped"
-          hint="ASCII approximation"
-          rightSlot={<CopyButton text={result.stripped} label="stripped" />}
+          label="đã bỏ dấu"
+          hint="dạng ASCII"
+          rightSlot={<CopyButton text={result.stripped} label="văn bản đã bỏ dấu" />}
         >
           <pre className="vn-text whitespace-pre-wrap break-words font-mono text-sm text-ink">
             {result.stripped}

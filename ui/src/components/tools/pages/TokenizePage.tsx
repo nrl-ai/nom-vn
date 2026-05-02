@@ -77,38 +77,38 @@ export function TokenizePage() {
       pending={pending}
       options={
         <>
-          <OptionRow label="Mode">
+          <OptionRow label="Chế độ">
             <Segmented<Mode>
               value={mode}
               onChange={setMode}
               options={[
-                { value: "word", label: "Words" },
-                { value: "sentence", label: "Sentences" },
+                { value: "word", label: "Từ" },
+                { value: "sentence", label: "Câu" },
               ]}
             />
           </OptionRow>
           {mode === "word" && (
             <OptionRow
-              label="Format"
+              label="Định dạng"
               hint={
                 fmt === "list"
-                  ? "Chips theo từ ghép (compound joined by space)"
-                  : "Một chuỗi với gạch dưới giữa các âm tiết"
+                  ? "Hiển thị từng từ riêng — từ ghép gộp lại bằng dấu cách"
+                  : "Một chuỗi liên tục — từ ghép nối bằng gạch dưới"
               }
             >
               <Segmented<WordFmt>
                 value={fmt}
                 onChange={setFmt}
                 options={[
-                  { value: "list", label: "List" },
-                  { value: "text", label: "Underscored" },
+                  { value: "list", label: "Danh sách" },
+                  { value: "text", label: "Gạch dưới" },
                 ]}
               />
             </OptionRow>
           )}
-          <OptionRow label="Engine">
+          <OptionRow label="Bộ tách">
             <p className="font-mono text-[11px] text-ink-mute">
-              nom.text.segment · pure stdlib · ~734k tok/s
+              nom.text.segment · thư viện chuẩn · ~734k token/giây
             </p>
           </OptionRow>
         </>
@@ -117,10 +117,10 @@ export function TokenizePage() {
         <div className="flex items-center justify-between gap-2">
           <span className="font-mono text-[11px] text-ink-mute">
             {mode === "word" && wordRes
-              ? `${wordRes.n_tokens ?? 0} tokens · ${wordRes.n_compounds ?? 0} compounds`
+              ? `${wordRes.n_tokens ?? 0} từ · ${wordRes.n_compounds ?? 0} từ ghép`
               : mode === "sentence" && sentRes
-                ? `${sentRes.n_sentences} sentences`
-                : "Cmd/Ctrl + Enter to run"}
+                ? `${sentRes.n_sentences} câu`
+                : "Bấm ⌘/Ctrl + Enter để chạy"}
           </span>
           <Button variant="accent" size="md" onClick={onRun} disabled={!text.trim() || pending}>
             {pending ? <Spinner /> : <Play size={14} />}
@@ -146,12 +146,12 @@ export function TokenizePage() {
 
       {mode === "word" && wordRes && (
         <Panel
-          label="tokens"
-          hint={wordRes.tokens ? `${wordRes.n_tokens ?? 0} tokens` : "underscored"}
+          label="từ"
+          hint={wordRes.tokens ? `${wordRes.n_tokens ?? 0} từ` : "gạch dưới"}
           rightSlot={
             <CopyButton
               text={wordRes.tokens ? wordRes.tokens.join(" | ") : (wordRes.text ?? "")}
-              label="tokens"
+              label="từ"
             />
           }
         >
@@ -168,7 +168,7 @@ export function TokenizePage() {
                         ? "border-accent bg-accent/10 text-accent-ink"
                         : "border-line bg-bg-soft text-ink")
                     }
-                    title={isCompound ? "compound (multi-syllable)" : undefined}
+                    title={isCompound ? "từ ghép (nhiều âm tiết)" : undefined}
                   >
                     {t}
                   </span>
@@ -185,9 +185,9 @@ export function TokenizePage() {
 
       {mode === "sentence" && sentRes && (
         <Panel
-          label="sentences"
+          label="câu"
           hint={`${sentRes.n_sentences}`}
-          rightSlot={<CopyButton text={sentRes.sentences.join("\n")} label="sentences" />}
+          rightSlot={<CopyButton text={sentRes.sentences.join("\n")} label="câu" />}
         >
           <ol className="vn-text space-y-1.5 text-sm">
             {sentRes.sentences.map((s, i) => (
@@ -204,8 +204,8 @@ export function TokenizePage() {
 
       {!wordRes && !sentRes && !errMsg && (
         <EmptyHint>
-          Chọn chế độ <span className="font-mono text-ink">Words</span> hoặc
-          <span className="mx-1 font-mono text-ink">Sentences</span>ở phải, rồi
+          Chọn chế độ <span className="font-mono text-ink">Từ</span> hoặc
+          <span className="mx-1 font-mono text-ink">Câu</span>ở cột phải, rồi bấm
           <span className="mx-1 font-mono text-ink">⌘/Ctrl + Enter</span>
           để chạy.
         </EmptyHint>

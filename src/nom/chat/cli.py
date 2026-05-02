@@ -61,8 +61,10 @@ def serve(
     *,
     host: str = "127.0.0.1",
     port: int = 8080,
-    model: str = "qwen3:8b",
+    backend: str = "ollama",
+    model: str | None = None,
     ollama_url: str = "http://localhost:11434",
+    llamacpp_url: str = "http://127.0.0.1:8080/v1",
     embedder: Any | None = None,
     open_browser: bool = True,
     data_dir: str | Path | None = "~/.nom",
@@ -73,8 +75,16 @@ def serve(
         host: bind address. Default ``127.0.0.1`` (localhost only).
             Use ``0.0.0.0`` to allow LAN access.
         port: TCP port. Default ``8080``.
-        model: Ollama model id. Default ``qwen3:8b``.
-        ollama_url: Ollama server URL.
+        backend: LLM backend. ``ollama`` (default), ``llamacpp``,
+            ``openai``, or ``anthropic``. Override via ``NOM_LLM_BACKEND``.
+        model: model id for the chosen backend. Default depends on
+            backend: ``qwen3:8b`` (ollama), ``llamacpp`` (llamacpp,
+            ignored by llama-server but recorded in logs),
+            ``gpt-4o-mini`` (openai), ``claude-haiku-4-5`` (anthropic).
+            Override via ``NOM_LLM_MODEL``.
+        ollama_url: Ollama server URL (only used when backend=ollama).
+        llamacpp_url: llama-server URL (only used when backend=llamacpp).
+            Must include ``/v1``. Override via ``NOM_LLAMACPP_URL``.
         embedder: optional :class:`nom.embeddings.Embedder` instance.
             Defaults to ``VietnameseEmbedder`` (lazy-loaded).
         open_browser: if True, opens the default browser at the running URL.
@@ -89,12 +99,57 @@ def serve(
             "`nom serve` requires uvicorn. Install with: pip install nom-vn[chat]"
         ) from exc
 
+    import os
+
     from nom.chat.server import build_app
     from nom.chat.sqlite_store import SqliteStore
     from nom.chat.store import MemoryStore
-    from nom.llm import Ollama
 
-    llm = Ollama(model=model, base_url=ollama_url)
+    backend = (os.environ.get("NOM_LLM_BACKEND") or backend).lower()
+    model = os.environ.get("NOM_LLM_MODEL") or model
+
+    if backend == "ollama":
+        from nom.llm import Ollama
+
+        llm: Any = Ollama(model=model or "qwen3:8b", base_url=ollama_url)
+        backend_label = f"ollama({llm.model}) via {ollama_url}"
+    elif backend == "llamacpp":
+        from nom.llm import LlamaCpp
+
+        llm = LlamaCpp(model=model or "llamacpp", base_url=llamacpp_url)
+        backend_label = f"llamacpp({llm.model}) via {llamacpp_url}"
+    elif backend in ("llamacpp-python", "llamacpp_python"):
+        from nom.llm import LlamaCppPython
+
+        if not model:
+            raise SystemExit(
+                "--backend llamacpp-python requires --model (a GGUF path or "
+                "'hf:<repo>:<filename>' shorthand). Example: "
+                "--model hf:bartowski/Qwen2.5-7B-Instruct-GGUF:Q4_K_M"
+            )
+        llm = LlamaCppPython(model=model)
+        backend_label = f"llamacpp-python({model})"
+    elif backend in ("huggingface", "hf"):
+        from nom.llm import HuggingFace
+
+        llm = HuggingFace(model=model or "Qwen/Qwen2.5-3B-Instruct")
+        backend_label = f"huggingface({llm.model_id})"
+    elif backend == "openai":
+        from nom.llm import OpenAI
+
+        llm = OpenAI(model=model or "gpt-4o-mini")
+        backend_label = f"openai({llm.model})"
+    elif backend == "anthropic":
+        from nom.llm import Anthropic
+
+        llm = Anthropic(model=model or "claude-haiku-4-5-20251001")
+        backend_label = f"anthropic({llm.model})"
+    else:
+        raise SystemExit(
+            f"unknown LLM backend {backend!r}; expected "
+            "ollama|llamacpp|llamacpp-python|huggingface|openai|anthropic"
+        )
+
     if data_dir is None:
         store: Any = MemoryStore(embedder=embedder, llm=llm)
         store_label = "in-memory (ephemeral)"
@@ -108,7 +163,7 @@ def serve(
 
     url = f"http://{host}:{port}"
     print(f"Nôm — serving at {url}")
-    print(f"  · model:   {model} via {ollama_url}")
+    print(f"  · llm:     {backend_label}")
     print(f"  · storage: {store_label}")
     print(f"  · ocr:     {ocr_label}")
     print(f"  · API docs at {url}/docs")
@@ -135,8 +190,31 @@ def main(argv: list[str] | None = None) -> int:
     p_serve = sub.add_parser("serve", help="Launch the Nôm chat web app")
     p_serve.add_argument("--host", default="127.0.0.1")
     p_serve.add_argument("--port", type=int, default=8080)
-    p_serve.add_argument("--model", default="qwen3:8b")
+    p_serve.add_argument(
+        "--backend",
+        default="ollama",
+        choices=[
+            "ollama",
+            "llamacpp",
+            "llamacpp-python",
+            "huggingface",
+            "openai",
+            "anthropic",
+        ],
+        help="LLM backend (env: NOM_LLM_BACKEND). Default: ollama.",
+    )
+    p_serve.add_argument(
+        "--model",
+        default=None,
+        help="Model id (env: NOM_LLM_MODEL). Default per backend: "
+        "qwen3:8b / llamacpp / gpt-4o-mini / claude-haiku-4-5-20251001.",
+    )
     p_serve.add_argument("--ollama-url", default="http://localhost:11434")
+    p_serve.add_argument(
+        "--llamacpp-url",
+        default="http://127.0.0.1:8080/v1",
+        help="llama-server URL incl. /v1 (env: NOM_LLAMACPP_URL).",
+    )
     p_serve.add_argument(
         "--no-browser",
         action="store_true",
@@ -160,8 +238,10 @@ def main(argv: list[str] | None = None) -> int:
         serve(
             host=args.host,
             port=args.port,
+            backend=args.backend,
             model=args.model,
             ollama_url=args.ollama_url,
+            llamacpp_url=args.llamacpp_url,
             open_browser=not args.no_browser,
             data_dir=None if args.in_memory else args.data_dir,
         )

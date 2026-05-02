@@ -91,7 +91,15 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
                     status_code=503,
                     detail="LLM backend unavailable (server started without an LLM)",
                 )
-            restored = fix_diacritics(text, llm=llm)
+            try:
+                restored = fix_diacritics(text, llm=llm)
+            except Exception as exc:
+                cls = type(exc).__name__
+                if "HTTPStatusError" in cls or "ConnectError" in cls or "Timeout" in cls:
+                    from nom.chat.server import _llm_error_to_503
+
+                    raise _llm_error_to_503(exc) from exc
+                raise
             used = "llm"
             model_id = getattr(llm, "name", None)
         else:

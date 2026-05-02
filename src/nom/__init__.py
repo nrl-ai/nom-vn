@@ -5,5 +5,5 @@ Named after chữ Nôm, the script Vietnam wrote in for a millennium.
 See https://nrl.ai/nom for documentation.
 """
 
-__version__ = "0.2.30"
+__version__ = "0.2.31"
 __all__ = ["__version__"]
