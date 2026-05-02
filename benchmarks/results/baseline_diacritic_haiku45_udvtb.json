@@ -1,0 +1,11 @@
+{
+  "backend": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "corpus": "benchmarks/data/ud_vi_vtb/test.conllu",
+  "n_sentences": 800,
+  "warmup_calls": 2,
+  "word_accuracy": 0.8168,
+  "sentence_exact": 0.1988,
+  "latency_ms_p50": 1458.1,
+  "latency_ms_mean": 1511.3
+}

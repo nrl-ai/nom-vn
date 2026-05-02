@@ -75,6 +75,7 @@ metric.
 | (cloud `gpt-4o-mini`) | Độc quyền | — | 95,37 % | **81,84 %** (đo 2026-05-02 trên 800 câu UD-VTB; chi phí ~0,02 USD) |
 | (cloud `gpt-5.4-mini`) | Độc quyền | — | Chưa đo | 78,68 % (đo 2026-05-02; mới hơn nhưng kém gpt-4o-mini ở văn học -3,16 pp) |
 | (cloud `gpt-5.4-nano`) | Độc quyền | — | Chưa đo | 73,18 % (đo 2026-05-02; rẻ nhưng kém gpt-4o-mini ở mọi loại văn bản) |
+| (cloud `claude-haiku-4-5`) | Độc quyền | — | Chưa đo | 81,68 % (đo 2026-05-02; gần như hoà gpt-4o-mini ở văn học, đắt hơn ~6 lần) |
 | local `gemma4:e4b` Q4 | Apache 2.0 | 9,6 GB | 93,18 % | **77,78 %** (đo 2026-05-02 trên RTX 3090) |
 | local `gemma3:4b` Q4 | Apache 2.0 | 3,3 GB | 89,06 % | **62,05 %** (đo 2026-05-02 trên RTX 3090) |
 | (sàn quy tắc) | — | 0 | 41,06 % | ~41 % (không phụ thuộc loại văn bản) |

@@ -1,0 +1,11 @@
+{
+  "backend": "anthropic",
+  "model": "claude-haiku-4-5-20251001",
+  "corpus": "benchmarks/data/tatoeba_vi/diacritic_eval_300.txt",
+  "n_sentences": 300,
+  "warmup_calls": 2,
+  "word_accuracy": 0.9049,
+  "sentence_exact": 0.5567,
+  "latency_ms_p50": 1182.0,
+  "latency_ms_mean": 1218.1
+}

@@ -109,6 +109,7 @@ Cùng ngữ liệu 55 câu (CC0). Bộ đo: `benchmarks/accuracy/bench_diacritic
 | (cloud `gpt-5.4-mini`) | proprietary | — | 96,12 % / 92,06 % / 78,68 % | 1,13 | 0,75 USD vào / 4,50 USD ra mỗi 1M token; thắng `gpt-4o-mini` ở văn bản hành chính/hội thoại nhưng kém ở văn học |
 | (cloud `gpt-4o-mini`) | proprietary | — | 95,37 % / 89,51 % / 81,84 % | 1,27 | 0,15 USD vào / 0,60 USD ra mỗi 1M token; **điểm cân bằng chi phí–chất lượng của OpenAI** |
 | (cloud `gpt-5.4-nano`) | proprietary | — | 93,82 % / 85,15 % / 73,18 % | 1,27 | 0,20 USD vào / 1,25 USD ra mỗi 1M token; mới hơn nhưng kém `gpt-4o-mini` ở mọi loại văn bản; bỏ qua |
+| (cloud `claude-haiku-4-5`) | proprietary | — | 96,19 % / 90,49 % / 81,68 % | 1,46 | 1,00 USD vào / 5,00 USD ra mỗi 1M token; nhỉnh hơn gpt-4o-mini ở hành chính / hội thoại nhưng đắt hơn ~6 lần |
 | local `gemma4:e4b` Q4 | Apache 2.0 | 9,6 GB | 93,18 % / 87,91 % / 77,78 % | 0,88 | LLM local mạnh nhất; cần ≥10 GB VRAM |
 | local `gemma3:4b` Q4 | Apache 2.0 | 3,3 GB | 89,06 % / 79,70 % / 62,05 % | 0,91 | -3 đến -16 pp so với gemma4:e4b; cho máy yếu hơn |
 | local `qwen3:1.7b` Q4 | Apache 2.0 | 1,4 GB | 16,60 % | 0,43 | Dưới sàn quy tắc 41 %; bỏ qua |
