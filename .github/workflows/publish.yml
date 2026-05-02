@@ -77,13 +77,19 @@ jobs:
           cache: pip
 
       # The wheel target force-includes src/nom/chat/ui_dist/, a build
-      # artifact that's gitignored. Editable install fails without it.
-      # Stage a placeholder so hatch's metadata build succeeds — the
-      # actual bundle ships via the separate `build-ui` job below.
+      # artifact that's gitignored. Editable install fails without it,
+      # and `test_root_serves_html` asserts the served HTML mentions "Nôm".
+      # Stage a minimal placeholder satisfying both — the actual bundle
+      # ships via the separate `build-ui` job below.
       - name: Stage placeholder UI bundle (so editable install works)
         run: |
           mkdir -p src/nom/chat/ui_dist
-          echo '<!-- placeholder for tests gate, real bundle ships in wheel build -->' > src/nom/chat/ui_dist/index.html
+          cat > src/nom/chat/ui_dist/index.html <<'EOF'
+          <!doctype html><html><head><meta charset="utf-8"><title>Nôm — placeholder</title></head>
+          <body><h1>Nôm 喃</h1>
+          <p>placeholder for tests gate; real bundle ships via the build-ui job.</p>
+          </body></html>
+          EOF
 
       - name: Install
         run: |
