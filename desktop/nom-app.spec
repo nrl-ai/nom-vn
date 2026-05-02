@@ -65,9 +65,14 @@ hiddenimports = [
 # Pull every nom.* submodule discoverable on disk, in case we forget one.
 hiddenimports += hooks.collect_submodules("nom")
 
-# Bundle data files for libraries that ship runtime assets.
-datas += hooks.collect_data_files("sentence_transformers", include_py_files=False)
-datas += hooks.collect_data_files("transformers", include_py_files=False)
+# NB: torch / transformers / sentence-transformers are NOT bundled. They
+# weigh ~3 GB combined; users who want HF-backed translation
+# (MADLAD/m2m100) or the [embeddings] / [diacritic-hf] features can
+# install them post-launch via pip:
+#     pip install -e ".[embeddings,diacritic-hf]"
+# The desktop ships the proven-fast paths: chat (Ollama), translate
+# (LLM-prompted), convert (Tesseract), Office walkers. Everything else
+# is a separately-installable upgrade.
 
 
 a = Analysis(
@@ -80,14 +85,29 @@ a = Analysis(
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
-        # Heavy libs we never call at runtime in the desktop bundle.
+        # Heavy ML libs — separately installable. Keeping them out keeps
+        # the bundle ~250 MB instead of ~5 GB on Linux.
+        "torch",
+        "torchaudio",
+        "torchvision",
+        "transformers",
+        "sentence_transformers",
+        "huggingface_hub",
+        "safetensors",
+        "tokenizers",
+        "accelerate",
+        "bitsandbytes",
+        # Generic data-science stack we don't use at runtime.
         "tkinter",
         "matplotlib",
         "pandas",
         "scipy",
+        "sklearn",
         "IPython",
         "jupyter",
         "notebook",
+        "numpy.tests",
+        "PIL.tests",
     ],
     noarchive=False,
 )
