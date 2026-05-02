@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.34] — 2026-05-02
+
+### Re-captured 02-chat-with-answer against matching content
+
+The previous chat-with-answer screenshot showed the LLM saying
+"câu hỏi không liên quan" because the active space was Truyện Kiều
+(literature) but the question was about a contract. Both fixed:
+
+- `scripts/capture_screenshots.py` now picks the
+  "Hợp đồng & Báo cáo (Office)" space when the contract question
+  is asked. Falls back to the first space if it's not seeded.
+- The question is now factual extract — "Số hợp đồng là gì? Bên A
+  là ai?" — instead of a numeric question that small models tend
+  to mangle (qwen3:1.7b answered "300 tỷ" instead of "300 triệu"
+  on the previous take).
+
+The new screenshot shows a grounded, accurate answer:
+"Số hợp đồng là HĐ-2026/045. Bên A là Công ty TNHH Pháp lý Hồng
+Hà — đại diện bởi ông Nguyễn Văn A, chức vụ Giám đốc." — both
+facts match the seeded ground truth, with citation markers and 3
+sources retrieved.
+
+No code-surface changes vs 0.2.33; this release exists so the
+publish workflow re-runs and ships an updated wheel + the
+refreshed README screenshot pointer (the PNG itself is served
+from main, not the wheel).
+
 ## [0.2.33] — 2026-05-02
 
 ### Publish-workflow fix — first release that can actually go to PyPI

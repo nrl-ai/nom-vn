@@ -148,29 +148,40 @@ def capture_all(url: str, out: Path) -> None:
         page.wait_for_timeout(500)
         shoot(page, out, "13-playground-settings")
 
-        # 02 — chat with a real LLM answer + citations
+        # 02 — chat with a real LLM answer + citations.
+        # Pick the space whose seeded content matches the question we ask
+        # so the LLM produces a real answer, not "câu hỏi không liên quan".
         click_task(page, r"Chat & RAG")
         page.wait_for_timeout(400)
+        # Prefer the contract space if seeded; fall back to the first space.
         space_btn = (
             page.locator("aside")
             .get_by_role("button")
-            .filter(has_text=re.compile(r"\d+ materials"))
+            .filter(has_text=re.compile(r"Hợp đồng"))
             .first
         )
+        if space_btn.count() == 0:
+            space_btn = (
+                page.locator("aside")
+                .get_by_role("button")
+                .filter(has_text=re.compile(r"\d+ materials"))
+                .first
+            )
         if space_btn.count() > 0:
             space_btn.click()
-            # Wait for the chat layout to settle — composer textarea is the
-            # signal it rendered. Some materials need a moment to load.
             page.wait_for_selector(
                 "textarea[placeholder*='Đặt câu hỏi']", state="visible", timeout=10_000
             )
             page.wait_for_timeout(500)
 
-            # Pre-warm via HTTP so the screenshot capture isn't blocked on
-            # cold model load.
             spaces = json.loads(urlopen(f"{url}/api/spaces", timeout=5).read())
-            space_id = spaces[0]["id"]
-            question = "Hợp đồng có giá trị bao nhiêu?"
+            # Match the clicked space ID from the API list (by name match).
+            target = next(
+                (s for s in spaces if "Hợp đồng" in s["name"]),
+                spaces[0],
+            )
+            space_id = target["id"]
+            question = "Số hợp đồng là gì? Bên A là ai?"
             print(f"  → /api/spaces/{space_id}/ask (warmup)")
             try:
                 post_json(
