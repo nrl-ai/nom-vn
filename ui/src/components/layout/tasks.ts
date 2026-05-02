@@ -1,4 +1,5 @@
 import {
+  Bot,
   Code2,
   Eraser,
   Languages,
@@ -20,6 +21,7 @@ export type TaskKey =
   | "normalize"
   | "strip"
   | "translate"
+  | "agents"
   | "api"
   | "settings";
 
@@ -38,6 +40,13 @@ export const TASKS: TaskMeta[] = [
     blurb: "Hỏi đáp tài liệu",
     icon: MessageSquare,
     category: "rag",
+  },
+  {
+    key: "translate",
+    label: "Dịch thuật",
+    blurb: "Việt ↔ Anh, giữ nguyên định dạng .docx",
+    icon: Languages,
+    category: "text",
   },
   {
     key: "diacritic",
@@ -68,11 +77,11 @@ export const TASKS: TaskMeta[] = [
     category: "text",
   },
   {
-    key: "translate",
-    label: "Dịch thuật",
-    blurb: "Việt ↔ Anh, giữ nguyên định dạng .docx",
-    icon: Languages,
-    category: "text",
+    key: "agents",
+    label: "Chạy tác tử",
+    blurb: "Theo dõi suy luận và gọi công cụ",
+    icon: Bot,
+    category: "rag",
   },
   {
     key: "api",

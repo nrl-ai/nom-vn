@@ -147,6 +147,21 @@ export const api = {
         needs: string[];
       }>;
     }>(`/api/llm/backends`),
+  // -- Agents ------------------------------------------------------------
+  agents: {
+    list: () => request<{ agents: { name: string; type: string }[] }>("/api/agents"),
+    run: (name: string, task: string) =>
+      request<{
+        output: string;
+        trace: { ts: number; kind: string; payload: Record<string, unknown> }[];
+        n_tool_calls: number;
+        n_llm_calls: number;
+        run_id: string;
+      }>(`/api/agents/${encodeURIComponent(name)}/run`, {
+        method: "POST",
+        body: JSON.stringify({ task }),
+      }),
+  },
   // -- Playground tools --------------------------------------------------
   tools: {
     diacriticRestore: (text: string, backend: DiacriticBackend, modelId?: string) =>

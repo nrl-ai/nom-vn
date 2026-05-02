@@ -209,3 +209,15 @@ export function useTranslateModels() {
     staleTime: Infinity,
   });
 }
+
+// Placeholder for the in-progress AgentRunPage. Returns an empty list
+// so the UI renders the "no agents registered" empty state. Real
+// /api/agents endpoint + recipe registry is being wired by a parallel
+// track; once that lands, swap to api.agents.list().
+export function useAgents() {
+  return useQuery({
+    queryKey: ["agents"],
+    queryFn: () => Promise.resolve({ agents: [] as Array<{ name: string; type: string }> }),
+    staleTime: Infinity,
+  });
+}
