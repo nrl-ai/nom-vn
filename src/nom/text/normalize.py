@@ -410,6 +410,7 @@ _DIACRITIC_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {"restored": {"type": "string"}},
     "required": ["restored"],
+    "additionalProperties": False,
 }
 
 

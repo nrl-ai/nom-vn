@@ -107,12 +107,19 @@ class OpenAI:
         constrained to emit valid JSON matching the schema. The
         returned string is that JSON document.
         """
+        # gpt-5* and o-series models reject `max_tokens` in favour of
+        # `max_completion_tokens` (and reject `temperature` other than 1).
+        # Detect by model id prefix so the adapter remains a single class.
+        uses_completion_tokens = self.model.startswith(("gpt-5", "o1", "o3", "o4"))
         body: dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": self.temperature,
-            "max_tokens": max_tokens,
         }
+        if uses_completion_tokens:
+            body["max_completion_tokens"] = max_tokens
+        else:
+            body["temperature"] = self.temperature
+            body["max_tokens"] = max_tokens
         if schema is not None:
             body["response_format"] = {
                 "type": "json_schema",

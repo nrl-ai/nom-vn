@@ -89,6 +89,12 @@ def main() -> int:
 
         llm = Ollama(model=args.model, think=False)
     else:
+        try:
+            from dotenv import load_dotenv
+
+            load_dotenv(REPO / ".env")
+        except ImportError:
+            pass
         from nom.llm import OpenAI
 
         llm = OpenAI(model=args.model)
