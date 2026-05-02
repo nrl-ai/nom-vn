@@ -85,21 +85,37 @@ on real Vietnamese corpora, this week.
 
 ## Multi-task playground web app (since v0.2.30)
 
-Left rail switches between **chat (RAG over your docs)** and stateless tools — diacritic restore, tokenize, normalize / detect, strip, noise generator, plus an API & Setup page and a Settings page (auth, backend, top_k). Editorial palette, sharp corners, full keyboard navigation (`Cmd/Ctrl + Enter` runs the active tool).
+Left rail switches between **chat (RAG over your docs)** and stateless tools — diacritic restore, tokenize, normalize/detect, strip diacritics, noise generator — plus a **Settings** page (server health, bearer-token auth, LLM backend picker, default `top_k`) and an **API & Setup** page (cURL examples + setup commands for Ollama / llama.cpp / HuggingFace / OpenAI / Anthropic). Editorial palette, sharp corners, full keyboard navigation (`Cmd/Ctrl + Enter` runs the active tool, gear icon top-right opens Settings).
 
 ![Welcome state — task switcher and spaces sidebar visible](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
+
+Chat with citations grounded in indexed Vietnamese documents:
+
+![Chat with a real answer + Vietnamese citations](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/02-chat-with-answer.png)
 
 Diacritic-restore tool with backend picker (rule / HF seq2seq / LLM) and per-word change highlighting:
 
 ![Diacritic restore playground](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/07-playground-diacritic.png)
 
+Word + sentence segmentation with compound highlighting:
+
+![Tokenize playground](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/09-playground-tokenize.png)
+
+NFC normalize + Vietnamese detection:
+
+![Normalize / detect playground](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/10-playground-normalize.png)
+
 Reproducible noise generator for training (`noisy → clean` pairs) — pick a preset, set a seed, run:
 
 ![Noise generator playground](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/08-playground-noise.png)
 
-Citations are first-class in chat. Every chunk number is a chip you can click to see the source passage:
+Settings page — server health, authentication toggle, LLM backend picker that emits a copy-paste launch command:
 
-![Citations expanded — Vietnamese chunks shown inline](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/03-citations-expanded.png)
+![Settings page](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/13-playground-settings.png)
+
+API & Setup page — Vietnamese-language install/run guide and cURL examples for every endpoint:
+
+![API & Setup page](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/12-playground-api.png)
 
 ---
 

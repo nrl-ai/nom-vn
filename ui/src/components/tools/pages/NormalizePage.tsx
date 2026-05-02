@@ -149,7 +149,7 @@ export function NormalizePage() {
       )}
 
       {detRes && (
-        <Panel label="nhận diện" hint={detRes.reason}>
+        <Panel label="nhận diện" hint={localizeReason(detRes.reason)}>
           <div className="grid grid-cols-2 gap-3">
             <Flag label="is_vietnamese" value={detRes.is_vietnamese} />
             <Flag label="has_diacritics" value={detRes.has_diacritics} />
@@ -213,6 +213,23 @@ export function NormalizePage() {
       )}
     </ToolShell>
   );
+}
+
+/** Translate the canonical English reasons returned by /api/tools/text/detect.
+ *
+ * The HTTP API stays English (it's a public surface read by curl, scripts,
+ * and other clients). The UI is Vietnamese — we localize at render time. */
+function localizeReason(reason: string): string {
+  if (reason.startsWith("Contains Vietnamese-unique")) {
+    return "Có ký tự dấu đặc trưng tiếng Việt";
+  }
+  if (reason.startsWith("Stripped form")) {
+    return "Bản đã bỏ dấu khớp với bảng từ tiếng Việt phổ biến";
+  }
+  if (reason.startsWith("No VN markers")) {
+    return "Không tìm thấy dấu hiệu tiếng Việt";
+  }
+  return reason;
 }
 
 function Flag({ label, value }: { label: string; value: boolean }) {

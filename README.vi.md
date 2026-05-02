@@ -84,21 +84,37 @@ trên ngữ liệu tiếng Việt thực, trong tuần này.
 
 ## Web app — playground đa nhiệm (từ v0.2.30)
 
-Sidebar trái chuyển giữa **chat (RAG trên tài liệu)** và 5 tool stateless — khôi phục dấu, tách từ/câu, chuẩn hoá / nhận diện, bỏ dấu, sinh nhiễu — cùng trang **API & Setup** và **Cài đặt** (auth, chọn backend LLM, top_k mặc định). Bảng màu biên tập, góc sắc, hỗ trợ phím tắt (`Cmd/Ctrl + Enter` để chạy tool).
+Sidebar trái chuyển giữa **Chat (RAG trên tài liệu)** và 5 công cụ stateless — Khôi phục dấu, Tách từ/câu, Chuẩn hoá/nhận diện, Bỏ dấu, Sinh nhiễu — cùng trang **API và cài đặt** và **Cài đặt** (xác thực, chọn backend LLM, top_k mặc định). Bảng màu biên tập, góc sắc, hỗ trợ phím tắt (`Cmd/Ctrl + Enter` để chạy công cụ, biểu tượng bánh răng góc phải để mở Cài đặt).
 
-![Trạng thái welcome — task switcher + spaces sidebar](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
+![Trạng thái welcome — task switcher và sidebar không gian](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/01-welcome.png)
 
-Tool khôi phục dấu với 3 backend (rule / HF seq2seq / LLM) và highlight thay đổi theo từng từ:
+Chat với câu trả lời có trích dẫn dựa trên tài liệu tiếng Việt:
+
+![Chat — câu trả lời thật + citation tiếng Việt](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/02-chat-with-answer.png)
+
+Khôi phục dấu với 3 backend (rule / HF seq2seq / LLM) và highlight thay đổi theo từng từ:
 
 ![Khôi phục dấu](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/07-playground-diacritic.png)
 
-Sinh nhiễu reproducible cho training (`noisy → clean`):
+Tách từ và tách câu, từ ghép được tô màu accent:
+
+![Tách từ và câu](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/09-playground-tokenize.png)
+
+Chuẩn hoá NFC và nhận diện tiếng Việt:
+
+![Chuẩn hoá và nhận diện](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/10-playground-normalize.png)
+
+Sinh nhiễu có thể tái hiện cho training (cặp `noisy → clean`):
 
 ![Sinh nhiễu](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/08-playground-noise.png)
 
-Citation là công dân hạng nhất trong chat. Mỗi số chunk là chip có thể click để xem đoạn nguồn:
+Trang Cài đặt — trạng thái máy chủ, bật/tắt xác thực bearer-token, chọn backend LLM (sinh ra lệnh khởi động sao chép được):
 
-![Citation mở rộng — chunk tiếng Việt hiển thị inline](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/03-citations-expanded.png)
+![Trang Cài đặt](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/13-playground-settings.png)
+
+Trang API và cài đặt — hướng dẫn chạy bằng tiếng Việt và ví dụ cURL cho mọi endpoint:
+
+![Trang API](https://raw.githubusercontent.com/nrl-ai/nom-vn/main/docs/screenshots/12-playground-api.png)
 
 ---
 

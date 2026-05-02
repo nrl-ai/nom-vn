@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.32] — 2026-05-02
+
+### Refreshed screenshot set + Vietnamese-only normalize hint
+
+`docs/screenshots/` regenerated end-to-end via the new
+`scripts/capture_screenshots.py` Playwright harness. Captured a
+real-LLM chat-with-answer screenshot (qwen3:1.7b on Ollama,
+seeded with the demo Truyện Kiều space). Eight playground pages
+covered: welcome, chat-with-answer, diacritic restore, tokenize,
+normalize+detect, strip, noise, API & Setup, Settings.
+
+The Normalize / Detect page now localizes the `reason` string
+returned by `/api/tools/text/detect` (HTTP API stays English; UI
+renders Vietnamese) so the screenshot reads "Có ký tự dấu đặc
+trưng tiếng Việt" instead of the raw English description.
+
+Also: `scripts/capture_screenshots.py` is reusable — point it at
+any running `nom serve` to regenerate the doc-screenshot set.
+
 ## [0.2.31] — 2026-05-02
 
 ### Multi-backend LLM + API & Settings pages
