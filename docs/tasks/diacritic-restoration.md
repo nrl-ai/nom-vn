@@ -41,9 +41,9 @@ và giấy phép.
 | LLM cục bộ (`gemma4:e4b` Q4 qua Ollama) | Apache 2.0 | gguf | 93.18 % | 77.78 % | 87.91 % | 92.71 % | tốt nhất trong nhóm LLM local, chỉ sau ViT5 fine-tune ~5-12 pp; ~0.9 s/câu trên RTX 3090 |
 | LLM cục bộ (`qwen3:1.7b` Q4 qua Ollama) | Apache 2.0 | gguf | 16.60 % | — | — | — | dưới rule baseline 41 %; bỏ qua, dùng gemma4:e4b nếu cần local LLM |
 | LLM đám mây (`gpt-4o-mini`) | Độc quyền | — | 95,37 % | 81,84 % | 89,51 % | 95,79 % | 0,15 USD vào / 0,60 USD ra mỗi 1M token; điểm cân bằng chi phí–chất lượng của OpenAI; **thắng gpt-5.4-mini ở văn học** (+3,16 pp) |
-| LLM đám mây (`gpt-5.4-mini`) | Độc quyền | — | Chưa đo | 78,68 % | 92,06 % | 96,12 % | 0,75 USD vào / 4,50 USD ra mỗi 1M token (gấp 5 lần gpt-4o-mini); hơn 0,3-2,6 pp ở văn bản hành chính/hội thoại nhưng kém ở văn học |
-| LLM đám mây (`gpt-5.4-nano`) | Độc quyền | — | Chưa đo | 73,18 % | 85,15 % | 93,82 % | 0,20 USD vào / 1,25 USD ra mỗi 1M token; **kém gpt-4o-mini ở cả 3 loại văn bản dù mới hơn**; bỏ qua, dùng gpt-4o-mini |
-| LLM đám mây (`claude-haiku-4-5`) | Độc quyền | — | Chưa đo | 81,68 % | 90,49 % | **96,19 %** | 1,00 USD vào / 5,00 USD ra mỗi 1M token; chất lượng nhỉnh hơn gpt-4o-mini ở văn bản trang trọng và hội thoại nhưng đắt hơn ~6 lần; gần như hoà ở văn học |
+| LLM đám mây (`gpt-5.4-mini`) | Độc quyền | — | 94,85 % | 78,68 % | 92,06 % | 96,12 % | 0,75 USD vào / 4,50 USD ra mỗi 1M token (gấp 5 lần gpt-4o-mini); hơn 0,3-2,6 pp ở văn bản hành chính/hội thoại nhưng kém ở văn học |
+| LLM đám mây (`gpt-5.4-nano`) | Độc quyền | — | 92,92 % | 73,18 % | 85,15 % | 93,82 % | 0,20 USD vào / 1,25 USD ra mỗi 1M token; **kém gpt-4o-mini ở cả 3 loại văn bản dù mới hơn**; bỏ qua, dùng gpt-4o-mini |
+| LLM đám mây (`claude-haiku-4-5`) | Độc quyền | — | 95,88 % | 81,68 % | 90,49 % | **96,19 %** | 1,00 USD vào / 5,00 USD ra mỗi 1M token; chất lượng nhỉnh hơn gpt-4o-mini ở văn bản trang trọng và hội thoại nhưng đắt hơn ~6 lần; gần như hoà ở văn học |
 
 Khoảng cách 8.7 pp giữa các register trên Toshiiiii1 xác nhận mô hình
 này over-fit về tiếng Việt formal/business hiện đại. Bản fine-tune

@@ -229,6 +229,16 @@ def _print_human(summary: BenchSummary, results: list[SentenceResult], show_exam
 
 
 def main(argv: list[str] | None = None) -> int:
+    # Optional .env loading so cloud LLM keys (OPENAI_API_KEY,
+    # ANTHROPIC_API_KEY) are picked up from the repo root without
+    # forcing manual exports.
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(REPO_ROOT / ".env")
+    except ImportError:
+        pass
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", type=Path, default=None, help="Write JSON results to this path")
     parser.add_argument("--examples", type=int, default=3, help="Show N example sentences")
