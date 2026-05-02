@@ -537,7 +537,7 @@ def _register_admin_routes_if_available(app: Any) -> None:
         return  # nom-vn-enterprise not installed; skip.
     try:
         register_admin_routes(app)
-    except Exception:  # noqa: BLE001 — license missing / invalid is OK
+    except Exception:
         return
 
 
