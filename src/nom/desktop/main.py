@@ -118,20 +118,31 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         type=int,
         default=DEFAULT_HEIGHT,
     )
+    parser.add_argument(
+        "--server-only",
+        action="store_true",
+        help=(
+            "Run only the embedded FastAPI server (no pywebview window). "
+            "Useful for headless smoke tests, CI runners without a display, "
+            "or for pointing your own browser at the local URL."
+        ),
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parse_args(argv)
 
-    try:
-        import webview
-    except ImportError:
-        print(
-            "nom-app requires pywebview. Install with: pip install nom-vn[desktop]",
-            file=sys.stderr,
-        )
-        return 2
+    if not args.server_only:
+        try:
+            import webview
+        except ImportError:
+            print(
+                "nom-app requires pywebview. Install with: pip install nom-vn[desktop] "
+                "(or pass --server-only to skip the desktop window).",
+                file=sys.stderr,
+            )
+            return 2
 
     port = _find_free_port(args.port)
     url = f"http://{args.host}:{port}"
@@ -148,6 +159,17 @@ def main(argv: list[str] | None = None) -> int:
         )
         _shutdown_server(server, server_thread)
         return 1
+
+    if args.server_only:
+        # Headless mode — run the server until SIGINT / SIGTERM, no UI.
+        print(f"server-only mode — open {url} in your browser; Ctrl+C to stop.", flush=True)
+        try:
+            server_thread.join()
+        except KeyboardInterrupt:
+            pass
+        finally:
+            _shutdown_server(server, server_thread)
+        return 0
 
     webview.create_window(
         title=WINDOW_TITLE,

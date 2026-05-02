@@ -1,0 +1,151 @@
+name: Desktop build (PyInstaller)
+
+# Build the desktop binary on every push to main and on every tag.
+# Each OS runs PyInstaller against the same `desktop/nom-app.spec` —
+# the spec is OS-aware (Windows .ico vs macOS .icns vs Linux PNG icon).
+#
+# Output: a single `dist/nom-app/` folder per OS, uploaded as a build
+# artifact. v0.0 ships the raw folder; v0.8 will wrap it in an
+# OS-specific installer (`.dmg` / `.msi` / `.AppImage`).
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build · ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x86_64
+            artifact: nom-app-linux
+          - os: macos-14  # Apple Silicon
+            label: macos-arm64
+            artifact: nom-app-macos-arm64
+          - os: macos-13  # Intel
+            label: macos-x86_64
+            artifact: nom-app-macos-x86_64
+          - os: windows-latest
+            label: windows-x86_64
+            artifact: nom-app-windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Set up Node (for UI bundle)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Install pip deps
+        # Pull [chat] for FastAPI + uvicorn + ML deps and [desktop] for
+        # PyInstaller + pywebview. tests/ aren't bundled, so [dev] is
+        # not strictly required — but pulling it keeps mypy happy if we
+        # ever add a CI lint step here.
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[chat,desktop]"
+
+      - name: Build UI bundle (pnpm)
+        # The PyInstaller spec force-includes src/nom/chat/ui_dist/ —
+        # build it before invoking PyInstaller so the bundle ships with
+        # the actual app instead of a placeholder.
+        working-directory: ui
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build
+
+      - name: Stage UI bundle into package
+        # scripts/build_ui.sh copies dist/ → src/nom/chat/ui_dist/. On
+        # Windows we run the equivalent in PowerShell.
+        shell: bash
+        run: |
+          mkdir -p src/nom/chat/ui_dist
+          cp -R ui/dist/* src/nom/chat/ui_dist/
+
+      - name: PyInstaller build
+        run: |
+          pyinstaller desktop/nom-app.spec --clean --noconfirm
+
+      - name: Smoke-test the binary — headless server-only mode
+        # CI runners don't have GTK/Qt with Python extensions, so the
+        # full pywebview path can't open a window. ``--server-only``
+        # boots only the embedded FastAPI server (no UI) and stays up
+        # until killed — enough to verify the bundle's import + runtime
+        # path is intact.
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set +e
+          ./dist/nom-app/nom-app --server-only --port 18090 --host 127.0.0.1 > /tmp/nom-app.log 2>&1 &
+          BIN_PID=$!
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null http://127.0.0.1:18090/api/health 2>/dev/null; then
+              echo "✓ binary launched and /api/health responds (after ${i}s)"
+              curl -sS http://127.0.0.1:18090/api/health | head -200
+              kill -TERM "$BIN_PID" 2>/dev/null || true
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "✗ /api/health did not respond within 30s"
+          tail -50 /tmp/nom-app.log || true
+          kill -9 "$BIN_PID" 2>/dev/null || true
+          exit 1
+
+      - name: Smoke-test the binary — Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $proc = Start-Process -FilePath "dist/nom-app/nom-app.exe" `
+            -ArgumentList "--server-only","--port","18090","--host","127.0.0.1" `
+            -RedirectStandardError "C:\\nom-app.log" `
+            -PassThru -NoNewWindow
+          $launched = $false
+          for ($i = 1; $i -le 30; $i++) {
+            try {
+              $r = Invoke-WebRequest -Uri "http://127.0.0.1:18090/api/health" -UseBasicParsing -TimeoutSec 2
+              if ($r.StatusCode -eq 200) {
+                Write-Host "[OK] binary launched and /api/health responds (after $i s)"
+                $launched = $true
+                break
+              }
+            } catch {}
+            Start-Sleep -Seconds 1
+          }
+          Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+          if (-not $launched) {
+            if (Test-Path "C:\\nom-app.log") { Get-Content "C:\\nom-app.log" }
+            exit 1
+          }
+
+      - name: Upload bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/nom-app/
+          retention-days: 14
+          if-no-files-found: error
