@@ -30,11 +30,14 @@ from nom.compliance.audit import (
 )
 from nom.compliance.risk import ClassificationResult, RiskClassifier, SystemSpec
 from nom.compliance.types import RiskTier
+from nom.compliance.wrappers import AuditedLLM, AuditedRAG
 
 __all__ = [
     "AuditChainTamperedError",
     "AuditEvent",
     "AuditLog",
+    "AuditedLLM",
+    "AuditedRAG",
     "ClassificationResult",
     "JSONLStore",
     "RiskClassifier",
