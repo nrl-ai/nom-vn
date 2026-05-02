@@ -228,6 +228,34 @@ class TestAsk:
         body = r.json()
         assert "ollama pull" in body["detail"].lower()
 
+    def test_ask_translates_llamacpp_unreachable_into_503(self) -> None:
+        """LlamaCpp adapter wraps the underlying ConnectError into a
+        RuntimeError with a 'Could not reach llama-server' message —
+        the server should still translate that into a clean 503."""
+
+        class _LlamaCppDownLLM:
+            name = "llamacpp"
+
+            def complete(self, prompt: str, **_: Any) -> str:
+                raise RuntimeError(
+                    "Could not reach llama-server at http://127.0.0.1:9999/v1. "
+                    "Start it with: `llama-server -m <gguf-path> --host 127.0.0.1 --port 8080`"
+                )
+
+        store = MemoryStore(embedder=_FakeEmbedder(), llm=_LlamaCppDownLLM())
+        app = build_app(store=store)
+        c = TestClient(app, raise_server_exceptions=False)
+        sid = c.post("/api/spaces", json={"name": "x"}).json()["id"]
+        c.post(
+            f"/api/spaces/{sid}/materials",
+            files={"file": ("d.txt", b"some content", "text/plain")},
+        )
+        r = c.post(f"/api/spaces/{sid}/ask", json={"question": "anything"})
+        assert r.status_code == 503, r.text
+        # The detail should pass the original message through (which mentions
+        # llama-server) rather than be a generic 500.
+        assert "llama-server" in r.json()["detail"].lower()
+
 
 # ---------------------------------------------------------------------------
 # MemoryStore — directly tested too

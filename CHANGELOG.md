@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.35] — 2026-05-02
+
+### Fix: 503 (not 500) when llama-server is unreachable
+
+End-to-end smoke test caught a transport-error branch that was
+falling through:
+
+- The `LlamaCpp` adapter wraps an underlying `httpx.ConnectError`
+  into a `RuntimeError("Could not reach llama-server at …")` so
+  the user gets an actionable hint at the SDK level.
+- But `server.py` only recognised transport errors by class name
+  (`HTTPStatusError`, `ConnectError`, `Timeout`). The wrapped
+  RuntimeError fell through and surfaced as a 500 Internal Server
+  Error with a generic "Internal Server Error" body.
+
+Now the catch in the `/ask` handler also detects the message
+contents (`"could not reach"`, `"llama-server"`, `"ollama"`,
+`"11434"`) and routes those through `_llm_error_to_503`, so
+unreachable-backend cases consistently return:
+
+- HTTP 503
+- A JSON `{"detail": "..."}` body that mentions `llama-server`
+  or `ollama pull` so the user knows what to do.
+
+New regression test `tests/test_chat.py::TestAsk::test_ask_
+translates_llamacpp_unreachable_into_503` covers it. 399 pytest +
+37 vitest = 436 passing.
+
 ## [0.2.34] — 2026-05-02
 
 ### Re-captured 02-chat-with-answer against matching content

@@ -401,9 +401,21 @@ def build_app(
             # Catch httpx.HTTPStatusError (Ollama 404 / connection refused etc.)
             # and any other LLM transport failure. We don't import httpx at
             # the top of the file so the chat module stays cheap; recognise
-            # the error class by name + message instead.
+            # the error by class name OR by message content (the LlamaCpp
+            # adapter wraps ConnectError into a RuntimeError with a
+            # "Could not reach llama-server" hint — same idea applies).
             cls = type(exc).__name__
-            if "HTTPStatusError" in cls or "ConnectError" in cls or "Timeout" in cls:
+            msg_l = str(exc).lower()
+            transport = (
+                "HTTPStatusError" in cls
+                or "ConnectError" in cls
+                or "Timeout" in cls
+                or "could not reach" in msg_l
+                or "llama-server" in msg_l
+                or "ollama" in msg_l
+                or "11434" in str(exc)
+            )
+            if transport:
                 raise _llm_error_to_503(exc) from exc
             raise
 
