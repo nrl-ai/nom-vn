@@ -67,25 +67,26 @@ diacritic VN Apache-licensed công khai trên Hugging Face trước khi
 đề xuất. Audit ngày 2026-04-26 tìm được một mô hình thắng trên mọi
 metric.
 
-**Phát hiện có sẵn — register-conditional (đo 2026-04-26):**
+**Mô hình có sẵn — phụ thuộc loại văn bản (đo 2026-04-26):**
 
-| Model | License | Disk | Word acc · 55 câu business | Word acc · 800 câu UD-VTB literary |
+| Mô hình | Giấy phép | Disk | Độ chính xác từ · 55 câu kinh doanh | Độ chính xác từ · 800 câu văn học UD-VTB |
 |---|---|---:|---:|---:|
-| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** | Apache 2.0 | ~1 GB | **97.81 %** | **54.14 %** |
-| (cloud `gpt-4o-mini`) | proprietary | — | 95.37 % | **81.84 %** (đo 2026-05-02 trên 800 câu UD-VTB; ~$0.02 spend) |
-| (cloud `gpt-5.4-mini`) | proprietary | — | chưa đo | 78.68 % (đo 2026-05-02; mới hơn nhưng kém gpt-4o-mini trên literary +3.16 pp) |
-| (cloud `gpt-5.4-nano`) | proprietary | — | chưa đo | 73.18 % (đo 2026-05-02; rẻ nhưng kém gpt-4o-mini trên mọi register) |
-| local `gemma4:e4b` Q4 | Apache 2.0 | 9.6 GB | 93.18 % | **77.78 %** (đo 2026-05-02 trên RTX 3090) |
-| local `gemma3:4b` Q4 | Apache 2.0 | 3.3 GB | 89.06 % | **62.05 %** (đo 2026-05-02 trên RTX 3090) |
-| (rule baseline) | — | 0 | 41.06 % | ~41 % (không phụ thuộc register) |
+| **`Toshiiiii1/Vietnamese_diacritics_restoration_5th`** | Apache 2.0 | ~1 GB | **97,81 %** | **89,40 %** |
+| (cloud `gpt-4o-mini`) | Độc quyền | — | 95,37 % | **81,84 %** (đo 2026-05-02 trên 800 câu UD-VTB; chi phí ~0,02 USD) |
+| (cloud `gpt-5.4-mini`) | Độc quyền | — | Chưa đo | 78,68 % (đo 2026-05-02; mới hơn nhưng kém gpt-4o-mini ở văn học -3,16 pp) |
+| (cloud `gpt-5.4-nano`) | Độc quyền | — | Chưa đo | 73,18 % (đo 2026-05-02; rẻ nhưng kém gpt-4o-mini ở mọi loại văn bản) |
+| local `gemma4:e4b` Q4 | Apache 2.0 | 9,6 GB | 93,18 % | **77,78 %** (đo 2026-05-02 trên RTX 3090) |
+| local `gemma3:4b` Q4 | Apache 2.0 | 3,3 GB | 89,06 % | **62,05 %** (đo 2026-05-02 trên RTX 3090) |
+| (sàn quy tắc) | — | 0 | 41,06 % | ~41 % (không phụ thuộc loại văn bản) |
 
-**Toshiiiii1 T5 — drop register-shift là 8 pp, không phải 43 pp**
-(sửa 2026-04-26). Run UD-VTB đầu bị nhầm do tokenization mismatch:
-UD ship câu ở dạng treebank-tokenized (khoảng trắng quanh mọi dấu
-câu, quy ước parsing-tool) trong khi seq2seq model output tiếng Việt
-tự nhiên. So sánh list `.split()` raw làm lệch alignment ngay tại
-dấu câu đầu tiên và sinh ra 0/800 sentence-exact (toán học không thể
-xảy ra). Sau khi `normalize_punct()` cả hai phía:
+**Toshiiiii1 T5 — chênh lệch giữa các loại văn bản chỉ 8 pp, không phải 43 pp**
+(sửa 2026-04-26). Lần đo UD-VTB đầu bị sai do bất khớp về cách tách
+từ: UD lưu câu ở dạng đã tách kiểu treebank (khoảng trắng quanh mọi
+dấu câu, theo quy ước cho công cụ phân tích cú pháp), còn mô hình
+seq2seq xuất ra tiếng Việt tự nhiên. So sánh trực tiếp danh sách
+`.split()` làm lệch căn chỉnh ngay tại dấu câu đầu tiên và sinh ra
+0/800 câu khớp tuyệt đối (về mặt toán học không thể xảy ra). Sau
+khi áp dụng `normalize_punct()` cho cả hai phía:
 
   Corpus 55 câu business:    97.81 % word acc
   UD-VTB literary 800 câu:   89.40 % word acc · 34.25 % sentence-exact
