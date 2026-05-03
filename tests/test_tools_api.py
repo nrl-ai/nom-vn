@@ -272,7 +272,7 @@ class TestTranslate:
         client = self._client('{"translation": "X"}')
         r = client.post(
             "/api/tools/translate",
-            json={"text": "Hello", "source": "ja", "target": "vi"},
+            json={"text": "Hello", "source": "fr", "target": "vi"},
         )
         assert r.status_code == 422
 

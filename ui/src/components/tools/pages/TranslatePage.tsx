@@ -49,13 +49,13 @@ const HF_MODEL_OPTIONS: ReadonlyArray<{
 }> = [
   {
     value: "google/madlad400-3b-mt",
-    label: "MADLAD-400-3B (chuyên dụng, Apache)",
-    hint: "Lần đầu tải khoảng 6 GB.",
+    label: "MADLAD-400-3B — khuyến nghị (chuyên dụng, Apache 2.0)",
+    hint: "Đo trên OPUS-100 EN→VN: chrF 40.92, BLEU 23.39, 260 ms/câu (RTX 3090). Lần đầu tải khoảng 6 GB.",
   },
   {
     value: "facebook/m2m100_418M",
-    label: "m2m100-418M (nhỏ, MIT, chạy CPU được)",
-    hint: "418 M tham số, lần đầu tải khoảng 2 GB.",
+    label: "m2m100-418M (nhỏ, MIT, CPU được)",
+    hint: "Đo EN→VN: chrF 35.73, BLEU 16.33, 870 ms/câu. Lần đầu tải khoảng 2 GB.",
   },
 ];
 
@@ -207,13 +207,20 @@ export function TranslatePage() {
 
   const sameLangWarning = source === target ? "Ngôn ngữ nguồn và đích phải khác nhau." : null;
 
-  const samples = source === "vi" ? VN_TO_EN_SAMPLES : EN_TO_VN_SAMPLES;
+  // Sample sentences are only curated for vi↔en. For other languages
+  // we hide the sample row to avoid confusing users with VN/EN snippets.
+  const samples =
+    source === "vi" && target === "en"
+      ? VN_TO_EN_SAMPLES
+      : source === "en" && target === "vi"
+        ? EN_TO_VN_SAMPLES
+        : [];
 
   return (
     <ToolShell
       icon={Languages}
       title="Dịch thuật"
-      subtitle="Việt ↔ Anh, giữ nguyên định dạng .docx"
+      subtitle="Việt · Anh · 中 · 한 · 日 — giữ nguyên định dạng tệp"
       pending={pending}
       options={
         <>
@@ -236,6 +243,9 @@ export function TranslatePage() {
                 options={[
                   { value: "vi", label: "Tiếng Việt" },
                   { value: "en", label: "English" },
+                  { value: "zh", label: "中文 (Chinese)" },
+                  { value: "ko", label: "한국어 (Korean)" },
+                  { value: "ja", label: "日本語 (Japanese)" },
                 ]}
               />
               <button
@@ -253,6 +263,9 @@ export function TranslatePage() {
                 options={[
                   { value: "vi", label: "Tiếng Việt" },
                   { value: "en", label: "English" },
+                  { value: "zh", label: "中文 (Chinese)" },
+                  { value: "ko", label: "한국어 (Korean)" },
+                  { value: "ja", label: "日本語 (Japanese)" },
                 ]}
               />
             </div>
@@ -328,21 +341,23 @@ export function TranslatePage() {
 
       {isTextMode ? (
         <>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="font-mono text-[11px] uppercase tracking-widest text-ink-mute">
-              Ví dụ
-            </span>
-            {samples.map((s) => (
-              <button
-                key={s.label}
-                type="button"
-                onClick={() => setText(s.text)}
-                className="border border-line bg-paper px-2 py-1 font-mono text-[11px] text-ink-soft hover:border-accent hover:text-accent"
-              >
-                {s.label}
-              </button>
-            ))}
-          </div>
+          {samples.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-mono text-[11px] uppercase tracking-widest text-ink-mute">
+                Ví dụ
+              </span>
+              {samples.map((s) => (
+                <button
+                  key={s.label}
+                  type="button"
+                  onClick={() => setText(s.text)}
+                  className="border border-line bg-paper px-2 py-1 font-mono text-[11px] text-ink-soft hover:border-accent hover:text-accent"
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           <TextInput
             value={text}

@@ -625,10 +625,18 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             "hf_models": [
                 {
                     "id": "google/madlad400-3b-mt",
-                    "label": "MADLAD-400-3B (T5 enc-dec, 3 B)",
+                    "label": "MADLAD-400-3B (T5 enc-dec, 3 B) — recommended",
                     "tier": "accuracy",
                     "params_m": 3000,
                     "license": "Apache 2.0",
+                    "measured_en2vi": {
+                        "chrf": 0.4092,
+                        "bleu": 23.39,
+                        "diacritic_recall": 0.5683,
+                        "latency_ms_p50": 260,
+                        "corpus": "OPUS-100 (300 sent)",
+                        "hardware": "RTX 3090 fp16",
+                    },
                 },
                 {
                     "id": "facebook/m2m100_418M",
@@ -636,6 +644,14 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
                     "tier": "fast",
                     "params_m": 418,
                     "license": "MIT",
+                    "measured_en2vi": {
+                        "chrf": 0.3573,
+                        "bleu": 16.33,
+                        "diacritic_recall": 0.5306,
+                        "latency_ms_p50": 870,
+                        "corpus": "OPUS-100 (300 sent)",
+                        "hardware": "RTX 3090 fp16",
+                    },
                 },
             ],
         }

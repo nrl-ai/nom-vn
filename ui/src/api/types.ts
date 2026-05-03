@@ -148,7 +148,7 @@ export interface LanguageRes {
 // Translation — single string + file upload. Mirrors
 // /api/tools/translate and /api/tools/translate/file in
 // src/nom/chat/tools_api.py.
-export type TranslateLang = "en" | "vi";
+export type TranslateLang = "en" | "vi" | "zh" | "ko" | "ja";
 export type TranslateBackend = "llm" | "hf";
 
 export interface TranslateReq {

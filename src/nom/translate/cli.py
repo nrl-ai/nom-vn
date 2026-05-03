@@ -35,7 +35,7 @@ def add_subparser(subparsers: argparse._SubParsersAction[Any]) -> None:
         "--src",
         dest="source",
         default="vi",
-        choices=["en", "vi"],
+        choices=["en", "vi", "zh", "ko", "ja"],
         help="Source language. Default: vi.",
     )
     p.add_argument(
@@ -43,7 +43,7 @@ def add_subparser(subparsers: argparse._SubParsersAction[Any]) -> None:
         "--tgt",
         dest="target",
         default="en",
-        choices=["en", "vi"],
+        choices=["en", "vi", "zh", "ko", "ja"],
         help="Target language. Default: en.",
     )
     p.add_argument(

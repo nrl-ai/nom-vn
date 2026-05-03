@@ -109,7 +109,7 @@ def test_empty_input_short_circuits() -> None:
 def test_rejects_unsupported_language_pair() -> None:
     llm = _FakeLLM("X")
     with pytest.raises(ValueError, match="unsupported language pair"):
-        LLMTranslator(llm=llm, source_lang="ja", target_lang="vi")
+        LLMTranslator(llm=llm, source_lang="fr", target_lang="vi")
 
 
 def test_rejects_same_source_and_target() -> None:

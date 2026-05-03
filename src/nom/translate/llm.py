@@ -26,6 +26,9 @@ __all__ = ["LLMTranslator"]
 _LANG_NAMES: dict[str, str] = {
     "en": "English",
     "vi": "Vietnamese",
+    "zh": "Chinese (Mandarin)",
+    "ko": "Korean",
+    "ja": "Japanese",
 }
 
 

@@ -1,0 +1,21 @@
+{
+  "task": "translation",
+  "direction": "vi2en",
+  "backend": "hf",
+  "model": "google/madlad400-3b-mt",
+  "precision": "fp16",
+  "corpus": "benchmarks/data/opus_100_envi/test/vie_Latn.jsonl",
+  "reference": "benchmarks/data/opus_100_envi/test/eng_Latn.jsonl",
+  "n_sentences": 300,
+  "warmup_calls": 3,
+  "best_of_n": 1,
+  "chrf": 0.4479,
+  "bleu": 27.12,
+  "diacritic_recall": null,
+  "cjk_bleed_chars": 0,
+  "latency_ms_p50": 210.8,
+  "latency_ms_mean": 247.5,
+  "transformers_version": "4.57.6",
+  "sacrebleu_version": "2.6.0",
+  "run_date": "2026-05-03"
+}

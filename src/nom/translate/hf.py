@@ -24,6 +24,9 @@ __all__ = ["HFTranslator"]
 _LANG_NAMES: dict[str, str] = {
     "en": "English",
     "vi": "Vietnamese",
+    "zh": "Chinese (Mandarin)",
+    "ko": "Korean",
+    "ja": "Japanese",
 }
 _MODEL_CACHE: dict[str, tuple[Any, Any]] = {}
 _CACHE_LOCK = threading.Lock()
