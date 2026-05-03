@@ -26,8 +26,12 @@ also no safetensors).
 ## Setup
 
 ```bash
-# Bench-only deps (added to pyproject.toml [project.optional-dependencies])
-pip install -e ".[translate]"     # transformers + torch + sacrebleu
+# Bench-only deps. transformers MUST be <5 — transformers 5.x mishandles
+# MADLAD-400's tied-weights config (input/output embeddings stay
+# de-tied) and the model emits "10000000000000♠0.00..." for every
+# input regardless of prompt. Verified on transformers 5.7.0, fixed
+# by downgrading to 4.x.
+pip install 'transformers<5' torch>=2.0 sacrebleu>=2.4 sentencepiece>=0.1.99
 ```
 
 For Ollama-backed runs (Qwen3-8B, etc.):
