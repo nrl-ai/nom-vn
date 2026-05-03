@@ -18,6 +18,15 @@ Hai bộ thực thể, chọn theo nhu cầu:
 Backend mặc định: regex (nhanh, deterministic, không cần model). Cần
 độ chính xác cao hơn, đổi sang HF model qua plugin doanh nghiệp.
 
+> **Trạng thái thật (2026-05-03):** chỉ regex được ship trong v0. Tests
+> verify đúng các pattern do chính chúng tôi viết — đó là test cấu
+> trúc, không phải chỉ số học từ dữ liệu. Path PhoBERT fine-tune cho
+> `LAW_REF` + `CONTRACT_PARTY` (mục tiêu F1 ≥ 0.85) cần ~70-90 giờ
+> chú thích và là Tier 3 work theo
+> [`docs/sota_vn_2026q2_expansion.md`](../sota_vn_2026q2_expansion.md).
+> Đến khi đó, regex bắt được hầu hết hợp đồng VN hiện đại nhưng sẽ
+> bỏ sót pattern không chuẩn.
+
 ## Cách dùng
 
 ### Trong giao diện web

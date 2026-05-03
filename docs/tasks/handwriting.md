@@ -7,12 +7,33 @@ phải engine OCR truyền thống.
 
 ## TL;DR — gợi ý của chúng tôi
 
-`pip install "nom-vn[handwriting]"` để có sẵn `transformers` + `torch`.
-Mặc định dùng [`5CD-AI/Vintern-1B-v3_5`](https://huggingface.co/5CD-AI/Vintern-1B-v3_5)
+`pip install "nom-vn[ocr-handwriting]"` để có sẵn `transformers` +
+`torch` + `torchvision` + `timm` + `pillow`. Mặc định dùng
+[`5CD-AI/Vintern-1B-v3_5`](https://huggingface.co/5CD-AI/Vintern-1B-v3_5)
 (MIT, 0.9 B tham số, safetensors). Lần đầu tải khoảng 1.8 GB.
 
 Yêu cầu: GPU 4–6 GB VRAM cho tốc độ chấp nhận được; CPU chạy được
 nhưng mất 1–2 phút mỗi ảnh.
+
+### Đo nội bộ trên `synthetic_ocr_vi` (2026-05-03)
+
+Bench đầu tay trên dòng chữ in tiếng Việt (đẩy qua Vintern, không
+phải Tesseract — để đo phần "Vintern xử lý đúng dòng in clean như
+thế nào"):
+
+| Điều kiện | n | Mean CER | Exact-match |
+|---|---:|---:|---:|
+| `clean` (1 font, nền trắng) | 20 | **0.47 %** | 16/20 |
+| `noisy` (cùng nội dung + nhiễu/jitter) | 20 | **0.37 %** | 17/20 |
+
+Phần lớn "lỗi" còn lại là biến thể chính tả VN hợp lệ (`hoà` ↔ `hòa`)
+mà CER tính là khác biệt. n=20 còn nhỏ — bench trên 200+ ảnh trước khi
+publish con số "VN handwriting CER" chính thức.
+
+Tập eval ([`nrl-ai/vn-synthetic-ocr`](https://huggingface.co/datasets/nrl-ai/vn-synthetic-ocr),
+CC0) đã publish trên HF. Baseline JSON:
+[`benchmarks/accuracy/vintern_ocr_clean_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/vintern_ocr_clean_baseline.json)
++ [`vintern_ocr_noisy_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/vintern_ocr_noisy_baseline.json).
 
 ## Cách dùng
 
@@ -66,21 +87,25 @@ cho phần Tesseract không làm được (chữ viết tay).
 
 ## Giới hạn đã biết
 
-- **Không có audit hệ thống về độ chính xác trên VN handwriting.**
-  Chỉ số trên model card là thử nghiệm nội bộ Vintern (không được
-  benchmark độc lập). Số ước lượng:
-  - Chữ in scan rõ: CER ≈ 5 %
-  - Chữ viết tay người trưởng thành nét rõ: CER ≈ 15 %
-  - Chữ viết tay nhanh hoặc nét nguệch ngoạc: CER ≈ 30 %+
-- **Phụ thuộc chất lượng ảnh.** Ảnh mờ, tối, hoặc nghiêng > 15° làm
++ **Đã đo trên chữ in synthetic (CER 0.47 % clean / 0.37 % noisy, n=20),
+  chưa đo độc lập trên chữ viết tay thực.** Mọi con số chữ-viết-tay
+  bên dưới là **ước lượng**, chưa benchmark first-party:
+  + Chữ in scan rõ: CER ≈ 5 % (cao hơn synthetic vì layout phức tạp)
+  + Chữ viết tay người trưởng thành nét rõ: CER ≈ 15 % (ước lượng)
+  + Chữ viết tay nhanh hoặc nét nguệch ngoạc: CER ≈ 30 %+ (ước lượng)
+
+  Bench đầu tay trên handwriting thật là task Tier 2 — sẽ chạy trên
+  `brianhuster/VietnameseOCRdataset` (~7 k ảnh, Apache-2.0) và
+  cập nhật con số ở đây trong cùng commit như JSON baseline.
++ **Phụ thuộc chất lượng ảnh.** Ảnh mờ, tối, hoặc nghiêng > 15° làm
   giảm chất lượng đáng kể. Crop sạch đầu vào trước.
-- **Không xử lý cấu trúc form.** Vintern trả về văn bản tuyến tính,
++ **Không xử lý cấu trúc form.** Vintern trả về văn bản tuyến tính,
   không nhận diện ô / cột / nhãn. Cho biểu mẫu có cấu trúc, kết hợp
   với rule-based field-extraction sau OCR.
-- **Latency cao.** 5–15 giây/ảnh trên GPU 8 GB là điển hình. Cho
++ **Latency cao.** 5–15 giây/ảnh trên GPU 8 GB là điển hình. Cho
   pipeline hàng loạt nên dùng [Hàng đợi](./jobs.md) thay vì chờ
   request HTTP.
-- **Tiếng Việt thuần;** mô hình đa ngôn ngữ về cơ bản nhưng chưa được
++ **Tiếng Việt thuần;** mô hình đa ngôn ngữ về cơ bản nhưng chưa được
   đo trên tài liệu lai EN/VN.
 
 ## Mô hình thay thế
@@ -93,7 +118,7 @@ cho phần Tesseract không làm được (chữ viết tay).
 
 ## Liên quan
 
-- [Chuyển định dạng (OCR chữ in)](./convert.md) — Tesseract + Pdfium.
-- [Khôi phục dấu](./diacritic-restoration.md) — chạy sau OCR để bù
++ [Chuyển định dạng (OCR chữ in)](./convert.md) — Tesseract + Pdfium.
++ [Khôi phục dấu](./diacritic-restoration.md) — chạy sau OCR để bù
   dấu Tesseract bỏ sót.
-- [Sửa chính tả](./spell-correction.md) — lượt cuối làm sạch lỗi OCR.
++ [Sửa chính tả](./spell-correction.md) — lượt cuối làm sạch lỗi OCR.

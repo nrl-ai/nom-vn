@@ -6,13 +6,34 @@ Trung / Nam) và đầu ra dấu thời gian theo từng đoạn.
 
 ## TL;DR — gợi ý của chúng tôi
 
-`pip install "nom-vn[stt]"` để có sẵn `transformers` + `torchaudio`.
-Mặc định dùng [`vinai/PhoWhisper-large`](https://huggingface.co/vinai/PhoWhisper-large)
+`pip install "nom-vn[stt]"` để có sẵn `transformers` + `torch` +
+`librosa` + `soundfile`. Mặc định dùng
+[`vinai/PhoWhisper-large`](https://huggingface.co/vinai/PhoWhisper-large)
 (BSD-3, 1.5 B tham số, 844 giờ huấn luyện trên audio VN) — fine-tune
 từ `whisper-large-v3`. Lần đầu tải khoảng 3 GB.
 
 Yêu cầu: GPU 6 GB VRAM cho real-time; CPU chạy được nhưng chậm 5 ×
 độ dài audio.
+
+### Đo nội bộ — trạng thái thật (2026-05-03)
+
+Chỉ 3 mẫu thử trên `doof-ferb/Speech-MASSIVE_vie` test split, **chưa
+phải bench đầy đủ**:
+
+| Mô hình | n | Mean WER |
+|---|---:|---:|
+| `vinai/PhoWhisper-large` | 3 | 15.2 % |
+| `openai/whisper-large-v3` | 3 | 15.2 % |
+
+Hai mô hình **bằng nhau** trên tập nhỏ này — lỗi chính: 1 trộn từ
+đồng âm (`múi giờ` ↔ `mỗi giờ`) + 1 thay từ (`xếp` ↔ `sắp`) + chênh
+lệch dấu câu / viết hoa. Số 6.4 % WER ở bảng dưới là claim của VinAI
+trên model card, chưa được tái lập trên tập đại trà ở đây.
+
+Baseline JSON:
+[`benchmarks/accuracy/stt_speech_massive_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/stt_speech_massive_baseline.json).
+Tier 2 sẽ bench trên ViMD 3-region split (Bắc 40.6 h / Trung 31.5 h /
+Nam 30.5 h) trước khi claim "PhoWhisper hơn Whisper-v3 trên VN".
 
 ## Cách dùng
 

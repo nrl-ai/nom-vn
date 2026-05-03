@@ -65,6 +65,14 @@ diễn ngôn (đoạn mở, thân, kết).
   bài rồi nén lại — không phát sinh ý mới hoặc paraphrase mạnh. Nếu
   cần tóm tắt phong cách "human", đổi sang LLM trò chuyện qua
   `nom.chat` với prompt phù hợp.
+- **Hallucination số liệu.** Bench nội bộ
+  ([baseline JSON](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/summarize_wiki_vi_baseline.json),
+  n=10 trên `wiki_vi`): **1/10 mẫu thêm năm "2025" không có trong
+  input** (bài về TP.HCM). Trên một mẫu khác (đoạn 234 ký tự về
+  Việt Nam), mô hình tự bịa ra con số GDP "6,8 % – 7,0 %" không có
+  trong nguồn. **Không dùng cho tổng hợp pháp lý / tài chính** mà
+  không kiểm chứng số liệu — số mẫu nhỏ nên đây là cảnh báo định
+  hướng, không phải đo định lượng đầy đủ.
 - **Ngôn ngữ.** Chỉ tiếng Việt; văn bản tiếng Anh sẽ được mô hình cố
   dịch thô — không khuyến nghị.
 

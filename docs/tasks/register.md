@@ -14,14 +14,23 @@ Phân loại đoạn văn tiếng Việt theo bốn lớp văn phong: **trang tr
 
 Hai backend, chọn theo ngân sách:
 
-| Backend | Cài đặt | Độ chính xác | Tốc độ |
-| --- | --- | --- | --- |
-| **Heuristic** *(mặc định)* | Không cần gì | ~70–80 % | ~1 ms |
-| **PhoBERT-base** | `pip install "nom-vn[register]"` | > 85 % | ~30 ms |
+| Backend | Cài đặt | Độ chính xác | Tốc độ | Trạng thái |
+| --- | --- | --- | --- | --- |
+| **Heuristic** *(mặc định)* | Không cần gì | ~70–80 % (chưa đo trên held-out) | ~1 ms | đã ship |
+| **PhoBERT-base** | `pip install "nom-vn[diacritic-hf]"` (nay đủ) | mục tiêu macro-F1 ≥ 0.85 | ~30 ms | code sẵn — bench đang chờ GPU run |
 
 Heuristic chạy ngay cục bộ — phù hợp khi dùng một lần hoặc batch nhỏ.
-PhoBERT cho production hoặc khi cần độ chính xác cao trên register
-ranh giới (kinh doanh ↔ trang trọng).
+PhoBERT là mục tiêu sản xuất; script huấn luyện ở
+[`training/register/`](https://github.com/nrl-ai/nom-vn/tree/main/training/register)
+sẵn sàng — chỉ cần GPU và vài giờ. Cho đến khi checkpoint publish lên
+HF (`nrl-ai/vn-register-phobert-base`, dự kiến v0.4), backend
+PhoBERT cần truyền `model_id` thủ công.
+
+> **Trung thực:** số "70–80 %" là ước lượng — heuristic được test trên
+> chính các từ-mốc của nó (tautological), nên chưa có con số macro-F1
+> trên tập held-out đáng tin. Đó là lý do chúng tôi không claim một
+> con số duy nhất cho lexicon ở đây. Nếu cần routing chất lượng cao,
+> chạy training script ngay.
 
 ## Cách dùng
 

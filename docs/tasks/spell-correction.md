@@ -199,11 +199,16 @@ bmd1905 (400M vs 220M của chúng tôi) không đáng kể — fine-tune có
 chủ đích trên phân phối nhiễu 8-register lấn át mô hình correction
 chung chung.
 
-## Bộ dữ liệu — `nrl-ai/*` (đang xếp hàng publish)
+## Bộ dữ liệu — `nrl-ai/*`
 
-Bộ dữ liệu huấn luyện và đánh giá sẽ được publish khi cả hai tier ship
-xong, theo cùng quy ước với bộ dữ liệu diacritic:
+Hai bộ synthetic + một bộ OOD thực tế:
 
+- [`nrl-ai/vn-spell-correction-eval-real`](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-eval-real)
+  — **đã publish** (2026-05-03, CC0). 150 cặp `(noisy, clean)` được
+  hand-curate từ 6 nguồn lỗi tiếng Việt thực tế (forum / mobile / telex
+  / OCR / legal / news, mỗi register 25 câu). Đây là tập OOD ngoài
+  phân phối training, dùng để verify mô hình không over-fit bộ sinh
+  nhiễu synthetic. Load qua `datasets.load_dataset("nrl-ai/vn-spell-correction-eval-real", "<register>", split="train")`.
 - `nrl-ai/vn-spell-correction-eval` — 2.098 cặp (noisy, clean) trên
   4 register × 2 mức nhiễu (light + heavy). Sinh tất định từ các slice
   eval diacritic qua `nom.text.noise`.
