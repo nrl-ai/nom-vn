@@ -511,6 +511,71 @@ JSON:
 
 ---
 
+## Module: `nom.convert` — *đã ship v0.3*
+
+PDF / ảnh → DOCX với chiến lược ưu tiên lớp văn bản trước, OCR
+fallback qua `pdfium2` + Tesseract. Đo trên kho công khai
+[`nrl-ai/vn-ocr-documents-eval`](https://huggingface.co/datasets/nrl-ai/vn-ocr-documents-eval)
+v0.4 — 156 tài liệu, 8 cấu hình.
+
+### Kho đánh giá v0.4 — *đã ship 2026-05-03*
+
+| Cấu hình | n | Nguồn | License |
+|---|---:|---|---|
+| `real` | 9 | chinhphu.vn + hanoi.gov.vn (ảnh quét đã ký) | PD theo Luật SHTT VN, Điều 15 |
+| `formal` | 24 | UDHR-vie + hiệu ứng quét tổng hợp | CC0 (text PD) |
+| `news_business` | 24 | wiki_vi + hiệu ứng quét tổng hợp | CC-BY-SA 4.0 |
+| `conversational` | 24 | tatoeba_vi + hiệu ứng quét tổng hợp | CC-BY 2.0 FR |
+| `literary` | 14 | wikisource Truyện Kiều + hiệu ứng quét | PD |
+| `receipt` | 21 | 7 mẫu × 3 seed + hiệu ứng quét | CC0 |
+| `contract` | 20 | 5 mẫu × 4 seed + hiệu ứng quét | CC0 |
+| `form` | 20 | 5 mẫu × 4 seed + hiệu ứng quét | CC0 |
+
+Pipeline hiệu ứng quét 8 bước (deterministic theo seed): nghiêng
+giấy ±0,5-2,5°, vignette góc, tông giấy hơi vàng, nhiễu hạt
+gaussian, vạch ngang máy quét, blur nhẹ, viền tối mép, JPEG
+round-trip 72-92 chất lượng. Ba profile (`office_scan` /
+`old_photocopy` / `clean_digital`) chọn theo hash doc_id để mỗi
+tài liệu trong cùng cấu hình trông khác nhau.
+
+### `nom.convert.convert_to_docx` trên v0.4 — *đo 2026-05-03*
+
+Tesseract 5 với gói `vie+eng`, không tinh chỉnh, đường OCR fallback:
+
+| Cấu hình | n | CER (chuẩn hoá khoảng trắng) |
+|---|---:|---:|
+| `real` (ảnh quét chính phủ thật) | 9 | **12,62 %** |
+| `synthetic_scan` tổng hợp | 147 | mean ~6 %, median ~4 % |
+| **Tổng** (cả 156 tài liệu) | **156** | **mean 6,66 % / median 4,32 %** |
+
+- **Ảnh quét thật khó hơn ~13 lần** so với ảnh tổng hợp — dấu mộc
+  đỏ, chữ ký tay, watermark mờ, từ viết tắt hành chính ("KT.",
+  "Lưu: VT") là phần lớn lỗi còn lại.
+- Throughput: ~1,3 giây / tài liệu trên CPU đơn lõi.
+- Thông số đo trên cả 8 tính năng nom-vn (`bench_features_e2e.py`):
+  102 LAW_REF / 203 DATE / 89 MONEY / 59 PHONE_VN / **39 ID_VN** —
+  cấu hình hợp đồng và đơn từ là nơi đầu tiên có CCCD trong kho.
+
+JSON đầu vào tái lập:
+[`benchmarks/results/baseline_features_e2e_v4.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_features_e2e_v4.json).
+Lệnh tái lập:
+
+```bash
+python benchmarks/data/vn_documents_ocr_v2/_synth_corpus.py
+python benchmarks/accuracy/bench_features_e2e.py
+```
+
+### Cảnh báo phương pháp
+
+- `real` mới chỉ 9 tài liệu; mở rộng lên 20+ cần ~110 phút chú
+  thích thủ công thêm 11 trang.
+- `synthetic_scan` dùng văn bản gốc làm ground truth hoàn hảo nhưng
+  hiệu ứng quét **không mô phỏng đầy đủ cấu trúc thư hành chính**
+  (mộc, chữ ký tay, ô đóng dấu, lề trang). Phù hợp đo nhận dạng ký
+  tự, không thay thế được kho ảnh quét gốc.
+
+---
+
 ## Module: `nom.nlp.ner_legal` — *đã ship v0.3, regex-only*
 
 Bộ pattern bổ sung cho `RegexNERModel` (đã có trong `nom.nlp.ner`)

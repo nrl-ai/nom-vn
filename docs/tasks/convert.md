@@ -97,34 +97,63 @@ convert_to_docx("scan.pdf", "scan.docx", ocr_language="vie+eng")
 translate_docx("scan.docx", "scan.en.docx", translator)
 ```
 
-## Số đo nội bộ (2026-05-03)
+## Số đo nội bộ — v0.4 (2026-05-03)
 
-Đo trên `nrl-ai/vn-ocr-documents-eval`
-([HuggingFace](https://huggingface.co/datasets/nrl-ai/vn-ocr-documents-eval),
-CC0): 12 tài liệu tiếng Việt thật quy mô A4 (hợp đồng, hoá đơn / biên
-lai, công văn / quyết định, đơn từ), được lưu dưới dạng PDF chỉ có
-ảnh để buộc đi qua đường OCR fallback.
+Đo trên kho đánh giá
+[`nrl-ai/vn-ocr-documents-eval`](https://huggingface.co/datasets/nrl-ai/vn-ocr-documents-eval)
+v0.4: **156 tài liệu** trên 8 cấu hình, chia thành hai nhóm chính —
+**ảnh quét thật** từ `chinhphu.vn` + `hanoi.gov.vn` (9 tài liệu,
+ground truth do người đọc xác minh trực tiếp) và **ảnh quét tổng
+hợp** rendered từ văn bản tiếng Việt công khai (UDHR, wiki_vi,
+tatoeba, wikisource Truyện Kiều) cộng các mẫu hoá đơn / hợp đồng /
+đơn từ tham số hoá, áp dụng pipeline 8 bước hiệu ứng máy quét
+(skew, vignette, hơi vàng giấy, nhiễu hạt, banding máy quét, blur,
+viền tối, JPEG round-trip).
 
-| Loại tài liệu | CER trung bình | n |
-|---|---:|---:|
-| Hợp đồng | **0,15 %** | 3 |
-| Đơn từ | 0,10 % | 3 |
-| Công văn / quyết định | 0,09 % | 3 |
-| Hoá đơn / biên lai | 0,84 % | 3 |
-| **Tổng** | **0,30 %** | 12 |
+| Cấu hình | n | Nguồn | CER trung bình (chuẩn hoá khoảng trắng) |
+|---|---:|---|---:|
+| `real` | 9 | chinhphu.vn + hanoi.gov.vn (ảnh quét đã ký) | **12,62 %** |
+| `formal` | 24 | UDHR-vie + hiệu ứng quét | ~9 % |
+| `news_business` | 24 | wiki_vi + hiệu ứng quét | ~7 % |
+| `conversational` | 24 | tatoeba + hiệu ứng quét | ~6 % |
+| `literary` | 14 | Wikisource Truyện Kiều + hiệu ứng quét | ~10 % |
+| `receipt` | 21 | 7 mẫu × 3 seed (hoá đơn, biên lai, phiếu chi, vé máy bay, ủng hộ, điện nước, viện phí) | ~3 % |
+| `contract` | 20 | 5 mẫu × 4 seed (lao động, thuê nhà, kinh tế, dịch vụ, vay) | ~3 % |
+| `form` | 20 | 5 mẫu × 4 seed (nghỉ việc, xác nhận cư trú, nhập học, nghỉ phép, đăng ký kinh doanh) | ~3 % |
+| **Tổng** | **156** | | **mean 6,66 %, median 4,32 %** |
 
-Throughput: 1,13 tài liệu / giây trên CPU đơn lõi (Intel
-i7-13700H). CER tính sau khi chuẩn hoá khoảng trắng (gộp các chuỗi
-khoảng trắng thành một dấu cách, NFC).
+Throughput: ~1,3 giây / tài liệu trên CPU đơn lõi (Intel i7-13700H).
+CER tính sau khi chuẩn hoá NFC + gộp các chuỗi khoảng trắng thành
+một dấu cách.
 
-JSON kết quả:
-[`benchmarks/results/baseline_convert_documents.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_convert_documents.json).
-Tái lập: `python benchmarks/accuracy/bench_convert_documents.py`.
+**Cảm nhận về độ khó**: ảnh quét thật (cấu hình `real`) **khó hơn
+~13 lần** so với ảnh tổng hợp do có dấu mộc đỏ, chữ ký tay, hơi
+nhoè, watermark mờ ở nền và các từ viết tắt hành chính
+("KT.", "Lưu: VT") mà gói `vie` của Tesseract không xử lý tốt.
 
-**Cảnh báo n nhỏ:** 12 tài liệu chỉ là smoke test; con số 0,30 % CER
-là chỉ báo định hướng, không phải đo định lượng đầy đủ. Mở rộng
-sang công văn công khai từ vbpl.vn (đợt sau) sẽ cho con số đáng
-tin cậy hơn.
+JSON kết quả + ma trận tính năng đầu cuối:
+[`benchmarks/results/baseline_features_e2e_v4.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_features_e2e_v4.json).
+
+Tái lập từ một bản clone sạch:
+
+```bash
+pip install -e ".[doc]"
+python benchmarks/data/vn_documents_ocr_v2/_synth_corpus.py
+python benchmarks/accuracy/bench_features_e2e.py
+```
+
+**Cảnh báo phương pháp:**
+
+- 9 ảnh quét thật vẫn là tập nhỏ; mở rộng lên 20+ cần chú thích thủ
+  công thêm 11 tài liệu nữa (tốc độ ~10 phút mỗi trang).
+- 147 tài liệu tổng hợp dùng văn bản gốc làm ground truth hoàn hảo,
+  đánh đổi: chữ in DejaVuSans + hiệu ứng quét **không có cấu trúc
+  thư hành chính đầy đủ** (mộc, chữ ký, ô đóng dấu) như bản quét
+  thật. Phù hợp cho đo nhận dạng ký tự cấp dòng, không thay thế
+  được kho ảnh quét gốc.
+- Phân loại thực thể trên kho v0.4: **102 LAW_REF, 203 DATE, 89
+  MONEY, 59 PHONE_VN, 39 ID_VN** — bản v0.3 chưa có ID_VN nào
+  vì chưa có hợp đồng / đơn từ chứa CCCD.
 
 ## Yêu cầu hệ thống
 
