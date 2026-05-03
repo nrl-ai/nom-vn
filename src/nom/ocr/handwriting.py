@@ -172,14 +172,19 @@ class VinternHandwritingOcr:
                 "card and update the wrapper."
             )
 
-        # Vintern's processor builds pixel_values internally given a path
-        # or PIL image; some forks expect a tensor directly. Try the
-        # PIL-image path first (matches the official card example).
+        # Vintern (InternVL family) wants pixel_values as a `[N_patches, 3,
+        # 448, 448]` torch FloatTensor — NOT a PIL.Image. The PIL path on
+        # the model card uses a `load_image()` helper that does the dynamic-
+        # tiling preprocess. We inline a single-tile fallback here (no
+        # tiling, just resize to 448²) — sufficient for OCR-on-page; a
+        # follow-up can add the dynamic patch-grid for very dense pages.
         from nom.text import normalize
+
+        pixel_values = _preprocess_for_internvl(img, model)
 
         text = model.chat(
             tokenizer,
-            img,
+            pixel_values,
             _OCR_PROMPT,
             generation_config={
                 "max_new_tokens": self.max_new_tokens,
@@ -194,3 +199,33 @@ class VinternHandwritingOcr:
             model=self.model_id,
             confidence=None,
         )
+
+
+# ---------------------------------------------------------------------- #
+# InternVL-style preprocess — Vintern is built on InternVL's vision
+# tower; pixel_values must be `[N_patches, 3, 448, 448]` ImageNet-
+# normalized FloatTensor. This single-tile path is sufficient for line /
+# page OCR; a dynamic-patch-grid pass for dense multi-column documents
+# can be added when we hit that use case.
+# ---------------------------------------------------------------------- #
+
+
+def _preprocess_for_internvl(img: Any, model: Any) -> Any:
+    """Convert a PIL.Image to ``pixel_values`` matching the model's device
+    + dtype. Single-tile fallback (no dynamic patching)."""
+    # torchvision lacks py.typed; the wrapper is `Any`-typed end-to-end so
+    # mypy doesn't lose anything by hiding the imports under `Any`.
+    transforms_mod: Any = __import__("torchvision.transforms", fromlist=["Compose"])
+    fn_mod: Any = __import__("torchvision.transforms.functional", fromlist=["InterpolationMode"])
+
+    transform = transforms_mod.Compose(
+        [
+            transforms_mod.Resize((448, 448), interpolation=fn_mod.InterpolationMode.BICUBIC),
+            transforms_mod.ToTensor(),
+            transforms_mod.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ]
+    )
+    tile: Any = transform(img).unsqueeze(0)  # [1, 3, 448, 448]
+    target_device = next(model.parameters()).device
+    target_dtype = next(model.parameters()).dtype
+    return tile.to(device=target_device, dtype=target_dtype)

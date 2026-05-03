@@ -219,18 +219,16 @@ class WhisperSTT:
             self._pipeline = _load_pipeline(self.model_id, self.device)
 
         # Whisper-large-v3 supports ``generate_kwargs={"language": "vi"}``
-        # to force a target language — useful when input is mostly VN
-        # but the model auto-detects EN for short clips. Default to None
-        # (let model detect) so code-switch audio routes correctly.
-        generate_kwargs: dict[str, Any] = {}
+        # to force a target language — useful when input is mostly VN but
+        # the model auto-detects EN for short clips. Pipeline requires
+        # the kwarg be omitted (NOT passed as None) when empty — passing
+        # ``None`` triggers ``TypeError: 'NoneType' object is not iterable``
+        # in transformers' _sanitize_parameters.
+        pipe_kwargs: dict[str, Any] = {"return_timestamps": return_timestamps}
         if language:
-            generate_kwargs["language"] = language
+            pipe_kwargs["generate_kwargs"] = {"language": language}
 
-        result = self._pipeline(
-            _audio_input(audio),
-            return_timestamps=return_timestamps,
-            generate_kwargs=generate_kwargs or None,
-        )
+        result = self._pipeline(_audio_input(audio), **pipe_kwargs)
         text = _coerce_text(str(result.get("text", "")))
         segments = _build_segments(result.get("chunks")) if return_timestamps else None
         return TranscriptionResult(
