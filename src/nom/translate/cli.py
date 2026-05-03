@@ -119,6 +119,31 @@ def run(args: argparse.Namespace) -> int:
         f"({stats.chars_in:,} → {stats.chars_out:,} chars).",
         file=sys.stderr,
     )
+
+    # Loud failure mode: every translatable unit failed. Almost always
+    # means the LLM backend is unreachable (Ollama not running or model
+    # not pulled). Silent CLI exit code 1 isn't enough — print a hint
+    # so the user knows what to check.
+    if (translated or 0) == 0 and (failed or 0) > 0:
+        if args.backend == "ollama":
+            model_hint = args.model or "qwen3:8b"
+            print(
+                f"\nALL paragraphs failed to translate. Common causes:\n"
+                f"  · Ollama not running:        `ollama serve` (or check {args.ollama_url})\n"
+                f"  · model not pulled:          `ollama pull {model_hint}`\n"
+                f"  · wrong model id:            `--model qwen3:1.7b` (or list with `ollama list`)\n"
+                f"\nThe output file contains the source text unchanged.",
+                file=sys.stderr,
+            )
+        elif args.backend == "hf":
+            print(
+                "\nALL paragraphs failed to translate. Common causes:\n"
+                "  · model id wrong:            `--model google/madlad400-3b-mt`\n"
+                "  · transformers version:      MADLAD needs `transformers<5`\n"
+                "  · HF cache empty + no net:   first run needs internet to download.\n"
+                "\nThe output file contains the source text unchanged.",
+                file=sys.stderr,
+            )
     return 0 if failed == 0 else 1
 
 
