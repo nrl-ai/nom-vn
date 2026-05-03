@@ -98,9 +98,25 @@ class LLMTranslator(Translator):
         try:
             obj = json.loads(raw)
         except json.JSONDecodeError:
-            return raw.strip()
+            return _strip_thinking_directives(raw.strip())
         if isinstance(obj, dict):
             value = obj.get("translation")
             if isinstance(value, str):
-                return value.strip()
-        return raw.strip()
+                return _strip_thinking_directives(value.strip())
+        return _strip_thinking_directives(raw.strip())
+
+
+# Qwen3 occasionally leaks the chat-template directive (/no_think, /think)
+# back into the generated JSON `translation` field — we caught
+# `"Project code /no_think"` on a real XLSX cell. Strip them here.
+_THINK_DIRECTIVES = (" /no_think", " /think", "/no_think", "/think")
+
+
+def _strip_thinking_directives(text: str) -> str:
+    for d in _THINK_DIRECTIVES:
+        text = text.replace(d, "")
+    # Also drop any stray Qwen3 thinking-block remnants — see the same
+    # pattern in nom.text.normalize.
+    if "</think>" in text:
+        text = text.split("</think>", 1)[1].lstrip()
+    return text.strip()
