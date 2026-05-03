@@ -158,6 +158,14 @@ export interface RegisterRes {
   model: string;
 }
 
+export interface HandwritingOcrRes {
+  filename: string;
+  model: string;
+  text: string;
+  n_chars: number;
+  confidence: number | null;
+}
+
 // Translation — single string + file upload. Mirrors
 // /api/tools/translate and /api/tools/translate/file in
 // src/nom/chat/tools_api.py.

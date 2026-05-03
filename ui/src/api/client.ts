@@ -10,6 +10,7 @@ import type {
   DiacriticBackend,
   DiacriticModelsRes,
   DiacriticRestoreRes,
+  HandwritingOcrRes,
   LanguageRes,
   Material,
   ModelsListRes,
@@ -227,6 +228,15 @@ export const api = {
           ...(modelId ? { model_id: modelId } : {}),
         }),
       }),
+    ocrHandwriting: (file: File, modelId?: string) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      if (modelId) fd.append("model_id", modelId);
+      return request<HandwritingOcrRes>("/api/tools/ocr/handwriting", {
+        method: "POST",
+        body: fd,
+      });
+    },
     translate: (
       text: string,
       source: TranslateLang,

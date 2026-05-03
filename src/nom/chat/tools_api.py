@@ -651,6 +651,53 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             },
         )
 
+    @app.post("/api/tools/ocr/handwriting")
+    async def ocr_handwriting(
+        file: Annotated[UploadFile, File()],
+        model_id: Annotated[str | None, Form()] = None,
+    ) -> dict[str, Any]:
+        """OCR a handwritten / form / ID-card image via the Vintern VLM
+        wrapper. Returns the full-page transcript as text.
+
+        The 60-px short-edge guard inside the wrapper rejects line-crop
+        inputs (VLMs hallucinate on tight crops — see
+        ``docs/sota_vn_2026q2_expansion.md``). Pass full pages.
+
+        503 when transformers / torch are missing or when the model
+        download fails. The wrapper rejects sub-60-px short-edge inputs
+        with 422 (clear "pass full page" hint).
+        """
+        from pathlib import Path
+
+        from nom.ocr import VinternHandwritingOcr
+
+        filename = file.filename or "upload.png"
+        suffix = Path(filename).suffix.lower()
+        if suffix not in {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unsupported image format {suffix!r}",
+            )
+
+        contents = await file.read()
+        try:
+            clf = VinternHandwritingOcr(model_id=model_id) if model_id else VinternHandwritingOcr()
+            result = clf.transcribe(contents)
+        except ImportError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        return {
+            "filename": filename,
+            "model": result.model,
+            "text": result.text,
+            "n_chars": len(result.text),
+            "confidence": result.confidence,
+        }
+
     @app.get("/api/tools/translate/models")
     def list_translate_models() -> dict[str, Any]:
         """Curated translation backends + the HF specialist models the

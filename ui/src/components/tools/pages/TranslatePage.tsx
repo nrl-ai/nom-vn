@@ -316,7 +316,7 @@ export function TranslatePage() {
               : fileJob
                 ? `${fileJob.status} · ${Math.round(fileJob.progress * 100)}%`
                 : !file
-                  ? "Chọn tệp .docx ở khung bên trái, sau đó bấm Dịch"
+                  ? "Chọn tệp .docx / .xlsx / .pptx / .txt, sau đó bấm Dịch"
                   : "Sẵn sàng — bấm Dịch để xếp hàng đợi"}
           </span>
           <Button variant="primary" size="md" onClick={onRun} disabled={!canRun}>
@@ -415,7 +415,7 @@ export function TranslatePage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept=".docx,.xlsx,.pptx,.txt,.md,.markdown,.rst,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/markdown"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0] ?? null;
@@ -430,9 +430,7 @@ export function TranslatePage() {
                   ) : (
                     <FileText size={16} className="shrink-0 text-accent" />
                   )}
-                  <span className="truncate font-mono">
-                    {file ? file.name : "Chưa chọn tệp .docx"}
-                  </span>
+                  <span className="truncate font-mono">{file ? file.name : "Chưa chọn tệp"}</span>
                 </div>
                 {file && (
                   <p className="mt-1 font-mono text-[11px] text-ink-mute">
@@ -453,9 +451,10 @@ export function TranslatePage() {
           </div>
 
           <p className="text-[11.5px] leading-snug text-ink-soft">
-            v0.1 chỉ hỗ trợ <code className="font-mono">.docx</code>. Cấu trúc (heading, danh sách,
-            bảng, header / footer) được giữ nguyên; định dạng phụ trong cùng đoạn (ví dụ một từ in
-            đậm giữa câu) có thể bị mất — sẽ cải thiện ở phiên bản sau.
+            Hỗ trợ <code className="font-mono">.docx .xlsx .pptx .txt .md .rst</code>. Cấu trúc
+            (heading, danh sách, bảng, header / footer, ô tính, slide) được giữ nguyên; định dạng
+            phụ trong cùng đoạn (ví dụ một từ in đậm giữa câu) có thể bị mất — sẽ cải thiện ở phiên
+            bản sau.
           </p>
 
           {errMsg && (
@@ -482,8 +481,8 @@ export function TranslatePage() {
           ) : (
             !errMsg && (
               <EmptyHint>
-                Chọn một tệp <span className="mx-1 font-mono text-ink">.docx</span>, sau đó bấm
-                Dịch. Tác vụ chạy nền — tiến độ hiển thị ngay tại đây.
+                Chọn một tệp <span className="mx-1 font-mono text-ink">.docx .xlsx .pptx .txt</span>
+                , sau đó bấm Dịch. Tác vụ chạy nền — tiến độ hiển thị ngay tại đây.
               </EmptyHint>
             )
           )}

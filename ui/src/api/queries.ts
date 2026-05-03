@@ -190,6 +190,13 @@ export function useClassifyRegister() {
   });
 }
 
+export function useOcrHandwriting() {
+  return useMutation({
+    mutationFn: (vars: { file: File; modelId?: string }) =>
+      api.tools.ocrHandwriting(vars.file, vars.modelId),
+  });
+}
+
 export function useTranslateText() {
   return useMutation({
     mutationFn: (vars: {
