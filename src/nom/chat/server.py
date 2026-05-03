@@ -458,21 +458,60 @@ def build_app(
         )
 
     if _ui_dist is not None:
-        # SPA catch-all — registered LAST so every concrete /api/* and
-        # /assets/* route wins by FastAPI's first-match-wins routing.
-        # Any other path serves index.html so the client router (App.tsx)
-        # handles deep links like /dich-thuat, /chuyen-doi, /mo-hinh.
+        # SPA fallback as middleware (NOT a route) so it can run *after*
+        # the router resolves and only fires when no concrete route
+        # matched. Doing this as a route forced first-match-wins ordering,
+        # which shadowed any route registered after build_app() returned
+        # (test code, plugins, etc.). The middleware approach lets the
+        # router handle /api/* first; only when it would 404 do we
+        # rewrite to index.html for non-API GETs.
         from fastapi.responses import FileResponse as _FileResponse
-        from fastapi.responses import HTMLResponse as _HTMLResponse
+        from starlette.types import ASGIApp, Receive, Scope, Send
 
-        @app.get("/{path:path}", response_class=_HTMLResponse, include_in_schema=False)
-        def spa_fallback(path: str) -> Any:
-            # Unknown /api/* paths must stay 404, not silently serve the
-            # SPA shell — otherwise client fetch() bugs would render as
-            # parse errors instead of HTTP failures.
-            if path.startswith("api/"):
-                raise HTTPException(status_code=404, detail=f"not found: /{path}")
-            return _FileResponse(_ui_dist / "index.html")
+        _index_html = str(_ui_dist / "index.html")
+
+        class _SpaFallbackMiddleware:
+            def __init__(self, app: ASGIApp) -> None:
+                self.app = app
+
+            async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+                if scope["type"] != "http" or scope.get("method") != "GET":
+                    await self.app(scope, receive, send)
+                    return
+                path = scope.get("path", "")
+                # Never rewrite API/assets/docs paths — they have real
+                # handlers and a 404 from those is informative.
+                if path.startswith(("/api/", "/assets/", "/docs", "/openapi", "/redoc")):
+                    await self.app(scope, receive, send)
+                    return
+
+                # Capture the inner response; if 404, swap to index.html.
+                status_holder: dict[str, int] = {}
+                start_holder: dict[str, Any] = {}
+
+                async def _send_capture(message: Any) -> None:
+                    if message["type"] == "http.response.start":
+                        status_holder["code"] = message["status"]
+                        start_holder["msg"] = message
+                        return  # buffer until we know whether to rewrite
+                    if message["type"] == "http.response.body":
+                        if status_holder.get("code") == 404:
+                            return  # buffer too — about to rewrite
+                        # Non-404: forward the buffered start, then this body.
+                        if "msg" in start_holder:
+                            await send(start_holder.pop("msg"))
+                        await send(message)
+                        return
+                    await send(message)
+
+                await self.app(scope, receive, _send_capture)
+
+                if status_holder.get("code") == 404:
+                    # Rewrite to index.html for SPA deep-link
+                    response = _FileResponse(_index_html)
+                    await response(scope, receive, send)
+
+        app.add_middleware(_SpaFallbackMiddleware)
 
     return app
 

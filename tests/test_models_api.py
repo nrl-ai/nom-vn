@@ -76,13 +76,17 @@ def test_cancel_unknown_pull_404(client: TestClient) -> None:
 
 def test_curated_catalog_shape() -> None:
     """The catalog feeds the UI's recommended-models list. Each entry
-    needs an id, label, tier, size_gb, license."""
+    needs an id, label, tier, size_gb, license, and source/tasks so the
+    UI can group rows by what they handle."""
     from nom.chat.models_api import _CURATED_CATALOG
 
     assert len(_CURATED_CATALOG) >= 3
     for entry in _CURATED_CATALOG:
-        assert {"id", "label", "tier", "size_gb", "license", "use_cases"}.issubset(entry)
+        assert {"id", "label", "tier", "size_gb", "license", "tasks", "source"}.issubset(entry)
         assert entry["tier"] in {"light", "standard", "power"}
+        assert entry["source"] in {"ollama", "hf", "system"}
+        assert isinstance(entry["tasks"], list)
+        assert len(entry["tasks"]) >= 1
 
 
 def test_pull_state_progress_calculation() -> None:
