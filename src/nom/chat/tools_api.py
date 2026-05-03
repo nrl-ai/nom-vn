@@ -292,6 +292,59 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
         d = detect_language(text)
         return {"input": text, "language": d.code, "confidence": d.confidence}
 
+    @app.post("/api/tools/classify/register")
+    def classify_register(payload: dict[str, Any]) -> dict[str, Any]:
+        """Classify VN text into 4 registers: formal / business /
+        conversational / literary.
+
+        Backends:
+
+        - ``lexicon`` (default): zero-ML, ~ms latency, ships with OSS.
+          See :class:`nom.classify.LexiconRegisterClassifier`.
+        - ``phobert``: production tier; pass ``model_id`` to a fine-tuned
+          PhoBERT-base 4-class head on HF. Lazy-loads transformers + torch.
+
+        Used by the UI's "Phân loại văn phong" page and as a router
+        signal for downstream diacritic / summarization / OCR-rerank
+        checkpoints (5-10 pp lift documented in
+        ``docs/sota_vn_2026q2_expansion.md``).
+        """
+        text = str(payload.get("text", ""))
+        backend = str(payload.get("backend", "lexicon")).lower()
+        if not text:
+            raise HTTPException(status_code=422, detail="`text` is required")
+
+        if backend == "lexicon":
+            from nom.classify import LexiconRegisterClassifier
+
+            clf: Any = LexiconRegisterClassifier()
+        elif backend == "phobert":
+            from nom.classify import PhoBertRegisterClassifier
+
+            clf = PhoBertRegisterClassifier(model_id=payload.get("model_id"))
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unsupported backend {backend!r}; expected 'lexicon' or 'phobert'",
+            )
+
+        try:
+            result = clf.predict(text)
+        except (ImportError, RuntimeError) as exc:
+            # ImportError → ML extras not installed; RuntimeError →
+            # PhoBERT wrapper invoked without a model_id (no default
+            # checkpoint published yet). Both surface as 503 so the UI
+            # can show "feature not yet available" rather than 500.
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        return {
+            "input": text,
+            "label": result.label.value,
+            "score": round(result.score, 4),
+            "distribution": {k.value: round(v, 4) for k, v in result.distribution.items()},
+            "backend": backend,
+            "model": clf.name,
+        }
+
     @app.post("/api/tools/translate")
     def translate(payload: dict[str, Any]) -> dict[str, Any]:
         """Translate a single string between EN and VN.

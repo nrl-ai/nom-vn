@@ -27,7 +27,7 @@ export function Message({ message }: Props) {
       >
         <div
           className={cn(
-            "vn-text break-words px-4 py-3 text-[14.5px] leading-relaxed",
+            "vn-text break-words px-4 py-2.5 text-[14.5px] leading-relaxed",
             isUser
               ? "whitespace-pre-wrap bg-accent text-accent-ink"
               : message.error
@@ -57,7 +57,7 @@ export function Message({ message }: Props) {
               <button
                 type="button"
                 onClick={() => setShowSources((v) => !v)}
-                className="flex items-center gap-1 font-mono text-[10.5px] uppercase tracking-widest text-ink-mute hover:text-ink"
+                className="meta flex items-center gap-1 uppercase tracking-widest hover:text-ink"
               >
                 {showSources ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
                 {message.citations.length} source
@@ -69,9 +69,9 @@ export function Message({ message }: Props) {
                   {message.citations.map((c, i) => (
                     <li
                       key={i}
-                      className="vn-text border border-line-soft bg-paper px-3 py-2 text-[13px] leading-relaxed"
+                      className="vn-text border border-line bg-paper px-3 py-2 text-[13px] leading-relaxed"
                     >
-                      <div className="mb-1 font-mono text-[9.5px] uppercase tracking-widest text-accent">
+                      <div className="meta-strong mb-1 uppercase tracking-widest text-accent">
                         [{i + 1}] doc {c.doc_idx} · chunk {c.chunk_idx} · score {c.score.toFixed(3)}
                       </div>
                       {c.text}
@@ -82,9 +82,7 @@ export function Message({ message }: Props) {
             </div>
           )}
 
-        {!message.pending && (
-          <span className="font-mono text-[10px] text-ink-mute">{formatRelative(message.ts)}</span>
-        )}
+        {!message.pending && <span className="meta">{formatRelative(message.ts)}</span>}
       </div>
     </div>
   );

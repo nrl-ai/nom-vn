@@ -15,35 +15,35 @@ interface HeaderProps {
 
 export function Header({ modelName, onHome, onSettings, onApi }: HeaderProps) {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-ink bg-bg px-6">
+    <header className="flex h-12 shrink-0 items-center justify-between border-b border-ink bg-bg px-5">
       <button
         onClick={onHome}
         className="group flex items-baseline gap-3"
         title="Về trang chủ"
         aria-label="Trang chủ"
       >
-        <h1 className="font-display text-2xl font-bold leading-none tracking-tight text-ink transition-colors group-hover:text-accent">
+        <h1 className="font-display text-xl font-bold leading-none tracking-tight text-ink transition-colors group-hover:text-accent">
           Nôm <span className="font-serif font-normal text-accent">喃</span>
         </h1>
         <span className="section-mark hidden transition-colors group-hover:text-ink sm:inline">
           công cụ ai tiếng việt
         </span>
       </button>
-      <div className="flex items-center gap-3 text-xs text-ink-soft">
+      <div className="flex items-center gap-2 text-xs">
         {modelName && (
-          <span className="hidden items-center gap-1.5 font-mono sm:inline-flex">
-            <Cpu size={12} className="text-accent" />
+          <span className="meta-strong hidden items-center gap-1.5 border border-line bg-paper px-2 py-1 sm:inline-flex">
+            <Cpu size={11} className="text-accent" />
             {modelName}
           </span>
         )}
-        <span className="hidden font-mono opacity-60 sm:inline">v0.2.31</span>
+        <span className="meta hidden sm:inline">v0.2.31</span>
         {onApi && (
           <button
             type="button"
             onClick={onApi}
             aria-label="API và cài đặt"
             title="API và cài đặt"
-            className="grid h-9 w-9 place-items-center border border-line bg-paper text-ink-soft transition-colors hover:border-ink hover:text-ink"
+            className="grid h-8 w-8 place-items-center border border-line bg-paper text-ink-soft transition-colors hover:border-ink hover:text-ink"
           >
             <BookOpen size={14} />
           </button>
@@ -54,7 +54,7 @@ export function Header({ modelName, onHome, onSettings, onApi }: HeaderProps) {
             onClick={onSettings}
             aria-label="Cài đặt"
             title="Cài đặt"
-            className="grid h-9 w-9 place-items-center border border-line bg-paper text-ink-soft transition-colors hover:border-ink hover:text-ink"
+            className="grid h-8 w-8 place-items-center border border-line bg-paper text-ink-soft transition-colors hover:border-ink hover:text-ink"
           >
             <SettingsIcon size={14} />
           </button>

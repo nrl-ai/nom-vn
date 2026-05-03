@@ -21,6 +21,18 @@ function fmtAge(ts: number): string {
   return `${Math.floor(sec / 3600)} g`;
 }
 
+/** Estimate seconds remaining from elapsed * (1 - progress) / progress.
+ *  Returns null when the estimate isn't useful yet (no progress, just
+ *  started, or close to done). */
+function fmtEta(job: BgJob): string | null {
+  if (job.status !== "running" || job.progress <= 0.01 || job.progress >= 0.99) return null;
+  const elapsed = Math.max(0.5, Date.now() / 1000 - job.created_at);
+  const remainingSec = (elapsed * (1 - job.progress)) / job.progress;
+  if (remainingSec < 1) return null;
+  if (remainingSec < 60) return `~${Math.ceil(remainingSec)} s`;
+  return `~${Math.ceil(remainingSec / 60)} ph`;
+}
+
 function StatusBadge({ status }: { status: BgJob["status"] }): React.ReactElement {
   const map: Record<BgJob["status"], { label: string; cls: string; icon: React.ReactElement }> = {
     queued: {
@@ -120,6 +132,7 @@ export function JobCard({ job, compact = false }: JobCardProps): React.ReactElem
 
   const isInFlight = job.status === "queued" || job.status === "running";
   const pct = Math.round(job.progress * 100);
+  const eta = fmtEta(job);
 
   return (
     <div className="border border-ink/15 bg-paper px-3 py-2.5 text-sm">
@@ -136,6 +149,7 @@ export function JobCard({ job, compact = false }: JobCardProps): React.ReactElem
           title={`updated ${fmtAge(job.updated_at)} ago`}
         >
           {pct}% · {fmtAge(job.created_at)}
+          {eta && ` · còn ${eta}`}
         </span>
       </div>
       {!compact && (

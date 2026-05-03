@@ -145,6 +145,19 @@ export interface LanguageRes {
   confidence: number;
 }
 
+export type RegisterLabel = "formal" | "business" | "conversational" | "literary";
+
+export type RegisterBackend = "lexicon" | "phobert";
+
+export interface RegisterRes {
+  input: string;
+  label: RegisterLabel;
+  score: number;
+  distribution: Record<RegisterLabel, number>;
+  backend: RegisterBackend;
+  model: string;
+}
+
 // Translation — single string + file upload. Mirrors
 // /api/tools/translate and /api/tools/translate/file in
 // src/nom/chat/tools_api.py.

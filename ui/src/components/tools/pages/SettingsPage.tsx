@@ -123,7 +123,8 @@ export function SettingsPage() {
   };
 
   const resetAll = () => {
-    if (!confirm("Reset all per-tool inputs and chat history saved in this browser?")) return;
+    if (!confirm("Đặt lại mọi đầu vào của công cụ và lịch sử chat đã lưu trong trình duyệt này?"))
+      return;
     try {
       const keys: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
@@ -197,7 +198,7 @@ export function SettingsPage() {
 
       {/* Auth */}
       <Panel
-        label="authentication"
+        label="xác thực"
         hint={authRequired ? "Cần token bearer" : "Mở — không yêu cầu token"}
         rightSlot={
           <span
@@ -356,7 +357,7 @@ export function SettingsPage() {
       </Panel>
 
       {/* UI prefs */}
-      <Panel label="ui preferences" hint="lưu trong localStorage">
+      <Panel label="tuỳ chọn giao diện" hint="lưu trong localStorage">
         <OptionRow
           label="top_k mặc định cho chat"
           hint="Số chunk được truy hồi đưa vào prompt. Mặc định 5."
@@ -378,7 +379,7 @@ export function SettingsPage() {
       </Panel>
 
       {/* Reset */}
-      <Panel label="reset" hint="xoá toàn bộ trạng thái lưu trong trình duyệt này">
+      <Panel label="đặt lại" hint="xoá toàn bộ trạng thái lưu trong trình duyệt này">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="max-w-md text-[12px] leading-snug text-ink-soft">
             Xoá hết <code className="bg-bg-soft px-1">nom:*</code> trong localStorage (lịch sử chat,

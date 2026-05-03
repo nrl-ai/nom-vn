@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster, toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { TaskNav } from "@/components/layout/TaskNav";
+import { SpacesSidebar } from "@/components/spaces/SpacesSidebar";
 import type { TaskKey } from "@/components/layout/tasks";
 import { ChatThread } from "@/components/chat/ChatThread";
 import { MaterialsDrawer } from "@/components/materials/MaterialsDrawer";
@@ -11,6 +12,8 @@ import { TokenizePage } from "@/components/tools/pages/TokenizePage";
 import { NormalizePage } from "@/components/tools/pages/NormalizePage";
 import { StripPage } from "@/components/tools/pages/StripPage";
 import { TranslatePage } from "@/components/tools/pages/TranslatePage";
+import { ConvertPage } from "@/components/tools/pages/ConvertPage";
+import { JobsPage } from "@/components/tools/pages/JobsPage";
 import { ModelsPage } from "@/components/tools/pages/ModelsPage";
 import { AgentRunPage } from "@/components/tools/pages/AgentRunPage";
 import { CompliancePage } from "@/components/tools/pages/CompliancePage";
@@ -29,6 +32,8 @@ const TASK_KEYS: ReadonlySet<TaskKey> = new Set([
   "normalize",
   "strip",
   "translate",
+  "convert",
+  "jobs",
   "models",
   "agents",
   "compliance",
@@ -37,7 +42,14 @@ const TASK_KEYS: ReadonlySet<TaskKey> = new Set([
   "settings",
 ]);
 
+import { TASK_SLUGS, taskFromPath } from "@/components/layout/tasks";
+
 function loadTask(): TaskKey {
+  // URL takes precedence over localStorage so deep-links work cleanly.
+  if (typeof window !== "undefined") {
+    const fromUrl = taskFromPath(window.location.pathname);
+    if (fromUrl) return fromUrl;
+  }
   try {
     const raw = localStorage.getItem(ACTIVE_TASK_KEY);
     if (raw && TASK_KEYS.has(raw as TaskKey)) return raw as TaskKey;
@@ -48,7 +60,28 @@ function loadTask(): TaskKey {
 }
 
 export default function App() {
-  const [activeTask, setActiveTask] = useState<TaskKey>(loadTask);
+  const [activeTask, setActiveTaskRaw] = useState<TaskKey>(loadTask);
+
+  // Wrap setActiveTask so every state change also pushes a history
+  // entry. URL stays in lockstep with the active tab.
+  const setActiveTask = (next: TaskKey): void => {
+    const slug = TASK_SLUGS[next];
+    if (typeof window !== "undefined" && window.location.pathname !== slug) {
+      window.history.pushState({ task: next }, "", slug);
+    }
+    setActiveTaskRaw(next);
+  };
+
+  // Browser back / forward → derive task from new URL.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const onPop = () => {
+      const fromUrl = taskFromPath(window.location.pathname);
+      if (fromUrl) setActiveTaskRaw(fromUrl);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   const [storedSpaceId, setStoredSpaceId] = useState<string | null>(() => {
     return localStorage.getItem(ACTIVE_SPACE_KEY);
   });
@@ -88,7 +121,7 @@ export default function App() {
 
   useEffect(() => {
     if (spacesQ.isError) {
-      toast.error(`Could not load spaces: ${(spacesQ.error as Error).message}`);
+      toast.error(`Không tải được danh sách không gian: ${(spacesQ.error as Error).message}`);
     }
   }, [spacesQ.isError, spacesQ.error]);
 
@@ -129,6 +162,12 @@ export default function App() {
     case "translate":
       centerPane = <TranslatePage />;
       break;
+    case "convert":
+      centerPane = <ConvertPage />;
+      break;
+    case "jobs":
+      centerPane = <JobsPage />;
+      break;
     case "models":
       centerPane = <ModelsPage />;
       break;
@@ -157,13 +196,14 @@ export default function App() {
         onHome={() => setActiveTask("chat")}
         onSettings={() => setActiveTask("settings")}
         onApi={() => setActiveTask("api")}
-        sidebar={
-          <Sidebar
-            activeTask={activeTask}
-            onTaskChange={setActiveTask}
-            activeSpaceId={activeSpaceId}
-            onSpaceSelect={(id) => setStoredSpaceId(id || null)}
-          />
+        sidebar={<TaskNav active={activeTask} onSelect={setActiveTask} />}
+        spacesSidebar={
+          isChat ? (
+            <SpacesSidebar
+              activeSpaceId={activeSpaceId}
+              onSelect={(id) => setStoredSpaceId(id || null)}
+            />
+          ) : undefined
         }
         studio={isChat ? <MaterialsDrawer spaceId={activeSpaceId} /> : undefined}
       >

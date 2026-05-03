@@ -225,6 +225,64 @@ class TestNLP:
         assert r.status_code == 422
 
 
+class TestRegisterClassifier:
+    """Tests for /api/tools/classify/register.
+
+    Lexicon backend only here — PhoBERT path is gated behind transformers
+    + torch + a published model checkpoint, covered by the integration
+    tier (and skipped cleanly until weights ship).
+    """
+
+    def test_lexicon_formal(self, client: TestClient) -> None:
+        r = client.post(
+            "/api/tools/classify/register",
+            json={
+                "text": (
+                    "Căn cứ Luật ban hành văn bản quy phạm pháp luật, "
+                    "trân trọng kính gửi quý cơ quan thông tư có hiệu lực từ 2026."
+                )
+            },
+        )
+        assert r.status_code == 200
+        body = r.json()
+        assert body["label"] == "formal"
+        assert 0.0 <= body["score"] <= 1.0
+        # Distribution covers all four classes and sums to ~1
+        dist = body["distribution"]
+        assert set(dist.keys()) == {"formal", "business", "conversational", "literary"}
+        assert abs(sum(dist.values()) - 1.0) < 1e-3
+        assert body["backend"] == "lexicon"
+
+    def test_lexicon_conversational(self, client: TestClient) -> None:
+        r = client.post(
+            "/api/tools/classify/register",
+            json={"text": "Mình thấy chỗ đó ngon lắm nha, bạn ơi đi thử nhé!"},
+        )
+        assert r.json()["label"] == "conversational"
+
+    def test_unknown_backend_422(self, client: TestClient) -> None:
+        r = client.post(
+            "/api/tools/classify/register",
+            json={"text": "Hôm nay trời đẹp.", "backend": "potato"},
+        )
+        assert r.status_code == 422
+
+    def test_phobert_without_model_id_503(self, client: TestClient) -> None:
+        # No default PhoBERT model is published yet — calling phobert
+        # backend without `model_id` returns 503 with the install hint,
+        # not a 500 with a stack trace.
+        r = client.post(
+            "/api/tools/classify/register",
+            json={"text": "Hôm nay trời đẹp.", "backend": "phobert"},
+        )
+        assert r.status_code == 503
+        assert "model_id" in r.json()["detail"]
+
+    def test_empty_input_422(self, client: TestClient) -> None:
+        r = client.post("/api/tools/classify/register", json={"text": ""})
+        assert r.status_code == 422
+
+
 class TestTranslate:
     """LLMTranslator path goes through the same FakeLLM the diacritic
     tests use. The fake returns canned JSON; the translator parses

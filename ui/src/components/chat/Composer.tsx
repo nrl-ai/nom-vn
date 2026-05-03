@@ -37,7 +37,7 @@ export function Composer({ value, onChange, onSubmit, disabled, pending, placeho
   };
 
   return (
-    <div className="shrink-0 border-t border-line bg-bg px-4 py-3">
+    <div className="shrink-0 border-t border-line bg-bg px-4 py-2.5 lg:px-5">
       <div className="flex items-end gap-2">
         <Textarea
           ref={ref}
@@ -47,22 +47,29 @@ export function Composer({ value, onChange, onSubmit, disabled, pending, placeho
           rows={1}
           disabled={disabled}
           placeholder={placeholder ?? "Đặt câu hỏi… (Enter để gửi, Shift+Enter xuống dòng)"}
-          className="max-h-[180px] min-h-[40px] flex-1"
+          className="max-h-[180px] min-h-[36px] flex-1"
         />
         <Button
           variant="accent"
           size="md"
           onClick={onSubmit}
           disabled={disabled || !value.trim() || pending}
-          className="h-10 shrink-0"
+          className="h-9 shrink-0"
           aria-label="Gửi"
         >
           {pending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
           <span className="hidden sm:inline">Gửi</span>
         </Button>
       </div>
-      <div className="mt-1.5 font-mono text-[10px] uppercase tracking-widest text-ink-mute">
-        Esc để xoá · Enter để gửi
+      <div className="meta mt-1 flex items-center gap-1.5 uppercase tracking-widest">
+        <span className="kbd normal-case tracking-normal">Enter</span>
+        <span>gửi</span>
+        <span className="text-ink-mute/50">·</span>
+        <span className="kbd normal-case tracking-normal">⇧ Enter</span>
+        <span>xuống dòng</span>
+        <span className="text-ink-mute/50">·</span>
+        <span className="kbd normal-case tracking-normal">Esc</span>
+        <span>xoá</span>
       </div>
     </div>
   );

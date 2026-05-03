@@ -17,6 +17,8 @@ import type {
   NormalizeRes,
   PullsListRes,
   PullState,
+  RegisterBackend,
+  RegisterRes,
   SentenceTokenizeRes,
   SentimentRes,
   Space,
@@ -215,6 +217,15 @@ export const api = {
       request<LanguageRes>("/api/tools/nlp/language", {
         method: "POST",
         body: JSON.stringify({ text }),
+      }),
+    classifyRegister: (text: string, backend: RegisterBackend = "lexicon", modelId?: string) =>
+      request<RegisterRes>("/api/tools/classify/register", {
+        method: "POST",
+        body: JSON.stringify({
+          text,
+          backend,
+          ...(modelId ? { model_id: modelId } : {}),
+        }),
       }),
     translate: (
       text: string,

@@ -7,6 +7,7 @@ import type {
   Material,
   ModelsListRes,
   PullsListRes,
+  RegisterBackend,
   Space,
   TranslateBackend,
   TranslateLang,
@@ -179,6 +180,13 @@ export function useSentiment() {
 export function useDetectLanguage() {
   return useMutation({
     mutationFn: (text: string) => api.tools.detectLanguage(text),
+  });
+}
+
+export function useClassifyRegister() {
+  return useMutation({
+    mutationFn: (vars: { text: string; backend?: RegisterBackend; modelId?: string }) =>
+      api.tools.classifyRegister(vars.text, vars.backend, vars.modelId),
   });
 }
 

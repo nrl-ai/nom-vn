@@ -112,32 +112,55 @@ export function AdminPage() {
             <div className="space-y-3 text-sm text-ink/80">
               <p>
                 Endpoint <code>/api/admin/*</code> chưa được kích hoạt — bạn đang chạy bản Cộng đồng
-                (Apache 2.0). Để mở các tính năng quản trị doanh nghiệp:
+                (Apache 2.0). Bản Doanh nghiệp được phân phối riêng theo hợp đồng (không có trên
+                pip). Để mở khoá các tính năng quản trị:
               </p>
               <ol className="list-decimal space-y-1 pl-5">
                 <li>
-                  Cài gói <code>pip install nom-vn-enterprise[all]</code>
+                  <a
+                    className="font-medium text-accent underline"
+                    href="https://nom-vn.nrl.ai/doanh-nghiep#lien-he"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Liên hệ tư vấn 30 phút
+                  </a>{" "}
+                  để nhận gói cài đặt và giấy phép.
                 </li>
                 <li>
-                  Đặt giấy phép tại <code>~/.nom/license.json</code>
+                  Đặt giấy phép tại <code>~/.nom/license.json</code>.
                 </li>
                 <li>
-                  Đăng nhập bằng tài khoản có vai trò
-                  <code> tenant.admin</code>
+                  Đăng nhập bằng tài khoản có vai trò <code>tenant.admin</code>.
                 </li>
               </ol>
-              <p className="pt-2 text-xs text-ink-soft">
-                Khi đủ ba điều trên, trang này sẽ tự hiện thông tin giấy phép, người dùng và lưu
-                lượng. Xem
+              <div className="flex flex-wrap items-center gap-2 pt-2">
                 <a
-                  className="ml-1 underline"
-                  href="/doanh-nghiep/so-sanh-oss-ee"
+                  className="inline-flex items-center gap-1.5 border border-accent bg-accent px-3 py-1.5 text-xs font-medium text-accent-ink transition-colors hover:bg-accent-soft"
+                  href="https://nom-vn.nrl.ai/doanh-nghiep#lien-he"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  bảng so sánh OSS vs Doanh nghiệp
+                  Đặt lịch tư vấn →
                 </a>
-                .
+                <a
+                  className="inline-flex items-center gap-1.5 border border-line bg-paper px-3 py-1.5 text-xs text-ink-soft transition-colors hover:border-ink hover:text-ink"
+                  href="https://nom-vn.nrl.ai/doanh-nghiep/so-sanh-oss-ee"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  So sánh OSS vs Doanh nghiệp
+                </a>
+                <a
+                  className="inline-flex items-center gap-1.5 border border-line bg-paper px-3 py-1.5 text-xs text-ink-soft transition-colors hover:border-ink hover:text-ink"
+                  href="mailto:vietanh@nrl.ai?subject=N%C3%B4m%20-%20Y%C3%AAu%20c%E1%BA%A7u%20b%E1%BA%A3n%20Doanh%20nghi%E1%BB%87p"
+                >
+                  vietanh@nrl.ai
+                </a>
+              </div>
+              <p className="pt-1 text-[11.5px] leading-snug text-ink-mute">
+                Khi đủ ba điều trên, trang này sẽ tự hiện thông tin giấy phép, người dùng và lưu
+                lượng.
               </p>
             </div>
           </Panel>

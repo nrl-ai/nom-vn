@@ -5,18 +5,24 @@ import { Header } from "./Header";
 import { Button } from "@/components/ui/button";
 
 // Layout modes:
-// - "chat" → three-pane (sources | chat | studio), the legacy NotebookLM-ish layout.
-// - "tool" → two-pane (task-nav | tool page); studio pane is hidden because
-//   stateless tools don't have a side concept of materials.
+// - "chat" → four-pane (task-nav | spaces | chat | studio). Spaces is a
+//   second left rail so the task switcher stays a slim icon-list while
+//   spaces gets its own breathing room.
+// - "tool" → two-pane (task-nav | tool page). Stateless tools have no
+//   side concept of materials, so spaces + studio are hidden.
 //
-// On mobile (<lg) the side panes always collapse into floating sheets toggled
-// from the header. The center pane (work area) is the only always-visible
-// region — that's the room you're "in" in this app.
+// On mobile (<lg) the side panes always collapse into floating sheets
+// toggled from the header. The center pane (work area) is the only
+// always-visible region — that's the room you're "in" in this app.
+// On mobile the spaces drawer rides along with the main sidebar drawer
+// (stacked) so users get one toggle, not two.
 
 interface AppShellProps {
   modelName?: string;
-  /** Always-shown sidebar — TaskNav or, for chat mode, the spaces list. */
+  /** Slim left rail — TaskNav. Always shown. */
   sidebar: React.ReactNode;
+  /** Second left rail — spaces list. Only used in chat mode. */
+  spacesSidebar?: React.ReactNode;
   /** Right pane (only used in chat mode). */
   studio?: React.ReactNode;
   /** Center pane — chat thread or active tool page. */
@@ -31,6 +37,7 @@ interface AppShellProps {
 export function AppShell({
   modelName,
   sidebar,
+  spacesSidebar,
   studio,
   children,
   mode = "chat",
@@ -41,6 +48,7 @@ export function AppShell({
   const [showSidebar, setShowSidebar] = useState(false);
   const [showStudio, setShowStudio] = useState(false);
 
+  const showSpacesPane = mode === "chat" && !!spacesSidebar;
   const showStudioPane = mode === "chat" && !!studio;
 
   return (
@@ -72,20 +80,65 @@ export function AppShell({
 
       <Header modelName={modelName} onHome={onHome} onSettings={onSettings} onApi={onApi} />
 
-      {/* Desktop layout: resizable panels */}
+      {/* Desktop layout: resizable panels.
+       *
+       * Stable Panel `id`s are *required* — react-resizable-panels uses
+       * them to track sizes when the spaces / studio panels conditionally
+       * mount. Without IDs the library can't reconcile sizes on remount
+       * and the resize handles act erratic.
+       *
+       * `autoSaveId` persists the user's chosen split per layout key
+       * across reloads. Three keys keep state separate by topology so
+       * tool-mode sizes don't bleed into chat mode and vice-versa.
+       *
+       * `hitAreaMargins` widens the grab zone to ~6 px each side without
+       * widening the visible 1 px line — the visible line stays editorial
+       * thin, but the cursor target is finger-friendly. */}
       <div className="hidden min-h-0 flex-1 lg:block">
-        <PanelGroup direction="horizontal">
-          <Panel defaultSize={mode === "tool" ? 18 : 20} minSize={14} maxSize={32}>
+        <PanelGroup
+          direction="horizontal"
+          autoSaveId={
+            mode === "chat"
+              ? showStudioPane
+                ? "nom:layout:chat"
+                : "nom:layout:chat-no-studio"
+              : "nom:layout:tool"
+          }
+        >
+          <Panel
+            id="nav"
+            order={1}
+            defaultSize={showSpacesPane ? 14 : 18}
+            minSize={12}
+            maxSize={24}
+          >
             <aside className="h-full overflow-hidden border-r border-line bg-bg">{sidebar}</aside>
           </Panel>
-          <PanelResizeHandle className="w-px bg-line" />
-          <Panel defaultSize={showStudioPane ? 55 : 82} minSize={30}>
+          {showSpacesPane && (
+            <>
+              <PanelResizeHandle className="w-px bg-line" hitAreaMargins={{ coarse: 8, fine: 6 }} />
+              <Panel id="spaces" order={2} defaultSize={18} minSize={14} maxSize={28}>
+                <aside className="h-full overflow-hidden border-r border-line bg-bg">
+                  {spacesSidebar}
+                </aside>
+              </Panel>
+            </>
+          )}
+          <PanelResizeHandle className="w-px bg-line" hitAreaMargins={{ coarse: 8, fine: 6 }} />
+          <Panel
+            id="main"
+            order={3}
+            defaultSize={
+              showSpacesPane && showStudioPane ? 43 : showSpacesPane ? 68 : showStudioPane ? 57 : 82
+            }
+            minSize={30}
+          >
             <main className="h-full overflow-hidden">{children}</main>
           </Panel>
           {showStudioPane && (
             <>
-              <PanelResizeHandle className="w-px bg-line" />
-              <Panel defaultSize={25} minSize={18} maxSize={36}>
+              <PanelResizeHandle className="w-px bg-line" hitAreaMargins={{ coarse: 8, fine: 6 }} />
+              <Panel id="studio" order={4} defaultSize={25} minSize={18} maxSize={36}>
                 <aside className="h-full overflow-hidden border-l border-line bg-bg">
                   {studio}
                 </aside>
@@ -95,12 +148,19 @@ export function AppShell({
         </PanelGroup>
       </div>
 
-      {/* Mobile layout: center full-bleed, drawers slide in */}
+      {/* Mobile layout: center full-bleed, drawers slide in.
+       * The main sidebar drawer stacks TaskNav + SpacesSidebar so a
+       * single toggle exposes both. */}
       <div className="relative min-h-0 flex-1 lg:hidden">
         <main className="h-full overflow-hidden">{children}</main>
         {showSidebar && (
-          <aside className="absolute inset-y-0 left-0 z-20 w-80 max-w-[88vw] animate-fade-in overflow-hidden border-r border-ink bg-bg shadow-editorial-soft">
-            {sidebar}
+          <aside className="absolute inset-y-0 left-0 z-20 flex w-80 max-w-[88vw] animate-fade-in flex-col overflow-hidden border-r border-ink bg-bg shadow-editorial-soft">
+            <div className={showSpacesPane ? "max-h-[42%] shrink-0 overflow-hidden" : "flex-1"}>
+              {sidebar}
+            </div>
+            {showSpacesPane && (
+              <div className="min-h-0 flex-1 border-t border-line">{spacesSidebar}</div>
+            )}
           </aside>
         )}
         {showStudioPane && showStudio && (

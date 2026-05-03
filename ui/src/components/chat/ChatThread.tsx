@@ -110,12 +110,14 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
 
   return (
     <div className="flex h-full flex-col bg-bg">
-      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-line px-4 py-3 lg:px-6">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-line px-4 py-2 lg:px-5">
         <div className="min-w-0 flex-1">
-          <h2 className="vn-text truncate font-display text-base font-semibold tracking-tight text-ink">
+          <h2 className="vn-text truncate font-display text-[15px] font-semibold leading-tight tracking-tight text-ink">
             {spaceName ?? "—"}
           </h2>
-          <span className="section-mark">§ chat · top_k={topK}</span>
+          <span className="section-mark">
+            § chat · top_k=<span className="text-accent">{topK}</span>
+          </span>
         </div>
         <div className="flex items-center gap-1">
           <Button
@@ -143,10 +145,8 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
         </div>
       </div>
       {showOptions && (
-        <div className="shrink-0 border-b border-line bg-bg-soft px-4 py-3 lg:px-6">
-          <label className="mb-1 block font-mono text-[11px] uppercase tracking-widest text-ink-mute">
-            top_k truy hồi
-          </label>
+        <div className="shrink-0 border-b border-line bg-bg-soft px-4 py-2.5 lg:px-5">
+          <label className="meta mb-1 block uppercase tracking-widest">top_k truy hồi</label>
           <div className="flex items-center gap-3">
             <input
               type="range"
@@ -158,7 +158,7 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
               className="flex-1 accent-[#b5563a]"
               aria-label="top_k"
             />
-            <span className="w-8 text-right font-mono text-sm text-ink">{topK}</span>
+            <span className="meta-strong w-8 text-right text-[13px] text-ink">{topK}</span>
           </div>
           <p className="mt-1 text-[11.5px] leading-snug text-ink-soft">
             Số chunk được truy hồi đưa vào prompt. Tăng → bao quát hơn nhưng chậm hơn, giảm → nhanh
@@ -169,7 +169,7 @@ export function ChatThread({ spaceId, spaceName, hasMaterials }: Props) {
 
       <div className="min-h-0 flex-1">
         <ScrollArea className="h-full">
-          <div ref={scrollRef} className="mx-auto max-w-3xl space-y-5 px-4 py-6 lg:px-6">
+          <div ref={scrollRef} className="mx-auto max-w-3xl space-y-4 px-4 py-5 lg:px-6">
             {messages.length === 0 && (
               <EmptyChatState hasMaterials={hasMaterials} onSuggest={(q) => send(q)} />
             )}

@@ -43,31 +43,32 @@ export function SpacesSidebar({ activeSpaceId, onSelect }: Props) {
 
   const handleDelete = async (e: React.MouseEvent, space: Space) => {
     e.stopPropagation();
-    if (!confirm(`Delete space “${space.name}”? This removes all materials.`)) return;
+    if (!confirm(`Xoá không gian “${space.name}”? Toàn bộ tài liệu đi kèm sẽ bị xoá.`)) return;
     await del.mutateAsync(space.id);
     if (activeSpaceId === space.id) onSelect("");
   };
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-center justify-between px-4 pb-2 pt-4">
-        <h2 className="section-mark">§ spaces</h2>
+      <div className="flex shrink-0 items-center justify-between px-3 pb-1.5 pt-3">
+        <h2 className="section-mark">§ không gian</h2>
         <Dialog open={openCreate} onOpenChange={setOpenCreate}>
           <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Create space">
+            <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Tạo không gian">
               <Plus size={14} />
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>New space</DialogTitle>
+              <DialogTitle>Không gian mới</DialogTitle>
               <DialogDescription>
-                A space groups related materials. You ask questions across one space at a time.
+                Một không gian gom những tài liệu liên quan. Mỗi câu hỏi chỉ truy hồi trong phạm vi
+                một không gian.
               </DialogDescription>
             </DialogHeader>
             <Input
               autoFocus
-              placeholder="e.g. Hợp đồng 2026"
+              placeholder="VD: Hợp đồng 2026"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
@@ -81,7 +82,7 @@ export function SpacesSidebar({ activeSpaceId, onSelect }: Props) {
             <div className="mt-4 flex justify-end gap-2">
               <DialogClose asChild>
                 <Button variant="ghost" size="sm">
-                  Cancel
+                  Huỷ
                 </Button>
               </DialogClose>
               <Button
@@ -91,7 +92,7 @@ export function SpacesSidebar({ activeSpaceId, onSelect }: Props) {
                 disabled={!draft.trim() || create.isPending}
               >
                 {create.isPending && <Loader2 size={12} className="animate-spin" />}
-                Create
+                Tạo
               </Button>
             </div>
           </DialogContent>
@@ -99,12 +100,14 @@ export function SpacesSidebar({ activeSpaceId, onSelect }: Props) {
       </div>
 
       <ScrollArea className="min-h-0 flex-1">
-        <div className="px-2 pb-4">
+        <div className="px-1.5 pb-3">
           {spacesQ.isLoading && (
-            <div className="px-3 py-6 text-xs italic text-ink-mute">Loading…</div>
+            <div className="px-3 py-5 text-xs italic text-ink-mute">Đang tải…</div>
           )}
           {spacesQ.isError && (
-            <div className="px-3 py-3 text-xs text-danger">Failed to load spaces.</div>
+            <div className="px-3 py-3 text-xs text-danger">
+              Không tải được danh sách không gian.
+            </div>
           )}
           {spacesQ.data && spacesQ.data.length === 0 && (
             <EmptySpaces onClickCreate={() => setOpenCreate(true)} />
@@ -139,23 +142,26 @@ function SpaceItem({
     <button
       onClick={onSelect}
       className={cn(
-        "group mb-1 flex w-full items-center gap-2 border px-3 py-2 text-left transition-colors",
-        active
-          ? "border-ink bg-paper shadow-editorial-soft"
-          : "border-transparent hover:bg-bg-soft",
+        "group flex w-full items-center gap-2 border-l-2 py-1.5 pl-2.5 pr-2 text-left transition-colors",
+        active ? "border-l-accent bg-accent-wash" : "border-l-transparent hover:bg-bg-soft",
       )}
     >
-      <Folder size={14} className={cn("shrink-0", active ? "text-accent" : "text-ink-mute")} />
+      <Folder size={13} className={cn("shrink-0", active ? "text-accent" : "text-ink-mute")} />
       <div className="min-w-0 flex-1">
-        <div className="vn-text truncate text-sm font-medium text-ink">{space.name}</div>
-        <div className="mt-0.5 font-mono text-[10px] text-ink-mute">
-          {space.n_materials} {space.n_materials === 1 ? "material" : "materials"}
+        <div
+          className={cn(
+            "vn-text truncate text-[13px] leading-tight",
+            active ? "font-semibold text-ink" : "font-medium text-ink-soft",
+          )}
+        >
+          {space.name}
         </div>
+        <div className="meta truncate">{space.n_materials} tài liệu</div>
       </div>
       <button
         onClick={onDelete}
         className="p-1 text-ink-mute opacity-0 transition-opacity hover:text-danger group-hover:opacity-100"
-        aria-label="Delete space"
+        aria-label="Xoá không gian"
       >
         <Trash2 size={12} />
       </button>
@@ -167,10 +173,10 @@ function EmptySpaces({ onClickCreate }: { onClickCreate: () => void }) {
   return (
     <div className="px-3 py-8 text-center">
       <p className="mb-3 text-xs italic text-ink-mute">
-        No spaces yet. A space holds documents you ask questions of.
+        Chưa có không gian nào. Một không gian giữ các tài liệu mà bạn muốn hỏi đáp.
       </p>
       <Button variant="outline" size="sm" onClick={onClickCreate}>
-        <Plus size={12} /> Create one
+        <Plus size={12} /> Tạo không gian
       </Button>
     </div>
   );
