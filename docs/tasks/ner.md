@@ -114,8 +114,9 @@ hoặc đầu số quốc gia `+84`:
 `nom.nlp.ner` dùng `RegexNERModel` ở v0:
 
 1. Chạy regex song song cho mỗi loại thực thể.
-2. Khử trùng overlap — nếu hai span chồng nhau, chọn loại có precedence
-   cao hơn (LAW_REF > ORG > MONEY > DATE > PHONE_VN > ID_VN > PER > LOC).
+2. Khử chồng lấn — nếu hai span chồng nhau, chọn loại có thứ tự
+   ưu tiên cao hơn (LAW_REF > ORG > MONEY > DATE > PHONE_VN > ID_VN
+   > PER > LOC).
 3. Trả về danh sách `NERSpan(label, text, start, end, confidence)`.
 
 Không dùng model trong v0 — nhanh (~5 ms/đoạn), deterministic, không
@@ -131,9 +132,9 @@ VN khó. Khi cần PER chính xác, đổi sang `HFNERModel(model_id="vinai/phob
 - **LAW_REF chỉ bắt mẫu chuẩn.** Tham chiếu pháp luật có cấu trúc
   bất thường (viết tắt, gộp số) có thể bị bỏ sót. Bao phủ ~85 % công
   văn VN hiện đại.
-- **ID_VN không xác minh checksum CCCD.** Có thể có false positive với
-  chuỗi 12 chữ số ngẫu nhiên. Hợp lý cho text mining; với verification
-  bắt buộc dùng API VNeID.
+- **ID_VN không xác minh mã kiểm tra CCCD.** Có thể có dương tính giả
+  với chuỗi 12 chữ số ngẫu nhiên. Hợp lý cho khai phá văn bản; khi
+  cần xác minh chính thức phải dùng API VNeID.
 - **PHONE_VN bỏ qua đầu số quốc tế ngoài VN.** Chỉ tập trung +84.
 
 ## Tích hợp với tác vụ khác
@@ -142,7 +143,7 @@ VN khó. Khi cần PER chính xác, đổi sang `HFNERModel(model_id="vinai/phob
 | --- | --- |
 | Hợp đồng → bảng tóm tắt | OCR → NER pháp lý → Tóm tắt với ngữ cảnh thực thể |
 | Đơn từ y tế | OCR → NER chuẩn (PER + DATE) → Phân loại rủi ro |
-| Audit log nội bộ | Chat → NER chuẩn (PER + ORG + DATE) → Lưu vào space |
+| Nhật ký kiểm toán nội bộ | Chat → NER chuẩn (PER + ORG + DATE) → Lưu vào space |
 
 ## Liên quan
 

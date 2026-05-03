@@ -17,9 +17,9 @@ số) — ROUGE-1 63.4 trên `vietnews`. Lần đầu tải khoảng 3.3 GB; sau
 Mở **Tóm tắt** ở thanh điều hướng bên trái. Dán đoạn văn (giới hạn
 ~1024 token, vượt sẽ tự cắt), chọn:
 
-- **Văn phong** — Báo / tin tức (mặc định, dùng prefix `vietnews`),
-  Hợp đồng (prefix `legal`), Hội thoại (prefix `dialogue`). Prefix
-  giúp mô hình điều chỉnh giọng văn đầu ra.
+- **Văn phong** — Báo / tin tức (mặc định, dùng tiền tố `vietnews`),
+  Hợp đồng (tiền tố `legal`), Hội thoại (tiền tố `dialogue`). Tiền
+  tố giúp mô hình điều chỉnh giọng văn đầu ra.
 - **Độ dài tóm tắt** — Ngắn (~64 token), Vừa (~128 token), Dài
   (~256 token, mặc định).
 
@@ -47,24 +47,26 @@ curl -X POST http://localhost:8080/api/tools/nlp/summarize \
 
 `nom.summarize` là wrapper mỏng quanh `transformers`:
 
-1. **Tokenize** — `vit5-large-vietnews` dùng SentencePiece âm tiết
-   tiếng Việt. Cap input ở 1024 token.
-2. **Prefix prompt** — chèn `vietnews:`, `legal:`, hoặc `dialogue:`
-   trước input để chỉ định văn phong.
-3. **Generate** — beam search 4 chùm, `length_penalty=2.0`, `no_repeat_ngram_size=3`.
-4. **Decode** — bỏ token đặc biệt, NFC-normalize, trả về.
+1. **Tách token** — `vit5-large-vietnews` dùng SentencePiece âm tiết
+   tiếng Việt. Giới hạn đầu vào ở 1024 token.
+2. **Chèn tiền tố** — `vietnews:`, `legal:`, hoặc `dialogue:` trước
+   đầu vào để chỉ định văn phong.
+3. **Sinh** — tìm chùm 4 nhánh (beam=4), `length_penalty=2.0`,
+   `no_repeat_ngram_size=3`.
+4. **Giải mã** — bỏ token đặc biệt, chuẩn hoá NFC, trả về.
 
 Truyền cả tài liệu, không cắt theo câu — mô hình tự cô đọng cấu trúc
 diễn ngôn (đoạn mở, thân, kết).
 
 ## Giới hạn đã biết
 
-- **Cap 1024 token đầu vào.** Bài dài hơn thì cắt thẳng — không có
-  chunk-and-merge ở v0. Cho hợp đồng dài cần chia đoạn theo tay.
-- **Tóm tắt rút trích, không tổng hợp.** Mô hình chọn cụm câu trong
-  bài rồi nén lại — không phát sinh ý mới hoặc paraphrase mạnh. Nếu
-  cần tóm tắt phong cách "human", đổi sang LLM trò chuyện qua
-  `nom.chat` với prompt phù hợp.
+- **Giới hạn 1024 token đầu vào.** Bài dài hơn thì cắt thẳng —
+  v0 chưa có cơ chế cắt-và-ghép. Với hợp đồng dài cần chia đoạn
+  thủ công.
+- **Tóm tắt rút trích, không tổng hợp.** Mô hình chọn cụm câu
+  trong bài rồi nén lại — không phát sinh ý mới hoặc viết lại
+  mạnh. Nếu cần tóm tắt giọng tự nhiên hơn, đổi sang LLM trò
+  chuyện qua `nom.chat` với prompt phù hợp.
 - **Bịa số liệu.** Đo nội bộ
   ([JSON kết quả](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/summarize_wiki_vi_baseline.json),
   n=10 trên `wiki_vi`): **1 trong 10 mẫu thêm năm "2025" không có
@@ -82,10 +84,10 @@ diễn ngôn (đoạn mở, thân, kết).
 | --- | --- | --- |
 | `VietAI/vit5-large-vietnews` *(mặc định)* | Apache 2.0 | Tin tức / báo chí |
 | `VietAI/vit5-base-vietnews` | Apache 2.0 | Máy 4 GB RAM, độ chính xác giảm ~3 ROUGE |
-| LLM trò chuyện qua `nom.chat` | tuỳ | Cần kiểm soát phong cách / tóm tắt theo prompt cụ thể |
+| LLM trò chuyện qua `nom.chat` | tuỳ | Cần kiểm soát phong cách / tóm tắt theo yêu cầu prompt cụ thể |
 
 ## Liên quan
 
 - [Phân loại văn phong](./register.md) — tự động chọn prefix phù hợp.
-- [Khôi phục dấu](./diacritic-restoration.md) — chạy trước nếu input
-  thiếu dấu (hơi mặn cho summarizer).
+- [Khôi phục dấu](./diacritic-restoration.md) — chạy trước nếu đầu
+  vào thiếu dấu (đầu vào thiếu dấu làm bộ tóm tắt giảm chất lượng).

@@ -104,13 +104,13 @@ Số do VinAI công bố trên model card — chưa được tái lập độc l
 
 ## Giới hạn đã biết
 
-- **Không hỗ trợ diarization** (phân biệt người nói). Đầu ra là một
-  luồng văn bản duy nhất; cho phỏng vấn nhiều người nói cần kết hợp
-  với `pyannote.audio` hoặc gắn nhãn thủ công.
+- **Không phân biệt người nói.** Đầu ra là một luồng văn bản duy
+  nhất; cho phỏng vấn nhiều người nói cần kết hợp với `pyannote.audio`
+  hoặc gắn nhãn thủ công.
 - **Audio kém chất lượng làm giảm WER mạnh.** Ghi âm điện thoại 8 kHz,
   ồn nền, hoặc nén MP3 < 96 kbps có thể đẩy WER lên 20 %+.
-- **Không có nhận diện hoạt động giọng nói (VAD).** Đoạn im lặng dài
-  có thể khiến mô hình bịa văn bản — sinh ra chữ "không có" trong
+- **Không có phát hiện hoạt động giọng nói (VAD).** Đoạn im lặng
+  dài có thể khiến mô hình bịa văn bản — sinh ra chữ không có trong
   ghi âm. Cắt khoảng im lặng trước khi đưa vào nếu thấy hiện tượng
   này.
 - **Số WER ở bảng dưới là VinAI tự công bố, không phải Nôm đo lại.**

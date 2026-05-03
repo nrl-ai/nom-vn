@@ -78,7 +78,7 @@ luận đường đọc.
 | --- | --- | --- |
 | Chữ viết tay | **Vintern-1B-v3_5** | Mô hình chuyên cho chữ tay tiếng Việt |
 | Chữ in sạch (PDF / scan) | **Tesseract** qua `nom convert` | CER 0 % trên dòng in sạch, 100 × nhanh hơn VLM |
-| Form lai (in + viết tay) | **Vintern** trước, **Tesseract** lại nếu phần in cần độ chính xác cao | Vintern bao quát; Tesseract chốt phần in |
+| Biểu mẫu lai (in + viết tay) | **Vintern** trước, **Tesseract** lại nếu phần in cần độ chính xác cao | Vintern bao quát; Tesseract chốt phần in |
 | Hồ sơ y tế viết tay | Vintern + người xác nhận | Vintern chưa được tinh chỉnh trên y tế VN; CER ước ~20 % |
 
 Vintern không thay thế Tesseract cho mọi trường hợp — nó **bổ sung**
@@ -98,12 +98,12 @@ cho phần Tesseract không làm được (chữ viết tay).
   cập nhật con số ở đây trong cùng commit với JSON kết quả.
 + **Phụ thuộc chất lượng ảnh.** Ảnh mờ, tối, hoặc nghiêng > 15° làm
   giảm chất lượng đáng kể. Crop sạch đầu vào trước.
-+ **Không xử lý cấu trúc form.** Vintern trả về văn bản tuyến tính,
-  không nhận diện ô / cột / nhãn. Cho biểu mẫu có cấu trúc, kết hợp
-  với rule-based field-extraction sau OCR.
-+ **Latency cao.** 5–15 giây/ảnh trên GPU 8 GB là điển hình. Cho
-  pipeline hàng loạt nên dùng [Hàng đợi](./jobs.md) thay vì chờ
-  request HTTP.
++ **Không xử lý cấu trúc biểu mẫu.** Vintern trả về văn bản tuyến
+  tính, không nhận diện ô / cột / nhãn. Với biểu mẫu có cấu trúc,
+  kết hợp một bước trích xuất trường theo luật sau bước OCR.
++ **Độ trễ cao.** 5–15 giây/ảnh trên GPU 8 GB là điển hình. Cho
+  xử lý hàng loạt nên dùng [Hàng đợi](./jobs.md) thay vì chờ
+  từng yêu cầu HTTP.
 + **Tiếng Việt thuần;** mô hình đa ngôn ngữ về cơ bản nhưng chưa được
   đo trên tài liệu lai EN/VN.
 
@@ -111,7 +111,7 @@ cho phần Tesseract không làm được (chữ viết tay).
 
 | Mô hình | License | Khi nào chọn |
 | --- | --- | --- |
-| `5CD-AI/Vintern-1B-v3_5` *(mặc định)* | MIT | VN handwriting tiêu chuẩn |
+| `5CD-AI/Vintern-1B-v3_5` *(mặc định)* | MIT | Chữ viết tay VN tiêu chuẩn |
 | `5CD-AI/Vintern-3B` | MIT | Cần chất lượng cao hơn, có VRAM 8 GB+ |
 | `qwen2.5-vl:7b` qua Ollama | Apache 2.0 | Đa ngôn ngữ, không cần GPU; kém Vintern trên VN |
 
