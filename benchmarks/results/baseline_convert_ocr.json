@@ -11,10 +11,10 @@
       "n_samples": 20,
       "cer_mean": 0.0016,
       "cer_median": 0.0,
-      "latency_ms_p50": 177.9,
-      "latency_ms_mean": 205.8,
-      "throughput_chars_per_sec": 266.3,
-      "total_seconds": 4.3
+      "latency_ms_p50": 138.1,
+      "latency_ms_mean": 156.5,
+      "throughput_chars_per_sec": 349.8,
+      "total_seconds": 3.27
     },
     {
       "flow": "image_to_docx",
@@ -22,10 +22,10 @@
       "n_samples": 20,
       "cer_mean": 0.0107,
       "cer_median": 0.0,
-      "latency_ms_p50": 192.7,
-      "latency_ms_mean": 195.2,
-      "throughput_chars_per_sec": 282.1,
-      "total_seconds": 4.06
+      "latency_ms_p50": 147.4,
+      "latency_ms_mean": 149.5,
+      "throughput_chars_per_sec": 368.4,
+      "total_seconds": 3.11
     },
     {
       "flow": "pdf_to_docx_text_layer",
@@ -34,18 +34,37 @@
       "pages_text_extracted": 0,
       "pages_ocred": 5,
       "chars_out": 10999,
-      "elapsed_seconds": 7.768,
-      "throughput_chars_per_sec": 1415.9,
+      "elapsed_seconds": 6.157,
+      "throughput_chars_per_sec": 1786.5,
       "first_200_chars": "Tuyên ngôn toàn thế giới về nhân quyền\ncủa Liên Hợp Quốc\nĐược Đại hội đồng Liên Hợp Quốc thông qua và công bố theo Nghị quyết\nsố 217 (IID, ngày 10 tháng 12 năm 1948.\nLời nói đầu\nVới nhận thức rằng:\nVi"
     },
     {
       "flow": "pdf_to_docx_ocr_fallback",
-      "n_pages": 1,
-      "pages_text_extracted": 0,
-      "pages_ocred": 1,
-      "elapsed_seconds": 0.287,
-      "cer": 0.6818,
-      "first_200_chars": "Mota doe glue hang ou hung gv a"
+      "corpus": "synthetic_ocr_vi/clean (rendered to single-page PDFs)",
+      "n_samples": 20,
+      "cer_mean": 0.007,
+      "cer_median": 0.0,
+      "latency_ms_p50": 167.3,
+      "latency_ms_mean": 173.7,
+      "pages_ocred_total": 20,
+      "pages_text_extracted_total": 0,
+      "examples": [
+        {
+          "id": "000",
+          "cer": 0.0,
+          "first": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải."
+        },
+        {
+          "id": "001",
+          "cer": 0.0,
+          "first": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở."
+        },
+        {
+          "id": "002",
+          "cer": 0.0,
+          "first": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê."
+        }
+      ]
     }
   ]
 }

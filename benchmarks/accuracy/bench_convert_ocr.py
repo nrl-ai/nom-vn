@@ -179,43 +179,83 @@ def _bench_pdf_text_layer(pdf_path: Path, *, workdir: Path) -> dict[str, Any]:
 
 
 def _bench_pdf_ocr_fallback(
-    fixture_image: Path,
-    expected_text: str,
+    image_dir: Path,
+    ground_truth: list[dict[str, Any]],
     *,
     ocr_language: str,
+    limit: int,
     workdir: Path,
 ) -> dict[str, Any]:
-    """Render the fixture image into a single-page PDF (no text layer)
-    and measure pdf_to_docx's OCR fallback path."""
+    """Embed each fixture image into a single-page PDF (no text layer)
+    sized to match the image's native aspect, then measure
+    ``pdf_to_docx``'s OCR fallback path. Reports mean CER + latency
+    across ``limit`` samples (``limit=0`` → full corpus).
+
+    The page size is computed from each image's pixel dimensions at
+    96 dpi, so Tesseract sees the bitmap at native resolution after
+    pdfium2 re-renders the page at the converter's ``ocr_dpi``. An
+    earlier version of this bench used a fixed 640x200pt page, which
+    stretched 1017x78px line crops into a wrong aspect and pushed
+    measured CER to 68 % even though the production code path was
+    fine — see commit fixing the regression.
+    """
+    from PIL import Image
+    from reportlab.lib.utils import ImageReader
     from reportlab.pdfgen import canvas as rl_canvas
 
     from nom.convert import pdf_to_docx
 
-    if not fixture_image.exists():
-        return {"flow": "pdf_to_docx_ocr_fallback", "skipped": "fixture absent"}
+    if not ground_truth:
+        return {"flow": "pdf_to_docx_ocr_fallback", "skipped": "no ground truth"}
 
-    pdf_src = workdir / "scan_only.pdf"
-    pdf_canvas = rl_canvas.Canvas(str(pdf_src), pagesize=(640, 200))
-    pdf_canvas.drawImage(str(fixture_image), 0, 0, 640, 200)
-    pdf_canvas.showPage()
-    pdf_canvas.save()
+    samples = ground_truth if limit == 0 else ground_truth[:limit]
+    cers: list[float] = []
+    latencies_ms: list[float] = []
+    n_ocred = 0
+    n_text = 0
+    examples: list[dict[str, Any]] = []
+    print(f"\n=== pdf_to_docx OCR fallback — n={len(samples)} ===")
 
-    dst = workdir / "scan_only.docx"
-    print(f"\n=== pdf_to_docx OCR fallback — {fixture_image.name} ===")
+    for s in samples:
+        png = image_dir / Path(s["clean"]).name
+        if not png.exists():
+            continue
+        with Image.open(png) as im:
+            w_px, h_px = im.size
+            page_w = w_px * 72 / 96
+            page_h = h_px * 72 / 96
+            pdf_src = workdir / f"scan_{s['id']}.pdf"
+            c = rl_canvas.Canvas(str(pdf_src), pagesize=(page_w, page_h))
+            c.drawImage(ImageReader(im), 0, 0, page_w, page_h)
+            c.showPage()
+            c.save()
 
-    t0 = time.perf_counter()
-    stats = pdf_to_docx(pdf_src, dst, ocr_language=ocr_language)
-    elapsed = time.perf_counter() - t0
-    hyp = _read_docx_text(dst)
+        dst = workdir / f"scan_{s['id']}.docx"
+        t0 = time.perf_counter()
+        stats = pdf_to_docx(pdf_src, dst, ocr_language=ocr_language)
+        latencies_ms.append((time.perf_counter() - t0) * 1000)
+        hyp = _read_docx_text(dst)
+        cer = _cer(hyp, s["text"])
+        cers.append(cer)
+        n_ocred += stats.pages_ocred
+        n_text += stats.pages_text_extracted
+        if len(examples) < 3:
+            examples.append({"id": s["id"], "cer": round(cer, 4), "first": hyp[:80]})
+
+    if not cers:
+        return {"flow": "pdf_to_docx_ocr_fallback", "skipped": "no fixtures rendered"}
 
     return {
         "flow": "pdf_to_docx_ocr_fallback",
-        "n_pages": stats.n_pages,
-        "pages_text_extracted": stats.pages_text_extracted,
-        "pages_ocred": stats.pages_ocred,
-        "elapsed_seconds": round(elapsed, 3),
-        "cer": round(_cer(hyp, expected_text), 4),
-        "first_200_chars": hyp[:200],
+        "corpus": "synthetic_ocr_vi/clean (rendered to single-page PDFs)",
+        "n_samples": len(cers),
+        "cer_mean": round(statistics.mean(cers), 4),
+        "cer_median": round(statistics.median(cers), 4),
+        "latency_ms_p50": round(statistics.median(latencies_ms), 1),
+        "latency_ms_mean": round(statistics.mean(latencies_ms), 1),
+        "pages_ocred_total": n_ocred,
+        "pages_text_extracted_total": n_text,
+        "examples": examples,
     }
 
 
@@ -275,17 +315,16 @@ def main() -> int:
             workdir=workdir,
         )
     )
-    # 4. PDF OCR fallback (synthetic image-only PDF)
-    if ground_truth:
-        first = ground_truth[0]
-        results["flows"].append(
-            _bench_pdf_ocr_fallback(
-                synth / "clean" / Path(first["clean"]).name,
-                first["text"],
-                ocr_language=args.ocr_language,
-                workdir=workdir,
-            )
+    # 4. PDF OCR fallback (synthetic image-only PDF) — N samples
+    results["flows"].append(
+        _bench_pdf_ocr_fallback(
+            synth / "clean",
+            ground_truth,
+            ocr_language=args.ocr_language,
+            limit=args.limit,
+            workdir=workdir,
         )
+    )
 
     # Print summary
     print("\n" + "=" * 70)
