@@ -166,6 +166,23 @@ export interface HandwritingOcrRes {
   confidence: number | null;
 }
 
+export type SttBackend = "phowhisper" | "whisper-v3";
+
+export interface SttSegment {
+  start: number;
+  end: number;
+  text: string;
+}
+
+export interface SttRes {
+  filename: string;
+  model: string;
+  language: string | null;
+  text: string;
+  n_chars: number;
+  segments: SttSegment[] | null;
+}
+
 // Translation — single string + file upload. Mirrors
 // /api/tools/translate and /api/tools/translate/file in
 // src/nom/chat/tools_api.py.

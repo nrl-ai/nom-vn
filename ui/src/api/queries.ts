@@ -9,6 +9,7 @@ import type {
   PullsListRes,
   RegisterBackend,
   Space,
+  SttBackend,
   TranslateBackend,
   TranslateLang,
   WordFmt,
@@ -194,6 +195,21 @@ export function useOcrHandwriting() {
   return useMutation({
     mutationFn: (vars: { file: File; modelId?: string }) =>
       api.tools.ocrHandwriting(vars.file, vars.modelId),
+  });
+}
+
+export function useSttTranscribe() {
+  return useMutation({
+    mutationFn: (vars: {
+      file: File;
+      backend?: SttBackend;
+      language?: string;
+      returnTimestamps?: boolean;
+    }) =>
+      api.tools.sttTranscribe(vars.file, vars.backend, {
+        language: vars.language,
+        returnTimestamps: vars.returnTimestamps,
+      }),
   });
 }
 

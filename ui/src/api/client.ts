@@ -22,6 +22,8 @@ import type {
   RegisterRes,
   SentenceTokenizeRes,
   SentimentRes,
+  SttBackend,
+  SttRes,
   Space,
   StripRes,
   TranslateBackend,
@@ -233,6 +235,21 @@ export const api = {
       fd.append("file", file);
       if (modelId) fd.append("model_id", modelId);
       return request<HandwritingOcrRes>("/api/tools/ocr/handwriting", {
+        method: "POST",
+        body: fd,
+      });
+    },
+    sttTranscribe: (
+      file: File,
+      backend: SttBackend = "phowhisper",
+      opts: { language?: string; returnTimestamps?: boolean } = {},
+    ) => {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("backend", backend);
+      if (opts.language) fd.append("language", opts.language);
+      if (opts.returnTimestamps) fd.append("return_timestamps", "true");
+      return request<SttRes>("/api/tools/stt/transcribe", {
         method: "POST",
         body: fd,
       });

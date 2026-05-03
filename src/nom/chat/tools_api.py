@@ -651,6 +651,73 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             },
         )
 
+    @app.post("/api/tools/stt/transcribe")
+    async def stt_transcribe(
+        file: Annotated[UploadFile, File()],
+        backend: Annotated[str, Form()] = "phowhisper",
+        language: Annotated[str | None, Form()] = None,
+        return_timestamps: Annotated[bool, Form()] = False,
+    ) -> dict[str, Any]:
+        """Transcribe an uploaded audio file (wav / mp3 / flac / m4a /
+        ogg) to Vietnamese text.
+
+        Backends:
+
+        - ``phowhisper`` (default) — VinAI/PhoWhisper-large, VN-tuned,
+          strongest published WER on VIVOS / VLSP T1.
+        - ``whisper-v3`` — openai/whisper-large-v3, multilingual; pick
+          this for VN↔EN code-switched audio (per ViMD survey, beats
+          PhoWhisper on mixed-language business inputs).
+
+        503 when transformers / torch / librosa missing or the model
+        download fails. PhoWhisper is .bin pickled (VinAI lab — accepted
+        per file-format trust ladder, documented in wrapper docstring).
+        """
+        from pathlib import Path
+
+        from nom.stt import PhoWhisperSTT, WhisperSTT
+
+        filename = file.filename or "upload.wav"
+        suffix = Path(filename).suffix.lower()
+        if suffix not in {".wav", ".mp3", ".flac", ".m4a", ".ogg", ".opus", ".webm"}:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unsupported audio format {suffix!r}",
+            )
+
+        contents = await file.read()
+        if backend == "phowhisper":
+            stt: Any = PhoWhisperSTT()
+        elif backend in ("whisper-v3", "whisper"):
+            stt = WhisperSTT()
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unsupported backend {backend!r}; expected 'phowhisper' or 'whisper-v3'",
+            )
+
+        try:
+            result = stt.transcribe(
+                contents, language=language, return_timestamps=return_timestamps
+            )
+        except ImportError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        return {
+            "filename": filename,
+            "model": result.model,
+            "language": result.language,
+            "text": result.text,
+            "n_chars": len(result.text),
+            "segments": (
+                [{"start": s.start, "end": s.end, "text": s.text} for s in result.segments]
+                if result.segments
+                else None
+            ),
+        }
+
     @app.post("/api/tools/ocr/handwriting")
     async def ocr_handwriting(
         file: Annotated[UploadFile, File()],
