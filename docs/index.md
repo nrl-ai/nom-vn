@@ -111,7 +111,7 @@ features:
 <a class="ev-usecase" href="/tasks/stt">
 <div class="marker">07 · giọng nói → văn bản</div>
 <h3>Chuyển ghi âm tiếng Việt thành văn bản</h3>
-<p>PhoWhisper-large (BSD-3, VinAI fine-tune Whisper trên 844 giờ VN) hoặc Whisper-large-v3 (đa ngôn ngữ, audio lai EN/VN). Đo nội bộ n=3: <strong>WER 15,2 %</strong>; cần đo trên ViMD 3 vùng.</p>
+<p>PhoWhisper-large (BSD-3, VinAI tinh chỉnh Whisper trên 844 giờ tiếng Việt) hoặc Whisper-large-v3 (đa ngôn ngữ, ghi âm lai EN/VN). Đo nội bộ n=3: <strong>WER 15,2 %</strong>; cần đo thêm trên ViMD 3 vùng.</p>
 <span class="ev-usecase-cta">Xem STT →</span>
 </a>
 
@@ -125,7 +125,7 @@ features:
 <a class="ev-usecase" href="/tasks/register">
 <div class="marker">09 · phân loại văn phong</div>
 <h3>Định tuyến văn bản theo thể loại</h3>
-<p>Quy tắc heuristic 4 lớp (trang trọng / kinh doanh / hội thoại / văn học) — chạy ~1 ms cục bộ, không cần model. Đường PhoBERT fine-tune (mục tiêu macro-F1 ≥ 0,85) đã có script, đang chờ chạy.</p>
+<p>PhoBERT-base 4 lớp (trang trọng / kinh doanh / hội thoại / văn học) — <strong>macro F1 0,900</strong> trên test n=1234 (formal 0,91 / business 0,91 / hội thoại 0,92 / văn học 0,87). Bản quy tắc fallback (~1 ms, không cần GPU) cũng ship trong OSS.</p>
 <span class="ev-usecase-cta">Xem phân loại văn phong →</span>
 </a>
 

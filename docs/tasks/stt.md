@@ -9,11 +9,11 @@ Trung / Nam) và đầu ra dấu thời gian theo từng đoạn.
 `pip install "nom-vn[stt]"` để có sẵn `transformers` + `torch` +
 `librosa` + `soundfile`. Mặc định dùng
 [`vinai/PhoWhisper-large`](https://huggingface.co/vinai/PhoWhisper-large)
-(BSD-3, 1.5 B tham số, 844 giờ huấn luyện trên audio VN) — fine-tune
-từ `whisper-large-v3`. Lần đầu tải khoảng 3 GB.
+(BSD-3, 1,5 B tham số, 844 giờ huấn luyện trên ghi âm tiếng Việt) —
+tinh chỉnh từ `whisper-large-v3`. Lần đầu tải khoảng 3 GB.
 
-Yêu cầu: GPU 6 GB VRAM cho real-time; CPU chạy được nhưng chậm 5 ×
-độ dài audio.
+Yêu cầu: GPU 6 GB VRAM cho thời gian thực; CPU chạy được nhưng chậm
+gấp ~5 lần thời lượng ghi âm.
 
 ### Số đo nội bộ — trạng thái thật (2026-05-03)
 
@@ -79,8 +79,9 @@ curl -X POST http://localhost:8080/api/jobs/stt \
 
 ### Ba vùng giọng
 
-PhoWhisper-large được fine-tune trên dữ liệu trải đều giữa giọng Bắc
-(38 %), Trung (22 %), Nam (40 %). WER trung bình:
+PhoWhisper-large được tinh chỉnh trên dữ liệu trải đều ba vùng —
+giọng Bắc (38 %), giọng Trung (22 %), giọng Nam (40 %). WER trung
+bình:
 
 | Vùng | WER (đo trên `vinai/PhoWhisper-test`) |
 | --- | --- |
@@ -108,11 +109,12 @@ Số do VinAI công bố trên model card — chưa được tái lập độc l
   với `pyannote.audio` hoặc gắn nhãn thủ công.
 - **Audio kém chất lượng làm giảm WER mạnh.** Ghi âm điện thoại 8 kHz,
   ồn nền, hoặc nén MP3 < 96 kbps có thể đẩy WER lên 20 %+.
-- **Không có VAD (voice activity detection).** Đoạn im lặng dài có
-  thể gây hallucination — mô hình phát sinh chữ "không có". Cắt im
-  lặng trước khi đưa vào nếu thấy hiện tượng này.
-- **Số WER ở trên là claim của VinAI, không phải đo lại của Nôm.**
-  Sẽ có bench tái lập trong v0.4 với corpus VLSP-2020 ASR test set.
+- **Không có nhận diện hoạt động giọng nói (VAD).** Đoạn im lặng dài
+  có thể khiến mô hình bịa văn bản — sinh ra chữ "không có" trong
+  ghi âm. Cắt khoảng im lặng trước khi đưa vào nếu thấy hiện tượng
+  này.
+- **Số WER ở bảng dưới là VinAI tự công bố, không phải Nôm đo lại.**
+  Đợt sau sẽ tái lập trên VLSP-2020 ASR test set.
 
 ## Mô hình thay thế
 

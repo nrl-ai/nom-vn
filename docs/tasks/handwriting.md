@@ -76,10 +76,10 @@ luận đường đọc.
 
 | Đầu vào | Khuyến nghị | Lý do |
 | --- | --- | --- |
-| Chữ viết tay | **Vintern-1B-v3_5** | Specialist VN handwriting |
-| Chữ in clean (PDF / scan) | **Tesseract** qua `nom convert` | CER 0 % trên dòng in sạch, 100 × nhanh hơn VLM |
+| Chữ viết tay | **Vintern-1B-v3_5** | Mô hình chuyên cho chữ tay tiếng Việt |
+| Chữ in sạch (PDF / scan) | **Tesseract** qua `nom convert` | CER 0 % trên dòng in sạch, 100 × nhanh hơn VLM |
 | Form lai (in + viết tay) | **Vintern** trước, **Tesseract** lại nếu phần in cần độ chính xác cao | Vintern bao quát; Tesseract chốt phần in |
-| Hồ sơ y tế viết tay | Vintern + xác nhận thủ công | Vintern chưa fine-tune trên y tế VN; CER ước ~20 % |
+| Hồ sơ y tế viết tay | Vintern + người xác nhận | Vintern chưa được tinh chỉnh trên y tế VN; CER ước ~20 % |
 
 Vintern không thay thế Tesseract cho mọi trường hợp — nó **bổ sung**
 cho phần Tesseract không làm được (chữ viết tay).
