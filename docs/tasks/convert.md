@@ -97,6 +97,35 @@ convert_to_docx("scan.pdf", "scan.docx", ocr_language="vie+eng")
 translate_docx("scan.docx", "scan.en.docx", translator)
 ```
 
+## Số đo nội bộ (2026-05-03)
+
+Đo trên `nrl-ai/vn-ocr-documents-eval`
+([HuggingFace](https://huggingface.co/datasets/nrl-ai/vn-ocr-documents-eval),
+CC0): 12 tài liệu tiếng Việt thật quy mô A4 (hợp đồng, hoá đơn / biên
+lai, công văn / quyết định, đơn từ), được lưu dưới dạng PDF chỉ có
+ảnh để buộc đi qua đường OCR fallback.
+
+| Loại tài liệu | CER trung bình | n |
+|---|---:|---:|
+| Hợp đồng | **0,15 %** | 3 |
+| Đơn từ | 0,10 % | 3 |
+| Công văn / quyết định | 0,09 % | 3 |
+| Hoá đơn / biên lai | 0,84 % | 3 |
+| **Tổng** | **0,30 %** | 12 |
+
+Throughput: 1,13 tài liệu / giây trên CPU đơn lõi (Intel
+i7-13700H). CER tính sau khi chuẩn hoá khoảng trắng (gộp các chuỗi
+khoảng trắng thành một dấu cách, NFC).
+
+JSON kết quả:
+[`benchmarks/results/baseline_convert_documents.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_convert_documents.json).
+Tái lập: `python benchmarks/accuracy/bench_convert_documents.py`.
+
+**Cảnh báo n nhỏ:** 12 tài liệu chỉ là smoke test; con số 0,30 % CER
+là chỉ báo định hướng, không phải đo định lượng đầy đủ. Mở rộng
+sang công văn công khai từ vbpl.vn (đợt sau) sẽ cho con số đáng
+tin cậy hơn.
+
 ## Yêu cầu hệ thống
 
 - **Tesseract** đã cài đặt cùng các gói ngôn ngữ cần dùng:
