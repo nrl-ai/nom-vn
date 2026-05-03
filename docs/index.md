@@ -61,7 +61,7 @@ features:
 
 <div class="ev-section">
 <h2>§ 02 · Dùng được vào việc gì</h2>
-<p class="lede">Tám tác vụ chính đã ship — mỗi tác vụ có trang riêng kèm số đo trên 4 register và lệnh tái lập từ một bản clone sạch.</p>
+<p class="lede">Mười hai tác vụ đã ship — mỗi tác vụ có trang riêng kèm số đo trên dữ liệu thật và lệnh tái lập từ một bản clone sạch.</p>
 </div>
 
 <div class="ev-usecases">
@@ -69,7 +69,7 @@ features:
 <a class="ev-usecase" href="/tasks/rag">
 <div class="marker">01 · RAG</div>
 <h3>Hỏi đáp trên kho tài liệu</h3>
-<p>Tải PDF / DOCX / XLSX / PPTX / ảnh — Nôm cắt đoạn, sinh vector, tra cứu, xếp hạng lại, trả lời kèm trích dẫn. <strong>R@1 86.3 %</strong> trên Zalo Legal.</p>
+<p>Tải PDF / DOCX / XLSX / PPTX / ảnh — Nôm cắt đoạn, sinh vector, tra cứu, xếp hạng lại, trả lời kèm trích dẫn. <strong>R@1 86,3 %</strong> trên Zalo Legal.</p>
 <span class="ev-usecase-cta">Xem tài liệu RAG →</span>
 </a>
 
@@ -83,40 +83,68 @@ features:
 <a class="ev-usecase" href="/tasks/convert">
 <div class="marker">03 · chuyển định dạng</div>
 <h3>PDF / ảnh → DOCX chỉnh sửa được</h3>
-<p>OCR (Tesseract <code>vie</code> hoặc VietOCR cho viết tay), bóc bố cục, dựng lại DOCX với đoạn văn, bảng, đầu trang chân trang. Đầu vào để dịch, biên tập, hoặc lưu trữ.</p>
+<p>OCR (Tesseract <code>vie</code> cho dòng in, Vintern cho viết tay), bóc bố cục, dựng lại DOCX với đoạn văn, bảng, đầu trang chân trang. Đầu vào để dịch, biên tập, hoặc lưu trữ.</p>
 <span class="ev-usecase-cta">Xem chuyển định dạng →</span>
 </a>
 
 <a class="ev-usecase" href="/tasks/spell-correction">
 <div class="marker">04 · sửa văn bản</div>
 <h3>Khôi phục dấu + sửa chính tả</h3>
-<p>Một mô hình ViT5 220 M xử lý gọn lỗi gõ Telex, mất dấu, lỗi OCR trong một lượt. <strong>98.32 %</strong> synthetic light · <strong>79.62 %</strong> OOD ngoài phân phối — vượt Toshiiiii1.</p>
+<p>Một mô hình ViT5 220 M xử lý gọn lỗi gõ Telex, mất dấu, lỗi OCR trong một lượt. <strong>98,32 %</strong> tổng hợp light · <strong>79,62 %</strong> OOD ngoài phân phối — vượt Toshiiiii1.</p>
 <span class="ev-usecase-cta">Xem sửa chính tả →</span>
 </a>
 
 <a class="ev-usecase" href="/tasks/ocr">
-<div class="marker">05 · OCR</div>
+<div class="marker">05 · OCR (chữ in)</div>
 <h3>Đọc ảnh / PDF scan tiếng Việt</h3>
-<p>Tesseract <code>vie</code> cho dòng in (<strong>CER 0.00 %</strong> sạch · 0.70 % nhiễu nhẹ), VietOCR cho chữ viết tay (<strong>CER 31.82 %</strong>) — vượt Tesseract 37.5 pp ở dòng viết tay.</p>
+<p>Tesseract <code>vie</code> cho dòng in (<strong>CER 0,00 %</strong> sạch · 0,70 % nhiễu nhẹ), VietOCR cho chữ viết tay (<strong>CER 31,82 %</strong>) — vượt Tesseract 37,5 pp ở dòng viết tay.</p>
 <span class="ev-usecase-cta">Xem OCR →</span>
 </a>
 
+<a class="ev-usecase" href="/tasks/handwriting">
+<div class="marker">06 · OCR chữ viết tay</div>
+<h3>Đọc biểu mẫu / ghi chú / CMND viết tay</h3>
+<p>Vintern-1B-v3_5 (MIT, safetensors) qua VLM cấp trang. <strong>CER 0,47 % sạch / 0,37 % nhiễu</strong> trên 20 ảnh chữ in tổng hợp; cảnh báo: VLM ảo trên line crop hẹp, phải truyền cả trang.</p>
+<span class="ev-usecase-cta">Xem OCR chữ viết tay →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/stt">
+<div class="marker">07 · giọng nói → văn bản</div>
+<h3>Chuyển ghi âm tiếng Việt thành văn bản</h3>
+<p>PhoWhisper-large (BSD-3, VinAI fine-tune Whisper trên 844 giờ VN) hoặc Whisper-large-v3 (đa ngôn ngữ, audio lai EN/VN). Đo nội bộ n=3: <strong>WER 15,2 %</strong>; cần đo trên ViMD 3 vùng.</p>
+<span class="ev-usecase-cta">Xem STT →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/summarize">
+<div class="marker">08 · tóm tắt</div>
+<h3>Tóm tắt báo / hợp đồng / hội thoại</h3>
+<p>VietAI ViT5-large-vietnews (MIT, 866 M) với prefix theo văn phong. Upstream ROUGE-1 63,4 vietnews. <strong>Cảnh báo:</strong> mô hình có thể bịa số liệu cụ thể — đừng dùng cho pháp lý / tài chính nếu không kiểm chứng số.</p>
+<span class="ev-usecase-cta">Xem tóm tắt →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/register">
+<div class="marker">09 · phân loại văn phong</div>
+<h3>Định tuyến văn bản theo thể loại</h3>
+<p>Quy tắc heuristic 4 lớp (trang trọng / kinh doanh / hội thoại / văn học) — chạy ~1 ms cục bộ, không cần model. Đường PhoBERT fine-tune (mục tiêu macro-F1 ≥ 0,85) đã có script, đang chờ chạy.</p>
+<span class="ev-usecase-cta">Xem phân loại văn phong →</span>
+</a>
+
 <a class="ev-usecase" href="/tasks/agents">
-<div class="marker">06 · tác tử</div>
+<div class="marker">10 · tác tử</div>
 <h3>Tác tử AI gọi công cụ và MCP</h3>
-<p>6 pattern Anthropic (Single / Chain / Route / Parallel / Voting / Orchestrator-Evaluator) + cầu nối MCP để expose hoặc dùng tool ngoài. Streaming bằng SSE, có audit log.</p>
+<p>6 mẫu Anthropic (Single / Chain / Route / Parallel / Voting / Orchestrator-Evaluator) + cầu nối MCP để mở hoặc dùng công cụ ngoài. Streaming bằng SSE, có audit log.</p>
 <span class="ev-usecase-cta">Xem tác tử →</span>
 </a>
 
-<a class="ev-usecase" href="/tasks/nlp">
-<div class="marker">07 · phân tích văn bản</div>
-<h3>NER, cảm xúc, nhận diện ngôn ngữ</h3>
-<p>Trích thực thể (PERSON / ORG / LOC / DATE / MONEY / …), phân loại cảm xúc câu, nhận diện ngôn ngữ. Cắm vào pipeline ETL hoặc gọi qua REST.</p>
-<span class="ev-usecase-cta">Xem phân tích văn bản →</span>
+<a class="ev-usecase" href="/tasks/ner">
+<div class="marker">11 · trích xuất thực thể</div>
+<h3>NER chuẩn + bộ pháp lý VN</h3>
+<p>Trích PER / ORG / LOC / DATE / MONEY (chuẩn) và <strong>LAW_REF</strong> (luật, điều, khoản) / <strong>ID_VN</strong> (CMND/CCCD) / <strong>PHONE_VN</strong> (bộ pháp lý) cho hợp đồng VN. Quy tắc, không cần GPU.</p>
+<span class="ev-usecase-cta">Xem trích xuất thực thể →</span>
 </a>
 
 <a class="ev-usecase" href="/tasks/compliance">
-<div class="marker">08 · tuân thủ</div>
+<div class="marker">12 · tuân thủ</div>
 <h3>Phân loại rủi ro AI · Luật 134/2025</h3>
 <p>Phân loại theo 3 mức (cao / trung / thấp) đối chiếu Điều 8–15. Mỗi quyết định kèm điều luật áp dụng và lý do — đầu vào dạng tự nhiên, không cần nhãn thủ công.</p>
 <span class="ev-usecase-cta">Xem tuân thủ →</span>
