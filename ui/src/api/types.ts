@@ -131,7 +131,10 @@ export interface NERSpan {
 export interface NERRes {
   input: string;
   spans: NERSpan[];
+  preset?: NERPreset;
 }
+
+export type NERPreset = "standard" | "legal";
 
 export interface SentimentRes {
   input: string;

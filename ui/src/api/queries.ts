@@ -6,6 +6,7 @@ import type {
   DiacriticBackend,
   Material,
   ModelsListRes,
+  NERPreset,
   PullsListRes,
   RegisterBackend,
   Space,
@@ -172,7 +173,12 @@ export function useDetect() {
 }
 
 export function useNERTag() {
-  return useMutation({ mutationFn: (text: string) => api.tools.nerTag(text) });
+  return useMutation({
+    mutationFn: (vars: { text: string; preset?: NERPreset } | string) => {
+      if (typeof vars === "string") return api.tools.nerTag(vars);
+      return api.tools.nerTag(vars.text, vars.preset);
+    },
+  });
 }
 
 export function useSentiment() {

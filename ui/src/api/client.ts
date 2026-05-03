@@ -14,6 +14,7 @@ import type {
   LanguageRes,
   Material,
   ModelsListRes,
+  NERPreset,
   NERRes,
   NormalizeRes,
   PullsListRes,
@@ -208,10 +209,10 @@ export const api = {
         method: "POST",
         body: JSON.stringify({ text }),
       }),
-    nerTag: (text: string) =>
+    nerTag: (text: string, preset: NERPreset = "standard") =>
       request<NERRes>("/api/tools/nlp/ner", {
         method: "POST",
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, preset }),
       }),
     sentiment: (text: string) =>
       request<SentimentRes>("/api/tools/nlp/sentiment", {

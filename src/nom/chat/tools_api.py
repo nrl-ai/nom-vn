@@ -252,14 +252,39 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
     # per modality).
     @app.post("/api/tools/nlp/ner")
     def nlp_ner(payload: dict[str, Any]) -> dict[str, Any]:
+        """Tag named-entity spans in VN text.
+
+        ``preset`` selects which pattern set runs:
+
+        - ``standard`` (default) — PER / ORG / LOC / MISC / DATE / MONEY
+          via the regex baseline.
+        - ``legal`` — adds VN legal-domain types: LAW_REF (luật / nghị
+          định / điều / khoản), ID_VN (CMND 9-digit / CCCD 12-digit),
+          PHONE_VN. See :mod:`nom.nlp.ner_legal`.
+        """
         text = str(payload.get("text", ""))
+        preset = str(payload.get("preset", "standard")).lower()
         if not text:
             raise HTTPException(status_code=422, detail="`text` is required")
+
         from nom.nlp import RegexNERModel
 
-        spans = RegexNERModel().tag(text)
+        if preset == "legal":
+            from nom.nlp.ner_legal import legal_ner_patterns
+
+            ner = RegexNERModel(extra_patterns=legal_ner_patterns())
+        elif preset == "standard":
+            ner = RegexNERModel()
+        else:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unsupported preset {preset!r}; expected 'standard' or 'legal'",
+            )
+
+        spans = ner.tag(text)
         return {
             "input": text,
+            "preset": preset,
             "spans": [
                 {
                     "start": s.start,
