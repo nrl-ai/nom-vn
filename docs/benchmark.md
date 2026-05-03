@@ -513,50 +513,58 @@ JSON:
 
 ## Module: `nom.convert` — *đã ship v0.3*
 
-PDF / ảnh → DOCX với chiến lược ưu tiên lớp văn bản trước, OCR
-fallback qua `pdfium2` + Tesseract. Đo trên kho công khai
+PDF / ảnh → DOCX theo chiến lược "ưu tiên lớp văn bản gốc, dự
+phòng OCR" — nếu trang PDF có sẵn lớp text đọc được thì rút trực
+tiếp qua `pdfplumber`; nếu không thì đi qua đường dự phòng:
+`pdfium2` kết xuất trang thành ảnh rồi Tesseract đọc. Đo trên kho
+công khai
 [`nrl-ai/vn-ocr-documents-eval`](https://huggingface.co/datasets/nrl-ai/vn-ocr-documents-eval)
 v0.4 — 156 tài liệu, 8 cấu hình.
 
 ### Kho đánh giá v0.4 — *đã ship 2026-05-03*
 
-| Cấu hình | n | Nguồn | License |
+| Cấu hình | n | Nguồn | Giấy phép |
 |---|---:|---|---|
-| `real` | 9 | chinhphu.vn + hanoi.gov.vn (ảnh quét đã ký) | PD theo Luật SHTT VN, Điều 15 |
-| `formal` | 24 | UDHR-vie + hiệu ứng quét tổng hợp | CC0 (text PD) |
+| `real` | 9 | chinhphu.vn + hanoi.gov.vn (ảnh quét có dấu ký) | Công khai theo Luật SHTT VN, Điều 15 |
+| `formal` | 24 | UDHR tiếng Việt + hiệu ứng quét tổng hợp | CC0 (văn bản gốc thuộc miền công khai) |
 | `news_business` | 24 | wiki_vi + hiệu ứng quét tổng hợp | CC-BY-SA 4.0 |
 | `conversational` | 24 | tatoeba_vi + hiệu ứng quét tổng hợp | CC-BY 2.0 FR |
-| `literary` | 14 | wikisource Truyện Kiều + hiệu ứng quét | PD |
-| `receipt` | 21 | 7 mẫu × 3 seed + hiệu ứng quét | CC0 |
-| `contract` | 20 | 5 mẫu × 4 seed + hiệu ứng quét | CC0 |
-| `form` | 20 | 5 mẫu × 4 seed + hiệu ứng quét | CC0 |
+| `literary` | 14 | Wikisource Truyện Kiều + hiệu ứng quét | Công khai |
+| `receipt` | 21 | 7 mẫu x 3 seed + hiệu ứng quét | CC0 |
+| `contract` | 20 | 5 mẫu x 4 seed + hiệu ứng quét | CC0 |
+| `form` | 20 | 5 mẫu x 4 seed + hiệu ứng quét | CC0 |
 
-Pipeline hiệu ứng quét 8 bước (deterministic theo seed): nghiêng
-giấy ±0,5-2,5°, vignette góc, tông giấy hơi vàng, nhiễu hạt
-gaussian, vạch ngang máy quét, blur nhẹ, viền tối mép, JPEG
-round-trip 72-92 chất lượng. Ba profile (`office_scan` /
-`old_photocopy` / `clean_digital`) chọn theo hash doc_id để mỗi
-tài liệu trong cùng cấu hình trông khác nhau.
+Pipeline 8 bước mô phỏng máy quét (đầu ra ổn định theo seed): nghiêng
+giấy +/- 0,5-2,5°, tối góc trang (vignette), tông giấy hơi vàng,
+nhiễu hạt phân phối Gauss, vạch ngang ru-lô máy quét, mờ ống kính,
+viền tối mép, đi qua JPEG nén 72-92 chất lượng rồi giải nén lại.
+Ba kiểu cấu hình (`office_scan` cho máy văn phòng hiện đại /
+`old_photocopy` cho ảnh photocopy cũ / `clean_digital` cho bản số
+hoá sạch) được chọn theo băm doc_id, để các tài liệu cùng cấu hình
+nhìn vẫn khác nhau.
 
 ### `nom.convert.convert_to_docx` trên v0.4 — *đo 2026-05-03*
 
-Tesseract 5 với gói `vie+eng`, không tinh chỉnh, đường OCR fallback:
+Tesseract 5 với gói `vie+eng`, không tinh chỉnh, qua đường OCR
+dự phòng:
 
-| Cấu hình | n | CER (chuẩn hoá khoảng trắng) |
+| Cấu hình | n | CER (đã chuẩn hoá khoảng trắng) |
 |---|---:|---:|
 | `real` (ảnh quét chính phủ thật) | 9 | **12,62 %** |
-| `synthetic_scan` tổng hợp | 147 | mean ~6 %, median ~4 % |
-| **Tổng** (cả 156 tài liệu) | **156** | **mean 6,66 % / median 4,32 %** |
+| `synthetic_scan` (tổng hợp gộp lại) | 147 | trung bình ~6 % / trung vị ~4 % |
+| **Tổng** (cả 156 tài liệu) | **156** | **trung bình 6,66 % / trung vị 4,32 %** |
 
-- **Ảnh quét thật khó hơn ~13 lần** so với ảnh tổng hợp — dấu mộc
-  đỏ, chữ ký tay, watermark mờ, từ viết tắt hành chính ("KT.",
-  "Lưu: VT") là phần lớn lỗi còn lại.
-- Throughput: ~1,3 giây / tài liệu trên CPU đơn lõi.
-- Thông số đo trên cả 8 tính năng nom-vn (`bench_features_e2e.py`):
-  102 LAW_REF / 203 DATE / 89 MONEY / 59 PHONE_VN / **39 ID_VN** —
-  cấu hình hợp đồng và đơn từ là nơi đầu tiên có CCCD trong kho.
+- **Ảnh quét thật khó hơn ~13 lần** so với ảnh tổng hợp. Bốn nguồn
+  lỗi chính: dấu mộc tròn đỏ đè lên chữ; chữ ký tay vắt qua dòng
+  tên; watermark nền chìm làm giảm tương phản; các từ viết tắt
+  hành chính ("KT.", "Lưu: VT", "TM.", "PCN") chưa được gói `vie`
+  của Tesseract huấn luyện đúng.
+- Tốc độ: ~1,3 giây mỗi tài liệu trên CPU đơn lõi.
+- Đo cả 8 tính năng nom-vn cùng lúc (`bench_features_e2e.py`):
+  **102 LAW_REF, 203 DATE, 89 MONEY, 59 PHONE_VN, 39 ID_VN** —
+  hợp đồng và đơn từ là nơi đầu tiên có CCCD trong kho.
 
-JSON đầu vào tái lập:
+JSON kết quả tái lập:
 [`benchmarks/results/baseline_features_e2e_v4.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_features_e2e_v4.json).
 Lệnh tái lập:
 
@@ -567,12 +575,16 @@ python benchmarks/accuracy/bench_features_e2e.py
 
 ### Cảnh báo phương pháp
 
-- `real` mới chỉ 9 tài liệu; mở rộng lên 20+ cần ~110 phút chú
-  thích thủ công thêm 11 trang.
-- `synthetic_scan` dùng văn bản gốc làm ground truth hoàn hảo nhưng
-  hiệu ứng quét **không mô phỏng đầy đủ cấu trúc thư hành chính**
-  (mộc, chữ ký tay, ô đóng dấu, lề trang). Phù hợp đo nhận dạng ký
-  tự, không thay thế được kho ảnh quét gốc.
+- `real` mới chỉ 9 tài liệu — mở rộng lên 20+ cần thêm ~110 phút
+  chú thích thủ công 11 trang nữa (đọc trực tiếp từng ảnh, không
+  tin Tesseract đoán).
+- `synthetic_scan` dùng chính văn bản gốc làm đáp án chuẩn (vì
+  được kết xuất từ văn bản, nên không bịa được). Đánh đổi: hiệu
+  ứng quét **chưa mô phỏng được cấu trúc thư hành chính đầy đủ**
+  — không có dấu mộc đỏ, chữ ký tay, ô đóng dấu, hai cột tiêu đề
+  như công văn thật. Phù hợp đo nhận dạng ký tự ở mức dòng / đoạn,
+  không thay thế được kho ảnh quét gốc khi muốn đánh giá khả năng
+  hiểu cấu trúc tài liệu.
 
 ---
 

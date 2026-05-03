@@ -99,39 +99,50 @@ translate_docx("scan.docx", "scan.en.docx", translator)
 
 ## Số đo nội bộ — v0.4 (2026-05-03)
 
-Đo trên kho đánh giá
+Đo trên kho đánh giá công khai
 [`nrl-ai/vn-ocr-documents-eval`](https://huggingface.co/datasets/nrl-ai/vn-ocr-documents-eval)
-v0.4: **156 tài liệu** trên 8 cấu hình, chia thành hai nhóm chính —
-**ảnh quét thật** từ `chinhphu.vn` + `hanoi.gov.vn` (9 tài liệu,
-ground truth do người đọc xác minh trực tiếp) và **ảnh quét tổng
-hợp** rendered từ văn bản tiếng Việt công khai (UDHR, wiki_vi,
-tatoeba, wikisource Truyện Kiều) cộng các mẫu hoá đơn / hợp đồng /
-đơn từ tham số hoá, áp dụng pipeline 8 bước hiệu ứng máy quét
-(skew, vignette, hơi vàng giấy, nhiễu hạt, banding máy quét, blur,
-viền tối, JPEG round-trip).
+v0.4: **156 tài liệu** trên 8 cấu hình, chia thành hai nhóm:
 
-| Cấu hình | n | Nguồn | CER trung bình (chuẩn hoá khoảng trắng) |
+- **Ảnh quét thật** từ `chinhphu.vn` + `hanoi.gov.vn` (9 tài liệu).
+  Đáp án chuẩn được người đọc trực tiếp xác minh từng trang —
+  không tin Tesseract đoán.
+- **Ảnh quét tổng hợp** kết xuất từ văn bản tiếng Việt thuộc miền
+  công khai (UDHR, wiki_vi, tatoeba, Wikisource Truyện Kiều) cộng
+  các mẫu hoá đơn / hợp đồng / đơn từ sinh tự động theo tham số,
+  rồi áp pipeline 8 bước mô phỏng máy quét: nghiêng giấy, tối
+  góc trang, ngả vàng giấy, nhiễu hạt, vạch ngang, mờ ống kính,
+  viền tối mép, đi qua JPEG nén lại.
+
+(Tách "thật" và "tổng hợp" để con số 12,62 % CER trên ảnh quét
+thật không bị làm loãng bởi 147 tài liệu tổng hợp dễ hơn.)
+
+| Cấu hình | n | Nguồn | CER trung bình (đã chuẩn hoá khoảng trắng) |
 |---|---:|---|---:|
-| `real` | 9 | chinhphu.vn + hanoi.gov.vn (ảnh quét đã ký) | **12,62 %** |
+| `real` | 9 | chinhphu.vn + hanoi.gov.vn (ảnh quét có dấu ký) | **12,62 %** |
 | `formal` | 24 | UDHR-vie + hiệu ứng quét | ~9 % |
 | `news_business` | 24 | wiki_vi + hiệu ứng quét | ~7 % |
 | `conversational` | 24 | tatoeba + hiệu ứng quét | ~6 % |
 | `literary` | 14 | Wikisource Truyện Kiều + hiệu ứng quét | ~10 % |
-| `receipt` | 21 | 7 mẫu × 3 seed (hoá đơn, biên lai, phiếu chi, vé máy bay, ủng hộ, điện nước, viện phí) | ~3 % |
-| `contract` | 20 | 5 mẫu × 4 seed (lao động, thuê nhà, kinh tế, dịch vụ, vay) | ~3 % |
-| `form` | 20 | 5 mẫu × 4 seed (nghỉ việc, xác nhận cư trú, nhập học, nghỉ phép, đăng ký kinh doanh) | ~3 % |
-| **Tổng** | **156** | | **mean 6,66 %, median 4,32 %** |
+| `receipt` | 21 | 7 mẫu x 3 seed (hoá đơn, biên lai, phiếu chi, vé máy bay, ủng hộ, điện / nước, viện phí) | ~3 % |
+| `contract` | 20 | 5 mẫu x 4 seed (lao động, thuê nhà, kinh tế, dịch vụ, vay) | ~3 % |
+| `form` | 20 | 5 mẫu x 4 seed (nghỉ việc, xác nhận cư trú, nhập học, nghỉ phép, đăng ký kinh doanh) | ~3 % |
+| **Tổng** | **156** | | **trung bình 6,66 % / trung vị 4,32 %** |
 
-Throughput: ~1,3 giây / tài liệu trên CPU đơn lõi (Intel i7-13700H).
-CER tính sau khi chuẩn hoá NFC + gộp các chuỗi khoảng trắng thành
-một dấu cách.
+Tốc độ: ~1,3 giây mỗi tài liệu trên CPU đơn lõi (Intel i7-13700H).
+CER tính sau khi chuẩn hoá Unicode NFC và gộp mọi chuỗi khoảng
+trắng thành một dấu cách (để chấm "Người nộp           Người
+nhận" không bị tính như lỗi).
 
-**Cảm nhận về độ khó**: ảnh quét thật (cấu hình `real`) **khó hơn
-~13 lần** so với ảnh tổng hợp do có dấu mộc đỏ, chữ ký tay, hơi
-nhoè, watermark mờ ở nền và các từ viết tắt hành chính
-("KT.", "Lưu: VT") mà gói `vie` của Tesseract không xử lý tốt.
+**Khoảng cách thật vs tổng hợp**: ảnh quét chính phủ thật **khó
+hơn ~13 lần** so với ảnh tổng hợp. Bốn nguồn lỗi chính:
 
-JSON kết quả + ma trận tính năng đầu cuối:
+- Dấu mộc tròn đỏ đè lên chữ.
+- Chữ ký tay vắt ngang dòng tên người ký.
+- Watermark (nền chìm) làm giảm độ tương phản.
+- Từ viết tắt hành chính như "KT.", "Lưu: VT", "TM.", "PCN" mà
+  gói `vie` của Tesseract chưa được huấn luyện để nhận đúng.
+
+JSON kết quả + ma trận đo cả 8 tính năng nom-vn:
 [`benchmarks/results/baseline_features_e2e_v4.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_features_e2e_v4.json).
 
 Tái lập từ một bản clone sạch:
@@ -144,16 +155,21 @@ python benchmarks/accuracy/bench_features_e2e.py
 
 **Cảnh báo phương pháp:**
 
-- 9 ảnh quét thật vẫn là tập nhỏ; mở rộng lên 20+ cần chú thích thủ
-  công thêm 11 tài liệu nữa (tốc độ ~10 phút mỗi trang).
-- 147 tài liệu tổng hợp dùng văn bản gốc làm ground truth hoàn hảo,
-  đánh đổi: chữ in DejaVuSans + hiệu ứng quét **không có cấu trúc
-  thư hành chính đầy đủ** (mộc, chữ ký, ô đóng dấu) như bản quét
-  thật. Phù hợp cho đo nhận dạng ký tự cấp dòng, không thay thế
-  được kho ảnh quét gốc.
-- Phân loại thực thể trên kho v0.4: **102 LAW_REF, 203 DATE, 89
-  MONEY, 59 PHONE_VN, 39 ID_VN** — bản v0.3 chưa có ID_VN nào
-  vì chưa có hợp đồng / đơn từ chứa CCCD.
+- 9 ảnh quét thật vẫn là tập nhỏ; muốn mở rộng lên 20+ cần chú
+  thích thủ công thêm 11 trang nữa (tốc độ ~10 phút / trang khi
+  đọc trực tiếp ảnh).
+- 147 tài liệu tổng hợp dùng chính văn bản gốc làm đáp án chuẩn
+  (không bịa được). Đánh đổi: chữ kết xuất từ phông DejaVuSans
+  cộng hiệu ứng quét **chưa mô phỏng được cấu trúc thư hành
+  chính đầy đủ** — không có dấu mộc đỏ, chữ ký tay, ô đóng dấu
+  hay hai cột tiêu đề như công văn thật. Phù hợp cho đo nhận
+  dạng ký tự ở mức dòng / đoạn, không thay thế được kho ảnh quét
+  thật để đánh giá hiểu cấu trúc tài liệu.
+- Phân bố nhãn thực thể tự động trên kho v0.4: **102 LAW_REF,
+  203 DATE, 89 MONEY, 59 PHONE_VN, 39 ID_VN**. Bản v0.3 (107 tài
+  liệu) chưa có nhãn ID_VN nào — vì kho chưa có hợp đồng hay đơn
+  từ chứa CCCD; v0.4 bổ sung 20 hợp đồng + 20 đơn từ là nơi
+  CCCD xuất hiện tự nhiên.
 
 ## Yêu cầu hệ thống
 
