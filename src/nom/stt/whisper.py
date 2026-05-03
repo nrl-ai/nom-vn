@@ -113,12 +113,28 @@ def _load_pipeline(model_id: str, device: str | None) -> Any:
 def _audio_input(audio: Path | str | bytes) -> Any:
     """Normalise audio input to something the HF pipeline accepts.
 
-    Bytes get materialised to a temporary BytesIO; paths pass through.
-    The pipeline does its own decoding via ``librosa`` / ``soundfile``;
-    we don't need to read samples ourselves.
+    Paths pass through as strings — the pipeline does its own decoding.
+    Bytes are decoded here via ``soundfile`` and resampled to 16 kHz
+    mono via ``librosa`` because newer ``transformers`` (>=4.50) no
+    longer accepts ``BytesIO`` from the ASR pipeline — it expects a
+    file path, a dict ``{"array": ndarray, "sampling_rate": int}``,
+    or a numpy ndarray. The BytesIO path landed a real
+    ``"We expect a numpy ndarray or torch tensor"`` failure on
+    PhoWhisper-large in 2026-05-03 STT-via-jobs sweep.
     """
     if isinstance(audio, bytes):
-        return BytesIO(audio)
+        import librosa
+        import soundfile as sf
+
+        with BytesIO(audio) as buf:
+            samples, sr = sf.read(buf, dtype="float32")
+        # Whisper-family models expect 16 kHz mono float32.
+        if samples.ndim > 1:
+            samples = samples.mean(axis=1)
+        if sr != 16_000:
+            samples = librosa.resample(samples, orig_sr=sr, target_sr=16_000)
+            sr = 16_000
+        return {"array": samples, "sampling_rate": sr}
     return str(Path(audio))
 
 
