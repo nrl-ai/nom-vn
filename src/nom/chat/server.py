@@ -129,6 +129,12 @@ def build_app(
 
     register_jobs_routes(app, llm=getattr(store, "_llm", None))
 
+    # Pre-warm the chat LLM in a background thread so the first user-
+    # facing request doesn't pay 5-10s of model load (Ollama's first call
+    # after server start). Safe to fire-and-forget — failure here just
+    # means the cold-start cost lands on the first real request instead.
+    _spawn_llm_warmup(getattr(store, "_llm", None))
+
     # /api/admin/* — opt-in EE feature, auto-mounted when
     # ``nom-vn-enterprise`` is installed in the same environment.
     # Silently skipped otherwise so the OSS server still works.
@@ -474,6 +480,29 @@ def build_app(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _spawn_llm_warmup(llm: Any) -> None:
+    """Issue a tiny throwaway LLM call in a background thread.
+
+    Ollama (and HF transformers) lazy-load weights on first inference;
+    that 5-10 s cost otherwise lands on whatever user-facing request
+    happens first. Pre-warming amortises it onto server boot. We
+    swallow every exception — a failed warmup is not a server failure.
+    """
+    if llm is None:
+        return
+    import contextlib
+    import threading
+
+    def _warm() -> None:
+        with contextlib.suppress(Exception):
+            # `complete` is the LLM Protocol's universal method name; any
+            # text gives Ollama enough to load the model into RAM.
+            if getattr(llm, "complete", None):
+                llm.complete("hi")
+
+    threading.Thread(target=_warm, name="nom-llm-warmup", daemon=True).start()
 
 
 def _resolve_authenticator() -> Any:
