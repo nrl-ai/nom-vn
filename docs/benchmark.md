@@ -554,6 +554,40 @@ dự phòng:
 | `synthetic_scan` (tổng hợp gộp lại) | 147 | trung bình ~6 % / trung vị ~4 % |
 | **Tổng** (cả 156 tài liệu) | **156** | **trung bình 6,66 % / trung vị 4,32 %** |
 
+### So sánh với PaddleOCR PP-OCRv5 mặc định — *đo 2026-05-03*
+
+Để xác thực rằng PaddleOCR PP-OCRv5 (lang='vi') **không phải lựa
+chọn thay thế** cho Tesseract, đo trực tiếp trên đúng 9 ảnh quét
+chính phủ thật (`config=real`):
+
+| Engine | CER trung bình | CER trung vị | Tốc độ (CPU) |
+|---|---:|---:|---:|
+| Tesseract `vie+eng` (mặc định nom-vn) | **12,62 %** | 11,99 % | ~1,3 giây / tài liệu |
+| PaddleOCR PP-OCRv5 `lang='vi'` | **20,74 %** | 19,33 % | ~60 giây / tài liệu |
+
+PaddleOCR thua **8,1 điểm phần trăm** và **chậm hơn ~46 lần**.
+Lý do: `lang='vi'` nạp `latin_PP-OCRv5_mobile_rec` — bộ nhận
+dạng Latin chung nuốt hết dấu thanh tiếng Việt. Mẫu đầu ra:
+
+```text
+Đáp án:    THỦ TƯỚNG CHÍNH PHỦ
+PP-OCRv5:  TH TƯNG CHÍNH PH
+
+Đáp án:    Độc lập - Tự do - Hạnh phúc
+PP-OCRv5:  Đc lp - T do - Hnh phúc
+```
+
+Mọi dấu sắc / huyền / nặng / hỏi / ngã + ơ / ư / ê / â / ô / ă / đ
+biến mất. JSON kết quả:
+[`benchmarks/results/baseline_paddleocr_v5_real.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_paddleocr_v5_real.json).
+
+Đường mở ra: tinh chỉnh PP-OCRv5 với từ điển ký tự VN — kế hoạch
+chi tiết tại
+[`training/paddleocr_vi_rec/`](https://github.com/nrl-ai/nom-vn/tree/main/training/paddleocr_vi_rec).
+Cổng adopt: trung vị CER trên `config=real` phải vượt 11,99 % của
+Tesseract; nếu không thì giữ Tesseract làm mặc định và ghi nhận
+kết quả âm tính.
+
 - **Ảnh quét thật khó hơn ~13 lần** so với ảnh tổng hợp. Bốn nguồn
   lỗi chính: dấu mộc tròn đỏ đè lên chữ; chữ ký tay vắt qua dòng
   tên; watermark nền chìm làm giảm tương phản; các từ viết tắt
