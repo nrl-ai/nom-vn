@@ -109,12 +109,14 @@ class RegisterClassifier(Protocol):
 # particles.
 _FORMAL_MARKERS: frozenset[str] = frozenset(
     {
+        # ── correspondence formulas
         "kính thưa",
         "trân trọng",
         "vui lòng",
         "kính gửi",
         "kính mời",
         "kính chào",
+        # ── legal / regulatory boilerplate
         "căn cứ",
         "điều khoản",
         "có hiệu lực",
@@ -134,6 +136,27 @@ _FORMAL_MARKERS: frozenset[str] = frozenset(
         "điều này",
         "điều luật",
         "luật pháp",
+        # ── UDHR-grade rights / philosophy vocabulary
+        "nhân loại",
+        "nhân quyền",
+        "phẩm cách",
+        "quyền lợi",
+        "quyền và nghĩa vụ",
+        "tự do và bình đẳng",
+        "lương tri",
+        "lý trí",
+        "nguyên tắc",
+        "công ước quốc tế",
+        "tuyên ngôn",
+        "đại hội đồng",
+        "liên hợp quốc",
+        "thoả thuận",
+        "công bằng",
+        "bảo đảm",
+        "thừa nhận",
+        "khẳng định",
+        "chủ thể",
+        "thẩm quyền",
     }
 )
 
@@ -211,10 +234,12 @@ _CONVERSATIONAL_MARKERS: frozenset[str] = frozenset(
 # vocabulary, evocative connectors. Wikisource VN classical prose.
 _LITERARY_MARKERS: frozenset[str] = frozenset(
     {
+        # ── archaic pronouns & honorifics
         "chàng",
         "nàng",
         "trẫm",
         "đấng",
+        # ── classic poetic noun phrases (folk / Lục bát / ca dao)
         "bốn bể",
         "trời đất",
         "non sông",
@@ -223,20 +248,42 @@ _LITERARY_MARKERS: frozenset[str] = frozenset(
         "hoa cỏ",
         "trăng tà",
         "bóng nguyệt",
+        # ── nature imagery from canonical VN poetry
+        "đầm sen",
+        "hoa sen",
+        "lá xanh",
+        "nhị vàng",
+        "bông trắng",
+        "gần bùn",
+        "mùi bùn",
+        "cây tre",
+        "lũy tre",
+        "bóng tre",
+        "lá đào",
+        "đào hoa",
+        "nguyệt rằm",
+        "trăng treo",
+        # ── narrative time markers
         "thuở xưa",
         "ngày xưa",
         "buổi ấy",
+        "thuở ấy",
+        # ── poetic personae
         "kẻ sĩ",
         "tao nhân",
         "mặc khách",
         "anh hùng",
         "tráng sĩ",
+        # ── lyrical / sentimental vocabulary
         "lệ rơi",
         "tâm tư",
         "u sầu",
         "nỗi niềm",
         "tha hương",
         "biệt ly",
+        "vương vấn",
+        "thầm thì",
+        "rưng rưng",
     }
 )
 
