@@ -11,7 +11,7 @@ Global:
   cal_metric_during_train: true
   # latin_PP-OCRv5_mobile_rec checkpoint extracted from paddleocr's
   # auto-download cache. Filled in by launch script.
-  pretrained_model: ./pretrained/latin_PP-OCRv5_mobile_rec/best_accuracy
+  pretrained_model: ./pretrained/latin_PP-OCRv5_mobile_rec_pretrained
   checkpoints:
   save_inference_dir:
   use_visualdl: false
