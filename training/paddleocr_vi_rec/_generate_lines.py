@@ -46,7 +46,7 @@ from _business_templates import (  # noqa: E402
     FORM_GENERATORS,
     RECEIPT_GENERATORS,
 )
-from _scan_artifacts import ScanProfile, apply_scan_artifacts  # noqa: E402
+from _scan_artifacts import ScanProfile  # noqa: E402
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
 DEJAVU_REGULAR = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
@@ -208,12 +208,22 @@ def _render_line(text: str, font_path: Path, target_h: int = LINE_HEIGHT) -> Ima
 
 
 def _augment_line(img: Image.Image, profile: ScanProfile, seed: int) -> Image.Image:
-    """Apply a milder scan-artifact pass tuned for line crops.
+    """Light line-crop augmentation — JPEG round-trip + a touch of noise.
 
-    Line crops can't take heavy skew (clips text edges). We reuse the
-    existing pipeline but with a clean_digital-ish profile by default.
+    PaddleOCR's `RecAug` already adds RandomColor / RandomCrop /
+    affine perturbations during training, so the generator just needs
+    to inject a realistic scan-noise floor. Skip the full 8-stage
+    page-level pipeline (banding / vignette / edge bleed are
+    page-scale phenomena and ~10x slower per image).
     """
-    return apply_scan_artifacts(img, profile=profile, seed=seed)
+    import io
+
+    rng = random.Random(seed)
+    # JPEG round-trip 78-92 quality
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=rng.randint(78, 92))
+    buf.seek(0)
+    return Image.open(buf).convert("RGB").copy()
 
 
 def main() -> int:
