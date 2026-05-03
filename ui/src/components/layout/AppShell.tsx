@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 // - "tool" → two-pane (task-nav | tool page). Stateless tools have no
 //   side concept of materials, so spaces + studio are hidden.
 //
-// On mobile (<lg) the side panes always collapse into floating sheets
+// On narrow viewports (<xl, < 1280 px) the side panes collapse into floating sheets
 // toggled from the header. The center pane (work area) is the only
 // always-visible region — that's the room you're "in" in this app.
 // On mobile the spaces drawer rides along with the main sidebar drawer
@@ -53,7 +53,7 @@ export function AppShell({
 
   return (
     <div className="flex h-full flex-col bg-bg">
-      <div className="absolute left-2 top-2 z-30 flex gap-1 lg:hidden">
+      <div className="absolute left-2 top-2 z-30 flex gap-1 xl:hidden">
         <Button
           variant="outline"
           size="icon"
@@ -65,7 +65,7 @@ export function AppShell({
         </Button>
       </div>
       {showStudioPane && (
-        <div className="absolute right-2 top-2 z-30 flex gap-1 lg:hidden">
+        <div className="absolute right-2 top-2 z-30 flex gap-1 xl:hidden">
           <Button
             variant="outline"
             size="icon"
@@ -78,7 +78,13 @@ export function AppShell({
         </div>
       )}
 
-      <Header modelName={modelName} onHome={onHome} onSettings={onSettings} onApi={onApi} />
+      <Header
+        modelName={modelName}
+        onHome={onHome}
+        onSettings={onSettings}
+        onApi={onApi}
+        reserveRightOnMobile={showStudioPane}
+      />
 
       {/* Desktop layout: resizable panels.
        *
@@ -94,7 +100,7 @@ export function AppShell({
        * `hitAreaMargins` widens the grab zone to ~6 px each side without
        * widening the visible 1 px line — the visible line stays editorial
        * thin, but the cursor target is finger-friendly. */}
-      <div className="hidden min-h-0 flex-1 lg:block">
+      <div className="hidden min-h-0 flex-1 xl:block">
         <PanelGroup
           direction="horizontal"
           autoSaveId={
@@ -151,7 +157,7 @@ export function AppShell({
       {/* Mobile layout: center full-bleed, drawers slide in.
        * The main sidebar drawer stacks TaskNav + SpacesSidebar so a
        * single toggle exposes both. */}
-      <div className="relative min-h-0 flex-1 lg:hidden">
+      <div className="relative min-h-0 flex-1 xl:hidden">
         <main className="h-full overflow-hidden">{children}</main>
         {showSidebar && (
           <aside className="absolute inset-y-0 left-0 z-20 flex w-80 max-w-[88vw] animate-fade-in flex-col overflow-hidden border-r border-ink bg-bg shadow-editorial-soft">

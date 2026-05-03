@@ -11,11 +11,26 @@ interface HeaderProps {
   onSettings?: () => void;
   /** Open the API & Setup task. */
   onApi?: () => void;
+  /** When true (chat mode on mobile), reserve room on the right for
+   *  the studio drawer toggle floated by AppShell. */
+  reserveRightOnMobile?: boolean;
 }
 
-export function Header({ modelName, onHome, onSettings, onApi }: HeaderProps) {
+export function Header({
+  modelName,
+  onHome,
+  onSettings,
+  onApi,
+  reserveRightOnMobile,
+}: HeaderProps) {
+  // Reserve 40px on the right whenever AppShell floats the studio toggle
+  // there (chat mode below xl), so it doesn't cover the settings button.
+  // The toggle disappears at xl, where right-pad collapses back to 5.
+  const rightPad = reserveRightOnMobile ? "pr-12 xl:pr-5" : "pr-3 xl:pr-5";
   return (
-    <header className="flex h-12 shrink-0 items-center justify-between border-b border-ink bg-bg px-5">
+    <header
+      className={`flex h-12 shrink-0 items-center justify-between border-b border-ink bg-bg pl-12 ${rightPad} xl:pl-5 xl:pr-5`}
+    >
       <button
         onClick={onHome}
         className="group flex items-baseline gap-3"
