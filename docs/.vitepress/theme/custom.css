@@ -823,6 +823,91 @@ body {
   color: var(--vp-c-text-1);
 }
 
+/* ===== USECASES GRID (home page "Dùng được vào việc gì" — 8 task cards) ===== */
+
+.ev-usecases {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: var(--vp-c-divider);
+  border: 1px solid var(--vp-c-divider);
+  margin: 0 0 32px;
+}
+
+@media (min-width: 720px) {
+  .ev-usecases {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .ev-usecases {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.ev-usecase,
+.vp-doc a.ev-usecase {
+  background: var(--vp-c-bg);
+  padding: 22px 22px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 200px;
+  text-decoration: none !important;
+  border-bottom: none !important;
+  color: inherit !important;
+  transition: background 0.2s ease;
+}
+
+.ev-usecase:hover,
+.vp-doc a.ev-usecase:hover {
+  background: var(--vp-c-bg-elv);
+}
+
+.ev-usecase .marker {
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vp-c-text-3);
+}
+
+.ev-usecase h3 {
+  font-family: var(--vp-font-family-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+  margin: 0 !important;
+  border: none !important;
+  padding: 0 !important;
+  color: var(--vp-c-text-1);
+  line-height: 1.25;
+}
+
+.ev-usecase p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--vp-c-text-2);
+  margin: 0 !important;
+}
+
+.ev-usecase-cta {
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px solid var(--vp-c-divider);
+  font-family: var(--vp-font-family-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+.ev-usecase:hover .ev-usecase-cta {
+  color: var(--vp-c-text-1);
+}
+
 /* ===== ENTERPRISE PAGE — same palette, new affordances ===== */
 
 /* Hero block (replaces VPHero on enterprise page since we use a regular doc layout) */

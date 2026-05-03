@@ -60,7 +60,72 @@ features:
 <div class="vp-doc home-extra">
 
 <div class="ev-section">
-<h2>§ 02 · Sản phẩm thấy được</h2>
+<h2>§ 02 · Dùng được vào việc gì</h2>
+<p class="lede">Tám tác vụ chính đã ship — mỗi tác vụ có trang riêng kèm số đo trên 4 register và lệnh tái lập từ một bản clone sạch.</p>
+</div>
+
+<div class="ev-usecases">
+
+<a class="ev-usecase" href="/tasks/rag">
+<div class="marker">01 · RAG</div>
+<h3>Hỏi đáp trên kho tài liệu</h3>
+<p>Tải PDF / DOCX / XLSX / PPTX / ảnh — Nôm cắt đoạn, sinh vector, tra cứu, xếp hạng lại, trả lời kèm trích dẫn. <strong>R@1 86.3 %</strong> trên Zalo Legal.</p>
+<span class="ev-usecase-cta">Xem tài liệu RAG →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/translate">
+<div class="marker">02 · dịch thuật</div>
+<h3>Dịch Việt ↔ Anh giữ nguyên định dạng</h3>
+<p>Dịch <code>.docx</code> / <code>.xlsx</code> / <code>.pptx</code> / <code>.txt</code> — giữ nguyên tiêu đề, bảng, cấu trúc. Chạy nội bộ qua Ollama hoặc gọi Claude / GPT cho tác vụ không nhạy cảm.</p>
+<span class="ev-usecase-cta">Xem dịch thuật →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/convert">
+<div class="marker">03 · chuyển định dạng</div>
+<h3>PDF / ảnh → DOCX chỉnh sửa được</h3>
+<p>OCR (Tesseract <code>vie</code> hoặc VietOCR cho viết tay), bóc bố cục, dựng lại DOCX với đoạn văn, bảng, đầu trang chân trang. Đầu vào để dịch, biên tập, hoặc lưu trữ.</p>
+<span class="ev-usecase-cta">Xem chuyển định dạng →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/spell-correction">
+<div class="marker">04 · sửa văn bản</div>
+<h3>Khôi phục dấu + sửa chính tả</h3>
+<p>Một mô hình ViT5 220 M xử lý gọn lỗi gõ Telex, mất dấu, lỗi OCR trong một lượt. <strong>98.32 %</strong> synthetic light · <strong>79.62 %</strong> OOD ngoài phân phối — vượt Toshiiiii1.</p>
+<span class="ev-usecase-cta">Xem sửa chính tả →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/ocr">
+<div class="marker">05 · OCR</div>
+<h3>Đọc ảnh / PDF scan tiếng Việt</h3>
+<p>Tesseract <code>vie</code> cho dòng in (<strong>CER 0.00 %</strong> sạch · 0.70 % nhiễu nhẹ), VietOCR cho chữ viết tay (<strong>CER 31.82 %</strong>) — vượt Tesseract 37.5 pp ở dòng viết tay.</p>
+<span class="ev-usecase-cta">Xem OCR →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/agents">
+<div class="marker">06 · tác tử</div>
+<h3>Tác tử AI gọi công cụ và MCP</h3>
+<p>6 pattern Anthropic (Single / Chain / Route / Parallel / Voting / Orchestrator-Evaluator) + cầu nối MCP để expose hoặc dùng tool ngoài. Streaming bằng SSE, có audit log.</p>
+<span class="ev-usecase-cta">Xem tác tử →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/nlp">
+<div class="marker">07 · phân tích văn bản</div>
+<h3>NER, cảm xúc, nhận diện ngôn ngữ</h3>
+<p>Trích thực thể (PERSON / ORG / LOC / DATE / MONEY / …), phân loại cảm xúc câu, nhận diện ngôn ngữ. Cắm vào pipeline ETL hoặc gọi qua REST.</p>
+<span class="ev-usecase-cta">Xem phân tích văn bản →</span>
+</a>
+
+<a class="ev-usecase" href="/tasks/compliance">
+<div class="marker">08 · tuân thủ</div>
+<h3>Phân loại rủi ro AI · Luật 134/2025</h3>
+<p>Phân loại theo 3 mức (cao / trung / thấp) đối chiếu Điều 8–15. Mỗi quyết định kèm điều luật áp dụng và lý do — đầu vào dạng tự nhiên, không cần nhãn thủ công.</p>
+<span class="ev-usecase-cta">Xem tuân thủ →</span>
+</a>
+
+</div>
+
+<div class="ev-section">
+<h2>§ 03 · Sản phẩm thấy được</h2>
 <p class="lede">Một lệnh <code>nom serve</code> là có giao diện web đầy đủ chạy ngay trên máy của bạn — không phải chỉ một thư viện trong terminal.</p>
 </div>
 
@@ -106,7 +171,7 @@ features:
 <p class="ev-shots-foot"><a href="/tasks/translate">Xem dịch thuật</a> · <a href="/tasks/convert">Xem chuyển định dạng</a> · <a href="/vi/quickstart">Cài và mở thử trong 2 phút →</a></p>
 
 <div class="ev-section">
-<h2>§ 03 · Pipeline RAG</h2>
+<h2>§ 04 · Pipeline RAG</h2>
 <p class="lede">Sáu bước, mỗi bước là một module thay thế được qua <code>Protocol</code> — không khoá vào nhà cung cấp nào.</p>
 </div>
 
@@ -130,7 +195,7 @@ flowchart LR
 <div class="vp-doc home-extra">
 
 <div class="ev-section">
-<h2>§ 04 · Triết lý vận hành</h2>
+<h2>§ 05 · Triết lý vận hành</h2>
 <p class="lede">Bốn nguyên tắc bất di bất dịch — đã thấm vào mọi commit và mọi con số trên trang này.</p>
 </div>
 
@@ -163,7 +228,7 @@ flowchart LR
 </div>
 
 <div class="ev-section">
-<h2>§ 05 · Đi đâu tiếp</h2>
+<h2>§ 06 · Đi đâu tiếp</h2>
 <p class="lede">Tuỳ bạn đang ở vai gì — học hỏi, tự cài, hay đánh giá cho doanh nghiệp.</p>
 </div>
 
