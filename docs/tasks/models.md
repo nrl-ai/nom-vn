@@ -151,5 +151,5 @@ rồi tự dọn để giao diện không phình.
 
 ## Liên quan
 
-- [API và cài đặt](./api.md) — biến môi trường để chỉ định backend
+- [Hàng đợi xử lý](./jobs.md) — kéo qua API hiển thị trên trang Hàng đợi
   và mô hình mặc định.
