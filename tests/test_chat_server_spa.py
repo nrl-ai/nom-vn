@@ -67,17 +67,24 @@ class TestSpaDeepLinks:
     )
     def test_spa_route_serves_index(self, client: TestClient, path: str) -> None:
         # When the UI bundle is staged into the package, deep links must
-        # serve index.html so the React router can take over. When it's
-        # not staged (rare in CI but possible), the route simply doesn't
-        # exist — that's fine for this test, which guards routing order
-        # not bundle presence.
+        # serve index.html so the React router can take over. CI ships a
+        # placeholder index.html (just `<title>Nôm — UI placeholder</title>`)
+        # and the test should pass against that too — what we're really
+        # guarding here is the routing order (catch-all fires last so
+        # `/api/*` resolves first), not the bundle contents.
         r = client.get(path)
         if r.status_code == 404:
             pytest.skip("UI dist not staged in this environment")
         assert r.status_code == 200
-        # index.html — sanity-check it's HTML, not the SPA shell mistaking
-        # itself for a JSON endpoint.
-        assert '<div id="root"' in r.text or "<html" in r.text.lower()
+        # Any HTML response is fine — full bundle has `<div id="root">`,
+        # CI placeholder has `<title>Nôm — UI placeholder</title>`.
+        body = r.text.lower()
+        assert (
+            '<div id="root"' in r.text
+            or "<html" in body
+            or "<title>" in body
+            or "<!doctype" in body
+        )
 
     def test_root_serves_index(self, client: TestClient) -> None:
         r = client.get("/")
