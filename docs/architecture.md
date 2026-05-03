@@ -396,6 +396,71 @@ flowchart TB
 
 Tất cả nằm trong cùng package ``nom-vn``, sau extras ``[chat]``.
 
+### `nom.classify` — Phân loại văn phong (đã phát hành, v0.3)
+
+Định tuyến văn bản theo bốn lớp văn phong (`formal` / `business` /
+`conversational` / `literary`) — dùng làm tín hiệu cho chọn checkpoint
+khôi phục dấu, tóm tắt, OCR rerank. Hai cách chạy sau cùng `Protocol`:
+
+- `LexiconRegisterClassifier` — heuristic từ-mốc, không cần học máy,
+  ~1 ms / câu, ship cùng OSS.
+- `PhoBertRegisterClassifier` — fine-tune PhoBERT-base (135 M, MIT,
+  .bin từ VinAI). `model_id` để trống cho tới khi checkpoint huấn
+  luyện hoàn tất; script ở `training/register/`.
+
+### `nom.ocr` — OCR chữ viết tay (đã phát hành, v0.3)
+
+Đọc chữ viết tay tiếng Việt trên biểu mẫu / ghi chú / CMND. Bổ sung
+cho ``nom.doc.OCR`` (Tesseract — chuyên chữ in). Lựa chọn hiện tại:
+
+- `VinternHandwritingOcr` — wrapper quanh `5CD-AI/Vintern-1B-v3_5`
+  (MIT, safetensors, 0,9 B). Tiền xử lý ImageNet 448×448 một-tile;
+  có `min_height=60 px` chặn line-crop để tránh VLM ảo trên crop hẹp.
+
+Số đo nội bộ: CER 0,47 % sạch / 0,37 % nhiễu trên `synthetic_ocr_vi`
+(n=20 mỗi loại) — xem `benchmarks/accuracy/vintern_ocr_*_baseline.json`.
+
+### `nom.stt` — Giọng nói → văn bản (đã phát hành, v0.3)
+
+Whisper-family STT cho tiếng Việt. Hai cách chạy sau cùng `Protocol`:
+
+- `PhoWhisperSTT` — `vinai/PhoWhisper-large` (BSD-3, .bin từ VinAI).
+  Mặc định cho audio thuần VN.
+- `WhisperSTT` — `openai/whisper-large-v3` (MIT, safetensors). Dùng
+  cho audio lai VN ↔ EN — beat PhoWhisper trên audio lai theo ViMD
+  survey (chưa tái lập tại đây).
+
+Cả hai dùng pipeline ``transformers.automatic-speech-recognition``;
+chunk 30 giây tự động, NFC sau khi decode.
+
+### `nom.summarize` — Tóm tắt (đã phát hành, v0.3)
+
+Tóm tắt văn bản tiếng Việt với prefix theo văn phong. Bản đầu tiên:
+
+- `ViT5Summarizer` — `VietAI/vit5-large-vietnews-summarization`
+  (MIT, .bin, 866 M, 1024-token cap). Prefix `vietnews:` / `legal:` /
+  `dialogue:` đổi giọng văn đầu ra.
+
+Cảnh báo: mô hình có thể bịa số liệu cụ thể (n=10 đo nội bộ — 1 mẫu
+thêm năm "2025" không có trong nguồn, một mẫu khác bịa con số GDP
+"6,8 % – 7,0 %"). Đừng dùng cho tóm tắt pháp lý / tài chính nếu
+không đối chiếu thủ công từng số.
+
+### `nom.nlp.ner_legal` — Mở rộng NER pháp lý (đã phát hành, v0.3)
+
+Bộ pattern bổ sung cho `RegexNERModel` (đã có trong `nom.nlp.ner`)
+phục vụ tài liệu pháp lý VN:
+
+- `LAW_REF` — tham chiếu luật (`Nghị định 13/2023/NĐ-CP`,
+  `Điều 5 Luật 134/2025`...)
+- `ID_VN` — CMND 9 chữ số / CCCD 12 chữ số
+- `PHONE_VN` — số di động và cố định VN
+
+Hàm `legal_ner_patterns()` trả về tuple `(label, pattern)` để truyền
+vào `RegexNERModel(extra_patterns=...)`. Hướng PhoBERT fine-tune cho
+`LAW_REF` + `CONTRACT_PARTY` cần ~70-90 giờ chú thích thủ công và
+chưa làm.
+
 ---
 
 ## Lựa chọn component — nhẹ, nhanh, chính xác, cục bộ, đổi được
