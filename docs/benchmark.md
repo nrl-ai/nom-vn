@@ -408,6 +408,136 @@ register-overfit và cần huấn luyện lại với data đa dạng hơn.
 
 ---
 
+## Module: `nom.ocr.handwriting` — *đã ship v0.3*
+
+VLM-based OCR cho chữ viết tay tiếng Việt (biểu mẫu, ghi chú, mặt
+sau CMND/CCCD). Bổ sung cho `nom.doc.ocr` (Tesseract — chữ in).
+
+- **`VinternHandwritingOcr`** — wrapper quanh
+  [`5CD-AI/Vintern-1B-v3_5`](https://huggingface.co/5CD-AI/Vintern-1B-v3_5)
+  (MIT, safetensors, 0,9 B tham số). Tiền xử lý ImageNet 448×448
+  một-tile; chặn line-crop dưới 60 px chiều ngắn để tránh hiện
+  tượng VLM ảo trên crop hẹp.
+
+### Số đo nội bộ trên `synthetic_ocr_vi` — *đo 2026-05-03*
+
+**Cảnh báo: đo trên chữ in tổng hợp, không phải chữ viết tay.**
+Mục đích là sàng lọc — nếu Vintern fail trên chữ in clean thì
+cũng không hy vọng được trên chữ tay. Số đo headline cho chữ tay
+phải đợi đợt sau trên `brianhuster/VietnameseOCRdataset` (~7 nghìn
+ảnh thật, Apache-2.0).
+
+| Điều kiện | n | CER trung bình | Khớp tuyệt đối |
+|---|---:|---:|---:|
+| `clean` (1 phông, nền trắng) | 20 | **0,47 %** | 16/20 |
+| `noisy` (cùng nội dung, nhiễu) | 20 | **0,37 %** | 17/20 |
+
+Phần lớn "lỗi" còn lại là biến thể chính tả VN hợp lệ
+(`hoà` ↔ `hòa`) mà CER tính là khác. n=20 là smoke test, không
+phải con số headline.
+
+JSON:
+[`vintern_ocr_clean_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/vintern_ocr_clean_baseline.json),
+[`vintern_ocr_noisy_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/vintern_ocr_noisy_baseline.json).
+
+---
+
+## Module: `nom.stt` — *đã ship v0.3*
+
+Whisper-family STT cho tiếng Việt — phỏng vấn, cuộc họp, ghi chú
+giọng nói.
+
+- **`PhoWhisperSTT`** — `vinai/PhoWhisper-large` (BSD-3, 1,5 B,
+  844 giờ huấn luyện trên ghi âm tiếng Việt). Mặc định cho audio
+  thuần VN.
+- **`WhisperSTT`** — `openai/whisper-large-v3` (MIT, safetensors).
+  Cho audio lai VN ↔ EN.
+
+### Số đo nội bộ — *đo 2026-05-03*
+
+**Cảnh báo: n=3 chỉ là smoke test, không phải đo đầy đủ.** Bench
+đầy đủ trên ViMD 3 vùng (Bắc 40,6 giờ / Trung 31,5 giờ / Nam 30,5
+giờ) là việc đợt sau.
+
+Trên 3 mẫu kiểm thử của `doof-ferb/Speech-MASSIVE_vie`:
+
+| Mô hình | n | WER trung bình |
+|---|---:|---:|
+| `vinai/PhoWhisper-large` | 3 | 15,2 % |
+| `openai/whisper-large-v3` | 3 | 15,2 % |
+
+Hai mô hình bằng nhau trên tập nhỏ này — lỗi chính: nhầm từ đồng
+âm (`múi giờ` ↔ `mỗi giờ`), thay từ (`xếp` ↔ `sắp`), chênh dấu
+câu / viết hoa. Con số 6,4 % WER trên model card VinAI là tự công
+bố, chưa được tái lập tại đây.
+
+JSON:
+[`stt_speech_massive_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/stt_speech_massive_baseline.json).
+
+---
+
+## Module: `nom.summarize` — *đã ship v0.3*
+
+Tóm tắt văn bản tiếng Việt với tiền tố theo văn phong:
+
+- **`ViT5Summarizer`** — `VietAI/vit5-large-vietnews-summarization`
+  (MIT, .bin, 866 M, 1024-token cap đầu vào). Tiền tố `vietnews:` /
+  `legal:` / `dialogue:` đổi giọng văn đầu ra.
+
+### Số đo nội bộ — *đo 2026-05-03*
+
+**Cảnh báo: cảnh báo bịa số liệu là chuẩn của module này, không
+phải ngoại lệ.** ViT5 tóm tắt là mô hình rút trích pha trộn, có
+thể chèn token số mới mà nguồn không có. Đo nội bộ trên 28 đoạn
+mở của `wiki_vi/articles.jsonl`:
+
+| Số liệu | Giá trị |
+|---|---:|
+| Tỉ lệ token mới (trung bình) | 13,6 % |
+| Mẫu thêm số mới không có trong nguồn | 7 / 28 |
+| **Tỉ lệ bịa số (cảnh báo)** | **25,0 %** |
+
+Ví dụ: bài về TP. Hồ Chí Minh, mô hình thêm năm "2025" không có
+trong đầu vào; bài Việt Nam (đoạn 234 ký tự), bịa con số GDP
+"6,8 % – 7,0 %". **Đừng dùng cho tóm tắt pháp lý / tài chính**
+mà không kiểm chứng từng số.
+
+n=28 còn nhỏ; con số 25 % là cảnh báo định hướng, không phải đo
+định lượng đầy đủ. Bench trên VLSP-MTSum (200+ mẫu pháp lý + tin
+tức) là việc đợt sau.
+
+JSON:
+[`summarize_wiki_vi_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/summarize_wiki_vi_baseline.json).
+
+---
+
+## Module: `nom.nlp.ner_legal` — *đã ship v0.3, regex-only*
+
+Bộ pattern bổ sung cho `RegexNERModel` (đã có trong `nom.nlp.ner`)
+phục vụ tài liệu pháp lý VN: `LAW_REF`, `ID_VN` (CMND/CCCD),
+`PHONE_VN`.
+
+### Trạng thái đo
+
+**Chưa có số đo học từ dữ liệu.** v0 chỉ là biểu thức chính quy.
+Bộ kiểm thử xác minh đúng các mẫu do chính chúng tôi viết — đây
+là kiểm tra cấu trúc, không phải đo trên kho VN gold-labeled.
+
+Bao phủ ước lượng (chưa đo trên kho chuẩn):
+
+| Lớp | Bắt được | Không bắt được |
+|---|---|---|
+| `LAW_REF` | `Luật 134/2025/QH15`, `Nghị định 13/2023/NĐ-CP`, `Thông tư`, `Điều X Luật Y` | tham chiếu viết tắt phi chuẩn (≈ 15 % công văn hiện đại) |
+| `ID_VN` | CMND 9 chữ số, CCCD 12 chữ số | không xác minh mã kiểm tra CCCD; chuỗi 12 chữ số ngẫu nhiên có thể dương tính giả |
+| `PHONE_VN` | di động 10 số `03/05/07/08/09`, `+84`, cố định Hà Nội | đầu số quốc tế ngoài VN |
+
+Hướng tinh chỉnh PhoBERT cho `LAW_REF` + `CONTRACT_PARTY` (mục
+tiêu F1 ≥ 0,85) cần ~70-90 giờ chú thích thủ công, xếp lịch sau
+theo
+[`docs/sota_vn_2026q2_expansion.md`](sota_vn_2026q2_expansion.md).
+
+---
+
 ## Module: `nom.doc.ocr` — *dự kiến v0.1*
 
 OCR là primitive leverage cao nhất và bị fail nhiều nhất trong AI tiếng Việt. Chúng tôi ship ba backend với cùng interface; default switch theo phần cứng có sẵn.
