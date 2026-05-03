@@ -281,6 +281,130 @@ toks = underthesea.word_tokenize(
 **Quy tắc ngón cái:** RAG indexing / BM25 / dọn nhẹ → `nom.text`.
 NER / dependency parsing / task ngôn ngữ → `underthesea`.
 
+### Trích xuất thực thể VN — bộ chuẩn + bộ pháp lý
+
+Quy tắc, không cần GPU, deterministic:
+
+```python
+from nom.nlp.ner import RegexNERModel
+
+# Bộ chuẩn — PER / ORG / LOC / DATE / MONEY
+ner = RegexNERModel()
+spans = ner.tag("Vietcombank chuyển 1.500.000 VND vào ngày 14/3/2025 cho FPT.")
+# → ('ORG' Vietcombank), ('MONEY' 1.500.000 VND), ('DATE' 14/3/2025), ('ORG' FPT)
+```
+
+Bộ pháp lý mở rộng — thêm `LAW_REF`, `ID_VN` (CMND/CCCD), `PHONE_VN`:
+
+```python
+from nom.nlp.ner import RegexNERModel
+from nom.nlp.ner_legal import legal_ner_patterns
+
+ner = RegexNERModel(extra_patterns=legal_ner_patterns())
+spans = ner.tag(
+    "Theo Nghị định 13/2023/NĐ-CP và Điều 5 Luật An ninh mạng, "
+    "ông Nguyễn Văn A (CMND 012345678, ĐT 0912 345 678) thanh toán "
+    "1.500.000 VND vào 14/3/2025."
+)
+# → 6 spans: 2× LAW_REF, 1× ID_VN, 1× PHONE_VN, 1× MONEY, 1× DATE
+```
+
+Hoặc qua API HTTP:
+
+```bash
+curl -X POST http://localhost:8080/api/tools/nlp/ner \
+  -H 'content-type: application/json' \
+  -d '{"text":"...","preset":"legal"}'
+```
+
+**Khi nào chọn:**
+
+- **Hồ sơ doanh nghiệp / báo cáo / email** → `preset=standard` (bộ chuẩn).
+- **Hợp đồng VN / công văn / biên bản** → `preset=legal` (mở rộng).
+- **Cần entity tự custom** (ID nhân viên, mã hợp đồng nội bộ) →
+  `RegexNERModel(extra_patterns=[("EMPLOYEE_ID", r"NV\d{6}"), ...])`.
+
+PhoBERT-based NER đầy đủ (PER chính xác, F1 ≥ 90 %) cần fine-tune
+trên VLSP-NER + chú thích tay cho `LAW_REF` / `CONTRACT_PARTY` —
+đợt sau, chưa làm.
+
+### Tóm tắt văn bản tiếng Việt
+
+```bash
+pip install "nom-vn[diacritic-hf]"   # đủ — transformers + torch
+```
+
+```python
+from nom.summarize import ViT5Summarizer
+
+summ = ViT5Summarizer()  # tải model lần đầu (~3.3 GB)
+result = summ.summarize(
+    "Việt Nam là một quốc gia nằm ở Đông Nam Á, có dân số khoảng "
+    "100 triệu người. Thủ đô của Việt Nam là Hà Nội. Việt Nam có nền "
+    "kinh tế đang phát triển nhanh chóng và là một trong những quốc gia "
+    "có tốc độ tăng trưởng GDP cao nhất khu vực.",
+    register="news",       # hoặc "legal" / "dialogue"
+    max_length=128,
+    min_length=20,
+)
+print(result.text)
+# → "Việt Nam là một trong những quốc gia có tốc độ tăng trưởng GDP
+#    cao nhất khu vực Đông Nam Á..."
+```
+
+> **Cảnh báo bịa số liệu:** mô hình ViT5 (và mọi mô hình tóm tắt sinh
+> nói chung) có thể thêm số / năm / chỉ số CỤ THỂ không có trong văn
+> bản gốc. Đo nội bộ: 1 trong 10 mẫu wiki_vi sinh ra năm "2025"
+> không có trong nguồn; một mẫu khác bịa số GDP "6,8 % – 7,0 %".
+> **Đừng dùng cho tóm tắt pháp lý / tài chính** mà không đối chiếu
+> thủ công từng số.
+
+Cap input ở 1024 token — văn bản dài hơn sẽ bị cắt; cho hợp đồng dài
+chia đoạn theo tay hoặc dùng Qwen3-8B + LoRA (chưa ship).
+
+### Giọng nói tiếng Việt → văn bản (STT)
+
+```bash
+pip install "nom-vn[stt]"   # transformers + torch + librosa + soundfile
+```
+
+```python
+from nom.stt import PhoWhisperSTT, WhisperSTT
+
+# Mặc định cho audio thuần VN
+stt = PhoWhisperSTT()  # vinai/PhoWhisper-large, ~3 GB lần đầu
+result = stt.transcribe("cuoc_hop.mp3")
+print(result.text)         # transcript đã NFC-normalize
+print(result.language)     # "vi"
+
+# Trả về timestamp theo đoạn (cho phụ đề / đối chiếu)
+result = stt.transcribe("cuoc_hop.mp3", return_timestamps=True)
+for seg in result.segments:
+    print(f"  {seg.start:.1f}s–{seg.end:.1f}s: {seg.text}")
+```
+
+Audio lai EN/VN — đổi sang Whisper-large-v3 (đa ngôn ngữ):
+
+```python
+stt = WhisperSTT()  # openai/whisper-large-v3
+result = stt.transcribe("podcast_tech.mp3", language="vi")
+```
+
+Hoặc qua hàng đợi xử lý nền (cho audio dài):
+
+```bash
+curl -X POST http://localhost:8080/api/jobs/stt-transcribe \
+  -F file=@cuoc_hop.mp3 \
+  -F backend=phowhisper \
+  -F return_timestamps=true
+# → { "id": "<job-id>", "status": "queued", ... }
+```
+
+Cảnh báo: PhoWhisper claim WER VIVOS 4,67 % và VLSP T1 13,75 %
+nhưng chưa được tái lập trong repo — đo nội bộ chỉ n=3 trên
+Speech-MASSIVE (15,2 % WER cả hai mô hình). Bench nghiêm túc trên
+ViMD 3 vùng là việc đợt sau.
+
 ### Normalize whitespace + Unicode
 
 ```python
