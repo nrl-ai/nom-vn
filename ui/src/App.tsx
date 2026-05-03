@@ -14,6 +14,12 @@ import { StripPage } from "@/components/tools/pages/StripPage";
 import { TranslatePage } from "@/components/tools/pages/TranslatePage";
 import { ConvertPage } from "@/components/tools/pages/ConvertPage";
 import { JobsPage } from "@/components/tools/pages/JobsPage";
+import { RegisterPage } from "@/components/tools/pages/RegisterPage";
+import { HandwritingPage } from "@/components/tools/pages/HandwritingPage";
+import { SpellPage } from "@/components/tools/pages/SpellPage";
+import { SttPage } from "@/components/tools/pages/SttPage";
+import { NerPage } from "@/components/tools/pages/NerPage";
+import { SummarizePage } from "@/components/tools/pages/SummarizePage";
 import { ModelsPage } from "@/components/tools/pages/ModelsPage";
 import { AgentRunPage } from "@/components/tools/pages/AgentRunPage";
 import { CompliancePage } from "@/components/tools/pages/CompliancePage";
@@ -167,6 +173,24 @@ export default function App() {
       break;
     case "jobs":
       centerPane = <JobsPage />;
+      break;
+    case "register":
+      centerPane = <RegisterPage />;
+      break;
+    case "handwriting":
+      centerPane = <HandwritingPage />;
+      break;
+    case "spell":
+      centerPane = <SpellPage />;
+      break;
+    case "stt":
+      centerPane = <SttPage />;
+      break;
+    case "ner":
+      centerPane = <NerPage />;
+      break;
+    case "summarize":
+      centerPane = <SummarizePage />;
       break;
     case "models":
       centerPane = <ModelsPage />;
