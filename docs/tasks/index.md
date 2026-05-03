@@ -12,15 +12,19 @@ trên cùng register grid, và lệnh tái lập.
 | **Sửa chính tả** — siêu tập của khôi phục dấu, vá lỗi ký tự + Telex + OCR | đã ship `nrl-ai/vn-spell-correction-base` v0.2.29 (SOTA OOD) | [→](/tasks/spell-correction) |
 | **Chuẩn hoá văn bản** — NFC/NFD, strip dấu, kiểm tra VN | shipped trong `nom.text` | [→](/tasks/text-normalization) |
 | **Tách từ** — segment tiếng Việt không dấu phụ | rule-based + underthesea | [→](/tasks/word-segmentation) |
+| **Phân loại văn phong** — trang trọng / kinh doanh / hội thoại / văn học | lexicon + PhoBERT-base | [→](/tasks/register) |
+| **Tóm tắt** — cô đọng văn bản dài về tin tức / hợp đồng / hội thoại | shipped trong `nom.summarize` (ViT5-large) | [→](/tasks/summarize) |
 
 ## Tác vụ về tài liệu
 
 | Tác vụ | Trạng thái | Trang |
 |---|---|---|
-| **OCR** — text từ ảnh / PDF scan | Tesseract `vie` (best printed); VLM cảnh báo | [→](/tasks/ocr) |
+| **OCR (chữ in)** — text từ ảnh / PDF scan | Tesseract `vie` (best printed); VLM cảnh báo | [→](/tasks/ocr) |
+| **OCR chữ viết tay** — biểu mẫu, ghi chú, CMND/CCCD | shipped trong `nom.ocr.handwriting` (Vintern-1B) | [→](/tasks/handwriting) |
 | **PDF text extraction** — text-layer cho PDF born-digital | pypdfium2 (BSD-3) | [→](/tasks/pdf-extraction) |
 | **Chuyển định dạng** — PDF / ảnh → DOCX có thể chỉnh sửa | shipped trong `nom.convert` | [→](/tasks/convert) |
-| **Dịch thuật** — Việt ↔ Anh, giữ định dạng `.docx`/`.xlsx`/`.pptx`/`.txt` | shipped trong `nom.translate` v0.1 | [→](/tasks/translate) |
+| **Dịch thuật** — Việt · Anh · 中 · 한 · 日, giữ định dạng `.docx`/`.xlsx`/`.pptx`/`.txt` | shipped trong `nom.translate` v0.1 | [→](/tasks/translate) |
+| **Giọng nói → văn bản** — phỏng vấn, cuộc họp, ghi chú audio | shipped trong `nom.stt` (PhoWhisper-large) | [→](/tasks/stt) |
 
 ## Tác vụ về retrieval / RAG
 
@@ -34,7 +38,15 @@ trên cùng register grid, và lệnh tái lập.
 
 | Tác vụ | Trạng thái | Trang |
 |---|---|---|
-| **NER + Sentiment + Lang detect** — entities, cảm xúc, ngôn ngữ | shipped trong `nom.nlp` | [→](/tasks/nlp) |
+| **Trích xuất thực thể** — PER/ORG/LOC/DATE/MONEY + LAW_REF/ID_VN/PHONE_VN cho VN pháp lý | shipped trong `nom.nlp.ner` | [→](/tasks/ner) |
+| **NER + cảm xúc + nhận diện ngôn ngữ** — thư viện đầy đủ | shipped trong `nom.nlp` | [→](/tasks/nlp) |
+
+## Vận hành
+
+| Tác vụ | Trạng thái | Trang |
+|---|---|---|
+| **Hàng đợi xử lý** — theo dõi tác vụ chạy nền + tiến độ + huỷ | shipped trong `nom.chat.bgjobs` | [→](/tasks/jobs) |
+| **Quản lý mô hình** — cài / theo dõi / xoá mô hình AI cục bộ | shipped trong `nom.chat.models_api` | [→](/tasks/models) |
 
 ## Multi-agent & MCP
 
