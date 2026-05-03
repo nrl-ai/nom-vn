@@ -1,21 +1,29 @@
-"""``/api/jobs/*`` — background-job HTTP surface for translate/convert.
+"""``/api/jobs/*`` — background-job HTTP surface for long-running tools.
 
-The synchronous ``/api/tools/translate/file`` and
-``/api/tools/convert/file`` endpoints stay (some clients want a
-blocking call). These job endpoints add a non-blocking flow:
+The synchronous ``/api/tools/...`` endpoints stay (clients that want a
+blocking call keep working). These job endpoints add a non-blocking
+flow for tasks that take seconds-to-minutes — model loads, audio
+transcription, large-document operations.
 
-- ``POST /api/jobs/translate-file`` — upload + start translate; returns
-  ``{job_id, ...job_snapshot}`` immediately.
-- ``POST /api/jobs/convert-file`` — same shape for PDF/image → DOCX.
-- ``GET  /api/jobs`` — list all jobs (newest first).
-- ``GET  /api/jobs/{id}`` — single snapshot for the polling client.
+Job kinds shipped today:
+
+- ``translate-file``      — upload → translated DOCX/PDF/...
+- ``convert-file``        — PDF / image → DOCX (Tesseract OCR)
+- ``stt-transcribe``      — audio → transcript + optional segments
+- ``ocr-handwriting``     — handwritten image → transcript
+- ``summarize-text``      — VN text → register-aware summary
+
+Endpoints:
+
+- ``POST /api/jobs/<kind>`` — enqueue, returns ``{job_id, status, ...}``
+  immediately (HTTP 202).
+- ``GET  /api/jobs``        — list all jobs (newest first).
+- ``GET  /api/jobs/{id}``   — single snapshot for the polling client.
 - ``GET  /api/jobs/{id}/download`` — stream the result file.
 - ``POST /api/jobs/{id}/cancel`` — cooperative cancel.
 - ``DELETE /api/jobs/{id}`` — drop the snapshot + temp dir.
 
 The work runs on the process-wide :class:`~nom.chat.bgjobs.BgJobRunner`.
-Progress callbacks come from the walkers (:mod:`nom.translate.formats`)
-and the convert pipeline.
 """
 
 from __future__ import annotations
@@ -258,6 +266,184 @@ def register_jobs_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             return dst_path, out_filename, meta
 
         job = runner.submit("convert-file", fn, message=f"queued: {filename}")
+        return _job_to_dict(job)
+
+    # ------------------------------------------------------------------ #
+    # New tool-style jobs — the synchronous /api/tools/<x> endpoints stay
+    # for short / interactive calls; these queue equivalents handle the
+    # cases where the model load alone is 10-60 s (Whisper, Vintern,
+    # ViT5-large). Result is always written as a UTF-8 text file inside
+    # the job's working dir so the existing /download path streams it
+    # without per-kind plumbing. ``meta`` carries the structured fields
+    # the UI used to read off the synchronous response (model id, n_chars,
+    # segments, register).
+    # ------------------------------------------------------------------ #
+
+    @app.post("/api/jobs/stt-transcribe", status_code=202)
+    async def start_stt_job(
+        file: Annotated[UploadFile, File()],
+        backend: Annotated[str, Form()] = "phowhisper",
+        language: Annotated[str | None, Form()] = None,
+        return_timestamps: Annotated[bool, Form()] = False,
+    ) -> dict[str, Any]:
+        """Enqueue an STT transcription. Returns the transcript as a
+        ``.txt`` (and writes segment timestamps as JSON in ``meta``)."""
+        filename = file.filename or "audio"
+        suffix = Path(filename).suffix.lower()
+        if suffix not in {".wav", ".mp3", ".flac", ".m4a", ".ogg", ".opus", ".webm"}:
+            raise HTTPException(status_code=422, detail=f"unsupported audio format {suffix!r}")
+        if backend not in ("phowhisper", "whisper-v3", "whisper"):
+            raise HTTPException(
+                status_code=422,
+                detail=f"unsupported backend {backend!r}; expected 'phowhisper' or 'whisper-v3'",
+            )
+
+        contents = await file.read()
+
+        def fn(job_dir: Path, reporter: Any) -> tuple[Path, str, dict[str, Any]]:
+            from nom.stt import PhoWhisperSTT, WhisperSTT
+
+            reporter.update(0.05, message="loading model")
+            stt: Any = PhoWhisperSTT() if backend == "phowhisper" else WhisperSTT()
+            reporter.raise_if_cancelled()
+            reporter.update(0.25, message="transcribing")
+            try:
+                result = stt.transcribe(
+                    contents, language=language, return_timestamps=return_timestamps
+                )
+            except ImportError as exc:
+                raise RuntimeError(f"STT backend unavailable: {exc}") from exc
+            reporter.update(0.95, message="writing")
+
+            stem = Path(filename).stem or "transcript"
+            out_filename = f"{stem}.txt"
+            dst_path = job_dir / out_filename
+            dst_path.write_text(result.text or "", encoding="utf-8")
+
+            segments_meta: list[dict[str, Any]] | None = None
+            if result.segments:
+                segments_meta = [
+                    {"start": s.start, "end": s.end, "text": s.text} for s in result.segments
+                ]
+
+            meta = {
+                "kind": "stt",
+                "backend": backend,
+                "model": result.model,
+                "language": result.language,
+                "n_chars": len(result.text or ""),
+                "segments": segments_meta,
+                "input_filename": filename,
+            }
+            return dst_path, out_filename, meta
+
+        job = runner.submit("stt-transcribe", fn, message=f"queued: {filename} ({backend})")
+        return _job_to_dict(job)
+
+    @app.post("/api/jobs/ocr-handwriting", status_code=202)
+    async def start_ocr_handwriting_job(
+        file: Annotated[UploadFile, File()],
+        model_id: Annotated[str | None, Form()] = None,
+    ) -> dict[str, Any]:
+        """Enqueue a Vintern handwriting-OCR call. Returns the transcript
+        as a ``.txt``; ``meta.confidence`` carries the engine's confidence
+        when surfaced (Vintern doesn't, so it's null today)."""
+        filename = file.filename or "page.png"
+        suffix = Path(filename).suffix.lower()
+        if suffix not in {".png", ".jpg", ".jpeg", ".tif", ".tiff", ".bmp", ".webp"}:
+            raise HTTPException(status_code=422, detail=f"unsupported image format {suffix!r}")
+
+        contents = await file.read()
+
+        def fn(job_dir: Path, reporter: Any) -> tuple[Path, str, dict[str, Any]]:
+            from nom.ocr import VinternHandwritingOcr
+
+            reporter.update(0.05, message="loading model")
+            clf = VinternHandwritingOcr(model_id=model_id) if model_id else VinternHandwritingOcr()
+            reporter.raise_if_cancelled()
+            reporter.update(0.25, message="transcribing")
+            try:
+                result = clf.transcribe(contents)
+            except ImportError as exc:
+                raise RuntimeError(f"OCR backend unavailable: {exc}") from exc
+            except ValueError as exc:
+                # Line-crop guard fires *before* model load, but propagate
+                # via the runtime-error path so the user sees the message.
+                raise RuntimeError(str(exc)) from exc
+            reporter.update(0.95, message="writing")
+
+            stem = Path(filename).stem or "transcript"
+            out_filename = f"{stem}.txt"
+            dst_path = job_dir / out_filename
+            dst_path.write_text(result.text or "", encoding="utf-8")
+
+            meta = {
+                "kind": "ocr-handwriting",
+                "model": result.model,
+                "n_chars": len(result.text or ""),
+                "confidence": result.confidence,
+                "input_filename": filename,
+            }
+            return dst_path, out_filename, meta
+
+        job = runner.submit("ocr-handwriting", fn, message=f"queued: {filename}")
+        return _job_to_dict(job)
+
+    @app.post("/api/jobs/summarize-text", status_code=202)
+    async def start_summarize_job(payload: dict[str, Any]) -> dict[str, Any]:
+        """Enqueue a ViT5-large summarization. Body identical to the
+        synchronous ``/api/tools/summarize`` endpoint."""
+        text = str(payload.get("text", ""))
+        register = payload.get("register")
+        if register is not None and not isinstance(register, str):
+            register = None
+        try:
+            max_length = int(payload.get("max_length", 256))
+            min_length = int(payload.get("min_length", 32))
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=422,
+                detail="`max_length` and `min_length` must be integers",
+            ) from exc
+        if not text:
+            raise HTTPException(status_code=422, detail="`text` is required")
+
+        def fn(job_dir: Path, reporter: Any) -> tuple[Path, str, dict[str, Any]]:
+            from nom.summarize import ViT5Summarizer
+
+            reporter.update(0.05, message="loading model")
+            summ = ViT5Summarizer()
+            reporter.raise_if_cancelled()
+            reporter.update(0.25, message="summarizing")
+            try:
+                result = summ.summarize(
+                    text,
+                    register=register,
+                    max_length=max_length,
+                    min_length=min_length,
+                )
+            except ImportError as exc:
+                raise RuntimeError(f"summarize backend unavailable: {exc}") from exc
+            reporter.update(0.95, message="writing")
+
+            out_filename = "summary.txt"
+            dst_path = job_dir / out_filename
+            dst_path.write_text(result.text or "", encoding="utf-8")
+
+            meta = {
+                "kind": "summarize",
+                "model": result.model,
+                "register": result.register,
+                "n_chars_in": result.n_chars_in,
+                "n_chars_out": result.n_chars_out,
+            }
+            return dst_path, out_filename, meta
+
+        job = runner.submit(
+            "summarize-text",
+            fn,
+            message=f"queued: {len(text)} chars · register={register or 'news'}",
+        )
         return _job_to_dict(job)
 
 
