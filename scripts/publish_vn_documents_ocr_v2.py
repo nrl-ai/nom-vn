@@ -53,9 +53,22 @@ def stage_files(out_dir: Path) -> list[tuple[Path, str]]:
     meta_lines = (LOCAL / "metadata.jsonl").read_text(encoding="utf-8").splitlines()
     docs = [json.loads(line) for line in meta_lines if line.strip()]
 
+    # v0.3: split by category, not just config — gives users 6 configs
+    # (real / literary / formal / news_business / conversational / receipt)
+    # rather than the v0.2 two-config split that lumped 80+ synth docs
+    # together.
+    cat_to_cfg = {
+        "government_real": "real",
+        "literary": "literary",
+        "formal": "formal",
+        "news_business": "news_business",
+        "conversational": "conversational",
+        "receipt_synthetic_scan": "receipt",
+    }
     by_cfg: dict[str, list[dict]] = {}
     for d in docs:
-        by_cfg.setdefault(d["config"], []).append(d)
+        cfg = cat_to_cfg.get(d["category"], d["config"])
+        by_cfg.setdefault(cfg, []).append(d)
 
     for cfg, cfg_docs in by_cfg.items():
         cfg_dir = out_dir / cfg

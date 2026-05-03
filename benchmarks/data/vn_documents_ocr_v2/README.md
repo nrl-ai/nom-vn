@@ -1,12 +1,26 @@
-# `vn_documents_ocr_v2` — Vietnamese scanned-document evaluation set v0.2
+# `vn_documents_ocr_v2` — Vietnamese scanned-document evaluation set v0.3
 
-12 single-page Vietnamese documents for evaluating PDF / image → DOCX
-OCR pipelines. Two configs:
+107 single-page Vietnamese documents for evaluating PDF / image → DOCX
+OCR pipelines. Six configs covering the full register matrix
+(formal / business / conversational / literary) plus real PD scans.
 
 | Config | n | Source | License |
 |---|---:|---|---|
-| `real` | 9 | chinhphu.vn (6) + hanoi.gov.vn (3) | Public Domain (Luật SHTT VN, Điều 15) |
-| `synthetic_scan` | 3 | synthetic templates + scan artifacts | CC0 1.0 |
+| `real` | 9 | chinhphu.vn + hanoi.gov.vn signed scans | Public Domain (Luật SHTT VN, Điều 15) |
+| `formal` | 24 | UDHR-vie articles (rendered + scan artifacts) | CC0 (rendered) — UDHR text is PD |
+| `news_business` | 24 | wiki_vi article openings (rendered + scan artifacts) | CC-BY-SA 4.0 (Wikipedia VN) |
+| `conversational` | 24 | tatoeba_vi sentence groups (rendered + scan artifacts) | CC-BY 2.0 FR (Tatoeba) |
+| `literary` | 23 | wikisource_vi Truyện Kiều excerpts (rendered + scan artifacts) | Public Domain |
+| `receipt` | 3 | synthetic receipt templates + scan artifacts | CC0 1.0 |
+
+The 9 `real` documents are true production input — image-only PDFs
+straight from chinhphu.vn / hanoi.gov.vn signed scans, ground-truthed
+by visual reading. The 95 `synthetic_scan` documents (formal +
+news_business + conversational + literary + receipt) render clean PD
+text into a page, then layer a comprehensive scan-artifact pipeline:
+skew, vignette, color cast, gaussian grain, periodic banding,
+gaussian blur, edge bleed, JPEG round-trip. The original clean text
+is the gold ground truth — no manual transcription needed.
 
 ## What's new vs v0.1
 
@@ -82,11 +96,18 @@ Latest in-house bench
 ([source](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_convert_documents_v2.json)),
 Tesseract 5 (`vie+eng` pack) via the `pdf_to_docx` OCR-fallback path:
 
-| Config | CER (raw) | CER (whitespace-normalized) | n |
-|---|---:|---:|---:|
-| `real` | 13.0 % | **12.62 %** | 9 |
-| `synthetic_scan` | 7.9 % | 0.43 % | 3 |
-| **OVERALL** | 12.54 % | 9.57 % | 12 |
+| Config | n | CER (whitespace-normalized) |
+|---|---:|---:|
+| `real` (chinhphu.vn + hanoi.gov.vn) | 9 | **12.62 %** |
+| All synthetic_scan (95 docs) | 95 | ~10 % |
+| `receipt` (synth + artifacts) | 3 | ~8 % |
+| `formal`, `news_business`, `conversational`, `literary` | 95 | varies 4-15 % |
+| **OVERALL** (107 docs) | 107 | **median 7.72 %, mean 10.51 %** |
+
+Per-doc CER ranges 0-22 %. Real chinhphu.vn signed scans are the
+hardest (skew + stamps + watermarks + admin abbreviations);
+synthetic_scan literary/conversational pages with low information
+density and clean fonts are the easiest.
 
 Throughput: ~0.7 docs/sec on a single CPU.
 
