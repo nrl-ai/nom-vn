@@ -402,11 +402,13 @@ Tất cả nằm trong cùng package ``nom-vn``, sau extras ``[chat]``.
 `conversational` / `literary`) — dùng làm tín hiệu cho chọn checkpoint
 khôi phục dấu, tóm tắt, OCR rerank. Hai cách chạy sau cùng `Protocol`:
 
-- `LexiconRegisterClassifier` — heuristic từ-mốc, không cần học máy,
-  ~1 ms / câu, ship cùng OSS.
-- `PhoBertRegisterClassifier` — fine-tune PhoBERT-base (135 M, MIT,
-  .bin từ VinAI). `model_id` để trống cho tới khi checkpoint huấn
-  luyện hoàn tất; script ở `training/register/`.
+- `LexiconRegisterClassifier` — phát hiện theo từ-mốc, không cần học
+  máy, ~1 ms / câu, đi cùng OSS làm fallback rẻ tiền.
+- `PhoBertRegisterClassifier` — đầu phân loại 4 lớp tinh chỉnh trên
+  PhoBERT-base (135 M, MIT). Mặc định trỏ đến
+  [`nrl-ai/vn-register-phobert-base`](https://huggingface.co/nrl-ai/vn-register-phobert-base)
+  (đã ship 2026-05-03, macro F1 0,900); script huấn luyện ở
+  `training/register/`.
 
 ### `nom.ocr` — OCR chữ viết tay (đã phát hành, v0.3)
 
@@ -457,9 +459,9 @@ phục vụ tài liệu pháp lý VN:
 - `PHONE_VN` — số di động và cố định VN
 
 Hàm `legal_ner_patterns()` trả về tuple `(label, pattern)` để truyền
-vào `RegexNERModel(extra_patterns=...)`. Hướng PhoBERT fine-tune cho
-`LAW_REF` + `CONTRACT_PARTY` cần ~70-90 giờ chú thích thủ công và
-chưa làm.
+vào `RegexNERModel(extra_patterns=...)`. Hướng tinh chỉnh PhoBERT cho
+`LAW_REF` + `CONTRACT_PARTY` cần ~70-90 giờ chú thích thủ công, xếp
+lịch sau.
 
 ---
 

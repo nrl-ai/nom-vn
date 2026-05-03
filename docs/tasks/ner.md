@@ -21,7 +21,7 @@ Backend mặc định: regex (nhanh, deterministic, không cần model). Cần
 > **Trạng thái thật (2026-05-03):** v0 mới chỉ ship phần biểu thức
 > chính quy. Bộ kiểm thử xác minh đúng các mẫu do chính chúng tôi
 > viết — đây là kiểm tra cấu trúc, không phải số đo học từ dữ liệu.
-> Hướng PhoBERT fine-tune cho `LAW_REF` + `CONTRACT_PARTY` (mục tiêu
+> Hướng tinh chỉnh PhoBERT cho `LAW_REF` + `CONTRACT_PARTY` (mục tiêu
 > F1 ≥ 0,85) cần ~70-90 giờ chú thích thủ công và xếp lịch sau theo
 > [`docs/sota_vn_2026q2_expansion.md`](../sota_vn_2026q2_expansion.md).
 > Đến lúc đó, biểu thức chính quy bắt được hầu hết hợp đồng VN
