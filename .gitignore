@@ -125,3 +125,4 @@ training/onnx_export/vn-diacritic-*-int8*/
 training/ocr_correction/data/*.jsonl
 training/ocr_correction/checkpoints/
 training/ocr_correction/run.log
+.qa-screenshots-2026-05-03/
