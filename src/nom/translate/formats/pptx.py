@@ -21,6 +21,7 @@ Trade-offs:
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -48,9 +49,15 @@ def translate_pptx(
     src: Path | str,
     dst: Path | str,
     translator: Translator,
+    *,
+    progress_cb: Callable[[float], None] | None = None,
 ) -> PptxTranslationStats:
     """Translate text content of a ``.pptx``. Source untouched; ``dst``
-    written fresh."""
+    written fresh.
+
+    ``progress_cb`` (when given) is invoked with a slide-level
+    fraction. Slide granularity (rather than paragraph) keeps the bar
+    smooth on big decks without overwhelming the runner."""
     try:
         from pptx import Presentation
     except ImportError as exc:
@@ -66,12 +73,18 @@ def translate_pptx(
     prs = Presentation(str(src_path))
     counts = _Counts()
 
-    for slide in prs.slides:
+    n_slides = max(1, len(prs.slides))
+    for idx, slide in enumerate(prs.slides):
         for shape in slide.shapes:
             _translate_shape(shape, translator, counts)
         if slide.has_notes_slide:
             notes_tf = slide.notes_slide.notes_text_frame
             _translate_text_frame(notes_tf, translator, counts)
+        if progress_cb is not None:
+            progress_cb(min(0.99, (idx + 1) / n_slides))
+
+    if progress_cb is not None:
+        progress_cb(1.0)
 
     dst_path.parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(dst_path))

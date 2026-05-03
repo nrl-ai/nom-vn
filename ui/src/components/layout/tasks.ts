@@ -1,9 +1,10 @@
 import {
-  Bot,
   Building2,
   Code2,
   Eraser,
+  FileType,
   Languages,
+  ListChecks,
   MessageSquare,
   Package,
   Scissors,
@@ -24,6 +25,14 @@ export type TaskKey =
   | "normalize"
   | "strip"
   | "translate"
+  | "convert"
+  | "jobs"
+  | "register"
+  | "handwriting"
+  | "spell"
+  | "stt"
+  | "ner"
+  | "summarize"
   | "models"
   | "agents"
   | "compliance"
@@ -39,6 +48,49 @@ export interface TaskMeta {
   category: "rag" | "text" | "dev";
 }
 
+// Per-task URL slug. Each tab gets its own browser URL so deep-links
+// (e.g. https://nom-vn.nrl.ai/translate) work, back/forward navigates
+// between tabs, and bookmarking lands you on the same screen.
+//
+// Slugs are kept in English so the same paths work after localization
+// (a Spanish or Japanese build of the UI swaps labels, not URLs).
+// "api" would collide with the /api/* HTTP namespace, so the docs page
+// gets "/api-docs" instead.
+export const TASK_SLUGS: Record<TaskKey, string> = {
+  chat: "/",
+  translate: "/translate",
+  convert: "/convert",
+  jobs: "/jobs",
+  diacritic: "/diacritic",
+  tokenize: "/tokenize",
+  normalize: "/normalize",
+  strip: "/strip",
+  register: "/register",
+  handwriting: "/handwriting",
+  spell: "/spell",
+  stt: "/stt",
+  ner: "/ner",
+  summarize: "/summarize",
+  models: "/models",
+  agents: "/agents",
+  compliance: "/compliance",
+  admin: "/admin",
+  api: "/api-docs",
+  settings: "/settings",
+};
+
+export const SLUG_TO_TASK: Record<string, TaskKey> = Object.fromEntries(
+  Object.entries(TASK_SLUGS).map(([k, v]) => [v, k as TaskKey]),
+) as Record<string, TaskKey>;
+
+export function taskFromPath(pathname: string): TaskKey | null {
+  // Normalize trailing slash; only "/" maps to chat.
+  const cleaned = pathname === "/" ? "/" : pathname.replace(/\/+$/, "");
+  return SLUG_TO_TASK[cleaned] ?? null;
+}
+
+// `agents` is currently hidden from the nav (no UI page yet) but the slug,
+// TaskKey, and route handling stay so existing deep-links keep working.
 export const TASKS: TaskMeta[] = [
   {
     key: "chat",
@@ -50,16 +102,23 @@ export const TASKS: TaskMeta[] = [
   {
     key: "translate",
     label: "Dịch thuật",
-    blurb: "Việt ↔ Anh, giữ định dạng .docx / .xlsx / .pptx / .txt",
+    blurb: "Việt · Anh · 中 · 한 · 日, giữ định dạng tệp",
     icon: Languages,
-    category: "text",
+    category: "rag",
   },
   {
-    key: "models",
-    label: "Mô hình",
-    blurb: "quản lý mô hình AI cài đặt cục bộ",
-    icon: Package,
-    category: "dev",
+    key: "convert",
+    label: "Chuyển định dạng",
+    blurb: "PDF / ảnh / DOCX / TXT / MD — chuyển qua lại",
+    icon: FileType,
+    category: "rag",
+  },
+  {
+    key: "jobs",
+    label: "Hàng đợi xử lý",
+    blurb: "Theo dõi tác vụ chạy nền + tiến độ",
+    icon: ListChecks,
+    category: "rag",
   },
   {
     key: "diacritic",
@@ -90,13 +149,6 @@ export const TASKS: TaskMeta[] = [
     category: "text",
   },
   {
-    key: "agents",
-    label: "Chạy tác tử",
-    blurb: "Theo dõi tác tử thời gian thực",
-    icon: Bot,
-    category: "rag",
-  },
-  {
     key: "compliance",
     label: "Phân loại rủi ro",
     blurb: "Luật 134/2025 — 3 mức",
@@ -108,6 +160,13 @@ export const TASKS: TaskMeta[] = [
     label: "Quản trị doanh nghiệp",
     blurb: "Giấy phép · audit · người dùng",
     icon: Building2,
+    category: "dev",
+  },
+  {
+    key: "models",
+    label: "Mô hình",
+    blurb: "quản lý mô hình AI cài đặt cục bộ",
+    icon: Package,
     category: "dev",
   },
   {

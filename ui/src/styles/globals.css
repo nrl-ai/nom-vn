@@ -45,6 +45,42 @@ body {
   font-weight: 600;
 }
 
+/* Metadata voice — model IDs, token counts, hashes, paths, chunk IDs.
+ * Monospace + tracked + ink-mute. The single utility that most reframes
+ * the UI from "blog" to "tool" — apply liberally to anything that reads
+ * as machine state rather than user prose. */
+.meta {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: #6a6a66;
+  font-variant-numeric: tabular-nums;
+}
+.meta-strong {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  color: #2a2a28;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* Inline keyboard chip — for hints like "Enter", "⌘K" rendered next to
+ * actions. Uses the line token so it stays in lockstep with dividers. */
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 5px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: #2a2a28;
+  background: #f1ece0;
+  border: 1px solid rgba(20, 20, 20, 0.22);
+  border-bottom-width: 2px;
+}
+
 /* Editorial scrollbar — thin, ink-tinted, no decoration. */
 ::-webkit-scrollbar {
   width: 8px;
@@ -54,10 +90,10 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(20, 20, 20, 0.2);
+  background: rgba(20, 20, 20, 0.28);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(20, 20, 20, 0.4);
+  background: rgba(20, 20, 20, 0.5);
 }
 
 /* Selection styling — burnt orange tint. */

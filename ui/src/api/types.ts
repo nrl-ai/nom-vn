@@ -224,8 +224,16 @@ export interface CuratedModel {
   tier: "light" | "standard" | "power";
   size_gb: number;
   needs_ram_gb: number;
-  use_cases: string[];
+  /** Where the model runs: "ollama" pulls via /api/models/pull, "hf"
+   *  downloads on first use via huggingface_hub, "system" is a binary
+   *  installed via apt / brew / conda. */
+  source: "ollama" | "hf" | "system";
+  /** Surfaces the model serves — used to group by task in the UI. */
+  tasks: string[];
+  /** Backwards-compat alias (older API responses used `use_cases`). */
+  use_cases?: string[];
   license: string;
+  notes?: string;
 }
 
 export interface ModelsListRes {
@@ -253,4 +261,40 @@ export interface PullState {
 
 export interface PullsListRes {
   pulls: PullState[];
+}
+
+// Document conversion — PDF / image → DOCX. Mirrors
+// /api/tools/convert/file in src/nom/chat/tools_api.py.
+export interface ConvertFileStats {
+  n_pages: number;
+  pages_text_extracted: number;
+  pages_ocred: number;
+  chars_out: number;
+  ocr_language: string;
+}
+
+// ---------------------------------------------------------------------------
+// Background jobs — long-running translate / convert that the UI polls
+// instead of holding open. Mirrors /api/jobs/* in
+// src/nom/chat/jobs_api.py.
+// ---------------------------------------------------------------------------
+
+export type BgJobStatus = "queued" | "running" | "completed" | "failed" | "cancelled";
+
+export interface BgJob {
+  id: string;
+  kind: string; // "translate-file" | "convert-file" — kept open-ended for v0.5
+  status: BgJobStatus;
+  progress: number; // [0, 1]
+  message: string;
+  created_at: number;
+  updated_at: number;
+  result_filename: string | null;
+  result_meta: Record<string, unknown>;
+  error: string | null;
+  download_url: string | null;
+}
+
+export interface BgJobListRes {
+  jobs: BgJob[];
 }

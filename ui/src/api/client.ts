@@ -3,6 +3,9 @@
 
 import type {
   Answer,
+  BgJob,
+  BgJobListRes,
+  ConvertFileStats,
   DetectRes,
   DiacriticBackend,
   DiacriticModelsRes,
@@ -295,5 +298,67 @@ export const api = {
       request<{ deleted: string }>(`/api/models/ollama/${encodeURIComponent(model)}`, {
         method: "DELETE",
       }),
+  },
+  // -- Background jobs ---------------------------------------------------
+  jobs: {
+    list: () => request<BgJobListRes>("/api/jobs"),
+    get: (id: string) => request<BgJob>(`/api/jobs/${id}`),
+    cancel: (id: string) => request<BgJob>(`/api/jobs/${id}/cancel`, { method: "POST" }),
+    delete: (id: string) => request<undefined>(`/api/jobs/${id}`, { method: "DELETE" }),
+    downloadUrl: (id: string) => `/api/jobs/${id}/download`,
+    startTranslate: async (
+      file: File,
+      source: TranslateLang,
+      target: TranslateLang,
+      backend: TranslateBackend = "llm",
+      modelId?: string,
+    ): Promise<BgJob> => {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("source", source);
+      fd.append("target", target);
+      fd.append("backend", backend);
+      if (modelId) fd.append("model_id", modelId);
+      return request<BgJob>("/api/jobs/translate-file", { method: "POST", body: fd });
+    },
+    startConvert: async (file: File, ocrLanguage: string = "vie+eng"): Promise<BgJob> => {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("ocr_language", ocrLanguage);
+      return request<BgJob>("/api/jobs/convert-file", { method: "POST", body: fd });
+    },
+  },
+  convert: {
+    file: async (
+      file: File,
+      ocrLanguage: string = "vie+eng",
+    ): Promise<{ blob: Blob; filename: string; stats: ConvertFileStats }> => {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("ocr_language", ocrLanguage);
+      const token = getAuthToken();
+      const res = await fetch("/api/tools/convert/file", {
+        method: "POST",
+        body: fd,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let detail = text;
+        try {
+          const parsed = JSON.parse(text);
+          if (parsed && typeof parsed.detail === "string") detail = parsed.detail;
+        } catch {
+          // raw text
+        }
+        throw new ApiError(res.status, detail);
+      }
+      const blob = await res.blob();
+      const stats = JSON.parse(res.headers.get("X-Convert-Stats") ?? "{}") as ConvertFileStats;
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const match = /filename="?([^";]+)"?/i.exec(cd);
+      const filename = match ? match[1] : "converted.docx";
+      return { blob, filename, stats };
+    },
   },
 };

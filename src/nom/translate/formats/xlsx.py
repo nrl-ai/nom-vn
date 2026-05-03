@@ -22,6 +22,7 @@ Trade-offs:
 from __future__ import annotations
 
 import contextlib
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -49,9 +50,15 @@ def translate_xlsx(
     src: Path | str,
     dst: Path | str,
     translator: Translator,
+    *,
+    progress_cb: Callable[[float], None] | None = None,
 ) -> XlsxTranslationStats:
     """Translate string cells in a ``.xlsx``. Source untouched; ``dst``
-    written fresh."""
+    written fresh.
+
+    ``progress_cb`` (when given) receives a ``[0, 1]`` fraction after
+    each cell.
+    """
     try:
         from openpyxl import load_workbook
     except ImportError as exc:
@@ -69,8 +76,13 @@ def translate_xlsx(
     wb = load_workbook(str(src_path))
     counts = _Counts()
 
+    total = max(1, sum(s.max_row * s.max_column for s in wb.worksheets))
+    seen = 0
     for sheet in wb.worksheets:
-        _translate_sheet(sheet, translator, counts)
+        seen = _translate_sheet(sheet, translator, counts, progress_cb, seen, total)
+
+    if progress_cb is not None:
+        progress_cb(1.0)
 
     dst_path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(str(dst_path))
@@ -95,26 +107,42 @@ class _Counts:
         )
 
 
-def _translate_sheet(sheet: Any, translator: Translator, counts: _Counts) -> None:
+def _translate_sheet(
+    sheet: Any,
+    translator: Translator,
+    counts: _Counts,
+    progress_cb: Callable[[float], None] | None,
+    seen: int,
+    total: int,
+) -> int:
     for row in sheet.iter_rows():
         for cell in row:
+            seen += 1
             value = cell.value
             if value is None or not isinstance(value, str):
+                if progress_cb is not None:
+                    progress_cb(min(0.99, seen / total))
                 continue
             # Skip formula cells — `cell.data_type == 'f'` covers them
             # but openpyxl also exposes a leading '=' on the value when
             # the workbook was loaded with formulas. Belt + suspenders.
             if cell.data_type == "f" or value.startswith("="):
+                if progress_cb is not None:
+                    progress_cb(min(0.99, seen / total))
                 continue
             stripped = value.strip()
             if not stripped:
                 counts.skipped += 1
+                if progress_cb is not None:
+                    progress_cb(min(0.99, seen / total))
                 continue
             counts.chars_in += len(value)
             try:
                 translated = translator.translate(value)
             except Exception:
                 counts.failed += 1
+                if progress_cb is not None:
+                    progress_cb(min(0.99, seen / total))
                 continue
             cell.value = translated
             counts.chars_out += len(translated)
@@ -124,3 +152,6 @@ def _translate_sheet(sheet: Any, translator: Translator, counts: _Counts) -> Non
             if cell.comment is not None and cell.comment.text:
                 with contextlib.suppress(Exception):
                     cell.comment.text = translator.translate(cell.comment.text)
+            if progress_cb is not None:
+                progress_cb(min(0.99, seen / total))
+    return seen

@@ -23,9 +23,13 @@ const config: Config = {
         "ink-mute": "#6a6a66",
         accent: "#b5563a",
         "accent-soft": "#d68870",
+        "accent-wash": "rgba(181,86,58,0.10)",
         "accent-ink": "#1a0f06",
-        line: "rgba(20,20,20,0.15)",
-        "line-soft": "rgba(20,20,20,0.08)",
+        // Dividers — bumped from 0.15/0.08 to 0.22/0.13 so structural lines
+        // read as visibly thin on cream rather than ghost-thin. The editorial
+        // language depends on the lines being *legible*, not invisible.
+        line: "rgba(20,20,20,0.22)",
+        "line-soft": "rgba(20,20,20,0.13)",
         danger: "#c0392b",
         ok: "#3d8a55",
       },

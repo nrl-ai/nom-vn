@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tanstack/react-query";
 import { api } from "./client";
 import type {
+  BgJob,
+  BgJobListRes,
   DiacriticBackend,
   Material,
   ModelsListRes,
@@ -245,7 +247,15 @@ export function useModelPulls(): UseQueryResult<PullsListRes> {
   return useQuery({
     queryKey: ["models", "pulls"],
     queryFn: api.models.pulls,
-    refetchInterval: 1500, // poll while a pull may be in flight
+    // Only poll while a pull is actually in flight. Otherwise idle —
+    // the manual "Pull" button calls invalidateQueries on success, which
+    // will re-arm this without a permanent 1.5 s heartbeat.
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data || !data.pulls) return false;
+      const inFlight = data.pulls.some((p) => p.status === "pending" || p.status === "downloading");
+      return inFlight ? 1500 : false;
+    },
   });
 }
 
@@ -278,5 +288,97 @@ export function useDeleteModel() {
   return useMutation({
     mutationFn: (model: string) => api.models.deleteOllama(model),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["models"] }),
+  });
+}
+
+// Convert tab — file upload to /api/tools/convert/file.
+export function useConvertFile() {
+  return useMutation({
+    mutationFn: (vars: { file: File; ocrLanguage?: string }) =>
+      api.convert.file(vars.file, vars.ocrLanguage),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Background-job queue — translate + convert run in the server's
+// thread pool, the UI polls. Polling cadence: aggressive while jobs are
+// in-flight (every 700 ms), idle when nothing's running. The list query
+// drives the Jobs sidebar / queue page.
+// ---------------------------------------------------------------------------
+
+export function useBgJobs(): UseQueryResult<BgJobListRes> {
+  return useQuery({
+    queryKey: ["jobs"],
+    queryFn: api.jobs.list,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data || !data.jobs) return false;
+      // Poll fast while any job is queued / running, otherwise stop.
+      const inFlight = data.jobs.some((j) => j.status === "queued" || j.status === "running");
+      return inFlight ? 700 : false;
+    },
+    staleTime: 0,
+  });
+}
+
+export function useBgJob(id: string | null) {
+  return useQuery({
+    queryKey: ["jobs", id],
+    queryFn: () => api.jobs.get(id!),
+    enabled: !!id,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (!data) return 700;
+      return data.status === "queued" || data.status === "running" ? 700 : false;
+    },
+    staleTime: 0,
+  });
+}
+
+export function useStartTranslateJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: {
+      file: File;
+      source: TranslateLang;
+      target: TranslateLang;
+      backend: TranslateBackend;
+      modelId?: string;
+    }) => api.jobs.startTranslate(vars.file, vars.source, vars.target, vars.backend, vars.modelId),
+    onSuccess: (job: BgJob) => {
+      qc.invalidateQueries({ queryKey: ["jobs"] });
+      qc.setQueryData(["jobs", job.id], job);
+    },
+  });
+}
+
+export function useStartConvertJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (vars: { file: File; ocrLanguage?: string }) =>
+      api.jobs.startConvert(vars.file, vars.ocrLanguage),
+    onSuccess: (job: BgJob) => {
+      qc.invalidateQueries({ queryKey: ["jobs"] });
+      qc.setQueryData(["jobs", job.id], job);
+    },
+  });
+}
+
+export function useCancelJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.jobs.cancel(id),
+    onSuccess: (job: BgJob) => {
+      qc.invalidateQueries({ queryKey: ["jobs"] });
+      qc.setQueryData(["jobs", job.id], job);
+    },
+  });
+}
+
+export function useDeleteJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.jobs.delete(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["jobs"] }),
   });
 }

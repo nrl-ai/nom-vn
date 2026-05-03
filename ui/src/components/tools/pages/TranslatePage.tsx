@@ -3,7 +3,6 @@ import {
   AlertTriangle,
   ArrowRightLeft,
   CheckCircle2,
-  Download,
   FileText,
   Languages,
   Play,
@@ -17,7 +16,8 @@ import { OptionRow, Segmented, Select } from "../options";
 import { TextInput } from "../TextInput";
 import { CopyButton } from "../CopyButton";
 import { useToolRunner } from "../useToolRunner";
-import { useTranslateFile, useTranslateText } from "@/api/queries";
+import { useBgJob, useStartTranslateJob, useTranslateText } from "@/api/queries";
+import { JobCard } from "../JobCard";
 import type { TranslateBackend, TranslateLang } from "@/api/types";
 
 const STORAGE_KEY = "nom:tool:translate";
@@ -121,7 +121,9 @@ export function TranslatePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const translateText = useTranslateText();
-  const translateFile = useTranslateFile();
+  const startTranslateJob = useStartTranslateJob();
+  const [jobId, setJobId] = useState<string | null>(null);
+  const jobQ = useBgJob(jobId);
 
   useEffect(() => {
     try {
@@ -153,8 +155,8 @@ export function TranslatePage() {
   }, [text, source, target, backend, modelId, translateText]);
 
   const onRunFile = useCallback(() => {
-    if (!file || translateFile.isPending || source === target) return;
-    translateFile.mutate(
+    if (!file || startTranslateJob.isPending || source === target) return;
+    startTranslateJob.mutate(
       {
         file,
         source,
@@ -163,29 +165,21 @@ export function TranslatePage() {
         modelId: backend === "hf" ? modelId || undefined : undefined,
       },
       {
-        onSuccess: ({ blob, filename, stats }) => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
-          toast.success(
-            `Đã dịch ${stats.paragraphs_translated} đoạn` +
-              (stats.paragraphs_failed > 0 ? `, ${stats.paragraphs_failed} lỗi` : ""),
-          );
+        onSuccess: (job) => {
+          setJobId(job.id);
+          toast.success(`Đã thêm vào hàng đợi: ${file.name}`);
         },
       },
     );
-  }, [file, source, target, backend, modelId, translateFile]);
+  }, [file, source, target, backend, modelId, startTranslateJob]);
 
   const isTextMode = mode === "text";
   const onRun = isTextMode ? onRunText : onRunFile;
   const canRun =
     source !== target &&
-    (isTextMode ? !!text.trim() && !translateText.isPending : !!file && !translateFile.isPending);
+    (isTextMode
+      ? !!text.trim() && !translateText.isPending
+      : !!file && !startTranslateJob.isPending);
 
   useToolRunner(onRun, canRun);
 
@@ -193,8 +187,8 @@ export function TranslatePage() {
     ? translateText.error
       ? (translateText.error as Error).message
       : null
-    : translateFile.error
-      ? (translateFile.error as Error).message
+    : startTranslateJob.error
+      ? (startTranslateJob.error as Error).message
       : null;
 
   useEffect(() => {
@@ -202,8 +196,8 @@ export function TranslatePage() {
   }, [errMsg]);
 
   const result = translateText.data;
-  const fileResult = translateFile.data;
-  const pending = translateText.isPending || translateFile.isPending;
+  const fileJob = jobQ.data;
+  const pending = translateText.isPending || startTranslateJob.isPending;
 
   const sameLangWarning = source === target ? "Ngôn ngữ nguồn và đích phải khác nhau." : null;
 
@@ -319,11 +313,11 @@ export function TranslatePage() {
                 : !text.trim()
                   ? "Nhập hoặc dán văn bản, sau đó bấm Dịch"
                   : "Bấm ⌘/Ctrl + Enter để dịch"
-              : fileResult
-                ? `${fileResult.stats.paragraphs_translated} đoạn dịch · ${fileResult.stats.chars_in.toLocaleString()} → ${fileResult.stats.chars_out.toLocaleString()} ký tự`
+              : fileJob
+                ? `${fileJob.status} · ${Math.round(fileJob.progress * 100)}%`
                 : !file
                   ? "Chọn tệp .docx ở khung bên trái, sau đó bấm Dịch"
-                  : "Sẵn sàng — bấm Dịch để chạy"}
+                  : "Sẵn sàng — bấm Dịch để xếp hàng đợi"}
           </span>
           <Button variant="primary" size="md" onClick={onRun} disabled={!canRun}>
             {pending ? <Spinner /> : <Play size={14} />}
@@ -471,52 +465,25 @@ export function TranslatePage() {
             </div>
           )}
 
-          {fileResult ? (
-            <Panel
-              label="Kết quả"
-              hint={`${fileResult.stats.paragraphs_translated} đoạn · ${fileResult.stats.paragraphs_skipped} bỏ qua · ${fileResult.stats.paragraphs_failed} lỗi`}
-              rightSlot={
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const url = URL.createObjectURL(fileResult.blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = fileResult.filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    URL.revokeObjectURL(url);
-                  }}
-                >
-                  <Download size={13} />
-                  Tải lại
-                </Button>
-              }
-            >
-              <div className="border-l-2 border-accent bg-paper px-3 py-2 text-sm text-ink">
-                <p>
-                  Tệp <span className="font-mono">{fileResult.filename}</span> đã được tải xuống.
-                </p>
-                <ul className="mt-2 space-y-1 font-mono text-[11.5px] text-ink-soft">
-                  <li>
-                    Cách dịch: <span className="text-ink">{fileResult.stats.backend}</span>
-                    {fileResult.stats.model_id ? ` · ${fileResult.stats.model_id}` : ""}
-                  </li>
-                  <li>
-                    Ký tự:{" "}
-                    <span className="text-ink">{fileResult.stats.chars_in.toLocaleString()}</span> →{" "}
-                    <span className="text-ink">{fileResult.stats.chars_out.toLocaleString()}</span>
-                  </li>
-                </ul>
-              </div>
-            </Panel>
+          {fileJob ? (
+            <div className="space-y-2">
+              <h3 className="font-mono text-[11px] uppercase tracking-wide text-ink-soft">
+                Tác vụ hiện tại
+              </h3>
+              <JobCard job={fileJob} />
+              <p className="text-[11.5px] leading-snug text-ink-soft">
+                Bạn có thể đóng trang này — tác vụ vẫn chạy nền. Mở{" "}
+                <a className="font-mono text-accent underline" href="/jobs">
+                  Hàng đợi xử lý
+                </a>{" "}
+                để xem tất cả tác vụ.
+              </p>
+            </div>
           ) : (
             !errMsg && (
               <EmptyHint>
                 Chọn một tệp <span className="mx-1 font-mono text-ink">.docx</span>, sau đó bấm
-                Dịch. Tệp dịch sẽ tự động tải về.
+                Dịch. Tác vụ chạy nền — tiến độ hiển thị ngay tại đây.
               </EmptyHint>
             )
           )}

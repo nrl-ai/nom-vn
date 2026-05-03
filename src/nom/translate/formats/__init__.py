@@ -14,6 +14,7 @@ Public surface:
   knows about
 """
 
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -45,6 +46,8 @@ def translate_file(
     src: Path | str,
     dst: Path | str,
     translator: Translator,
+    *,
+    progress_cb: Callable[[float], None] | None = None,
 ) -> Any:
     """Translate ``src`` to ``dst``, dispatching by file extension.
 
@@ -53,19 +56,22 @@ def translate_file(
     the returned object via its dataclass-fields rather than by a
     common interface.
 
+    ``progress_cb`` (when given) is forwarded to the format walker;
+    it's invoked with a ``[0, 1]`` fraction after each translation unit.
+
     Raises ``ValueError`` for unsupported extensions.
     """
     src_path = Path(src)
     suffix = src_path.suffix.lower()
 
     if suffix == ".docx":
-        return translate_docx(src, dst, translator)
+        return translate_docx(src, dst, translator, progress_cb=progress_cb)
     if suffix == ".xlsx":
-        return translate_xlsx(src, dst, translator)
+        return translate_xlsx(src, dst, translator, progress_cb=progress_cb)
     if suffix == ".pptx":
-        return translate_pptx(src, dst, translator)
+        return translate_pptx(src, dst, translator, progress_cb=progress_cb)
     if suffix in _TEXT_EXTS:
-        return translate_text(src, dst, translator)
+        return translate_text(src, dst, translator, progress_cb=progress_cb)
     raise ValueError(
         f"unsupported source format {suffix!r}; supported: {sorted(SUPPORTED_FORMATS)}"
     )

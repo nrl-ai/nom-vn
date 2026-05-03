@@ -334,50 +334,176 @@ def _apply_pull_event(state: _PullState, event: dict[str, Any]) -> None:
 # Curated catalog — the UI's "Recommended for VN" list.
 
 
+# Catalog entries are tagged with `source` so the UI can group by
+# "what runs where". `tasks` lists the surfaces the model serves —
+# the UI groups by task to answer "which model handles X". `notes`
+# is a one-line subhead the UI renders under the label.
 _CURATED_CATALOG: list[dict[str, Any]] = [
+    # ----------------------------------------------------------------------
+    # Generalist LLMs (chat, diacritic-fallback, translate-fallback)
+    # served via Ollama.
+    {
+        "id": "qwen3:0.6b",
+        "label": "Qwen3 0.6B",
+        "source": "ollama",
+        "tier": "light",
+        "size_gb": 0.5,
+        "needs_ram_gb": 2,
+        "tasks": ["chat", "diacritic", "translate"],
+        "license": "Apache 2.0",
+        "notes": "Nhẹ nhất — chạy được trên máy 4 GB RAM.",
+    },
     {
         "id": "qwen3:1.7b",
-        "label": "Qwen3 1.7B (siêu nhẹ)",
+        "label": "Qwen3 1.7B",
+        "source": "ollama",
         "tier": "light",
         "size_gb": 1.4,
         "needs_ram_gb": 4,
-        "use_cases": ["chat", "diacritic", "translate"],
+        "tasks": ["chat", "diacritic", "translate"],
         "license": "Apache 2.0",
+        "notes": "Cân bằng tốc độ / chất lượng cho desktop CPU.",
     },
     {
         "id": "qwen3:8b",
         "label": "Qwen3 8B (mặc định)",
+        "source": "ollama",
         "tier": "standard",
         "size_gb": 5.1,
         "needs_ram_gb": 8,
-        "use_cases": ["chat", "diacritic", "translate", "rag"],
+        "tasks": ["chat", "diacritic", "translate", "rag"],
         "license": "Apache 2.0",
+        "notes": "Mặc định cho cài đặt mới — chất lượng đáng tin cậy.",
     },
     {
         "id": "qwen3:14b",
-        "label": "Qwen3 14B (chất lượng cao)",
+        "label": "Qwen3 14B",
+        "source": "ollama",
         "tier": "power",
         "size_gb": 9.0,
         "needs_ram_gb": 16,
-        "use_cases": ["chat", "rag"],
+        "tasks": ["chat", "rag"],
         "license": "Apache 2.0",
+        "notes": "Chất lượng RAG cao nhất; cần ≥16 GB RAM hoặc GPU.",
     },
     {
         "id": "gemma3:4b",
         "label": "Gemma3 4B",
+        "source": "ollama",
         "tier": "light",
         "size_gb": 3.3,
         "needs_ram_gb": 6,
-        "use_cases": ["chat", "diacritic"],
+        "tasks": ["chat", "diacritic"],
         "license": "Gemma",
+        "notes": "Lựa chọn thay thế Qwen3 cho chat ngắn.",
     },
     {
         "id": "gemma3:12b",
         "label": "Gemma3 12B",
+        "source": "ollama",
         "tier": "power",
         "size_gb": 8.0,
         "needs_ram_gb": 16,
-        "use_cases": ["chat", "rag"],
+        "tasks": ["chat", "rag"],
         "license": "Gemma",
+        "notes": "Tương đương Qwen3 14B với licence Gemma.",
+    },
+    # ----------------------------------------------------------------------
+    # Translation specialists (HF transformers, downloaded on first use
+    # via the `huggingface_hub` cache; not pull-able through Ollama).
+    {
+        "id": "google/madlad400-3b-mt",
+        "label": "MADLAD-400 3B (khuyến nghị)",
+        "source": "hf",
+        "tier": "standard",
+        "size_gb": 6.0,
+        "needs_ram_gb": 8,
+        "tasks": ["translate"],
+        "license": "Apache 2.0",
+        "notes": "Chuyên dụng MT 419 ngôn ngữ; OPUS-100 EN→VN chrF 40.92.",
+    },
+    {
+        "id": "facebook/m2m100_418M",
+        "label": "M2M100 418M",
+        "source": "hf",
+        "tier": "light",
+        "size_gb": 2.0,
+        "needs_ram_gb": 4,
+        "tasks": ["translate"],
+        "license": "MIT",
+        "notes": "Nhẹ, chạy CPU được; chất lượng kém hơn MADLAD ~5pp chrF.",
+    },
+    # ----------------------------------------------------------------------
+    # Diacritic / spell-correction specialists.
+    {
+        "id": "nrl-ai/vn-spell-correction-base",
+        "label": "VN Spell-Correction Base (sửa lỗi gõ + dấu)",
+        "source": "hf",
+        "tier": "standard",
+        "size_gb": 0.9,
+        "needs_ram_gb": 2,
+        "tasks": ["diacritic", "spell-correction"],
+        "license": "Apache 2.0",
+        "notes": "ViT5 220M — 98.32% light, 97.03% heavy synthetic; vượt Toshiiiii1.",
+    },
+    {
+        "id": "nrl-ai/vn-diacritic-vit5-base",
+        "label": "VN Diacritic ViT5 Base (chỉ khôi phục dấu)",
+        "source": "hf",
+        "tier": "standard",
+        "size_gb": 0.9,
+        "needs_ram_gb": 2,
+        "tasks": ["diacritic"],
+        "license": "Apache 2.0",
+        "notes": "Tập trung vào khôi phục dấu, nhỏ gọn hơn spell-correction.",
+    },
+    {
+        "id": "vinai/bartpho-syllable-base",
+        "label": "BARTpho-Syllable Base",
+        "source": "hf",
+        "tier": "light",
+        "size_gb": 0.5,
+        "needs_ram_gb": 2,
+        "tasks": ["diacritic"],
+        "license": "MIT",
+        "notes": "Tokenizer cấp âm tiết khớp tốt với phục dấu; dùng cho biến thể nano.",
+    },
+    # ----------------------------------------------------------------------
+    # RAG retrieval stack — bi-encoder + cross-encoder reranker.
+    {
+        "id": "bkai-foundation-models/vietnamese-bi-encoder",
+        "label": "BKAI Vietnamese Bi-Encoder (embedder)",
+        "source": "hf",
+        "tier": "standard",
+        "size_gb": 0.5,
+        "needs_ram_gb": 2,
+        "tasks": ["rag", "embedder"],
+        "license": "Apache 2.0",
+        "notes": "Embedder mặc định cho tiếng Việt; cần underscore từ ghép.",
+    },
+    {
+        "id": "BAAI/bge-reranker-v2-m3",
+        "label": "BGE Reranker v2 m3 (cross-encoder)",
+        "source": "hf",
+        "tier": "standard",
+        "size_gb": 2.3,
+        "needs_ram_gb": 4,
+        "tasks": ["rag", "reranker"],
+        "license": "Apache 2.0",
+        "notes": "Cross-encoder xếp hạng lại sau bi-encoder; R@1 86.3% Zalo Legal.",
+    },
+    # ----------------------------------------------------------------------
+    # OCR — Tesseract is a system binary, not a model file. Listed here so
+    # the UI surfaces it; install via apt / brew, not pull.
+    {
+        "id": "tesseract-ocr-vie",
+        "label": "Tesseract VI (OCR in / quét)",
+        "source": "system",
+        "tier": "light",
+        "size_gb": 0.05,
+        "needs_ram_gb": 1,
+        "tasks": ["ocr", "convert"],
+        "license": "Apache 2.0",
+        "notes": "CER 0.00% trên dòng in sạch; cài qua `apt install tesseract-ocr-vie`.",
     },
 ]

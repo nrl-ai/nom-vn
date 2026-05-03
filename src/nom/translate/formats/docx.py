@@ -28,6 +28,7 @@ until user feedback proves they're needed.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -67,6 +68,7 @@ def translate_docx(
     translator: Translator,
     *,
     preserve_runs: bool = False,
+    progress_cb: Callable[[float], None] | None = None,
 ) -> DocxTranslationStats:
     """Translate a ``.docx`` file from ``src`` to ``dst``.
 
@@ -112,10 +114,21 @@ def translate_docx(
     # the same <w:p> via multiple <w:tc> handles.
     seen: set[Any] = set()
 
+    # Estimate total paragraphs up-front so we can compute a meaningful
+    # percentage as the walker advances. Off-by-a-bit is fine — table
+    # cells and headers walk the same dedup path so the count is
+    # tight enough for a UI bar.
+    total_units = max(1, _estimate_total_units(doc))
+    progress = _Progress(total_units, progress_cb)
+
     for para in doc.paragraphs:
-        _translate_paragraph(para, translator, counts, seen, preserve_runs=preserve_runs)
+        _translate_paragraph(
+            para, translator, counts, seen, preserve_runs=preserve_runs, progress=progress
+        )
     for tbl in doc.tables:
-        _translate_table(tbl, translator, counts, seen, preserve_runs=preserve_runs)
+        _translate_table(
+            tbl, translator, counts, seen, preserve_runs=preserve_runs, progress=progress
+        )
 
     for section in doc.sections:
         for region in (
@@ -129,9 +142,27 @@ def translate_docx(
             if region is None:
                 continue
             for para in region.paragraphs:
-                _translate_paragraph(para, translator, counts, seen, preserve_runs=preserve_runs)
+                _translate_paragraph(
+                    para,
+                    translator,
+                    counts,
+                    seen,
+                    preserve_runs=preserve_runs,
+                    progress=progress,
+                )
             for tbl in region.tables:
-                _translate_table(tbl, translator, counts, seen, preserve_runs=preserve_runs)
+                _translate_table(
+                    tbl,
+                    translator,
+                    counts,
+                    seen,
+                    preserve_runs=preserve_runs,
+                    progress=progress,
+                )
+
+    # Final tick — guarantees the bar lands at 100 % even if the
+    # estimate over-counted (e.g. nested tables we skipped).
+    progress.finalize()
 
     dst_path.parent.mkdir(parents=True, exist_ok=True)
     doc.save(str(dst_path))
@@ -160,6 +191,70 @@ class _Counts:
         )
 
 
+class _Progress:
+    """Threads progress reporting through the recursive walker.
+
+    The walker calls :meth:`tick` once per paragraph it visits (not per
+    paragraph translated — empty paragraphs and dedup hits also tick so
+    the bar advances proportionally to the work seen).
+    """
+
+    def __init__(self, total: int, cb: Callable[[float], None] | None) -> None:
+        self._total = total
+        self._cb = cb
+        self._done = 0
+
+    def tick(self) -> None:
+        if self._cb is None:
+            return
+        self._done += 1
+        # Cap at 0.99 — finalize() emits the 1.0 tick.
+        frac = min(0.99, self._done / self._total)
+        self._cb(frac)
+
+    def finalize(self) -> None:
+        if self._cb is not None:
+            self._cb(1.0)
+
+
+def _estimate_total_units(doc: Any) -> int:
+    """Cheap pre-walk to count how many paragraph-likes the translator
+    will see. Used only to scale the progress bar — exact accuracy
+    isn't needed, just stable."""
+    total = 0
+    for _ in doc.paragraphs:
+        total += 1
+    for tbl in doc.tables:
+        total += _count_table_paragraphs(tbl)
+    for section in doc.sections:
+        for region in (
+            section.header,
+            section.footer,
+            section.first_page_header,
+            section.first_page_footer,
+            section.even_page_header,
+            section.even_page_footer,
+        ):
+            if region is None:
+                continue
+            for _ in region.paragraphs:
+                total += 1
+            for tbl in region.tables:
+                total += _count_table_paragraphs(tbl)
+    return total
+
+
+def _count_table_paragraphs(table: Any) -> int:
+    n = 0
+    for row in table.rows:
+        for cell in row.cells:
+            for _ in cell.paragraphs:
+                n += 1
+            for nested in cell.tables:
+                n += _count_table_paragraphs(nested)
+    return n
+
+
 def _translate_paragraph(
     paragraph: Paragraph,
     translator: Translator,
@@ -167,18 +262,25 @@ def _translate_paragraph(
     seen: set[Any],
     *,
     preserve_runs: bool = False,
+    progress: _Progress | None = None,
 ) -> None:
     element = paragraph._element
     if element in seen:
+        if progress is not None:
+            progress.tick()
         return
     seen.add(element)
 
     runs = _all_runs_in_order(paragraph)
     source = "".join(r.text for r in runs) if runs else ""
     if not source:
+        if progress is not None:
+            progress.tick()
         return
     if not source.strip():
         counts.skipped += 1
+        if progress is not None:
+            progress.tick()
         return
 
     counts.chars_in += len(source)
@@ -193,6 +295,8 @@ def _translate_paragraph(
             )
         except Exception:
             counts.failed += 1
+            if progress is not None:
+                progress.tick()
             return
 
         if result.protected:
@@ -200,6 +304,8 @@ def _translate_paragraph(
                 run.text = new_text
             counts.chars_out += sum(len(t) for t in result.run_texts)
             counts.translated += 1
+            if progress is not None:
+                progress.tick()
             return
         # Tag protection round-trip failed — fall through to v0 collapse
         # using the cleaned fallback text the protector returned.
@@ -208,6 +314,8 @@ def _translate_paragraph(
             run.text = ""
         counts.chars_out += len(result.fallback_text)
         counts.translated += 1
+        if progress is not None:
+            progress.tick()
         return
 
     # v0 collapse — single-run paragraph, or preserve_runs disabled.
@@ -215,6 +323,8 @@ def _translate_paragraph(
         translated = translator.translate(source)
     except Exception:
         counts.failed += 1
+        if progress is not None:
+            progress.tick()
         return
 
     counts.chars_out += len(translated)
@@ -222,6 +332,8 @@ def _translate_paragraph(
     for run in runs[1:]:
         run.text = ""
     counts.translated += 1
+    if progress is not None:
+        progress.tick()
 
 
 def _translate_table(
@@ -231,13 +343,28 @@ def _translate_table(
     seen: set[Any],
     *,
     preserve_runs: bool = False,
+    progress: _Progress | None = None,
 ) -> None:
     for row in table.rows:
         for cell in row.cells:
             for para in cell.paragraphs:
-                _translate_paragraph(para, translator, counts, seen, preserve_runs=preserve_runs)
+                _translate_paragraph(
+                    para,
+                    translator,
+                    counts,
+                    seen,
+                    preserve_runs=preserve_runs,
+                    progress=progress,
+                )
             for nested in cell.tables:
-                _translate_table(nested, translator, counts, seen, preserve_runs=preserve_runs)
+                _translate_table(
+                    nested,
+                    translator,
+                    counts,
+                    seen,
+                    preserve_runs=preserve_runs,
+                    progress=progress,
+                )
 
 
 def _all_runs_in_order(paragraph: Paragraph) -> list[Run]:

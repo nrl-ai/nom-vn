@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -47,8 +48,16 @@ def translate_text(
     src: Path | str,
     dst: Path | str,
     translator: Translator,
+    *,
+    progress_cb: Callable[[float], None] | None = None,
 ) -> TextTranslationStats:
-    """Translate a plain-text or markdown file. UTF-8 in / UTF-8 out, NFC."""
+    """Translate a plain-text or markdown file. UTF-8 in / UTF-8 out, NFC.
+
+    ``progress_cb``, when supplied, is called with a ``[0.0, 1.0]``
+    fraction after each translation unit. The runner that owns the
+    callback can also raise from inside it (e.g. cooperative cancel)
+    and the walker will propagate.
+    """
     src_path = Path(src)
     dst_path = Path(dst)
     if not src_path.exists():
@@ -65,22 +74,24 @@ def translate_text(
     failed_count = 0
     chars_in = 0
     chars_out = 0
+    total = max(1, len(paragraphs))
 
-    for para in paragraphs:
+    for idx, para in enumerate(paragraphs):
         if not para.strip():
             out_paragraphs.append(para)
             skipped_count += 1
-            continue
-        chars_in += len(para)
-        try:
-            translated = translator.translate(para)
-        except Exception:
-            out_paragraphs.append(para)
-            failed_count += 1
-            continue
-        chars_out += len(translated)
-        out_paragraphs.append(translated)
-        translated_count += 1
+        else:
+            chars_in += len(para)
+            try:
+                translated = translator.translate(para)
+                chars_out += len(translated)
+                out_paragraphs.append(translated)
+                translated_count += 1
+            except Exception:
+                out_paragraphs.append(para)
+                failed_count += 1
+        if progress_cb is not None:
+            progress_cb((idx + 1) / total)
 
     output = "\n\n".join(out_paragraphs)
     output = unicodedata.normalize("NFC", output)

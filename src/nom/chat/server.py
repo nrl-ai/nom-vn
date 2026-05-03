@@ -122,6 +122,13 @@ def build_app(
 
     register_models_routes(app)
 
+    # /api/jobs/* — long-running translate / convert as background jobs
+    # with progress reporting. UI uses this to show a queue + % bar
+    # instead of holding an HTTP connection open for minutes.
+    from nom.chat.jobs_api import register_jobs_routes
+
+    register_jobs_routes(app, llm=getattr(store, "_llm", None))
+
     # /api/admin/* — opt-in EE feature, auto-mounted when
     # ``nom-vn-enterprise`` is installed in the same environment.
     # Silently skipped otherwise so the OSS server still works.
@@ -443,6 +450,23 @@ def build_app(
                 "n_retrieved": answer.n_retrieved,
             }
         )
+
+    if _ui_dist is not None:
+        # SPA catch-all — registered LAST so every concrete /api/* and
+        # /assets/* route wins by FastAPI's first-match-wins routing.
+        # Any other path serves index.html so the client router (App.tsx)
+        # handles deep links like /dich-thuat, /chuyen-doi, /mo-hinh.
+        from fastapi.responses import FileResponse as _FileResponse
+        from fastapi.responses import HTMLResponse as _HTMLResponse
+
+        @app.get("/{path:path}", response_class=_HTMLResponse, include_in_schema=False)
+        def spa_fallback(path: str) -> Any:
+            # Unknown /api/* paths must stay 404, not silently serve the
+            # SPA shell — otherwise client fetch() bugs would render as
+            # parse errors instead of HTTP failures.
+            if path.startswith("api/"):
+                raise HTTPException(status_code=404, detail=f"not found: /{path}")
+            return _FileResponse(_ui_dist / "index.html")
 
     return app
 
