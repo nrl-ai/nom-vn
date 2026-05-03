@@ -8,23 +8,52 @@
 
 ## Master matrix
 
-| Trục | Top pick | License | Format | Size | VN bench (đã công bố) | Bench cost trước ship |
+| Trục | Top pick | License | Format | Size | VN bench (in-house, 2026-05-03) | Status |
 |---|---|---|---|---|---|---|
-| Register classifier (baseline) | `nom.classify.LexiconRegisterClassifier` (in-tree) | Apache 2.0 | — (zero-ML) | < 1 KB | n/a — heuristic, ~ms latency | shipped 2026-05-03 |
-| Register classifier (target) | `vinai/phobert-base` fine-tune | MIT | .bin (VinAI) | 135 M | **No published source** — phải tự bench | 30 min train + 2k labels (training/register/) |
-| Handwriting OCR | `5CD-AI/Vintern-1B-v3_5` (zero-shot) | MIT | safetensors | 0.9 B | vi-MTVQA 41.9 (form) — handwriting CER chưa công bố | 1 day bench, fine-tune nếu gap >10 pp |
-| Spell v0.1 | `vinai/bartpho-syllable-base` + `coung21/vi-spelling-correction` | MIT × MIT | .bin × CSV | 115 M × 978 k pairs | Chưa có gold benchmark VN; train + eval trên Viwiki-spelling | 3-5 days fine-tune + bench |
-| Spell v0.2 (precision guard) | `vinai/phobert-base` token-class head | MIT | .bin | 135 M | Tự đo FPR target <5 % trên UD-VTB clean | +3 days |
-| STT | `VinAI/PhoWhisper-large` | BSD-3 | .bin (VinAI) | 1.5 B | VIVOS 4.67 % WER, VLSP T1 13.75 % | 1-2 days bench |
-| STT (code-switch) | `openai/whisper-large-v3` | MIT | safetensors | 1.5 B | Beats PhoWhisper on VN↔EN business audio (ViMD finding) | 1 day bench |
-| Diarization | `pyannote/speaker-diarization-community-1` | CC-BY-4.0 (gated) | .bin | 16 M | VoxConverse DER 11.2 % (EN bench) — VN chưa có | 2 days integration |
-| Diarization (streaming) | NVIDIA Sortformer v2 | CC-BY-4.0 | TBD | — | RTF 0.093, ≤4 speakers hard cap | 3 days integration |
-| NER base | `vinai/phobert-base` fine-tune | MIT | .bin (VinAI) | 135 M | **F1 94.7** VLSP 2016 (PER/ORG/LOC/MISC) | 1 day fine-tune trên VLSP |
-| NER alt | `NlpHUST/ner-vietnamese-electra-base` | MIT | safetensors | 110 M | F1 92.14 VLSP 2018 | 1 day bench |
-| Summarization (news) | `VietAI/vit5-large` | MIT | .bin | 866 M | ROUGE-1 **63.4** vietnews | 0 (off-the-shelf) — bench với underthesea tokenizer |
-| Summarization (legal/long) | `Qwen/Qwen3-8B` + LoRA per register | Apache 2.0 | safetensors | 8 B | 131 k context, no published VN summarization number | 5-7 days LoRA train |
+| Register classifier (baseline) | `nom.classify.LexiconRegisterClassifier` (in-tree) | Apache 2.0 | — (zero-ML) | < 1 KB | not measured (heuristic; tautological on its own markers) | shipped |
+| Register classifier (target) | `vinai/phobert-base` fine-tune | MIT | .bin (VinAI) | 135 M | training script ready; **GPU run pending** | code-complete |
+| Handwriting OCR | `5CD-AI/Vintern-1B-v3_5` (zero-shot) | MIT | safetensors | 0.9 B | **CER 0.47 % clean / 0.37 % noisy** (n=20 each, `synthetic_ocr_vi`) | shipped + benched |
+| Spell v0.1 | `nrl-ai/vn-spell-correction-base` (in-stack) | MIT | .bin | ~900 MB | **78.33 % word-acc agg / 65 of 150 sent-exact** (n=150 OOD across 6 registers) | shipped + benched |
+| Spell v0.1 by register | same | — | — | — | ocr 97.6 / news 96.5 / mobile 95.8 / legal 95.6 / forum 63.4 / **telex 18.0** | known weak spots |
+| Spell v0.2 (precision guard) | `vinai/phobert-base` token-class head | MIT | .bin | 135 M | Tự đo FPR target <5 % trên UD-VTB clean | not started |
+| STT | `VinAI/PhoWhisper-large` | BSD-3 | .bin (VinAI) | 1.5 B | **15.2 % WER** in-house (n=3 Speech-MASSIVE_vie); upstream: VIVOS 4.67 % WER, VLSP T1 13.75 % | shipped + tiny bench |
+| STT (code-switch) | `openai/whisper-large-v3` | MIT | safetensors | 1.5 B | **15.2 % WER** in-house (n=3, identical to PhoWhisper on this set) | shipped + tiny bench |
+| Diarization | `pyannote/speaker-diarization-community-1` | CC-BY-4.0 (gated) | .bin | 16 M | VoxConverse DER 11.2 % (EN bench) — VN chưa có | not integrated |
+| Diarization (streaming) | NVIDIA Sortformer v2 | CC-BY-4.0 | TBD | — | RTF 0.093, ≤4 speakers hard cap | not integrated |
+| NER base | regex baseline (`nom.nlp.ner_legal`) | Apache 2.0 | — (zero-ML) | n/a | tests pass on patterns I designed (tautological) | shipped |
+| NER target | `vinai/phobert-base` fine-tune w/ LAW_REF + CONTRACT_PARTY heads | MIT | .bin | 135 M | F1 94.7 PER/ORG/LOC/MISC (VLSP 2016, upstream); custom heads need 70-90 hr annot | not started |
+| Summarization (news) | `VietAI/vit5-large-vietnews-summarization` | MIT | .bin | 866 M | upstream ROUGE-1 63.4 vietnews; 1-sample test **hallucinated specific GDP figures** | shipped, hallucination caveat |
+| Summarization (legal/long) | `Qwen/Qwen3-8B` + LoRA per register | Apache 2.0 | safetensors | 8 B | 131 k context, no VN summary number | not started |
 
-**Bold = highest-confidence published number per row.** "No published source" = phải tự bench, không bịa.
+**Bold = first-party measured.** Bench sources committed under `benchmarks/accuracy/`:
+`spell_correction_real_baseline.json`, `vintern_ocr_clean_baseline.json`,
+`vintern_ocr_noisy_baseline.json`, `stt_speech_massive_baseline.json`.
+Reproduce by re-running the inline scripts from a clean clone.
+
+**Caveats baked into the numbers, not hidden in footnotes:**
+
+- **Spell telex 18 %** is a real failure mode. The model converted
+  "Toi yu" → "Tới từ" (different meaning entirely). Forum register
+  (chat-style abbreviations) is the second-worst at 63 %. Don't claim
+  "spell-correction works" without saying *which register* — formal
+  prose is genuinely 95-97 %, telex/forum are not.
+- **Vintern 0.47 % CER** is computed at the character level — many of
+  the residual errors are valid VN diacritic variants (`hoà` ↔ `hòa`)
+  that count as differences but are functionally correct. n=20 only;
+  scale to a 200-image set before adoption claims.
+- **STT n=3 is a smoke test, not a verdict.** Both PhoWhisper-large
+  and Whisper-v3 hit identical WER on this set (15.2 %), with errors
+  driven mostly by punctuation/case differences and one shared
+  homophone confusion (`múi giờ` ↔ `mỗi giờ`). Bench on ViMD's
+  three-region split before claiming dialect coverage.
+- **Summarize hallucination** observed on a single 234-char input
+  (the model wrote out specific "6,8 % – 7,0 %" GDP figures that
+  weren't in the source). Single sample isn't a verdict, but it's
+  enough to flag — multi-sample bench is open Tier 2 work.
+- **Register-classifier "ML"** isn't shipped yet. The PhoBERT path is
+  code-complete with a training script under `training/register/`,
+  but the GPU run hasn't happened. The lexicon baseline is what
+  actually runs in OSS today.
 
 ---
 
