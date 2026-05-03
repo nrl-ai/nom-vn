@@ -1,0 +1,105 @@
+{
+  "model": "VietAI/vit5-large-vietnews-summarization",
+  "corpus": "benchmarks/data/wiki_vi/articles.jsonl (first 10 with extract>=200 chars)",
+  "n_samples": 10,
+  "mean_novel_token_rate": 0.193,
+  "samples_with_novel_numbers": 1,
+  "elapsed_seconds": 19.2,
+  "bench_date": "2026-05-03",
+  "device": "cuda",
+  "metric_note": "novel_token_rate = ratio of output tokens NOT in input. Crude proxy for hallucination; common-VN function words inflate it. Numeric novelty is the cleanest signal.",
+  "samples": [
+    {
+      "title": "Việt Nam",
+      "n_chars_in": 1500,
+      "n_chars_out": 176,
+      "summary": "Việt Nam là một quốc gia ở vùng Đông Nam Á , nơi con người sinh sống từ thời kỳ đồ đá cũ , trải qua các triều đại độc lập kéo dài từ Văn Lang , Âu Lạc đến thời kỳ Trung thuộc .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.027,
+      "n_novel_tokens": 1
+    },
+    {
+      "title": "Hà Nội",
+      "n_chars_in": 1500,
+      "n_chars_out": 232,
+      "summary": "Thủ đô của Việt Nam có diện tích 3.359,82 km2 , và dân số xấp xỉ 8,8 triệu người . Đây là thành phố đông dân thứ hai và có mật độ dân số cao nhất trong 34 đơn vị hành chính cấp tỉnh của Việt nam nhưng phân bố dân số không đồng đều .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.022,
+      "n_novel_tokens": 1
+    },
+    {
+      "title": "Thành phố Hồ Chí Minh",
+      "n_chars_in": 1500,
+      "n_chars_out": 210,
+      "summary": "Theo dữ liệu về diện tích và dân số của thành phố Hồ Chí Minh , đến năm 2025 , thành phố có diện tích 6.772,59 km2 , dân số là hơn 14 triệu người (cao nhất cả nước ) , mật độ dân số trung bình 2.067 người/km2 .",
+      "novel_numbers": [
+        "2025"
+      ],
+      "novel_token_rate": 0.026,
+      "n_novel_tokens": 1
+    },
+    {
+      "title": "Đà Nẵng",
+      "n_chars_in": 1500,
+      "n_chars_out": 194,
+      "summary": "Đà Nẵng có diện tích lớn thứ hai của Việt Nam ( sau Đồng Nai ) , là trung tâm chính trị , kinh tế - xã hội lớn của miền Trung và là hạt nhân quan trọng trong Vùng kinh tế trọng điểm miền Trung .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.0,
+      "n_novel_tokens": 0
+    },
+    {
+      "title": "Huế",
+      "n_chars_in": 1500,
+      "n_chars_out": 157,
+      "summary": "Khi dịch vụ chuyển phát nhanh đi toàn quốc , bạn sẽ nhận được các thông báo chấp thuận từ Bộ Văn hoá  Thể thao và Du lịch về việc đặt tên cho thành phố Huế .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.543,
+      "n_novel_tokens": 19
+    },
+    {
+      "title": "Phở",
+      "n_chars_in": 1500,
+      "n_chars_out": 113,
+      "summary": "Phở là món ăn truyền thống của Việt Nam , được xem là một trong những món ăn tiêu biểu cho nền ẩm thực Việt Nam .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.0,
+      "n_novel_tokens": 0
+    },
+    {
+      "title": "Áo dài",
+      "n_chars_in": 1500,
+      "n_chars_out": 129,
+      "summary": "Áo dài không chỉ là trang phục truyền thống mà còn là biểu tượng văn hoá , tôn vinh vẻ đẹp thanh lịch của người phụ nữ Việt Nam .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.037,
+      "n_novel_tokens": 1
+    },
+    {
+      "title": "Tết Nguyên Đán",
+      "n_chars_in": 1500,
+      "n_chars_out": 251,
+      "summary": "Tết Nguyên Đán là dịp lễ quan trọng của người Việt Nam và các nước thuộc vùng văn hoá Á Đông nói chung và của Việt Nam nói riêng trong năm . Vì Tết tính theo Âm lịch nên đây cũng là dịp để người Việt tìm hiểu về văn hoá của các dân tộc trên thế giới .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.349,
+      "n_novel_tokens": 15
+    },
+    {
+      "title": "Trống đồng Đông Sơn",
+      "n_chars_in": 1500,
+      "n_chars_out": 180,
+      "summary": "Trống đồng Đông Sơn là một trong những trống đồng có kiến trúc đẹp nhất thế giới . Những chiếc trống đồng này đã giúp cho người Việt cổ hiểu hơn về các giá trị của nền văn hoá đó .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.294,
+      "n_novel_tokens": 10
+    },
+    {
+      "title": "Vịnh Hạ Long",
+      "n_chars_in": 1500,
+      "n_chars_out": 206,
+      "summary": "Giới thiệu về vịnh Hạ Long - địa điểm du lịch nổi tiếng được nhiều người biết đến , giới thiệu những thông tin thú vị về di sản thiên nhiên thế giới , di sản văn hoá thế giới và giá trị độc đáo của di sản .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.629,
+      "n_novel_tokens": 22
+    }
+  ]
+}
