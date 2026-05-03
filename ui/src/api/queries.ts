@@ -10,6 +10,7 @@ import type {
   RegisterBackend,
   Space,
   SttBackend,
+  SummarizeRegister,
   TranslateBackend,
   TranslateLang,
   WordFmt,
@@ -209,6 +210,22 @@ export function useSttTranscribe() {
       api.tools.sttTranscribe(vars.file, vars.backend, {
         language: vars.language,
         returnTimestamps: vars.returnTimestamps,
+      }),
+  });
+}
+
+export function useSummarize() {
+  return useMutation({
+    mutationFn: (vars: {
+      text: string;
+      register?: SummarizeRegister;
+      maxLength?: number;
+      minLength?: number;
+    }) =>
+      api.tools.summarize(vars.text, {
+        register: vars.register,
+        maxLength: vars.maxLength,
+        minLength: vars.minLength,
       }),
   });
 }

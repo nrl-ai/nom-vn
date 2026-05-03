@@ -183,6 +183,17 @@ export interface SttRes {
   segments: SttSegment[] | null;
 }
 
+export type SummarizeRegister = "news" | "legal" | "dialogue";
+
+export interface SummarizeRes {
+  input: string;
+  summary: string;
+  model: string;
+  register: SummarizeRegister | null;
+  n_chars_in: number;
+  n_chars_out: number;
+}
+
 // Translation — single string + file upload. Mirrors
 // /api/tools/translate and /api/tools/translate/file in
 // src/nom/chat/tools_api.py.

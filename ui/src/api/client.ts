@@ -24,6 +24,8 @@ import type {
   SentimentRes,
   SttBackend,
   SttRes,
+  SummarizeRegister,
+  SummarizeRes,
   Space,
   StripRes,
   TranslateBackend,
@@ -254,6 +256,19 @@ export const api = {
         body: fd,
       });
     },
+    summarize: (
+      text: string,
+      opts: { register?: SummarizeRegister; maxLength?: number; minLength?: number } = {},
+    ) =>
+      request<SummarizeRes>("/api/tools/summarize", {
+        method: "POST",
+        body: JSON.stringify({
+          text,
+          ...(opts.register ? { register: opts.register } : {}),
+          ...(opts.maxLength ? { max_length: opts.maxLength } : {}),
+          ...(opts.minLength ? { min_length: opts.minLength } : {}),
+        }),
+      }),
     translate: (
       text: string,
       source: TranslateLang,

@@ -651,6 +651,52 @@ def register_tool_routes(app: FastAPI, *, llm: LLM | None = None) -> None:
             },
         )
 
+    @app.post("/api/tools/summarize")
+    def summarize_text(payload: dict[str, Any]) -> dict[str, Any]:
+        """Summarize VN text via ViT5-large (default) with register-aware
+        prompt prefix when ``register`` is provided.
+
+        Body: ``{"text": ..., "register": "news"|"legal"|"dialogue", "max_length": 256}``.
+        503 when transformers / torch missing.
+        """
+        text = str(payload.get("text", ""))
+        register = payload.get("register")
+        if register is not None and not isinstance(register, str):
+            register = None
+        try:
+            max_length = int(payload.get("max_length", 256))
+            min_length = int(payload.get("min_length", 32))
+        except (TypeError, ValueError) as exc:
+            raise HTTPException(
+                status_code=422,
+                detail="`max_length` and `min_length` must be integers",
+            ) from exc
+        if not text:
+            raise HTTPException(status_code=422, detail="`text` is required")
+
+        from nom.summarize import ViT5Summarizer
+
+        try:
+            result = ViT5Summarizer().summarize(
+                text,
+                register=register,
+                max_length=max_length,
+                min_length=min_length,
+            )
+        except ImportError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+        return {
+            "input": text,
+            "summary": result.text,
+            "model": result.model,
+            "register": result.register,
+            "n_chars_in": result.n_chars_in,
+            "n_chars_out": result.n_chars_out,
+        }
+
     @app.post("/api/tools/stt/transcribe")
     async def stt_transcribe(
         file: Annotated[UploadFile, File()],
