@@ -224,7 +224,7 @@ export function TranslatePage() {
               onChange={setMode}
               options={[
                 { value: "text", label: "Văn bản" },
-                { value: "file", label: "Tệp .docx" },
+                { value: "file", label: "Tệp" },
               ]}
             />
           </OptionRow>
