@@ -98,12 +98,23 @@ def test_nfc_robustness(clf: LexiconRegisterClassifier) -> None:
     assert abs(a.score - b.score) < 1e-9
 
 
-def test_phobert_wrapper_raises_without_model_id() -> None:
-    """Default model id is None until training run completes — instantiating
-    without an explicit model_id should fail loud, not silent."""
+def test_phobert_wrapper_default_model_set() -> None:
+    """Default model id was set when ``nrl-ai/vn-register-phobert-base``
+    was published 2026-05-03. Calling ``PhoBertRegisterClassifier()`` no
+    longer raises — the wrapper resolves to the published checkpoint.
+
+    We don't actually load the weights here (would need transformers +
+    a network round-trip); we just verify the default isn't ``None`` and
+    is a sensible HF repo id. The full forward path is exercised by an
+    integration script outside the unit tier.
+    """
+    from nom.classify.register import _DEFAULT_PHOBERT_MODEL
+
+    assert _DEFAULT_PHOBERT_MODEL is not None
+    assert _DEFAULT_PHOBERT_MODEL.startswith("nrl-ai/")
     clf = PhoBertRegisterClassifier()
-    with pytest.raises(RuntimeError, match="model_id"):
-        clf.predict("test")
+    assert clf.model_id is None  # caller didn't override; wrapper falls back
+    # `_ensure_loaded` would trigger weight download — skip in unit tier.
 
 
 def test_distribution_sums_to_one_when_markers_hit(clf: LexiconRegisterClassifier) -> None:

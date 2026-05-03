@@ -1,0 +1,36 @@
+{
+  "model_id": "vinai/phobert-base",
+  "trained_at": "2026-05-03T06:13:19Z",
+  "train_seconds": 195.1,
+  "config": {
+    "epochs": 4,
+    "batch_size": 32,
+    "max_length": 256,
+    "learning_rate": 3e-05,
+    "max_samples_per_class": 2000,
+    "seed": 42
+  },
+  "split_sizes": {
+    "train": 4318,
+    "val": 617,
+    "test": 1234
+  },
+  "test_metrics": {
+    "test_loss": 0.3803604245185852,
+    "test_macro_f1": 0.9003481778686047,
+    "test_f1_formal": 0.9142857142857143,
+    "test_f1_business": 0.905982905982906,
+    "test_f1_conversational": 0.9152542372881356,
+    "test_f1_literary": 0.8658698539176627,
+    "test_runtime": 3.5158,
+    "test_samples_per_second": 350.987,
+    "test_steps_per_second": 5.689,
+    "epoch": 4.0
+  },
+  "labels": [
+    "formal",
+    "business",
+    "conversational",
+    "literary"
+  ]
+}

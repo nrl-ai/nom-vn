@@ -85,7 +85,9 @@ Per the project's verified-benchmarks rule, the model adopts only when:
 
 | Date | Args | macro_F1 | f1_formal | f1_business | f1_conv | f1_literary | Notes |
 | ---- | ---- | -------: | --------: | ----------: | ------: | ----------: | ----- |
-| TBD  | epochs=4, bs=32, max=2000 | — | — | — | — | — | First run pending |
+| 2026-05-03 | epochs=4, bs=32, max=2000, lr=3e-5 | **0.900** | 0.914 | 0.906 | 0.915 | 0.866 | First production run; both adoption gates clear (macro ≥ 0.85, every per-class ≥ 0.75). Published as `nrl-ai/vn-register-phobert-base` (MIT, ~540 MB safetensors). Test split n=1234. Trained 195 s on RTX 3090. |
 
-When the first run lands, fill the row in the same commit as the
-`result.json` (per the docs-sync rule) and bump the model card.
+`literary` is the lowest at 0.866 — confusion matrix shows it loses
+~18 % recall to `formal` because of shared archaic vocabulary. v2
+should sample more diverse literary registers (`Wikisource_vi` ⊃
+just Truyện Kiều) before re-training.

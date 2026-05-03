@@ -366,13 +366,15 @@ class LexiconRegisterClassifier:
 # users don't silently fall back to a missing model.
 # ---------------------------------------------------------------------- #
 
-_DEFAULT_PHOBERT_MODEL: str | None = None
+_DEFAULT_PHOBERT_MODEL: str | None = "nrl-ai/vn-register-phobert-base"
 """HF model id for the production PhoBERT register head.
 
-Will be set once ``training/register/train.py`` completes a fine-tune
-that meets the macro-F1 ≥ 0.85 target on the held-out 20 % of the
-4-register corpus. Until then this is ``None`` and callers must pass
-their own ``model_id``.
+Set 2026-05-03: published checkpoint at ``nrl-ai/vn-register-phobert-base``
+(MIT, ~540 MB safetensors, PhoBERT-base + 4-class head). In-house
+test split (n=1234) gives macro-F1 0.900 — both adoption gates from
+``docs/sota_vn_2026q2_expansion.md`` clear (macro-F1 ≥ 0.85, every
+per-class F1 ≥ 0.75; literary 0.866 is the lowest). See
+``benchmarks/accuracy/register_phobert_base_baseline.json``.
 """
 
 

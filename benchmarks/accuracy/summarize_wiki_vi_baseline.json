@@ -1,13 +1,14 @@
 {
   "model": "VietAI/vit5-large-vietnews-summarization",
-  "corpus": "benchmarks/data/wiki_vi/articles.jsonl (first 10 with extract>=200 chars)",
-  "n_samples": 10,
-  "mean_novel_token_rate": 0.193,
-  "samples_with_novel_numbers": 1,
-  "elapsed_seconds": 19.2,
+  "corpus": "benchmarks/data/wiki_vi/articles.jsonl (first 50 with extract>=200 chars, truncated to 1500)",
+  "n_samples": 28,
+  "mean_novel_token_rate": 0.136,
+  "samples_with_novel_numbers": 7,
+  "novel_number_rate_pct": 25.0,
+  "elapsed_seconds": 77.2,
   "bench_date": "2026-05-03",
   "device": "cuda",
-  "metric_note": "novel_token_rate = ratio of output tokens NOT in input. Crude proxy for hallucination; common-VN function words inflate it. Numeric novelty is the cleanest signal.",
+  "metric_note": "novel_token_rate = ratio of output tokens not in input. Function-word-noisy. samples_with_novel_numbers is the cleanest hallucination signal — output added a numeric value not in input.",
   "samples": [
     {
       "title": "Việt Nam",
@@ -15,8 +16,7 @@
       "n_chars_out": 176,
       "summary": "Việt Nam là một quốc gia ở vùng Đông Nam Á , nơi con người sinh sống từ thời kỳ đồ đá cũ , trải qua các triều đại độc lập kéo dài từ Văn Lang , Âu Lạc đến thời kỳ Trung thuộc .",
       "novel_numbers": [],
-      "novel_token_rate": 0.027,
-      "n_novel_tokens": 1
+      "novel_token_rate": 0.027
     },
     {
       "title": "Hà Nội",
@@ -24,8 +24,7 @@
       "n_chars_out": 232,
       "summary": "Thủ đô của Việt Nam có diện tích 3.359,82 km2 , và dân số xấp xỉ 8,8 triệu người . Đây là thành phố đông dân thứ hai và có mật độ dân số cao nhất trong 34 đơn vị hành chính cấp tỉnh của Việt nam nhưng phân bố dân số không đồng đều .",
       "novel_numbers": [],
-      "novel_token_rate": 0.022,
-      "n_novel_tokens": 1
+      "novel_token_rate": 0.022
     },
     {
       "title": "Thành phố Hồ Chí Minh",
@@ -35,8 +34,7 @@
       "novel_numbers": [
         "2025"
       ],
-      "novel_token_rate": 0.026,
-      "n_novel_tokens": 1
+      "novel_token_rate": 0.026
     },
     {
       "title": "Đà Nẵng",
@@ -44,8 +42,7 @@
       "n_chars_out": 194,
       "summary": "Đà Nẵng có diện tích lớn thứ hai của Việt Nam ( sau Đồng Nai ) , là trung tâm chính trị , kinh tế - xã hội lớn của miền Trung và là hạt nhân quan trọng trong Vùng kinh tế trọng điểm miền Trung .",
       "novel_numbers": [],
-      "novel_token_rate": 0.0,
-      "n_novel_tokens": 0
+      "novel_token_rate": 0.0
     },
     {
       "title": "Huế",
@@ -53,8 +50,7 @@
       "n_chars_out": 157,
       "summary": "Khi dịch vụ chuyển phát nhanh đi toàn quốc , bạn sẽ nhận được các thông báo chấp thuận từ Bộ Văn hoá  Thể thao và Du lịch về việc đặt tên cho thành phố Huế .",
       "novel_numbers": [],
-      "novel_token_rate": 0.543,
-      "n_novel_tokens": 19
+      "novel_token_rate": 0.543
     },
     {
       "title": "Phở",
@@ -62,8 +58,7 @@
       "n_chars_out": 113,
       "summary": "Phở là món ăn truyền thống của Việt Nam , được xem là một trong những món ăn tiêu biểu cho nền ẩm thực Việt Nam .",
       "novel_numbers": [],
-      "novel_token_rate": 0.0,
-      "n_novel_tokens": 0
+      "novel_token_rate": 0.0
     },
     {
       "title": "Áo dài",
@@ -71,8 +66,7 @@
       "n_chars_out": 129,
       "summary": "Áo dài không chỉ là trang phục truyền thống mà còn là biểu tượng văn hoá , tôn vinh vẻ đẹp thanh lịch của người phụ nữ Việt Nam .",
       "novel_numbers": [],
-      "novel_token_rate": 0.037,
-      "n_novel_tokens": 1
+      "novel_token_rate": 0.037
     },
     {
       "title": "Tết Nguyên Đán",
@@ -80,8 +74,7 @@
       "n_chars_out": 251,
       "summary": "Tết Nguyên Đán là dịp lễ quan trọng của người Việt Nam và các nước thuộc vùng văn hoá Á Đông nói chung và của Việt Nam nói riêng trong năm . Vì Tết tính theo Âm lịch nên đây cũng là dịp để người Việt tìm hiểu về văn hoá của các dân tộc trên thế giới .",
       "novel_numbers": [],
-      "novel_token_rate": 0.349,
-      "n_novel_tokens": 15
+      "novel_token_rate": 0.349
     },
     {
       "title": "Trống đồng Đông Sơn",
@@ -89,8 +82,7 @@
       "n_chars_out": 180,
       "summary": "Trống đồng Đông Sơn là một trong những trống đồng có kiến trúc đẹp nhất thế giới . Những chiếc trống đồng này đã giúp cho người Việt cổ hiểu hơn về các giá trị của nền văn hoá đó .",
       "novel_numbers": [],
-      "novel_token_rate": 0.294,
-      "n_novel_tokens": 10
+      "novel_token_rate": 0.294
     },
     {
       "title": "Vịnh Hạ Long",
@@ -98,8 +90,167 @@
       "n_chars_out": 206,
       "summary": "Giới thiệu về vịnh Hạ Long - địa điểm du lịch nổi tiếng được nhiều người biết đến , giới thiệu những thông tin thú vị về di sản thiên nhiên thế giới , di sản văn hoá thế giới và giá trị độc đáo của di sản .",
       "novel_numbers": [],
-      "novel_token_rate": 0.629,
-      "n_novel_tokens": 22
+      "novel_token_rate": 0.629
+    },
+    {
+      "title": "Đồng bằng sông Cửu Long",
+      "n_chars_in": 1500,
+      "n_chars_out": 161,
+      "summary": "Đồng bằng sông Cửu Long là một trong những vùng rộng lớn nhất của Việt Nam , có diện tích 34.699,81 km2 . Chiều cao trung bình so với mực nước biển từ 0 đến 2m .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.083
+    },
+    {
+      "title": "Tiếng Việt",
+      "n_chars_in": 1500,
+      "n_chars_out": 133,
+      "summary": "Tiếng Việt là ngôn ngữ được sử dụng bởi nhiều người nhất (hơn hẳn tổng số người nói tất cả các ngôn ngữ khác cùng ngữ hệ cộng lại ) .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.0
+    },
+    {
+      "title": "Chữ Quốc ngữ",
+      "n_chars_in": 1500,
+      "n_chars_out": 135,
+      "summary": "Trong sách Tự điển Taberd những năm 1789 , Trương Vĩnh Ký đã đề cập đến chữ quốc ngữ và lần đầu tiên được sử dụng rộng rãi ở Việt Nam .",
+      "novel_numbers": [
+        "1789"
+      ],
+      "novel_token_rate": 0.267
+    },
+    {
+      "title": "Chữ Nôm",
+      "n_chars_in": 1500,
+      "n_chars_out": 148,
+      "summary": "Trong tiếng Việt , từ \" chữ \" được sử dụng để chỉ tiếng nói của người phương Nam . Chữ Nôm là loại văn tự ngữ tố - âm tiết dùng để viết tiếng Việt .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.0
+    },
+    {
+      "title": "Lý Thường Kiệt",
+      "n_chars_in": 1500,
+      "n_chars_out": 148,
+      "summary": "Lý Thường Kiệt là một nhân vật lịch sử đầy tranh cãi trong lịch sử Việt Nam . Tuy nhiên , ông là một trong hai danh tướng vĩ đại nhất của triều Lý .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.154
+    },
+    {
+      "title": "Trần Hưng Đạo",
+      "n_chars_in": 1500,
+      "n_chars_out": 159,
+      "summary": "Khi nhà Trần còn chưa lên ngôi , Hưng Đạo Vương Trần Hưng Đạo đã chỉ huy quân đội đánh tan ba cuộc xâm lược của quân Nguyên  Mông vào năm 1258 , 1285 và 1290 .",
+      "novel_numbers": [
+        "1258",
+        "1290"
+      ],
+      "novel_token_rate": 0.2
+    },
+    {
+      "title": "Nguyễn Du",
+      "n_chars_in": 1500,
+      "n_chars_out": 147,
+      "summary": "Tác phẩm Truyện Kiều của Nguyễn Du được xem là một kiệt tác văn học , một trong những thành tựu tiêu biểu nhất của nền văn học trung đại Việt Nam .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.0
+    },
+    {
+      "title": "Hồ Xuân Hương",
+      "n_chars_in": 1500,
+      "n_chars_out": 144,
+      "summary": "Học giới cho rằng Hồ Xuân Hương sinh vào năm 1772 , theo học giả John Balaban thì bà được sinh ra ở phường Khán Xuân ( ) , ở quận 10 , TP. HCM .",
+      "novel_numbers": [
+        "10",
+        "1772"
+      ],
+      "novel_token_rate": 0.154
+    },
+    {
+      "title": "Truyện Kiều",
+      "n_chars_in": 1500,
+      "n_chars_out": 167,
+      "summary": "Chị em Thuý Kiều là một trong những truyện thơ nổi tiếng nhất và xét vào hàng kinh điển trong văn học Việt Nam , tác phẩm được nhiều nơi khắc in và lưu hành rộng rãi .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.029
+    },
+    {
+      "title": "Lục Vân Tiên",
+      "n_chars_in": 1500,
+      "n_chars_out": 116,
+      "summary": "Truyện Lục Vân Tiên của Nguyễn Đình Chiểu là một trong những tác phẩm tiêu biểu của nền văn học Việt Nam thế kỷ 19 .",
+      "novel_numbers": [
+        "19"
+      ],
+      "novel_token_rate": 0.083
+    },
+    {
+      "title": "Bún bò Huế",
+      "n_chars_in": 1186,
+      "n_chars_out": 147,
+      "summary": "Ngày 25 tháng 11 năm 2016 , Cục sở hữu trí tuệ Việt Nam cấp Giấy chứng nhận đăng ký nhãn hiệu chứng nhận số 4-0272400-000 cho dấu hiệu Bún Bò Huế .",
+      "novel_numbers": [
+        "2016"
+      ],
+      "novel_token_rate": 0.0
+    },
+    {
+      "title": "Bánh mì",
+      "n_chars_in": 1500,
+      "n_chars_out": 121,
+      "summary": "Dù có nhiều hình dạng và kết cấu khác nhau , bánh mì vẫn giữ vai trò quan trọng trong nền văn hoá ẩm thực của nhân loại .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.222
+    },
+    {
+      "title": "Giáo dục Việt Nam",
+      "n_chars_in": 1500,
+      "n_chars_out": 151,
+      "summary": "Giáo dục Việt Nam dưới chính thể Cộng hoà xã hội chủ nghĩa Việt Nam (từ 1976 đến nay ) là một sự tiếp nối của giáo dục thời Việt Nam Dân chủ Cộng hoà .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.04
+    },
+    {
+      "title": "Kinh tế Việt Nam",
+      "n_chars_in": 1500,
+      "n_chars_out": 137,
+      "summary": "Phó Thủ tướng Vương Đình Huệ nêu ra những trăn trở của mình về việc Hoa Kỳ chưa công nhận Việt Nam có nền kinh tế thị trường hoàn chỉnh .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.3
+    },
+    {
+      "title": "Đường sắt Việt Nam",
+      "n_chars_in": 1500,
+      "n_chars_out": 118,
+      "summary": "Năm 1885 , chuyến tàu đầu tiên khởi hành từ ga Sài Gòn đến ga Mỹ Tho đánh dấu sự ra đời của Ngành Đường sắt Việt Nam .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.0
+    },
+    {
+      "title": "Sân bay quốc tế Nội Bài",
+      "n_chars_in": 1500,
+      "n_chars_out": 101,
+      "summary": "Sân bay Nội Bài là sân bay quốc tế lớn thứ hai của miền Bắc Việt Nam , chỉ sau sân bay Tân Sơn Nhất .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.0
+    },
+    {
+      "title": "Đại học Quốc gia Hà Nội",
+      "n_chars_in": 1500,
+      "n_chars_out": 150,
+      "summary": "Đại học Quốc gia Hà Nội là trường đại học đầu tiên của Việt Nam được trao tặng Huân chương Sao Vàng trong Lễ kỷ niệm 105 năm thành lập ( 1945-2018 ) .",
+      "novel_numbers": [
+        "105",
+        "1945",
+        "2018"
+      ],
+      "novel_token_rate": 0.233
+    },
+    {
+      "title": "Trí tuệ nhân tạo",
+      "n_chars_in": 1500,
+      "n_chars_out": 122,
+      "summary": "Dù trí tuệ nhân tạo ( AI ) là một lĩnh vực nghiên cứu tiềm năng , nhưng nhiều ứng dụng của nó không được nhận diện là AI .",
+      "novel_numbers": [],
+      "novel_token_rate": 0.125
     }
   ]
 }

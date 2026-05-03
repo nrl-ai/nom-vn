@@ -16,21 +16,35 @@ Hai cách chạy, chọn theo nhu cầu:
 
 | Cách chạy | Cài đặt | Độ chính xác | Tốc độ | Trạng thái |
 | --- | --- | --- | --- | --- |
-| **Quy tắc (heuristic)** *(mặc định)* | Không cần gì | ~70–80 % (chưa đo trên tập riêng) | ~1 ms | đã ship |
-| **PhoBERT-base** | `pip install "nom-vn[diacritic-hf]"` (đủ) | mục tiêu macro-F1 ≥ 0,85 | ~30 ms | mã đã sẵn — đợi chạy huấn luyện trên máy GPU |
+| **Quy tắc (heuristic)** *(rẻ tiền)* | Không cần gì | ~70–80 % (chưa đo trên tập riêng) | ~1 ms | đã ship |
+| **PhoBERT-base** *(mặc định sản xuất)* | `pip install "nom-vn[diacritic-hf]"` | **macro F1 0,900** trên test n=1234 | ~30 ms | đã ship 2026-05-03 |
 
-Quy tắc chạy ngay cục bộ — phù hợp khi dùng một lần hoặc theo lô nhỏ.
-PhoBERT là mục tiêu sản xuất; script huấn luyện ở
-[`training/register/`](https://github.com/nrl-ai/nom-vn/tree/main/training/register)
-đã sẵn — chỉ cần máy GPU và vài giờ. Cho đến khi checkpoint được
-đăng lên HuggingFace (`nrl-ai/vn-register-phobert-base`, dự kiến
-v0.4), `model_id` cần truyền thủ công khi dùng PhoBERT.
+Cả hai chạy cục bộ. Quy tắc phù hợp cho fallback rẻ tiền (không cần
+GPU, không tải model). PhoBERT là mặc định cho định tuyến sản xuất —
+checkpoint
+[`nrl-ai/vn-register-phobert-base`](https://huggingface.co/nrl-ai/vn-register-phobert-base)
+(MIT, ~540 MB safetensors) tự động tải lần đầu khi gọi
+`PhoBertRegisterClassifier()`.
 
-> **Trung thực:** số "70–80 %" là ước lượng — quy tắc được kiểm tra
-> chính trên các từ-mốc của nó (tự test mình), nên chưa có macro-F1
-> đáng tin trên tập riêng. Vì vậy chúng tôi không công bố một con số
-> duy nhất cho phần quy tắc. Nếu cần định tuyến chất lượng cao, chạy
-> script huấn luyện ngay.
+Số đo nội bộ trên test n=1234 (2026-05-03):
+
+| Class | F1 | Support |
+|---|---:|---:|
+| `formal` | 0,914 | 34 |
+| `business` | 0,906 | 400 |
+| `conversational` | 0,915 | 400 |
+| `literary` | 0,866 | 400 |
+| **macro** | **0,900** | 1234 |
+
+`literary` là lớp yếu nhất — nhầm sang `formal` ~18 % do từ vựng cổ
+chia sẻ. Đợt v2 sẽ thêm corpus văn học VN đa dạng hơn (Wikisource ⊃
+chỉ Truyện Kiều) trước khi train lại.
+
+JSON kết quả:
+[`benchmarks/accuracy/register_phobert_base_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/register_phobert_base_baseline.json).
+Tái lập:
+[`training/register/train.py`](https://github.com/nrl-ai/nom-vn/tree/main/training/register)
+(195 giây trên RTX 3090).
 
 ## Cách dùng
 

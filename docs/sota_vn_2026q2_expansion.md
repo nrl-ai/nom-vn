@@ -11,7 +11,7 @@
 | Trục | Lựa chọn hàng đầu | Giấy phép | Định dạng | Kích thước | Số đo VN (nội bộ, 2026-05-03) | Trạng thái |
 |---|---|---|---|---|---|---|
 | Phân loại văn phong (cơ sở) | `nom.classify.LexiconRegisterClassifier` (trong cây mã) | Apache 2.0 | — (không học máy) | < 1 KB | chưa đo (quy tắc; tự test mình trên từ-mốc của chính nó) | đã ship |
-| Phân loại văn phong (mục tiêu) | `vinai/phobert-base` fine-tune | MIT | .bin (VinAI) | 135 M | script huấn luyện đã sẵn; **đợi máy GPU chạy** | mã đã sẵn |
+| Phân loại văn phong (sản xuất) | [`nrl-ai/vn-register-phobert-base`](https://huggingface.co/nrl-ai/vn-register-phobert-base) (PhoBERT-base + 4-class head) | MIT | safetensors | ~540 MB | **macro F1 0,900** trên test n=1234 (formal 0,914 / business 0,906 / conv 0,915 / literary 0,866) | đã ship + đo đầy đủ |
 | OCR chữ viết tay | `5CD-AI/Vintern-1B-v3_5` (không cần fine-tune) | MIT | safetensors | 0,9 B | **CER 0,47 % sạch / 0,37 % nhiễu** (n=20 mỗi loại, `synthetic_ocr_vi`) | đã ship + đã đo |
 | Sửa chính tả v0.1 | `nrl-ai/vn-spell-correction-base` (sẵn trong stack) | MIT | .bin | ~900 MB | **78,33 % word-acc tổng hợp / khớp 65 trên 150 câu** (n=150 OOD trên 6 thể loại) | đã ship + đã đo |
 | Sửa chính tả v0.1 theo thể loại | cùng mô hình | — | — | — | ocr 97,6 / news 96,5 / mobile 95,8 / legal 95,6 / forum 63,4 / **telex 18,0** | điểm yếu đã biết |
@@ -50,9 +50,13 @@ Tái lập bằng cách chạy lại các script đính kèm từ một bản cl
   (mô hình tự bịa con số GDP "6,8 % – 7,0 %" không có trong nguồn).
   Một mẫu chưa phải kết luận, nhưng đủ để cảnh báo — đo nhiều mẫu
   là việc của đợt tiếp theo.
-- **Phân loại văn phong "có học máy"** chưa được ship. Đường PhoBERT
-  có script huấn luyện ở `training/register/`, nhưng chưa chạy trên
-  máy GPU. Phiên bản chạy trong OSS hôm nay là quy tắc.
+- **Phân loại văn phong "có học máy"** đã ship sau lần huấn luyện
+  ngày 2026-05-03 — macro F1 0,900 trên test n=1234, qua cả hai cửa
+  thẩm định (macro ≥ 0,85, từng class ≥ 0,75). Phiên bản
+  [`nrl-ai/vn-register-phobert-base`](https://huggingface.co/nrl-ai/vn-register-phobert-base)
+  giờ là mặc định khi gọi `PhoBertRegisterClassifier()`. Phiên bản
+  quy tắc vẫn trong OSS như fallback rẻ tiền (~1 ms / câu, không cần
+  GPU).
 
 ---
 
