@@ -160,22 +160,43 @@ configs:
   data_files:
   - split: test
     path: real/**
-- config_name: synthetic_scan
+- config_name: formal
   data_files:
   - split: test
-    path: synthetic_scan/**
+    path: formal/**
+- config_name: news_business
+  data_files:
+  - split: test
+    path: news_business/**
+- config_name: conversational
+  data_files:
+  - split: test
+    path: conversational/**
+- config_name: literary
+  data_files:
+  - split: test
+    path: literary/**
+- config_name: receipt
+  data_files:
+  - split: test
+    path: receipt/**
 ---
 
-# `vn-ocr-documents-eval` v0.2
+# `vn-ocr-documents-eval` v0.3
 
-12 single-page Vietnamese documents for evaluating PDF / image → DOCX
-OCR pipelines. Two configs covering 7+ document types from 3 source
-domains.
+107 single-page Vietnamese documents for evaluating PDF / image → DOCX
+OCR pipelines. Six configs covering the full register matrix
+(formal + business + conversational + literary) plus real PD scans
+and synthetic receipts.
 
 | Config | n | Source | License |
 |---|---:|---|---|
-| `real` | 9 | chinhphu.vn (6) + hanoi.gov.vn (3) | Public Domain (Luật SHTT VN, Điều 15) |
-| `synthetic_scan` | 3 | synthetic templates + scan artifacts | CC0 1.0 |
+| `real` | 9 | chinhphu.vn + hanoi.gov.vn signed scans | Public Domain (Luật SHTT VN, Điều 15) |
+| `formal` | 24 | UDHR-vie articles + scan artifacts | CC0 (rendered) — UDHR text is PD |
+| `news_business` | 24 | wiki_vi article openings + scan artifacts | CC-BY-SA 4.0 (Wikipedia VN) |
+| `conversational` | 24 | tatoeba_vi sentence groups + scan artifacts | CC-BY 2.0 FR (Tatoeba) |
+| `literary` | 23 | wikisource Truyện Kiều excerpts + scan artifacts | Public Domain |
+| `receipt` | 3 | synthetic receipt templates + scan artifacts | CC0 1.0 |
 
 ## What's new vs v0.1
 
