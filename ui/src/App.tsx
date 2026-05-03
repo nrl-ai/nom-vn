@@ -216,6 +216,7 @@ export default function App() {
     <TooltipProvider delayDuration={120}>
       <AppShell
         modelName={healthQ.data?.llm ?? undefined}
+        version={healthQ.data?.version ?? undefined}
         mode={isChat ? "chat" : "tool"}
         onHome={() => setActiveTask("chat")}
         onSettings={() => setActiveTask("settings")}

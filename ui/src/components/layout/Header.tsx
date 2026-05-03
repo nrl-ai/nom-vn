@@ -6,6 +6,8 @@ import { Cpu, Settings as SettingsIcon, BookOpen } from "lucide-react";
 
 interface HeaderProps {
   modelName?: string;
+  /** Server-reported package version (from /api/health). */
+  version?: string;
   onHome?: () => void;
   /** Open the Settings task. */
   onSettings?: () => void;
@@ -18,6 +20,7 @@ interface HeaderProps {
 
 export function Header({
   modelName,
+  version,
   onHome,
   onSettings,
   onApi,
@@ -51,7 +54,7 @@ export function Header({
             {modelName}
           </span>
         )}
-        <span className="meta hidden sm:inline">v0.2.31</span>
+        {version && <span className="meta hidden sm:inline">v{version}</span>}
         {onApi && (
           <button
             type="button"

@@ -19,6 +19,8 @@ import { Button } from "@/components/ui/button";
 
 interface AppShellProps {
   modelName?: string;
+  /** Server-reported package version (from /api/health). */
+  version?: string;
   /** Slim left rail — TaskNav. Always shown. */
   sidebar: React.ReactNode;
   /** Second left rail — spaces list. Only used in chat mode. */
@@ -36,6 +38,7 @@ interface AppShellProps {
 
 export function AppShell({
   modelName,
+  version,
   sidebar,
   spacesSidebar,
   studio,
@@ -80,6 +83,7 @@ export function AppShell({
 
       <Header
         modelName={modelName}
+        version={version}
         onHome={onHome}
         onSettings={onSettings}
         onApi={onApi}
