@@ -73,7 +73,7 @@ export function TokenizePage() {
     <ToolShell
       icon={Scissors}
       title="Tách từ / câu"
-      subtitle="word + sentence segmentation"
+      subtitle="tách từ ghép và tách câu theo dấu kết câu"
       pending={pending}
       options={
         <>

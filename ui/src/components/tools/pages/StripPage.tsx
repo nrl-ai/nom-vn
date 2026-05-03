@@ -48,7 +48,7 @@ export function StripPage() {
     <ToolShell
       icon={Eraser}
       title="Bỏ dấu"
-      subtitle="strip diacritics → ASCII"
+      subtitle="bỏ dấu tiếng Việt sang ASCII (đ → d, ơ → o, ...)"
       pending={strip.isPending}
       options={
         <>

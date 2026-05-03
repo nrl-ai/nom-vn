@@ -87,7 +87,7 @@ export function NormalizePage() {
     <ToolShell
       icon={Sigma}
       title="Chuẩn hoá Unicode + nhận diện"
-      subtitle="NFC normalize · detect VN"
+      subtitle="chuẩn hoá NFC · phát hiện ngôn ngữ tiếng Việt"
       pending={pending}
       options={
         <>

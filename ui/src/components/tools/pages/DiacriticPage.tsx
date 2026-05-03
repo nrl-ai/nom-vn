@@ -71,7 +71,7 @@ export function DiacriticPage() {
     <ToolShell
       icon={Type}
       title="Khôi phục dấu tiếng Việt"
-      subtitle="diacritic restore"
+      subtitle="khôi phục dấu cho văn bản không dấu hoặc mất dấu một phần"
       pending={restore.isPending}
       options={
         <>

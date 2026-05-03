@@ -204,7 +204,7 @@ function OriginalView({
 // DOCX — paragraphs (one per page entry, with table-row entries inline)
 // ---------------------------------------------------------------------------
 function DocxView({ pages, loading }: { pages: string[] | null; loading: boolean }) {
-  if (loading) return <Centered>Loading document…</Centered>;
+  if (loading) return <Centered>Đang tải tài liệu…</Centered>;
   if (!pages || pages.length === 0) return <Centered>No content extracted.</Centered>;
   return (
     <ScrollArea className="h-full">
@@ -247,7 +247,7 @@ function DocxView({ pages, loading }: { pages: string[] | null; loading: boolean
 // ---------------------------------------------------------------------------
 function XlsxView({ pages, loading }: { pages: string[] | null; loading: boolean }) {
   const [activeSheet, setActiveSheet] = useState(0);
-  if (loading) return <Centered>Loading workbook…</Centered>;
+  if (loading) return <Centered>Đang tải bảng tính…</Centered>;
   if (!pages || pages.length === 0) return <Centered>No content extracted.</Centered>;
   // Each page format: "# SheetName\n<TSV rows>"
   const sheets = pages.map((p) => parseSheet(p));
@@ -323,7 +323,7 @@ function parseSheet(page: string): { name: string; rows: string[][] } {
 // PPTX — one card per slide, with optional speaker notes section
 // ---------------------------------------------------------------------------
 function PptxView({ pages, loading }: { pages: string[] | null; loading: boolean }) {
-  if (loading) return <Centered>Loading slides…</Centered>;
+  if (loading) return <Centered>Đang tải slide…</Centered>;
   if (!pages || pages.length === 0) return <Centered>No content extracted.</Centered>;
   return (
     <ScrollArea className="h-full">
@@ -408,7 +408,7 @@ function RawTextEmbed({ url }: { url: string }) {
   if (text === null) {
     return (
       <div className="flex items-center gap-2 p-6 text-sm italic text-ink-mute">
-        <Loader2 size={12} className="animate-spin" /> Loading…
+        <Loader2 size={12} className="animate-spin" /> Đang tải…
       </div>
     );
   }

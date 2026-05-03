@@ -80,7 +80,7 @@ export function MaterialsDrawer({ spaceId }: Props) {
     <div className="flex h-full flex-col">
       <div className="shrink-0 px-4 pb-2 pt-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="section-mark">§ sources</h2>
+          <h2 className="section-mark">§ tài liệu nguồn</h2>
           {matsQ.data && matsQ.data.length > 0 && (
             <span className="font-mono text-[10px] text-ink-mute">{matsQ.data.length}</span>
           )}
@@ -117,28 +117,26 @@ export function MaterialsDrawer({ spaceId }: Props) {
           />
           <div className="text-xs text-ink-soft">
             {!spaceId
-              ? "Select a space first"
+              ? "Chọn một không gian trước"
               : dragOver
-                ? "Drop to upload"
-                : "Drag & drop or click to upload"}
+                ? "Thả tệp để tải lên"
+                : "Kéo thả hoặc bấm để tải lên"}
           </div>
           <div className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink-mute">
-            pdf · text · image (ocr) · code
+            pdf · văn bản · ảnh (ocr) · mã nguồn
           </div>
         </div>
 
         {indexSpace.isPending && (
           <div className="mt-2 flex animate-fade-in items-center gap-2 border border-line-soft bg-bg-soft px-2.5 py-1.5 text-[11px] text-ink-soft">
             <Loader2 size={11} className="shrink-0 animate-spin text-accent" />
-            <span>Indexing — parse, chunk, embed…</span>
+            <span>Đang nạp — bóc tách, cắt đoạn, sinh vector…</span>
           </div>
         )}
         {indexSpace.isError && (
           <div className="mt-2 flex animate-fade-in items-start gap-2 border border-danger/60 bg-paper px-2.5 py-1.5 text-[11px] text-danger">
             <AlertCircle size={11} className="mt-0.5 shrink-0" />
-            <span className="break-words">
-              Indexing failed: {(indexSpace.error as Error).message}
-            </span>
+            <span className="break-words">Nạp thất bại: {(indexSpace.error as Error).message}</span>
           </div>
         )}
         {jobs.length > 0 && (
@@ -174,16 +172,18 @@ export function MaterialsDrawer({ spaceId }: Props) {
         <div className="px-2 pb-4">
           {!spaceId && (
             <div className="px-3 py-6 text-center text-xs italic text-ink-mute">
-              No space selected.
+              Chưa chọn không gian.
             </div>
           )}
           {spaceId && matsQ.isLoading && (
-            <div className="px-3 py-3 text-xs italic text-ink-mute">Loading…</div>
+            <div className="px-3 py-3 text-xs italic text-ink-mute">Đang tải…</div>
           )}
           {spaceId && matsQ.data && matsQ.data.length === 0 && jobs.length === 0 && (
             <div className="px-3 py-6 text-center">
               <FileText size={20} className="mx-auto mb-2 text-ink-mute" />
-              <p className="text-xs italic text-ink-mute">No sources yet. Upload above.</p>
+              <p className="text-xs italic text-ink-mute">
+                Chưa có tài liệu. Tải lên ở trên để bắt đầu.
+              </p>
             </div>
           )}
           {matsQ.data?.map((m) => (
@@ -199,19 +199,21 @@ export function MaterialsDrawer({ spaceId }: Props) {
         {/* Studio placeholder section — NotebookLM has Audio Overview /
             Mind Map / FAQ here. We don't yet; be honest. */}
         <div className="mt-2 border-t border-line-soft px-4 pb-6 pt-4">
-          <h2 className="section-mark mb-3">§ studio</h2>
+          <h2 className="section-mark mb-3">§ studio sản phẩm</h2>
           <div className="space-y-1.5">
-            {["Briefing doc", "Mind map", "FAQ", "Audio overview"].map((label) => (
-              <div
-                key={label}
-                className="flex items-center justify-between border border-line-soft bg-paper px-3 py-2 text-xs text-ink-mute"
-              >
-                <span>{label}</span>
-                <span className="font-mono text-[9.5px] uppercase tracking-widest opacity-60">
-                  v0.3
-                </span>
-              </div>
-            ))}
+            {["Bản tóm tắt", "Sơ đồ tư duy", "Câu hỏi thường gặp", "Tổng quan âm thanh"].map(
+              (label) => (
+                <div
+                  key={label}
+                  className="flex items-center justify-between border border-line-soft bg-paper px-3 py-2 text-xs text-ink-mute"
+                >
+                  <span>{label}</span>
+                  <span className="font-mono text-[9.5px] uppercase tracking-widest opacity-60">
+                    v0.3
+                  </span>
+                </div>
+              ),
+            )}
           </div>
         </div>
       </ScrollArea>
