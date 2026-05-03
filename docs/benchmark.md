@@ -363,6 +363,51 @@ Baseline: `benchmarks/results/baseline_segment_ud_vtb_test.json`
 
 ---
 
+## Module: `nom.classify.register` — *đã ship v0.3*
+
+Phân loại đoạn văn tiếng Việt theo 4 lớp văn phong: trang trọng,
+kinh doanh / báo chí, hội thoại, văn học. Hai cách chạy sau cùng
+`Protocol`:
+
+- **`LexiconRegisterClassifier`** — bộ từ điển đặc trưng cho mỗi
+  văn phong, không cần model. Mặc định khi không cài extras.
+- **`PhoBertRegisterClassifier`** — wrapper quanh
+  [`nrl-ai/vn-register-phobert-base`](https://huggingface.co/nrl-ai/vn-register-phobert-base)
+  (PhoBERT-base + đầu phân loại 4 lớp, MIT, ~540 MB safetensors).
+
+### Số đo nội bộ — *đo 2026-05-03*
+
+Tinh chỉnh PhoBERT-base 4 epoch trên kho 4 lớp đa nguồn (giới hạn
+2 000 mẫu / lớp; cắt 70/10/20 train/val/test theo lớp). 195 giây
+trên RTX 3090, bf16.
+
+| Lớp | F1 | Hỗ trợ (test) |
+|---|---:|---:|
+| `formal` | 0,914 | 34 |
+| `business` | 0,906 | 400 |
+| `conversational` | 0,915 | 400 |
+| `literary` | 0,866 | 400 |
+| **macro** | **0,900** | 1234 |
+
+Cổng adopt: macro F1 ≥ 0,85 **và** mọi F1 lớp ≥ 0,75 — đều đạt.
+`literary` là lớp yếu nhất do từ vựng cổ điển chia sẻ với `formal`
+(~18 % câu Wikisource bị nhầm sang `formal`).
+
+JSON kết quả:
+[`benchmarks/accuracy/register_phobert_base_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/register_phobert_base_baseline.json).
+Tái lập: `python training/register/train.py --output-dir checkpoints/register-phobert-base --epochs 4`.
+
+### Cảnh báo — đo trên 1 corpus
+
+Hiện chỉ đo trên hold-out cùng phân phối với tập huấn luyện (UDHR,
+wiki_vi, Tatoeba, Wikisource, UD-VTB). Theo nguyên tắc đa-corpus của dự
+án, claim "F1 macro 0,900 trên VN tổng quát" cần một corpus thứ
+hai (đợt sau: Zalo Legal QA `formal`, vietnews `business`). Nếu
+spread > 10 pp giữa các corpus thì checkpoint hiện tại đang
+register-overfit và cần huấn luyện lại với data đa dạng hơn.
+
+---
+
 ## Module: `nom.doc.ocr` — *dự kiến v0.1*
 
 OCR là primitive leverage cao nhất và bị fail nhiều nhất trong AI tiếng Việt. Chúng tôi ship ba backend với cùng interface; default switch theo phần cứng có sẵn.
