@@ -5,43 +5,241 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.3.0a1] — 2026-05-02 (in progress)
+## [0.3.0a1] — 2026-05-03
 
-### Added: `nom.compliance.audit` — HMAC-chained audit log (Đ14.1.c, Đ28.3)
+First alpha of the 0.3 line. Substantial expansion since 0.2.37 — new
+AI capabilities (translation walkers, OCR, STT, summarize, register
+classifier, NER, spell correction), a durable background-job runtime,
+a Models catalog UI, the desktop bundle, and the first slice of the
+`nom.compliance` module aimed at Luật 134/2025/QH15.
 
-First slice of the new `nom.compliance` module aimed at Luật
-134/2025/QH15 (effective 2026-03-01). This release ships the audit-log
-substrate; risk classifier, transparency / incident handlers, dossier
-generators, and the website hub follow in subsequent 0.3.0 alphas.
+The 0.3 line is alpha while the compliance module surface stabilizes
+(transparency / incident / dossier APIs may still shift). Pin to
+`nom-vn==0.3.0a1` if you need the new wrappers; the 0.2 line stays as
+the recommended channel for everyone else.
 
-- **`nom.compliance.AuditLog`** — append-only, HMAC-SHA256 signed
-  chain. Every entry's signature covers the previous entry's
-  signature, so any tamper anywhere breaks `verify()` cleanly. Sinks:
-  `SQLiteStore` (default, multi-thread safe) and `JSONLStore`
-  (export-friendly).
-- **`Signer` Protocol** — `HMACSigner` is the v0.3 default
-  (`cryptography` lib, Apache-2.0 OR BSD-3). The Protocol lets v0.4
-  swap to a quantum-safe ML-DSA-65 backend without a core change.
-- **`RiskTier`** enum — values map to Đ9.1.a/b/c verbatim
-  (`high`/`medium`/`low`).
-- **`AuditLog.export(path, since=, until=)`** — date-bounded JSONL
-  slice. This is the artifact you hand a Bộ KH&CN inspector under
-  Đ28.3.
-- **OTel span helpers** — `audit_span()` /
-  `annotate_audit_span()` reuse the existing tracer in
-  `nom.chat.observability` so compliance events show up in any
-  OpenInference-aware backend (Phoenix / Langfuse / Arize / Datadog).
-- **New extras**: `pip install nom-vn[compliance]` — pulls
-  `cryptography>=42` and `Jinja2>=3` for the audit primitive and the
-  upcoming dossier templates.
+### Added — Translation (`nom.translate`)
 
-Tests live in `tests/test_compliance_audit.py` covering chain
-integrity, tamper detection in both sinks, multi-thread emit, and
-canonical-JSON determinism on VN/CJK input. Wrong-key verification,
-`raise_if_tampered()`, and concurrent emit are all exercised.
+- **`Translator` Protocol** + `LLMTranslator` (Ollama backend) +
+  `HFTranslator` (HuggingFace seq2seq). FLORES-200 bench harness in
+  `benchmarks/translation/`.
+- **Format-preserving file walkers** for `.docx`, `.pptx`, `.xlsx`,
+  `.txt`, `.md`. Run-redistribution preserves bold / italic / colour
+  inside paragraphs; opt-in tag protection guards intra-paragraph
+  styling. Single dispatcher: `translate_file(path, ...)`.
+- **`google/madlad400-3b-mt`** as the recommended specialist for
+  EN ↔ VN — chrF 40.92 EN→VN at 260 ms/sentence (CUDA fp16).
+  Hard requirement: `transformers<5`.
+- **5-language coverage** — Vietnamese ↔ English / Chinese / Korean /
+  Japanese.
+- **`nom translate` CLI** — single-string and file-batch modes, with
+  an actionable hint when *all* paragraphs fail (most common cause:
+  Ollama not running, model not pulled, or wrong `--model` flag).
 
-Public landscape comparison and dev-facing guide land with the
-`docs/tasks/compliance.md` page in a later 0.3.0 alpha.
+### Added — OCR & document conversion (`nom.ocr`, `nom.convert`)
+
+- **`nom.convert`** — PDF + image → DOCX with automatic OCR fallback.
+  Detects PDFs that contain only CID-glyph text (font subsetting
+  defeated text extraction) and routes them through Tesseract.
+- **`Vintern-1B-v3_5` wrapper** (`nom.ocr.handwriting`) — VN
+  handwriting OCR via 5CD-AI's specialist VLM. Use for handwriting;
+  Tesseract still wins on clean printed lines (CER 0 % vs Vintern's
+  ~31 %).
+- **OCR flow benchmark** (`benchmarks/ocr/`) — image, PDF text-layer,
+  PDF OCR fallback paths all measured.
+
+### Added — Speech-to-text (`nom.stt`)
+
+- **PhoWhisper-large** (`vinai/PhoWhisper-large`, BSD-3) —
+  default for VN-only audio. WER 15.2 % internal (n=3, 30s chunks);
+  full ViMD reproduction TBD.
+- **Whisper-large-v3** (MIT, safetensors) — fallback for
+  code-switched VN ↔ EN audio.
+- BytesIO-safe input path: decode via `soundfile` + resample to
+  16 kHz mono float32 with `librosa` before the HF ASR pipeline.
+
+### Added — Summarization (`nom.summarize`)
+
+- **`VinAI/vit5-large-vietnews-summarization`** wrapper —
+  abstractive summarization for news / legal / dialogue registers.
+  Known caveat: ViT5 is prone to numeric hallucination ("(quý I tăng
+  7,37 %)" not in source) — verify numbers before redistributing.
+
+### Added — Register classification (`nom.classify.register`)
+
+- **4-class router** (formal / business / conversational / literary)
+  with two backends:
+  - **Lexicon baseline** — ~1 ms cục bộ, no model download. 64-marker
+    lexicon covering legal, business, casual, and poetic vocabularies.
+  - **`PhoBertRegisterClassifier`** — wraps `nrl-ai/vn-register-phobert-base`
+    (now published on HF Hub). **Macro-F1 0.900** on a 1,234-sentence
+    test set (formal 0.91 / business 0.91 / conversational 0.92 /
+    literary 0.87).
+- Training script `training/register/train.py` (PhoBERT-base
+  fine-tune) + dataset prep pipeline. The model card carries the
+  full reproduction recipe.
+- Wired through `/api/tools/classify/register` and the
+  **Phân loại văn phong** UI page.
+
+### Added — VN spell correction (`nom.spell`)
+
+- Spell page rewired to a tier-picker over `nrl-ai/vn-spell-correction-*`
+  family models — fixes typos, missing diacritics, OCR noise, and
+  teencode in one pass.
+
+### Added — Vietnamese NER (`nom.nlp.ner`, `nom.nlp.ner_legal`)
+
+- General-purpose VN NER + a **legal-domain preset** with three
+  custom entity types: `LAW_REF` (Luật/Nghị định/Thông tư), `ID_VN`
+  (Vietnamese ID numbers), `PHONE_VN` (Vietnamese phone formats).
+  See `docs/recipes.md` for examples.
+
+### Added — Background jobs (`nom.chat.bgjobs`, `nom.jobs`)
+
+- **`BgJobRunner`** — in-process thread-pool job runner with
+  cooperative cancellation, progress callbacks, and result-file
+  retention. Translate / convert / STT / handwriting OCR / summarize
+  all run as background jobs now.
+- **`nom.jobs`** (durable runtime) — separate, audit-trail-backed
+  long-running job substrate aimed at compliance workflows.
+- **REST surface** — `POST /api/jobs/translate-file`,
+  `POST /api/jobs/convert-file`, plus `GET/DELETE /api/jobs/{id}`,
+  `POST /api/jobs/{id}/cancel`, `GET /api/jobs/{id}/download`.
+
+### Added — Models catalog UI
+
+- **Models** task page — multi-select Ollama catalog with parallel
+  pulls, live progress, RAM-tier badges, and HF / system-tool entries
+  for non-Ollama dependencies. Polling is demand-driven (only fires
+  while pulls are in flight).
+- New endpoints: `/api/models`, `/api/models/pull`,
+  `/api/models/pull/batch`, `/api/models/pulls`,
+  `/api/models/pull/{id}/cancel`, `DELETE /api/models/ollama/{model}`.
+
+### Added — Agents + MCP
+
+- **`nom.agents`** — native multi-agent runtime with 6 patterns
+  (sequential, parallel, router, planner-executor, reflexion,
+  hierarchical) + production-ready agent factory recipes.
+- **`nom.mcp`** — MCP bridge + HTTP/SSE transport for `nom.agents`,
+  and `nom.mcp.integrations` for joining external MCP servers.
+- **Agent run viewer UI** — live stream of agent steps via SSE.
+
+### Added — Chat UX (`ui/`)
+
+- **GFM tables, headings, and inline SVG charts** in chat responses.
+  The RAG grounding prompt now teaches the LLM that the UI renders
+  rich Markdown — chart blocks (` ```chart … ``` `) emit accent-coloured
+  SVG bar / line charts inline.
+- **Re-IA sidebar** — three task groups (`Ứng dụng` 6 apps /
+  `Công cụ văn bản` 7 utils / `Hệ thống` 6 ops). All 19 task pages
+  reachable from a single rail.
+- **Translate tab v2** — visual hierarchy, full Vietnamese copy,
+  accent stripes; single-string + file-upload modes share one page.
+- Models, Spell, Register, Handwriting, STT, NER, Summarize wired
+  through `App.tsx` + `tasks.ts`.
+
+### Added — Desktop (`nom.desktop`)
+
+- **PyInstaller-bundled native shell** via `pywebview` — Windows /
+  macOS / Linux. `--server-only` flag for headless installs.
+- ~3 GB of optional ML deps trimmed from the desktop bundle (only
+  the core chat/RAG path ships in the binary; specialist models are
+  pulled at runtime).
+- Cross-platform GitHub Action (`desktop-build.yml`) builds all 4
+  OS targets per push.
+
+### Added — Compliance scaffolding (Luật 134/2025/QH15, eff. 2026-03-01)
+
+First substantive slice of the new `nom.compliance` module:
+
+- **`nom.compliance.audit`** — append-only HMAC-SHA256 chained log.
+  Every entry's signature covers the previous entry's signature, so
+  any tamper anywhere breaks `verify()` cleanly. Sinks: `SQLiteStore`
+  (default, multi-thread safe) and `JSONLStore` (export-friendly).
+  `Signer` Protocol with `HMACSigner` default; `RiskTier` enum maps
+  to Đ9.1.a/b/c verbatim. `AuditLog.export(path, since=, until=)`
+  produces the date-bounded JSONL slice you hand a Bộ KH&CN
+  inspector under Đ28.3. OTel span helpers reuse the existing
+  tracer.
+- **`nom.compliance.risk`** — rule-based risk classifier covering
+  Đ9 / Đ10 / Đ14 / Đ15.
+- **`nom.compliance.wrappers`** — `AuditedLLM` and `AuditedRAG`
+  drop-in wrappers (Đ14.1.c, Đ14.1.e).
+- **`nom.compliance.transparency`** + **`nom.compliance.incident`** —
+  Đ11 + Đ12 plumbing.
+- **`nom.compliance.dossier`** — Đ10 / Đ14.1.c full + Đ13 / Đ27 MVP
+  generators (Jinja2 templates).
+- **Console UI page** at `/compliance` — risk classify + audit-log
+  inspector.
+- **Website hub** + **Đ25.1 SME hub** at `nom-vn.nrl.ai/compliance`.
+
+### Added — `nom.platform` Protocol seams
+
+- Auth, RBAC, license, plugin, audit-forward, and privacy Protocols
+  carved out so the enterprise edition (`nom-ee`) can plug in without
+  touching OSS code.
+
+### Added — Models published to HuggingFace Hub (`nrl-ai/*`)
+
+- **`nrl-ai/vn-register-phobert-base`** — first VN 4-register
+  classifier (macro-F1 0.900).
+- **`nrl-ai/vn-spell-correction-base`** — VN spelling / diacritics /
+  OCR-noise / teencode corrector.
+- **`nrl-ai/vn-diacritic-vit5-base`** — diacritic restoration only,
+  smaller footprint than the spell-correction variant.
+- All cards carry the "How we compare" matrix (this model vs other
+  variants vs public SOTA vs cloud LLM baseline) and cite Viet-Anh
+  Nguyen + Neural Research Lab in the BibTeX block.
+
+### Added — New optional-dependency extras
+
+- `pip install nom-vn[compliance]` — `cryptography>=42`, `Jinja2>=3`.
+- `pip install nom-vn[stt]` — `transformers>=4.45`, `torch>=2.0`,
+  `librosa`, `soundfile`.
+- `pip install nom-vn[desktop]` — `pywebview` for the native shell.
+- `pip install nom-vn[all]` — every extra rolled together.
+
+### Fixed
+
+- **`nom.text.segment`** — preserve VN decimal / thousand separators
+  in `text_normalize` (was rewriting `5,66 %` → `5, 66 %` and
+  breaking RAG chunks).
+- **`nom.translate.llm`** — strip qwen3 thinking-mode directives
+  (`/no_think`, `/think`, `</think>` blocks) that were leaking into
+  translation output.
+- **`nom.chat.server`** — SPA catch-all moved from a route to a
+  Starlette middleware so late-registered `/api/*` routes resolve
+  correctly. Fixed a regression where `/api/health` returned the SPA
+  shell, pegging the React UI's polling loop at 789 % CPU.
+- **`nom.ocr` / `nom.stt`** — wrappers actually run end-to-end on
+  real data (multiple pre-flight bugs in argument shapes).
+- **`ui/markdown`** — bold-eats-placeholder regression in the chart /
+  code-block placeholder substitution. Switched from PUA / `\x00`
+  tokens to plain ASCII (`NOMCODEBLOCK<N>`).
+
+### Changed
+
+- **UI: 4-pane layout breakpoint bumped from `lg:` (1024 px) to `xl:`
+  (1280 px).** 1024 px viewports now get the drawer-style single-pane
+  layout instead of cramped 4-pane with truncated VN labels.
+- **Sidebar nav re-IA** — 19 task pages grouped into Apps / Text
+  utilities / System sections.
+- **Documentation:** big VN-correctness sweep across the website. All
+  user-facing docs (`docs/**`) read as natural Vietnamese; English
+  jargon swapped where a clean VN equivalent exists per the
+  language-by-surface rule. New task pages for Jobs, Models,
+  Summarize, Handwriting, STT, Register, NER, Compliance.
+- **Homepage use-case grid** — 8 → 12 cards reflecting the new tools.
+
+### Notes
+
+- This release contains 100+ commits since 0.2.37; only user-visible
+  changes are listed above. See `git log v0.2.37..v0.3.0a1` for the
+  full history.
+- The compliance module is intentionally surfaced behind an extra
+  (`nom-vn[compliance]`) — installs without it stay slim and the
+  cryptography dependency is opt-in.
 
 ## [0.2.37] — 2026-05-02
 
