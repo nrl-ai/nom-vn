@@ -6,15 +6,16 @@ import { TaskNav } from "../TaskNav";
 describe("TaskNav", () => {
   it("renders task buttons grouped by category", () => {
     render(<TaskNav active="chat" onSelect={() => {}} />);
-    expect(screen.getByText("documents")).toBeInTheDocument();
-    expect(screen.getByText("text tools")).toBeInTheDocument();
-    expect(screen.getByText("developer")).toBeInTheDocument();
+    // Section headers are now Vietnamese (re-IA 2026-05-03).
+    expect(screen.getByText("ứng dụng")).toBeInTheDocument();
+    expect(screen.getByText("công cụ văn bản")).toBeInTheDocument();
+    expect(screen.getByText("hệ thống")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Chat & RAG/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Khôi phục dấu/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Tách từ/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Chuẩn hoá/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Bỏ dấu/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Sinh nhiễu/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Dịch thuật/ })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /API và cài đặt/ })).toBeInTheDocument();
     // Settings task — match its blurb to disambiguate from the API task,
     // which also has "Cài đặt" in its label.
@@ -32,7 +33,7 @@ describe("TaskNav", () => {
   it("forwards the chosen task key to onSelect", async () => {
     const onSelect = vi.fn();
     render(<TaskNav active="chat" onSelect={onSelect} />);
-    await userEvent.click(screen.getByRole("button", { name: /Sinh nhiễu/ }));
-    expect(onSelect).toHaveBeenCalledWith("noise");
+    await userEvent.click(screen.getByRole("button", { name: /Tóm tắt/ }));
+    expect(onSelect).toHaveBeenCalledWith("summarize");
   });
 });
