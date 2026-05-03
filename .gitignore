@@ -126,3 +126,9 @@ training/ocr_correction/data/*.jsonl
 training/ocr_correction/checkpoints/
 training/ocr_correction/run.log
 .qa-screenshots-2026-05-03/
+
+# PaddleOCR rec training data — regenerate via _generate_lines.py
+training/paddleocr_vi_rec/data/
+training/paddleocr_vi_rec/checkpoints/
+training/paddleocr_vi_rec/pretrained/
+training/paddleocr_vi_rec/train.log
