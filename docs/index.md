@@ -36,7 +36,7 @@ features:
       width: 32
       height: 32
     title: Sửa văn bản — dấu, chính tả, gõ Telex
-    details: 'Mô hình <code>nrl-ai/vn-spell-correction-base</code> v0.2.29 xử lý gọn lỗi gõ, lỗi OCR và mất dấu trong một lượt. <strong>98.32 % light · 97.03 % heavy</strong> trên 8 tập kiểm thử; <strong>79.62 %</strong> trên tập 150 câu hand-curate ngoài phân phối — vượt Toshiiiii1.'
+    details: 'Mô hình <code>nrl-ai/vn-spell-correction-base</code> v0.2.29 xử lý gọn lỗi gõ, lỗi OCR và mất dấu trong một lượt. <strong>98,32 % nhiễu nhẹ · 97,03 % nhiễu nặng</strong> trên 8 tập kiểm thử; <strong>79,62 %</strong> trên tập 150 câu tuyển thủ công ngoài phân phối — vượt Toshiiiii1.'
     link: /tasks/spell-correction
     linkText: Tài liệu sửa chính tả
   - icon:
@@ -125,7 +125,7 @@ features:
 <a class="ev-usecase" href="/tasks/register">
 <div class="marker">09 · phân loại văn phong</div>
 <h3>Định tuyến văn bản theo thể loại</h3>
-<p>PhoBERT-base 4 lớp (trang trọng / kinh doanh / hội thoại / văn học) — <strong>macro F1 0,900</strong> trên test n=1234 (formal 0,91 / business 0,91 / hội thoại 0,92 / văn học 0,87). Bản quy tắc fallback (~1 ms, không cần GPU) cũng ship trong OSS.</p>
+<p>PhoBERT-base 4 lớp (trang trọng / kinh doanh / hội thoại / văn học) — <strong>macro F1 0,900</strong> trên test n=1234 (trang trọng 0,91 / kinh doanh 0,91 / hội thoại 0,92 / văn học 0,87). Bản quy tắc dự phòng (~1 ms, không cần GPU) cũng ship trong OSS.</p>
 <span class="ev-usecase-cta">Xem phân loại văn phong →</span>
 </a>
 
@@ -177,7 +177,7 @@ features:
 <a href="/screenshots/07-playground-diacritic.png" target="_blank" rel="noopener">
 <img src="/screenshots/07-playground-diacritic.png" alt="Khôi phục dấu cho hợp đồng tiếng Việt không dấu" loading="lazy" />
 </a>
-<figcaption><strong>Khôi phục dấu trực tiếp.</strong> Dán văn bản không dấu, chọn register (kinh doanh, hội thoại, văn học...), chọn backend (rule / mô hình HF / LLM) — chạy thẳng trên máy.</figcaption>
+<figcaption><strong>Khôi phục dấu trực tiếp.</strong> Dán văn bản không dấu, chọn văn phong (kinh doanh, hội thoại, văn học...), chọn cách chạy (quy tắc / mô hình HF / LLM) — chạy thẳng trên máy.</figcaption>
 </figure>
 
 <figure class="ev-shot">
@@ -249,8 +249,8 @@ flowchart LR
 
 <div class="ev-principle">
 <div class="num">P · 04</div>
-<div class="title">Đa register</div>
-<div class="body">Mọi mô hình được đo trên ít nhất hai register khác nhau (kinh doanh + văn học, hoặc trong-miền + ngoài-miền). Khoảng cách >10 pp giữa các register là dấu hiệu over-fit và sẽ được ghi rõ trong model card thay vì bị che giấu.</div>
+<div class="title">Đa văn phong</div>
+<div class="body">Mọi mô hình được đo trên ít nhất hai văn phong khác nhau (kinh doanh + văn học, hoặc trong-miền + ngoài-miền). Khoảng cách >10 pp giữa các văn phong là dấu hiệu lệch văn phong và sẽ được ghi rõ trong model card thay vì bị che giấu.</div>
 </div>
 
 </div>
@@ -271,7 +271,7 @@ flowchart LR
 
 <a class="ev-next" href="/tasks/">
 <div class="marker">cho nhà nghiên cứu</div>
-<h3>Số đo trên 4 register</h3>
+<h3>Số đo trên 4 văn phong</h3>
 <p>Mỗi tác vụ — khôi phục dấu, sửa chính tả, OCR, tách từ, embedding, reranker, RAG — có trang riêng kèm số đo và lệnh tái lập.</p>
 <span class="ev-next-cta">Xem các tác vụ →</span>
 </a>
