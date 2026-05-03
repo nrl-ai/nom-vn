@@ -421,6 +421,8 @@ def _build_prompt(question: str, context_blocks: list[str]) -> str:
     - Answer in the same language as the question (VN ↔ EN auto).
     - Cite the bracketed chunk numbers it relied on.
     - Refuse to fabricate when the context is insufficient.
+    - Use rich Markdown when it improves clarity (tables, headings,
+      lists, inline charts) — the chat UI renders all of them.
     """
     context = "\n\n".join(context_blocks)
     return (
@@ -428,6 +430,20 @@ def _build_prompt(question: str, context_blocks: list[str]) -> str:
         "question using ONLY the context blocks below. Cite the relevant block "
         "numbers like [1] [2] inline. If the context does not contain the answer, "
         "say so plainly — do not fabricate. Match the language of the question.\n\n"
+        "FORMATTING — the chat UI renders rich Markdown. Use it when it makes "
+        "the answer clearer:\n"
+        "- **Tables** for tabular data: `| col | col |\\n|---|---|\\n| val | val |`\n"
+        "- **Headings** `# H1` … `### H3` to structure long answers\n"
+        "- **Bullet / numbered lists** for enumerations\n"
+        "- **Bold** for key terms; **inline `code`** for identifiers\n"
+        "- **Inline charts** for numeric trends — emit a fenced block with "
+        "language `chart`:\n"
+        "  ```chart\n"
+        '  {"type":"bar","title":"Doanh thu Q1","data":[{"label":"T1","value":850},{"label":"T2","value":920}]}\n'
+        "  ```\n"
+        '  `type` is `"bar"` (default) or `"line"`. Each data point needs '
+        "`label` and `value`. Only emit a chart when the source has at least "
+        "two comparable numbers — never invent data.\n\n"
         f"=== Context ===\n{context}\n\n"
         f"=== Question ===\n{question}\n\n"
         "=== Answer ==="
