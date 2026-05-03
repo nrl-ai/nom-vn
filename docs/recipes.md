@@ -211,6 +211,48 @@ nhiễu theo taxonomy lỗi paper VSEC
 ([arxiv:2111.00640](https://arxiv.org/abs/2111.00640)) và các nhầm
 thanh tần suất cao bắt được trong audit khôi phục dấu của chúng tôi.
 
+### Phân loại văn phong (router 4 lớp)
+
+Định tuyến input theo văn phong (`formal` / `business` / `conversational`
+/ `literary`) để các tool downstream (khôi phục dấu, tóm tắt, OCR
+rerank) chọn đúng checkpoint chuyên biệt — survey nội bộ đo được spread
+~8.7 pp giữa các văn phong, vậy nên router cheap này lift mọi tool khác
+5–10 pp tự động.
+
+```python
+# Baseline — zero-ML, ~ms latency, ship trong OSS
+from nom.classify import LexiconRegisterClassifier
+
+clf = LexiconRegisterClassifier()
+res = clf.predict("Căn cứ Luật ban hành văn bản quy phạm pháp luật, …")
+# RegisterResult(label=RegisterLabel.FORMAL, score=0.62,
+#                distribution={FORMAL: 0.62, BUSINESS: 0.20, …})
+```
+
+```python
+# Production — PhoBERT-base + 4-class head (cần fine-tune trước)
+from nom.classify import PhoBertRegisterClassifier
+
+clf = PhoBertRegisterClassifier(model_id="nrl-ai/vn-register-phobert-base")
+res = clf.predict("Doanh thu công ty trong quý 2 năm 2026 đạt 1,2 tỷ đồng …")
+# Lazy-loads transformers + torch khi gọi predict() lần đầu.
+# Tự word-segment qua nom.text.word_tokenize trước khi tokenize PhoBERT
+# (BKai gotcha: raw text drops ≥ 15 pp).
+```
+
+Fine-tune checkpoint riêng:
+
+```bash
+python training/register/train.py \
+    --output-dir checkpoints/register-phobert-base \
+    --epochs 4
+# Macro-F1 target ≥ 0.85 trên held-out 20 % của assembly UDHR + VNTC +
+# Tatoeba + Wikisource. Xem training/register/README.md.
+```
+
+**Quy tắc ngón cái:** demo / CPU-only / không-cần-precision → lexicon.
+Production routing trong server pipeline → PhoBERT.
+
 ### Tách từ tiếng Việt
 
 Hai backend, chọn theo tốc độ vs F1:
