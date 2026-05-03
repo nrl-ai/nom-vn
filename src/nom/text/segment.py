@@ -172,7 +172,29 @@ def sent_tokenize(text: str) -> list[str]:
 
 _MULTI_WS_RE = re.compile(r"\s+")
 _SPACE_BEFORE_PUNCT_RE = re.compile(r"\s+([\.\,\;\:\!\?])")
-_NO_SPACE_AFTER_PUNCT_RE = re.compile(r"([\.\,\;\:\!\?])(?=[^\s\.\,\;\:\!\?])")
+# Add a space after .,;:!? when followed by a non-space, non-punct char.
+# BUT exclude `,` and `.` between two digits — Vietnamese uses `,` as
+# decimal separator ("5,66%") and `.` as thousand separator ("1.500.000").
+# Without this exclusion, "5,66%" becomes "5, 66%" and "1.500.000" becomes
+# "1. 500. 000" — caught in real RAG indexing of GDP article (2026-05-03).
+_NO_SPACE_AFTER_PUNCT_RE = re.compile(
+    # Alt 1: digit + (. or ,) + digit  → preserve as-is (VN decimal /
+    # thousand separator). Caught in real RAG indexing 2026-05-03 where
+    # "5,66%" became "5, 66%" and "1.500.000" became "1. 500. 000".
+    r"(?<=\d)([\.\,])(?=\d)"
+    r"|"
+    # Alt 2: any punctuation followed by a non-space, non-punct char →
+    # add a trailing space.
+    r"([\.\,\;\:\!\?])(?=[^\s\.\,\;\:\!\?])"
+)
+
+
+def _add_space_after_punct(match: re.Match[str]) -> str:
+    # group(1) is the digit-decimal/thousand separator (preserve as-is).
+    # group(2) is the regular punctuation (add a trailing space).
+    if match.group(1) is not None:
+        return match.group(1)
+    return f"{match.group(2)} "
 
 
 def text_normalize(text: str) -> str:
@@ -201,6 +223,6 @@ def text_normalize(text: str) -> str:
         return text
     nfc = unicodedata.normalize("NFC", text)
     no_pre_space = _SPACE_BEFORE_PUNCT_RE.sub(r"\1", nfc)
-    with_post_space = _NO_SPACE_AFTER_PUNCT_RE.sub(r"\1 ", no_pre_space)
+    with_post_space = _NO_SPACE_AFTER_PUNCT_RE.sub(_add_space_after_punct, no_pre_space)
     collapsed = _MULTI_WS_RE.sub(" ", with_post_space)
     return collapsed.strip()

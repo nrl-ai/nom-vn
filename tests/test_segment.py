@@ -123,3 +123,18 @@ class TestTextNormalize:
         # decomposed "co" + combining hook → "cỏ"
         result = text_normalize("co" + "̉")
         assert result == "cỏ"
+
+    def test_preserves_vn_decimal_comma(self) -> None:
+        """VN uses ',' as decimal separator. text_normalize must NOT
+        add a space inside '5,66%' or it breaks RAG indexing
+        (the chunker re-splits on the synthetic space and citations
+        come back as '5, 66%')."""
+        assert text_normalize("GDP tăng 5,66% so với") == "GDP tăng 5,66% so với"
+        assert text_normalize("102,5 tỷ USD") == "102,5 tỷ USD"
+
+    def test_preserves_vn_thousand_separator_dot(self) -> None:
+        """VN uses '.' as thousand separator. '1.500.000.000' must stay
+        intact, not become '1. 500. 000. 000'."""
+        assert text_normalize("Tổng 1.500.000.000 đồng") == "Tổng 1.500.000.000 đồng"
+        # Mixed: thousand-separator dots + sentence-end dot
+        assert text_normalize("Đạt 1.500.000.Số tiếp theo.") == "Đạt 1.500.000. Số tiếp theo."
