@@ -19,7 +19,7 @@ export function TaskNav({ active, onSelect }: Props) {
         {(["rag", "text", "dev"] as const).map((cat) => (
           <div key={cat} className="mb-3 last:mb-0">
             <div className="meta px-2 pb-0.5 pt-1.5 uppercase tracking-widest">
-              {cat === "rag" ? "ứng dụng" : cat === "text" ? "công cụ văn bản" : "lập trình"}
+              {cat === "rag" ? "ứng dụng" : cat === "text" ? "công cụ văn bản" : "hệ thống"}
             </div>
             <ul>
               {TASKS.filter((t) => t.category === cat).map((t) => (

@@ -97,7 +97,14 @@ export function taskFromPath(pathname: string): TaskKey | null {
 
 // `agents` is currently hidden from the nav (no UI page yet) but the slug,
 // TaskKey, and route handling stay so existing deep-links keep working.
+//
+// Order within each category is intentional — items the user reaches for
+// daily come first; specialty / advanced ones come last. Categories:
+//   rag  → "Ứng dụng" (creator-side primary tasks)
+//   text → "Công cụ văn bản" (atomic VN text utilities)
+//   dev  → "Hệ thống" (operations + management + reference)
 export const TASKS: TaskMeta[] = [
+  // ── ỨNG DỤNG (creator-side primary tasks)
   {
     key: "chat",
     label: "Chat & RAG",
@@ -108,29 +115,8 @@ export const TASKS: TaskMeta[] = [
   {
     key: "translate",
     label: "Dịch thuật",
-    blurb: "Việt · Anh · 中 · 한 · 日, giữ định dạng tệp",
+    blurb: "Việt · Anh · 中 · 한 · 日, giữ định dạng",
     icon: Languages,
-    category: "rag",
-  },
-  {
-    key: "convert",
-    label: "Chuyển định dạng",
-    blurb: "PDF / ảnh / DOCX / TXT / MD — chuyển qua lại",
-    icon: FileType,
-    category: "rag",
-  },
-  {
-    key: "jobs",
-    label: "Hàng đợi xử lý",
-    blurb: "Theo dõi tác vụ chạy nền + tiến độ",
-    icon: ListChecks,
-    category: "rag",
-  },
-  {
-    key: "handwriting",
-    label: "OCR chữ viết tay",
-    blurb: "Vintern-1B · biểu mẫu / ghi chú / CMND",
-    icon: PenLine,
     category: "rag",
   },
   {
@@ -141,24 +127,40 @@ export const TASKS: TaskMeta[] = [
     category: "rag",
   },
   {
-    key: "stt",
-    label: "Giọng nói → văn bản",
-    blurb: "PhoWhisper · Whisper-v3 · Bắc/Trung/Nam",
-    icon: Mic,
+    key: "convert",
+    label: "Chuyển định dạng",
+    blurb: "PDF / ảnh → DOCX, OCR cục bộ",
+    icon: FileType,
     category: "rag",
   },
   {
-    key: "register",
-    label: "Phân loại văn phong",
-    blurb: "Trang trọng / kinh doanh / hội thoại / văn học",
-    icon: Layers,
-    category: "text",
+    key: "handwriting",
+    label: "OCR chữ viết tay",
+    blurb: "Vintern-1B · biểu mẫu / ghi chú / CMND",
+    icon: PenLine,
+    category: "rag",
   },
+  {
+    key: "stt",
+    label: "Giọng nói → văn bản",
+    blurb: "PhoWhisper · Whisper-v3 · 3 vùng giọng",
+    icon: Mic,
+    category: "rag",
+  },
+
+  // ── CÔNG CỤ VĂN BẢN (atomic VN utilities)
   {
     key: "spell",
     label: "Kiểm tra chính tả",
     blurb: "Telex · dấu · phương ngữ · teencode",
     icon: SpellCheck,
+    category: "text",
+  },
+  {
+    key: "diacritic",
+    label: "Khôi phục dấu",
+    blurb: "Bù lại dấu cho văn bản",
+    icon: Type,
     category: "text",
   },
   {
@@ -169,10 +171,10 @@ export const TASKS: TaskMeta[] = [
     category: "text",
   },
   {
-    key: "diacritic",
-    label: "Khôi phục dấu",
-    blurb: "Bù lại dấu cho văn bản",
-    icon: Type,
+    key: "register",
+    label: "Phân loại văn phong",
+    blurb: "Trang trọng / kinh doanh / hội thoại / văn học",
+    icon: Layers,
     category: "text",
   },
   {
@@ -196,12 +198,21 @@ export const TASKS: TaskMeta[] = [
     icon: Eraser,
     category: "text",
   },
+
+  // ── HỆ THỐNG (operations, compliance, management, reference)
+  {
+    key: "jobs",
+    label: "Hàng đợi xử lý",
+    blurb: "Theo dõi tác vụ chạy nền + tiến độ",
+    icon: ListChecks,
+    category: "dev",
+  },
   {
     key: "compliance",
     label: "Phân loại rủi ro",
     blurb: "Luật 134/2025 — 3 mức",
     icon: ShieldCheck,
-    category: "rag",
+    category: "dev",
   },
   {
     key: "admin",
@@ -213,7 +224,7 @@ export const TASKS: TaskMeta[] = [
   {
     key: "models",
     label: "Mô hình",
-    blurb: "quản lý mô hình AI cài đặt cục bộ",
+    blurb: "Quản lý mô hình AI cài đặt cục bộ",
     icon: Package,
     category: "dev",
   },
