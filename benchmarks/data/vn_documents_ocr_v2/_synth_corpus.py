@@ -31,6 +31,7 @@ Run from the corpus dir::
 from __future__ import annotations
 
 import json
+import re
 import sys
 from dataclasses import dataclass
 from hashlib import md5
@@ -41,6 +42,11 @@ from reportlab.pdfgen import canvas as rl_canvas
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
+from _business_templates import (  # noqa: E402
+    CONTRACT_GENERATORS,
+    FORM_GENERATORS,
+    RECEIPT_GENERATORS,
+)
 from _scan_artifacts import ScanProfile, apply_scan_artifacts  # noqa: E402
 
 REPO = ROOT.parents[2]
@@ -167,12 +173,55 @@ def _save_doc(recipe: SynthRecipe) -> dict:
     }
 
 
-def _split_paragraphs(text: str, *, min_words: int = 40, max_words: int = 200) -> list[str]:
+_WIKISOURCE_NOISE = re.compile(
+    r"^("
+    r"\d{4,6}[A-ZĐÀÁẢÃẠÂẦẤẨẪẬĂẰẮẲẴẶÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴ]"  # IDs concat with title
+    r"|•|"  # bullet lines
+    r"thông tin về bản này"
+    r"|các dự án wiki khác"
+    r"|Trích dẫn từ"
+    r"|Bản dịch đăng trong"
+    r"|của Wikisource"
+    r"|Wikisource dịch"
+    r"|^Chú thích$"
+    r"|^▲"
+    r")"
+)
+
+
+def _looks_like_metadata(line: str) -> bool:
+    s = line.strip()
+    if not s:
+        return False
+    # Numerical ID concatenated with VN text — common Wikisource artifact.
+    # E.g. "30881Bài tựa Truyện KiềuĐoàn QuìChu Mạnh Trinh"
+    if re.match(r"^\d{4,7}[A-ZĐÀ-ỹ]", s):
+        return True
+    return bool(_WIKISOURCE_NOISE.match(s))
+
+
+def _split_paragraphs(
+    text: str,
+    *,
+    min_words: int = 40,
+    max_words: int = 200,
+    skip_metadata: bool = True,
+    skip_after_marker: tuple[str, ...] = ("Chú thích", "Tham khảo", "Liên kết ngoài"),
+) -> list[str]:
     """Cut a long text into paragraph-shaped chunks of min_words..max_words."""
+    # First strip metadata sections + everything after a Chú thích / footnotes marker.
+    cleaned_lines: list[str] = []
+    for line in text.splitlines():
+        if any(line.strip().startswith(m) for m in skip_after_marker):
+            break
+        if skip_metadata and _looks_like_metadata(line):
+            continue
+        cleaned_lines.append(line)
+
     out: list[str] = []
     buf: list[str] = []
     n = 0
-    for line in text.splitlines():
+    for line in cleaned_lines:
         line = line.strip()
         if not line:
             if buf and n >= min_words:
@@ -342,6 +391,60 @@ def main() -> int:
             )
         )
 
+    # receipt — 7 templates x 3 seeds = 21 docs
+    for tpl_idx, gen in enumerate(RECEIPT_GENERATORS):
+        for seed_idx in range(3):
+            seed = tpl_idx * 100 + seed_idx
+            title, text = gen(seed)
+            rid = f"synth_receipt_{tpl_idx:02d}_{seed_idx:02d}"
+            recipes.append(
+                SynthRecipe(
+                    doc_id=rid,
+                    category="receipt_synthetic_scan",
+                    title=title,
+                    text=text,
+                    font_path=DEJAVU_REGULAR,
+                    font_size=24,  # smaller font — receipts have more text
+                    profile=_pick_profile(rid),
+                )
+            )
+
+    # contract — 5 templates x 4 seeds = 20 docs
+    for tpl_idx, gen in enumerate(CONTRACT_GENERATORS):
+        for seed_idx in range(4):
+            seed = tpl_idx * 100 + seed_idx
+            title, text = gen(seed)
+            rid = f"synth_contract_{tpl_idx:02d}_{seed_idx:02d}"
+            recipes.append(
+                SynthRecipe(
+                    doc_id=rid,
+                    category="contract",
+                    title=title,
+                    text=text,
+                    font_path=DEJAVU_REGULAR,
+                    font_size=24,
+                    profile=_pick_profile(rid),
+                )
+            )
+
+    # form — 5 templates x 4 seeds = 20 docs
+    for tpl_idx, gen in enumerate(FORM_GENERATORS):
+        for seed_idx in range(4):
+            seed = tpl_idx * 100 + seed_idx
+            title, text = gen(seed)
+            rid = f"synth_form_{tpl_idx:02d}_{seed_idx:02d}"
+            recipes.append(
+                SynthRecipe(
+                    doc_id=rid,
+                    category="form",
+                    title=title,
+                    text=text,
+                    font_path=DEJAVU_REGULAR,
+                    font_size=24,
+                    profile=_pick_profile(rid),
+                )
+            )
+
     # ----- Render each -----
     by_cat: dict[str, int] = {}
     records: list[dict] = []
@@ -350,17 +453,29 @@ def main() -> int:
         records.append(rec)
         by_cat[r.category] = by_cat.get(r.category, 0) + 1
 
-    # Append to existing metadata.jsonl (which has the 12 v0.2 records)
+    # Replace all synth_* records with the freshly generated set; keep the
+    # real PD scans untouched. Also remove orphaned artifacts (PNG/PDF) for
+    # synth_* doc_ids that are no longer in the new generation.
     meta_path = ROOT / "metadata.jsonl"
     existing: list[dict] = []
+    stale_doc_ids: set[str] = set()
     if meta_path.exists():
         for line in meta_path.read_text(encoding="utf-8").splitlines():
             if not line.strip():
                 continue
             d = json.loads(line)
-            # Drop any prior synth_* records to keep this generator idempotent
-            if not d["doc_id"].startswith("synth_") or d["doc_id"].startswith("synth_scan_receipt"):
+            if d["doc_id"].startswith("synth_"):
+                stale_doc_ids.add(d["doc_id"])
+            else:
                 existing.append(d)
+
+    new_doc_ids = {r["doc_id"] for r in records}
+    for stale_id in stale_doc_ids - new_doc_ids:
+        for p in (
+            OUT_PAGES / f"{stale_id}_p1.png",
+            OUT_DOCS / f"{stale_id}.pdf",
+        ):
+            p.unlink(missing_ok=True)
 
     all_records = existing + records
     with meta_path.open("w", encoding="utf-8") as f:

@@ -1,8 +1,10 @@
-# `vn_documents_ocr_v2` — Vietnamese scanned-document evaluation set v0.3
+# `vn_documents_ocr_v2` — Vietnamese scanned-document evaluation set v0.4
 
-107 single-page Vietnamese documents for evaluating PDF / image → DOCX
-OCR pipelines. Six configs covering the full register matrix
-(formal / business / conversational / literary) plus real PD scans.
+~155 single-page Vietnamese documents for evaluating PDF / image → DOCX
+OCR pipelines. Eight configs covering the full register matrix
+(formal / business / conversational / literary) plus real PD scans
+and three categories of business documents (receipts / contracts /
+forms) generated from parametrized fictional templates.
 
 | Config | n | Source | License |
 |---|---:|---|---|
@@ -11,7 +13,9 @@ OCR pipelines. Six configs covering the full register matrix
 | `news_business` | 24 | wiki_vi article openings (rendered + scan artifacts) | CC-BY-SA 4.0 (Wikipedia VN) |
 | `conversational` | 24 | tatoeba_vi sentence groups (rendered + scan artifacts) | CC-BY 2.0 FR (Tatoeba) |
 | `literary` | 23 | wikisource_vi Truyện Kiều excerpts (rendered + scan artifacts) | Public Domain |
-| `receipt` | 3 | synthetic receipt templates + scan artifacts | CC0 1.0 |
+| `receipt` | 21 | 7 templates × 3 seeds + scan artifacts | CC0 1.0 |
+| `contract` | 20 | 5 templates × 4 seeds + scan artifacts | CC0 1.0 |
+| `form` | 20 | 5 templates × 4 seeds + scan artifacts | CC0 1.0 |
 
 The 9 `real` documents are true production input — image-only PDFs
 straight from chinhphu.vn / hanoi.gov.vn signed scans, ground-truthed

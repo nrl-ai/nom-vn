@@ -64,6 +64,8 @@ def stage_files(out_dir: Path) -> list[tuple[Path, str]]:
         "news_business": "news_business",
         "conversational": "conversational",
         "receipt_synthetic_scan": "receipt",
+        "contract": "contract",
+        "form": "form",
     }
     by_cfg: dict[str, list[dict]] = {}
     for d in docs:
@@ -180,6 +182,14 @@ configs:
   data_files:
   - split: test
     path: receipt/**
+- config_name: contract
+  data_files:
+  - split: test
+    path: contract/**
+- config_name: form
+  data_files:
+  - split: test
+    path: form/**
 ---
 
 # `vn-ocr-documents-eval` v0.3
@@ -196,7 +206,9 @@ and synthetic receipts.
 | `news_business` | 24 | wiki_vi article openings + scan artifacts | CC-BY-SA 4.0 (Wikipedia VN) |
 | `conversational` | 24 | tatoeba_vi sentence groups + scan artifacts | CC-BY 2.0 FR (Tatoeba) |
 | `literary` | 23 | wikisource Truyện Kiều excerpts + scan artifacts | Public Domain |
-| `receipt` | 3 | synthetic receipt templates + scan artifacts | CC0 1.0 |
+| `receipt` | 21 | 7 templates x 3 seeds (tax invoice, payment, expense voucher, transport ticket, donation, utility, medical) | CC0 1.0 |
+| `contract` | 20 | 5 templates x 4 seeds (labor, rental, economic, service, loan) | CC0 1.0 |
+| `form` | 20 | 5 templates x 4 seeds (resignation, residence cert, enrollment, leave, business registration) | CC0 1.0 |
 
 ## What's new vs v0.1
 
