@@ -129,6 +129,32 @@ doc = [
 llm = [
   "httpx>=0.27",
 ]
+# Handwriting OCR — VLM (Vintern-1B-v3_5 default).
+#
+# Vintern is built on InternVL's vision tower; loading the modeling code
+# (trust_remote_code=True) requires `timm` for the patched ConvNeXt
+# stages. torchvision provides the Resize/Normalize transforms used by
+# the inline `_preprocess_for_internvl` helper. Both pure-Python /
+# permissive licensed.
+"ocr-handwriting" = [
+  "transformers>=4.45",
+  "torch>=2.0",
+  "torchvision>=0.20",
+  "timm>=1.0",
+  "pillow>=10",
+]
+# Speech-to-text — Whisper / PhoWhisper.
+#
+# librosa is the only widespread VN-friendly audio loader transformers'
+# asr pipeline integrates with cleanly; soundfile (libsndfile) is its
+# default backend for WAV/FLAC/OGG. Both BSD/ISC licensed; no native
+# proprietary codecs.
+stt = [
+  "transformers>=4.45",
+  "torch>=2.0",
+  "librosa>=0.10",
+  "soundfile>=0.12",
+]
 otel = [
   # OpenTelemetry — optional. Activates when OTEL_* env vars are set.
   # Speaks the OpenInference semantic conventions so traces flow to
@@ -167,7 +193,7 @@ desktop = [
   "pillow>=10",
 ]
 all = [
-  "nom-vn[chat,compliance,desktop,diacritics,doc,embeddings,llm,otel]",
+  "nom-vn[chat,compliance,desktop,diacritics,doc,embeddings,llm,nlp,ocr-handwriting,otel,stt]",
 ]
 dev = [
   "pytest>=8",

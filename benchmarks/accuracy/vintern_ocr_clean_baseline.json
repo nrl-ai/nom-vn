@@ -1,0 +1,73 @@
+{
+  "model": "5CD-AI/Vintern-1B-v3_5",
+  "preprocess": "single-tile 448x448 ImageNet-norm",
+  "corpus": "benchmarks/data/synthetic_ocr_vi/clean",
+  "n_samples": 20,
+  "mean_cer": 0.0047,
+  "exact_match": 16,
+  "elapsed_seconds": 18.8,
+  "bench_date": "2026-05-03",
+  "device": "cuda",
+  "samples": [
+    {
+      "id": "000",
+      "target": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà giải.",
+      "pred": "Mọi tranh chấp được giải quyết thông qua thương lượng và hòa giải.",
+      "cer": 0.0303
+    },
+    {
+      "id": "001",
+      "target": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+      "pred": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+      "cer": 0.0
+    },
+    {
+      "id": "002",
+      "target": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+      "pred": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+      "cer": 0.0
+    },
+    {
+      "id": "003",
+      "target": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+      "pred": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà Nội.",
+      "cer": 0.0
+    },
+    {
+      "id": "004",
+      "target": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+      "pred": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+      "cer": 0.0
+    },
+    {
+      "id": "005",
+      "target": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+      "pred": "Hai bên đã đọc, hiểu và đồng ý ký vào hợp đồng này.",
+      "cer": 0.0
+    },
+    {
+      "id": "006",
+      "target": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thoả thuận.",
+      "pred": "Bên cung cấp dịch vụ cam kết hoàn thành đúng tiến độ đã thỏa thuận.",
+      "cer": 0.0299
+    },
+    {
+      "id": "007",
+      "target": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+      "pred": "Tôi mới chuyển nhà, mấy hôm nay vẫn đang sắp xếp đồ đạc.",
+      "cer": 0.0
+    },
+    {
+      "id": "008",
+      "target": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+      "pred": "Hè này gia đình tôi sẽ đi nghỉ ở Đà Nẵng một tuần.",
+      "cer": 0.0
+    },
+    {
+      "id": "009",
+      "target": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+      "pred": "Tôi nghĩ chúng ta nên hẹn nhau cà phê vào sáng mai.",
+      "cer": 0.0
+    }
+  ]
+}

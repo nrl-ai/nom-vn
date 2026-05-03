@@ -85,7 +85,8 @@ def _load_pipeline(model_id: str, device: str | None) -> Any:
     except ImportError as exc:
         raise ImportError(
             "Whisper-family STT requires transformers + torch + librosa. "
-            "Install with: pip install 'transformers>=4.45' 'torch>=2.0' 'librosa>=0.10'"
+            "Install with: pip install 'nom-vn[stt]' "
+            "(brings transformers + torch + librosa + soundfile)."
         ) from exc
 
     if device is None:

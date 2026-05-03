@@ -1,0 +1,43 @@
+{
+  "model": "5CD-AI/Vintern-1B-v3_5",
+  "preprocess": "single-tile 448x448 ImageNet-norm",
+  "corpus": "benchmarks/data/synthetic_ocr_vi/noisy",
+  "n_samples": 20,
+  "mean_cer": 0.0037,
+  "exact_match": 17,
+  "elapsed_seconds": 19.2,
+  "bench_date": "2026-05-03",
+  "device": "cuda",
+  "samples": [
+    {
+      "id": "000",
+      "cer": 0.0303,
+      "pred": "Mọi tranh chấp được giải quyết thông qua thương lượng và hòa",
+      "target": "Mọi tranh chấp được giải quyết thông qua thương lượng và hoà"
+    },
+    {
+      "id": "001",
+      "cer": 0.0,
+      "pred": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở.",
+      "target": "Văn bản này được ban hành theo thẩm quyền của Giám đốc Sở."
+    },
+    {
+      "id": "002",
+      "cer": 0.0,
+      "pred": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê.",
+      "target": "Cuối tuần này tôi muốn về thăm bố mẹ ở quê."
+    },
+    {
+      "id": "003",
+      "cer": 0.0,
+      "pred": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà",
+      "target": "Triển lãm mỹ thuật quốc tế khai mạc tại Bảo tàng Mỹ thuật Hà"
+    },
+    {
+      "id": "004",
+      "cer": 0.0,
+      "pred": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con.",
+      "target": "Sáng nay tôi dậy sớm để đi tập thể dục cùng con."
+    }
+  ]
+}

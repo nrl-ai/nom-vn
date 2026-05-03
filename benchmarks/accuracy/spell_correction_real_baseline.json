@@ -1,0 +1,43 @@
+{
+  "model": "nrl-ai/vn-spell-correction-base",
+  "n_samples": 150,
+  "aggregate": {
+    "word_acc": 0.7833,
+    "sentence_exact": 65
+  },
+  "per_register": {
+    "forum": {
+      "n": 25,
+      "word_acc": 0.634,
+      "sentence_exact": 4
+    },
+    "legal": {
+      "n": 25,
+      "word_acc": 0.9562,
+      "sentence_exact": 17
+    },
+    "mobile": {
+      "n": 25,
+      "word_acc": 0.9584,
+      "sentence_exact": 11
+    },
+    "news": {
+      "n": 25,
+      "word_acc": 0.9654,
+      "sentence_exact": 14
+    },
+    "ocr": {
+      "n": 25,
+      "word_acc": 0.9757,
+      "sentence_exact": 19
+    },
+    "telex": {
+      "n": 25,
+      "word_acc": 0.18,
+      "sentence_exact": 0
+    }
+  },
+  "elapsed_seconds": 35.8,
+  "bench_date": "2026-05-03",
+  "device": "cuda"
+}

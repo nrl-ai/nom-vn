@@ -99,8 +99,9 @@ class VinternHandwritingOcr:
             from transformers import AutoModel, AutoTokenizer
         except ImportError as exc:
             raise ImportError(
-                "VinternHandwritingOcr requires transformers + torch. "
-                "Install with: pip install 'transformers>=4.45' 'torch>=2.0'"
+                "VinternHandwritingOcr needs the handwriting-OCR extras. "
+                "Install with: pip install 'nom-vn[ocr-handwriting]' "
+                "(brings transformers + torch + torchvision + timm + pillow)."
             ) from exc
 
         device = self.device
@@ -140,7 +141,8 @@ class VinternHandwritingOcr:
             from PIL import Image as PILImage
         except ImportError as exc:
             raise ImportError(
-                "VinternHandwritingOcr requires Pillow. Install with: pip install Pillow"
+                "VinternHandwritingOcr requires Pillow. "
+                "Install with: pip install 'nom-vn[ocr-handwriting]'"
             ) from exc
 
         if isinstance(image, bytes):

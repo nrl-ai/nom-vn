@@ -1,0 +1,56 @@
+{
+  "corpus": "doof-ferb/Speech-MASSIVE_vie test (first 3 samples)",
+  "n_samples": 3,
+  "models": {
+    "phowhisper-large": {
+      "mean_wer": 0.152,
+      "elapsed_seconds": 884.0,
+      "samples": [
+        {
+          "path": "/tmp/vn_test_0.wav",
+          "gold": "kích thước của một con cá nhà táng là bao nhiêu",
+          "pred": "kích thước của một con cá nhà táng là bao nhiêu.",
+          "wer": 0.0909
+        },
+        {
+          "path": "/tmp/vn_test_1.wav",
+          "gold": "gửi thư điện tử các cuộc hẹn của tôi để xếp lại lịch trình",
+          "pred": "gửi thư điện tử các cuộc hẹn của tôi để sắp lại lịch trình.",
+          "wer": 0.1429
+        },
+        {
+          "path": "/tmp/vn_test_2.wav",
+          "gold": "vui lòng thay đổi múi giờ sang giờ canada",
+          "pred": "vui lòng thay đổi mỗi giờ sang giờ canada.",
+          "wer": 0.2222
+        }
+      ]
+    },
+    "whisper-large-v3": {
+      "mean_wer": 0.152,
+      "elapsed_seconds": 6.9,
+      "samples": [
+        {
+          "path": "/tmp/vn_test_0.wav",
+          "gold": "kích thước của một con cá nhà táng là bao nhiêu",
+          "pred": "Kích thước của một con cá nhà táng là bao nhiêu?",
+          "wer": 0.0909
+        },
+        {
+          "path": "/tmp/vn_test_1.wav",
+          "gold": "gửi thư điện tử các cuộc hẹn của tôi để xếp lại lịch trình",
+          "pred": "Gửi thư điện tử các cuộc hẹn của tôi để sắp lại lịch trình.",
+          "wer": 0.1429
+        },
+        {
+          "path": "/tmp/vn_test_2.wav",
+          "gold": "vui lòng thay đổi múi giờ sang giờ canada",
+          "pred": "Vui lòng thay đổi mối giờ sang giờ Canada.",
+          "wer": 0.2222
+        }
+      ]
+    }
+  },
+  "bench_date": "2026-05-03",
+  "device": "cuda"
+}

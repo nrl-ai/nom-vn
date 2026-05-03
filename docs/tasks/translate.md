@@ -150,6 +150,27 @@ VN → EN (chưa đo MADLAD chiều này).
 > in ra `"10000000000000♠0.00..."` cho mọi đầu vào. Hãy ghim
 > `transformers < 5` (cũng đã ghim trong gói `nom-vn[diacritic-hf]`).
 
+### Bẫy chất lượng đã đo trên MADLAD
+
+Đo trong sweep ngày 2026-05-03 trên đoạn ngẫu nhiên có chứa năm cụ thể
+kết hợp thuật ngữ kinh tế:
+
+- **Số bị thay đổi.** "for 2025" → "năm 2015" (mô hình lệch năm sang
+  một năm xuất hiện nhiều hơn trong dữ liệu huấn luyện).
+- **Idiom dịch sai.** "economic outlook" thường đi vào "thị trường
+  chứng khoán" (phổ biến trong corpus tin tức tài chính VN) thay vì
+  "triển vọng kinh tế" trung tính.
+- **Hallucination URL.** Khi gặp đoạn cuối có khoảng trắng và mẫu
+  "according to X" lặp, đôi khi sinh ra `"://t.co/888..."` hoặc
+  chuỗi pic.twitter.com/ — phổ biến hơn ở chuỗi đa-đoạn so với gọi
+  từng đoạn riêng.
+
+Kết luận thực dụng: dùng MADLAD cho **tin tức / hợp đồng thông
+thường** nơi chất lượng cao đáng giá. Cho **tài liệu pháp lý** mà sai
+năm hay sai thuật ngữ là không chấp nhận được, dùng LLM chat
+(qwen3:8b trở lên) — nó nhớ câu trước đó và ít hallucinate trên
+context dài. Đối chiếu output ngẫu nhiên trước khi dùng cho production.
+
 Số đo đầy đủ đã lưu ở [`benchmarks/results/`](../../benchmarks/results/).
 
 ## Liên quan
