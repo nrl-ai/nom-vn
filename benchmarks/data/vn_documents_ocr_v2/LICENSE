@@ -1,0 +1,29 @@
+License terms for vn_documents_ocr_v2 — mixed PD + CC0
+
+Per-record license is in metadata.jsonl ("license" field). Two regimes
+apply:
+
+1. The 9 records in the `real` config are public-domain Vietnamese
+   government works under Luật Sở hữu trí tuệ Việt Nam, Điều 15
+   (Vietnamese law does not extend copyright to legal-normative
+   documents, administrative texts, or judicial documents). Sources:
+     - chinhphu.vn (Văn phòng Chính phủ — Office of the Government)
+     - hanoi.gov.vn (Ủy ban nhân dân TP Hà Nội — Hanoi People's Committee)
+   Each record's "source_url" field links to the upstream PD original.
+
+2. The 3 records in the `synthetic_scan` config plus this README and
+   the `_generate.py` script are released under Creative Commons
+   Zero v1.0 Universal (CC0). To the extent possible under law, the
+   contributors have waived all copyright and related or neighboring
+   rights. Full text:
+     https://creativecommons.org/publicdomain/zero/1.0/legalcode
+
+Personal data: none. The PD government records name public officials
+(Prime Minister, Ministers, Vice Chairs of People's Committees) in
+their official capacities — public record under Vietnamese law. The
+synthetic receipts use fictional names, addresses, ID numbers, phone
+numbers, and amounts.
+
+Redistribution: combine both regimes by treating the dataset as
+CC0 + public-domain. No attribution is legally required, but a
+citation to nrl-ai/vn-ocr-documents-eval is appreciated.

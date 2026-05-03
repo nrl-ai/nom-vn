@@ -1,0 +1,185 @@
+{
+  "config": {
+    "ocr_language": "vie+eng",
+    "limit": 0,
+    "tesseract": "/home/vietanhdev/miniconda3/bin/tesseract",
+    "corpus": "benchmarks/data/vn_documents_ocr_v2",
+    "n_docs": 12
+  },
+  "summary": {
+    "overall_cer_raw": 0.1254,
+    "overall_cer_normalized": 0.0957,
+    "total_seconds": 16.97,
+    "docs_per_second": 0.707
+  },
+  "by_config": {
+    "real": {
+      "n": 9,
+      "cer_normalized_mean": 0.1262,
+      "cer_normalized_median": 0.1199
+    },
+    "synthetic_scan": {
+      "n": 3,
+      "cer_normalized_mean": 0.0043,
+      "cer_normalized_median": 0.0041
+    }
+  },
+  "per_doc": [
+    {
+      "doc_id": "real_qd_729_ttg",
+      "config": "real",
+      "category": "government_real",
+      "title": "Quyết định 729/QĐ-TTg",
+      "issuer": "Thủ tướng Chính phủ",
+      "n_pages": 1,
+      "cer_raw": 0.1701,
+      "cer_normalized": 0.1545,
+      "elapsed_seconds": 1.66,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_cv_3722_metro",
+      "config": "real",
+      "category": "government_real",
+      "title": "Công văn 3722/VPCP-CN",
+      "issuer": "Văn phòng Chính phủ",
+      "n_pages": 1,
+      "cer_raw": 0.156,
+      "cer_normalized": 0.1398,
+      "elapsed_seconds": 1.14,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_nq_115_ba_vi",
+      "config": "real",
+      "category": "government_real",
+      "title": "Nghị quyết 115/NQ-CP",
+      "issuer": "Chính phủ",
+      "n_pages": 1,
+      "cer_raw": 0.112,
+      "cer_normalized": 0.0967,
+      "elapsed_seconds": 1.28,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_qd_707_ttg",
+      "config": "real",
+      "category": "government_real",
+      "title": "Quyết định 707/QĐ-TTg",
+      "issuer": "Thủ tướng Chính phủ",
+      "n_pages": 1,
+      "cer_raw": 0.0536,
+      "cer_normalized": 0.0398,
+      "elapsed_seconds": 1.13,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_tt_21_bct_fuel",
+      "config": "real",
+      "category": "government_real",
+      "title": "Thông tư 21/2026/TT-BCT",
+      "issuer": "Bộ Công Thương",
+      "n_pages": 1,
+      "cer_raw": 0.1318,
+      "cer_normalized": 0.1199,
+      "elapsed_seconds": 1.39,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_hanoi_qd_2280_water",
+      "config": "real",
+      "category": "government_real",
+      "title": "Quyết định 2280/QĐ-UBND",
+      "issuer": "UBND TP Hà Nội",
+      "n_pages": 1,
+      "cer_raw": 0.1579,
+      "cer_normalized": 0.1445,
+      "elapsed_seconds": 1.39,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_hanoi_tb_453_flag",
+      "config": "real",
+      "category": "government_real",
+      "title": "Thông báo 453/TB-UBND",
+      "issuer": "UBND TP Hà Nội",
+      "n_pages": 1,
+      "cer_raw": 0.2331,
+      "cer_normalized": 0.2195,
+      "elapsed_seconds": 0.99,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_hanoi_kh_173_festival",
+      "config": "real",
+      "category": "government_real",
+      "title": "Kế hoạch 173/KH-UBND",
+      "issuer": "UBND TP Hà Nội",
+      "n_pages": 1,
+      "cer_raw": 0.1244,
+      "cer_normalized": 0.1104,
+      "elapsed_seconds": 1.59,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "real_tt_37_bca_vehicle",
+      "config": "real",
+      "category": "government_real",
+      "title": "Thông tư 37/2026/TT-BCA",
+      "issuer": "Bộ Công an",
+      "n_pages": 1,
+      "cer_raw": 0.1284,
+      "cer_normalized": 0.1109,
+      "elapsed_seconds": 1.86,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "synth_scan_receipt_hoa_don",
+      "config": "synthetic_scan",
+      "category": "receipt_synthetic_scan",
+      "title": "HOÁ ĐƠN GIÁ TRỊ GIA TĂNG",
+      "issuer": "synthetic — fictional",
+      "n_pages": 1,
+      "cer_raw": 0.0161,
+      "cer_normalized": 0.0072,
+      "elapsed_seconds": 1.66,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "synth_scan_receipt_bien_lai",
+      "config": "synthetic_scan",
+      "category": "receipt_synthetic_scan",
+      "title": "BIÊN LAI THU TIỀN",
+      "issuer": "synthetic — fictional",
+      "n_pages": 1,
+      "cer_raw": 0.1421,
+      "cer_normalized": 0.0015,
+      "elapsed_seconds": 1.41,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    },
+    {
+      "doc_id": "synth_scan_receipt_phieu_chi",
+      "config": "synthetic_scan",
+      "category": "receipt_synthetic_scan",
+      "title": "PHIẾU CHI",
+      "issuer": "synthetic — fictional",
+      "n_pages": 1,
+      "cer_raw": 0.0792,
+      "cer_normalized": 0.0041,
+      "elapsed_seconds": 1.47,
+      "pages_ocred": 1,
+      "pages_text_extracted": 0
+    }
+  ]
+}
