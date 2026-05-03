@@ -267,16 +267,30 @@ class TestRegisterClassifier:
         )
         assert r.status_code == 422
 
-    def test_phobert_without_model_id_503(self, client: TestClient) -> None:
-        # No default PhoBERT model is published yet — calling phobert
-        # backend without `model_id` returns 503 with the install hint,
-        # not a 500 with a stack trace.
+    def test_phobert_returns_well_formed_response(self, client: TestClient) -> None:
+        # Since `nrl-ai/vn-register-phobert-base` shipped, the `phobert`
+        # backend with no explicit `model_id` falls back to that
+        # published default.
+        # - Success path (transformers + torch present, model cached):
+        #   200 with the same {label, score, distribution, backend}
+        #   shape as the lexicon backend.
+        # - Failure path (slim install / no torch on CI lint runner):
+        #   503 with a human-readable install hint.
+        # Either path must be well-formed — never a 500 stack trace.
         r = client.post(
             "/api/tools/classify/register",
             json={"text": "Hôm nay trời đẹp.", "backend": "phobert"},
         )
-        assert r.status_code == 503
-        assert "model_id" in r.json()["detail"]
+        assert r.status_code in (200, 503)
+        if r.status_code == 200:
+            body = r.json()
+            assert body["backend"] == "phobert"
+            assert body["label"] in {"formal", "business", "conversational", "literary"}
+            assert 0.0 <= body["score"] <= 1.0
+            assert abs(sum(body["distribution"].values()) - 1.0) < 1e-3
+        else:
+            detail = r.json()["detail"]
+            assert any(needle in detail for needle in ("model_id", "transformers", "torch"))
 
     def test_empty_input_422(self, client: TestClient) -> None:
         r = client.post("/api/tools/classify/register", json={"text": ""})

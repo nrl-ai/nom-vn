@@ -60,13 +60,27 @@ Tái lập bằng cách chạy lại các script đính kèm từ một bản cl
 
 ---
 
-## Trust-ladder verdicts đáng flag
+## Cảnh báo theo bậc tin cậy định dạng tệp
 
-- **PhoWhisper / PhoBERT đều là `.bin` pickled, không có safetensors variant.** Acceptable per project policy (VinAI = recognized VN lab) — nhưng **bắt buộc document SHA256 + lý do trong wrapper docstring** mỗi khi load. Không được dùng `pickle` từ unknown publisher; VinAI là exception có lý do.
-- **`5CD-AI/Viet-Handwriting-OCR` license unspecified** — không train trước khi confirm với 5CD-AI. Dùng `brianhuster/VietnameseOCRdataset` (Apache 2.0, 7 296 ảnh) cho eval đến khi license confirmed.
-- **`pyannote/speaker-diarization-community-1` gated** — cần HF account + contact share; không có commercial restriction nhưng auto-pull không chạy. Cần wrapper thông báo user setup.
-- **`X-GENRE` (phân loại văn phong đa ngôn ngữ, không cần huấn luyện) là CC-BY-SA-4.0** — copyleft. Dùng làm điểm so sánh, không dùng làm phụ thuộc lõi.
-- **`XLSum VN` (40 k articles) là CC-BY-NC-SA** — non-commercial. Skip cho training; dùng `nam194/vietnews` (143 k, license permissive) thay thế.
+- **PhoWhisper / PhoBERT đều ship dạng `.bin` (pickle), không có
+  bản safetensors.** Chấp nhận được theo chính sách dự án (VinAI là
+  lab tiếng Việt được công nhận) — nhưng **bắt buộc ghi SHA256 +
+  lý do trong docstring của wrapper** mỗi lần load. Không nhận
+  `pickle` từ tác giả vô danh; VinAI là ngoại lệ có lý do.
+- **`5CD-AI/Viet-Handwriting-OCR` chưa rõ giấy phép** — không huấn
+  luyện trước khi xác nhận với 5CD-AI. Dùng tạm
+  `brianhuster/VietnameseOCRdataset` (Apache 2.0, 7 296 ảnh) cho
+  đánh giá cho đến khi giấy phép được làm rõ.
+- **`pyannote/speaker-diarization-community-1` cần xin quyền** —
+  yêu cầu tài khoản HuggingFace + chia sẻ thông tin liên hệ; không
+  có ràng buộc thương mại nhưng tải tự động không chạy. Wrapper cần
+  hiển thị hướng dẫn cho người dùng.
+- **`X-GENRE` (phân loại văn phong đa ngôn ngữ, không cần huấn
+  luyện) là CC-BY-SA-4.0** — copyleft. Dùng làm điểm so sánh, không
+  dùng làm phụ thuộc lõi.
+- **`XLSum VN` (40 nghìn bài) là CC-BY-NC-SA** — phi thương mại.
+  Bỏ qua cho huấn luyện; dùng `nam194/vietnews` (143 nghìn, giấy
+  phép cho phép) thay thế.
 
 ---
 

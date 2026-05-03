@@ -429,11 +429,11 @@ Whisper-family STT cho tiếng Việt. Hai cách chạy sau cùng `Protocol`:
 - `PhoWhisperSTT` — `vinai/PhoWhisper-large` (BSD-3, .bin từ VinAI).
   Mặc định cho audio thuần VN.
 - `WhisperSTT` — `openai/whisper-large-v3` (MIT, safetensors). Dùng
-  cho audio lai VN ↔ EN — beat PhoWhisper trên audio lai theo ViMD
-  survey (chưa tái lập tại đây).
+  cho ghi âm lai VN ↔ EN — theo khảo cứu trên ViMD, Whisper-v3 vượt
+  PhoWhisper trên audio lai (chưa tái lập tại đây).
 
 Cả hai dùng pipeline ``transformers.automatic-speech-recognition``;
-chunk 30 giây tự động, NFC sau khi decode.
+tự cắt khúc mỗi 30 giây, NFC sau khi giải mã.
 
 ### `nom.summarize` — Tóm tắt (đã phát hành, v0.3)
 
