@@ -15,23 +15,22 @@ phải engine OCR truyền thống.
 Yêu cầu: GPU 4–6 GB VRAM cho tốc độ chấp nhận được; CPU chạy được
 nhưng mất 1–2 phút mỗi ảnh.
 
-### Đo nội bộ trên `synthetic_ocr_vi` (2026-05-03)
+### Số đo nội bộ trên `synthetic_ocr_vi` (2026-05-03)
 
-Bench đầu tay trên dòng chữ in tiếng Việt (đẩy qua Vintern, không
-phải Tesseract — để đo phần "Vintern xử lý đúng dòng in clean như
-thế nào"):
+Đo thử Vintern trên dòng chữ in tiếng Việt — để biết "Vintern đọc
+đúng dòng in sạch đến đâu" trước khi nói chuyện chữ viết tay:
 
-| Điều kiện | n | Mean CER | Exact-match |
+| Điều kiện | n | CER trung bình | Khớp tuyệt đối |
 |---|---:|---:|---:|
-| `clean` (1 font, nền trắng) | 20 | **0.47 %** | 16/20 |
-| `noisy` (cùng nội dung + nhiễu/jitter) | 20 | **0.37 %** | 17/20 |
+| `clean` (một phông, nền trắng) | 20 | **0,47 %** | 16/20 |
+| `noisy` (cùng nội dung, có nhiễu) | 20 | **0,37 %** | 17/20 |
 
 Phần lớn "lỗi" còn lại là biến thể chính tả VN hợp lệ (`hoà` ↔ `hòa`)
-mà CER tính là khác biệt. n=20 còn nhỏ — bench trên 200+ ảnh trước khi
-publish con số "VN handwriting CER" chính thức.
+nhưng CER tính là khác. n=20 còn nhỏ — phải đo trên 200+ ảnh trước
+khi công bố con số "CER chữ viết tay VN" chính thức.
 
-Tập eval ([`nrl-ai/vn-synthetic-ocr`](https://huggingface.co/datasets/nrl-ai/vn-synthetic-ocr),
-CC0) đã publish trên HF. Baseline JSON:
+Tập đánh giá ([`nrl-ai/vn-synthetic-ocr`](https://huggingface.co/datasets/nrl-ai/vn-synthetic-ocr),
+CC0) đã đăng trên HuggingFace. JSON kết quả:
 [`benchmarks/accuracy/vintern_ocr_clean_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/vintern_ocr_clean_baseline.json)
 + [`vintern_ocr_noisy_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/vintern_ocr_noisy_baseline.json).
 
@@ -87,16 +86,16 @@ cho phần Tesseract không làm được (chữ viết tay).
 
 ## Giới hạn đã biết
 
-+ **Đã đo trên chữ in synthetic (CER 0.47 % clean / 0.37 % noisy, n=20),
-  chưa đo độc lập trên chữ viết tay thực.** Mọi con số chữ-viết-tay
-  bên dưới là **ước lượng**, chưa benchmark first-party:
-  + Chữ in scan rõ: CER ≈ 5 % (cao hơn synthetic vì layout phức tạp)
-  + Chữ viết tay người trưởng thành nét rõ: CER ≈ 15 % (ước lượng)
-  + Chữ viết tay nhanh hoặc nét nguệch ngoạc: CER ≈ 30 %+ (ước lượng)
++ **Đã đo trên chữ in tổng hợp (CER 0,47 % sạch / 0,37 % nhiễu,
+  n=20), chưa đo độc lập trên chữ viết tay thật.** Các con số dưới
+  đây là **ước lượng**, chưa có số liệu nội bộ:
+  + Ảnh quét chữ in rõ: CER ≈ 5 % (cao hơn tổng hợp do bố cục phức tạp)
+  + Chữ viết tay người lớn, nét rõ: CER ≈ 15 % (ước lượng)
+  + Chữ viết tay nhanh hoặc nguệch ngoạc: CER ≈ 30 %+ (ước lượng)
 
-  Bench đầu tay trên handwriting thật là task Tier 2 — sẽ chạy trên
-  `brianhuster/VietnameseOCRdataset` (~7 k ảnh, Apache-2.0) và
-  cập nhật con số ở đây trong cùng commit như JSON baseline.
+  Đo trên chữ viết tay thật là việc đợt sau — sẽ chạy trên
+  `brianhuster/VietnameseOCRdataset` (~7 nghìn ảnh, Apache-2.0) và
+  cập nhật con số ở đây trong cùng commit với JSON kết quả.
 + **Phụ thuộc chất lượng ảnh.** Ảnh mờ, tối, hoặc nghiêng > 15° làm
   giảm chất lượng đáng kể. Crop sạch đầu vào trước.
 + **Không xử lý cấu trúc form.** Vintern trả về văn bản tuyến tính,

@@ -8,52 +8,51 @@
 
 ## Master matrix
 
-| Trục | Top pick | License | Format | Size | VN bench (in-house, 2026-05-03) | Status |
+| Trục | Lựa chọn hàng đầu | Giấy phép | Định dạng | Kích thước | Số đo VN (nội bộ, 2026-05-03) | Trạng thái |
 |---|---|---|---|---|---|---|
-| Register classifier (baseline) | `nom.classify.LexiconRegisterClassifier` (in-tree) | Apache 2.0 | — (zero-ML) | < 1 KB | not measured (heuristic; tautological on its own markers) | shipped |
-| Register classifier (target) | `vinai/phobert-base` fine-tune | MIT | .bin (VinAI) | 135 M | training script ready; **GPU run pending** | code-complete |
-| Handwriting OCR | `5CD-AI/Vintern-1B-v3_5` (zero-shot) | MIT | safetensors | 0.9 B | **CER 0.47 % clean / 0.37 % noisy** (n=20 each, `synthetic_ocr_vi`) | shipped + benched |
-| Spell v0.1 | `nrl-ai/vn-spell-correction-base` (in-stack) | MIT | .bin | ~900 MB | **78.33 % word-acc agg / 65 of 150 sent-exact** (n=150 OOD across 6 registers) | shipped + benched |
-| Spell v0.1 by register | same | — | — | — | ocr 97.6 / news 96.5 / mobile 95.8 / legal 95.6 / forum 63.4 / **telex 18.0** | known weak spots |
-| Spell v0.2 (precision guard) | `vinai/phobert-base` token-class head | MIT | .bin | 135 M | Tự đo FPR target <5 % trên UD-VTB clean | not started |
-| STT | `VinAI/PhoWhisper-large` | BSD-3 | .bin (VinAI) | 1.5 B | **15.2 % WER** in-house (n=3 Speech-MASSIVE_vie); upstream: VIVOS 4.67 % WER, VLSP T1 13.75 % | shipped + tiny bench |
-| STT (code-switch) | `openai/whisper-large-v3` | MIT | safetensors | 1.5 B | **15.2 % WER** in-house (n=3, identical to PhoWhisper on this set) | shipped + tiny bench |
-| Diarization | `pyannote/speaker-diarization-community-1` | CC-BY-4.0 (gated) | .bin | 16 M | VoxConverse DER 11.2 % (EN bench) — VN chưa có | not integrated |
-| Diarization (streaming) | NVIDIA Sortformer v2 | CC-BY-4.0 | TBD | — | RTF 0.093, ≤4 speakers hard cap | not integrated |
-| NER base | regex baseline (`nom.nlp.ner_legal`) | Apache 2.0 | — (zero-ML) | n/a | tests pass on patterns I designed (tautological) | shipped |
-| NER target | `vinai/phobert-base` fine-tune w/ LAW_REF + CONTRACT_PARTY heads | MIT | .bin | 135 M | F1 94.7 PER/ORG/LOC/MISC (VLSP 2016, upstream); custom heads need 70-90 hr annot | not started |
-| Summarization (news) | `VietAI/vit5-large-vietnews-summarization` | MIT | .bin | 866 M | upstream ROUGE-1 63.4 vietnews; 1-sample test **hallucinated specific GDP figures** | shipped, hallucination caveat |
-| Summarization (legal/long) | `Qwen/Qwen3-8B` + LoRA per register | Apache 2.0 | safetensors | 8 B | 131 k context, no VN summary number | not started |
+| Phân loại văn phong (cơ sở) | `nom.classify.LexiconRegisterClassifier` (trong cây mã) | Apache 2.0 | — (không học máy) | < 1 KB | chưa đo (quy tắc; tự test mình trên từ-mốc của chính nó) | đã ship |
+| Phân loại văn phong (mục tiêu) | `vinai/phobert-base` fine-tune | MIT | .bin (VinAI) | 135 M | script huấn luyện đã sẵn; **đợi máy GPU chạy** | mã đã sẵn |
+| OCR chữ viết tay | `5CD-AI/Vintern-1B-v3_5` (không cần fine-tune) | MIT | safetensors | 0,9 B | **CER 0,47 % sạch / 0,37 % nhiễu** (n=20 mỗi loại, `synthetic_ocr_vi`) | đã ship + đã đo |
+| Sửa chính tả v0.1 | `nrl-ai/vn-spell-correction-base` (sẵn trong stack) | MIT | .bin | ~900 MB | **78,33 % word-acc tổng hợp / khớp 65 trên 150 câu** (n=150 OOD trên 6 thể loại) | đã ship + đã đo |
+| Sửa chính tả v0.1 theo thể loại | cùng mô hình | — | — | — | ocr 97,6 / news 96,5 / mobile 95,8 / legal 95,6 / forum 63,4 / **telex 18,0** | điểm yếu đã biết |
+| Sửa chính tả v0.2 (chặn lỗi) | `vinai/phobert-base` head phân loại token | MIT | .bin | 135 M | Tự đo FPR mục tiêu <5 % trên UD-VTB sạch | chưa bắt đầu |
+| STT | `VinAI/PhoWhisper-large` | BSD-3 | .bin (VinAI) | 1,5 B | **WER 15,2 %** nội bộ (n=3 Speech-MASSIVE_vie); VinAI công bố: VIVOS 4,67 % WER, VLSP T1 13,75 % | đã ship + đo nhỏ |
+| STT (lai EN/VN) | `openai/whisper-large-v3` | MIT | safetensors | 1,5 B | **WER 15,2 %** nội bộ (n=3, ngang PhoWhisper trên tập này) | đã ship + đo nhỏ |
+| Phân tách người nói | `pyannote/speaker-diarization-community-1` | CC-BY-4.0 (gated) | .bin | 16 M | VoxConverse DER 11,2 % (đo trên tiếng Anh) — chưa có số VN | chưa tích hợp |
+| Phân tách (thời gian thực) | NVIDIA Sortformer v2 | CC-BY-4.0 | TBD | — | RTF 0,093, giới hạn cứng ≤4 người nói | chưa tích hợp |
+| NER cơ sở | quy tắc (`nom.nlp.ner_legal`) | Apache 2.0 | — (không học máy) | n/a | test pass trên các mẫu chính tôi viết (tự test mình) | đã ship |
+| NER mục tiêu | `vinai/phobert-base` fine-tune + đầu LAW_REF + CONTRACT_PARTY | MIT | .bin | 135 M | F1 94,7 PER/ORG/LOC/MISC (VLSP 2016, upstream); đầu custom cần 70–90 giờ chú thích | chưa bắt đầu |
+| Tóm tắt (tin tức) | `VietAI/vit5-large-vietnews-summarization` | MIT | .bin | 866 M | upstream ROUGE-1 63,4 vietnews; 1 mẫu thử **bịa số GDP cụ thể** | đã ship, kèm cảnh báo bịa số |
+| Tóm tắt (pháp lý / dài) | `Qwen/Qwen3-8B` + LoRA theo thể loại | Apache 2.0 | safetensors | 8 B | ngữ cảnh 131 k, chưa có số tóm tắt VN | chưa bắt đầu |
 
-**Bold = first-party measured.** Bench sources committed under `benchmarks/accuracy/`:
+**In đậm = số chính chúng tôi đo.** Nguồn JSON đặt tại `benchmarks/accuracy/`:
 `spell_correction_real_baseline.json`, `vintern_ocr_clean_baseline.json`,
 `vintern_ocr_noisy_baseline.json`, `stt_speech_massive_baseline.json`.
-Reproduce by re-running the inline scripts from a clean clone.
+Tái lập bằng cách chạy lại các script đính kèm từ một bản clone sạch.
 
-**Caveats baked into the numbers, not hidden in footnotes:**
+**Cảnh báo gắn liền với từng con số, không giấu vào chú thích chân:**
 
-- **Spell telex 18 %** is a real failure mode. The model converted
-  "Toi yu" → "Tới từ" (different meaning entirely). Forum register
-  (chat-style abbreviations) is the second-worst at 63 %. Don't claim
-  "spell-correction works" without saying *which register* — formal
-  prose is genuinely 95-97 %, telex/forum are not.
-- **Vintern 0.47 % CER** is computed at the character level — many of
-  the residual errors are valid VN diacritic variants (`hoà` ↔ `hòa`)
-  that count as differences but are functionally correct. n=20 only;
-  scale to a 200-image set before adoption claims.
-- **STT n=3 is a smoke test, not a verdict.** Both PhoWhisper-large
-  and Whisper-v3 hit identical WER on this set (15.2 %), with errors
-  driven mostly by punctuation/case differences and one shared
-  homophone confusion (`múi giờ` ↔ `mỗi giờ`). Bench on ViMD's
-  three-region split before claiming dialect coverage.
-- **Summarize hallucination** observed on a single 234-char input
-  (the model wrote out specific "6,8 % – 7,0 %" GDP figures that
-  weren't in the source). Single sample isn't a verdict, but it's
-  enough to flag — multi-sample bench is open Tier 2 work.
-- **Register-classifier "ML"** isn't shipped yet. The PhoBERT path is
-  code-complete with a training script under `training/register/`,
-  but the GPU run hasn't happened. The lexicon baseline is what
-  actually runs in OSS today.
+- **Sửa chính tả ở thể loại telex 18 %** là điểm yếu thật. Mô hình
+  đã chuyển "Toi yu" → "Tới từ" (khác nghĩa hoàn toàn). Thể loại
+  forum (viết tắt kiểu chat) đứng thứ hai từ dưới với 63 %. Đừng nói
+  "sửa chính tả chạy tốt" mà không nói rõ *thể loại nào* — văn bản
+  trang trọng đúng là 95–97 %, telex / forum thì không.
+- **Vintern CER 0,47 %** tính ở mức ký tự — phần lớn lỗi còn lại là
+  biến thể chính tả VN hợp lệ (`hoà` ↔ `hòa`) mà CER đếm là khác,
+  dù về nghĩa thì giống. n=20 còn nhỏ; phải đo trên 200 ảnh trước
+  khi công bố để áp dụng.
+- **STT n=3 là đo thử, chưa phải kết luận.** Cả PhoWhisper-large
+  và Whisper-v3 đều đạt 15,2 % WER trên tập này; lỗi chủ yếu do dấu
+  câu / viết hoa và một chỗ nhầm từ đồng âm (`múi giờ` ↔ `mỗi giờ`).
+  Phải đo trên ViMD chia 3 vùng trước khi khẳng định bao phủ phương
+  ngữ.
+- **Tóm tắt bịa số liệu** đã thấy trên một đoạn 234 ký tự duy nhất
+  (mô hình tự bịa con số GDP "6,8 % – 7,0 %" không có trong nguồn).
+  Một mẫu chưa phải kết luận, nhưng đủ để cảnh báo — đo nhiều mẫu
+  là việc của đợt tiếp theo.
+- **Phân loại văn phong "có học máy"** chưa được ship. Đường PhoBERT
+  có script huấn luyện ở `training/register/`, nhưng chưa chạy trên
+  máy GPU. Phiên bản chạy trong OSS hôm nay là quy tắc.
 
 ---
 

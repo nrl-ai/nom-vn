@@ -12,25 +12,25 @@ Phân loại đoạn văn tiếng Việt theo bốn lớp văn phong: **trang tr
 
 ## TL;DR — gợi ý của chúng tôi
 
-Hai backend, chọn theo ngân sách:
+Hai cách chạy, chọn theo nhu cầu:
 
-| Backend | Cài đặt | Độ chính xác | Tốc độ | Trạng thái |
+| Cách chạy | Cài đặt | Độ chính xác | Tốc độ | Trạng thái |
 | --- | --- | --- | --- | --- |
-| **Heuristic** *(mặc định)* | Không cần gì | ~70–80 % (chưa đo trên held-out) | ~1 ms | đã ship |
-| **PhoBERT-base** | `pip install "nom-vn[diacritic-hf]"` (nay đủ) | mục tiêu macro-F1 ≥ 0.85 | ~30 ms | code sẵn — bench đang chờ GPU run |
+| **Quy tắc (heuristic)** *(mặc định)* | Không cần gì | ~70–80 % (chưa đo trên tập riêng) | ~1 ms | đã ship |
+| **PhoBERT-base** | `pip install "nom-vn[diacritic-hf]"` (đủ) | mục tiêu macro-F1 ≥ 0,85 | ~30 ms | mã đã sẵn — đợi chạy huấn luyện trên máy GPU |
 
-Heuristic chạy ngay cục bộ — phù hợp khi dùng một lần hoặc batch nhỏ.
+Quy tắc chạy ngay cục bộ — phù hợp khi dùng một lần hoặc theo lô nhỏ.
 PhoBERT là mục tiêu sản xuất; script huấn luyện ở
 [`training/register/`](https://github.com/nrl-ai/nom-vn/tree/main/training/register)
-sẵn sàng — chỉ cần GPU và vài giờ. Cho đến khi checkpoint publish lên
-HF (`nrl-ai/vn-register-phobert-base`, dự kiến v0.4), backend
-PhoBERT cần truyền `model_id` thủ công.
+đã sẵn — chỉ cần máy GPU và vài giờ. Cho đến khi checkpoint được
+đăng lên HuggingFace (`nrl-ai/vn-register-phobert-base`, dự kiến
+v0.4), `model_id` cần truyền thủ công khi dùng PhoBERT.
 
-> **Trung thực:** số "70–80 %" là ước lượng — heuristic được test trên
-> chính các từ-mốc của nó (tautological), nên chưa có con số macro-F1
-> trên tập held-out đáng tin. Đó là lý do chúng tôi không claim một
-> con số duy nhất cho lexicon ở đây. Nếu cần routing chất lượng cao,
-> chạy training script ngay.
+> **Trung thực:** số "70–80 %" là ước lượng — quy tắc được kiểm tra
+> chính trên các từ-mốc của nó (tự test mình), nên chưa có macro-F1
+> đáng tin trên tập riêng. Vì vậy chúng tôi không công bố một con số
+> duy nhất cho phần quy tắc. Nếu cần định tuyến chất lượng cao, chạy
+> script huấn luyện ngay.
 
 ## Cách dùng
 

@@ -15,25 +15,27 @@ từ `whisper-large-v3`. Lần đầu tải khoảng 3 GB.
 Yêu cầu: GPU 6 GB VRAM cho real-time; CPU chạy được nhưng chậm 5 ×
 độ dài audio.
 
-### Đo nội bộ — trạng thái thật (2026-05-03)
+### Số đo nội bộ — trạng thái thật (2026-05-03)
 
-Chỉ 3 mẫu thử trên `doof-ferb/Speech-MASSIVE_vie` test split, **chưa
-phải bench đầy đủ**:
+Mới chỉ 3 mẫu thử trên `doof-ferb/Speech-MASSIVE_vie` (split kiểm
+thử), **chưa phải đánh giá đầy đủ**:
 
-| Mô hình | n | Mean WER |
+| Mô hình | n | WER trung bình |
 |---|---:|---:|
-| `vinai/PhoWhisper-large` | 3 | 15.2 % |
-| `openai/whisper-large-v3` | 3 | 15.2 % |
+| `vinai/PhoWhisper-large` | 3 | 15,2 % |
+| `openai/whisper-large-v3` | 3 | 15,2 % |
 
-Hai mô hình **bằng nhau** trên tập nhỏ này — lỗi chính: 1 trộn từ
-đồng âm (`múi giờ` ↔ `mỗi giờ`) + 1 thay từ (`xếp` ↔ `sắp`) + chênh
-lệch dấu câu / viết hoa. Số 6.4 % WER ở bảng dưới là claim của VinAI
-trên model card, chưa được tái lập trên tập đại trà ở đây.
+Hai mô hình **bằng nhau** trên tập nhỏ này — lỗi chính: một chỗ
+nhầm từ đồng âm (`múi giờ` ↔ `mỗi giờ`) + một chỗ thay từ
+(`xếp` ↔ `sắp`) + chênh lệch dấu câu / viết hoa. Con số 6,4 %
+WER ở bảng dưới là VinAI tự công bố trên model card, chưa
+được tái lập tại đây.
 
-Baseline JSON:
+JSON kết quả:
 [`benchmarks/accuracy/stt_speech_massive_baseline.json`](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/accuracy/stt_speech_massive_baseline.json).
-Tier 2 sẽ bench trên ViMD 3-region split (Bắc 40.6 h / Trung 31.5 h /
-Nam 30.5 h) trước khi claim "PhoWhisper hơn Whisper-v3 trên VN".
+Đợt sau sẽ đánh giá trên ViMD chia theo 3 vùng (Bắc 40,6 giờ /
+Trung 31,5 giờ / Nam 30,5 giờ) trước khi khẳng định "PhoWhisper
+hơn Whisper-v3 trên tiếng Việt".
 
 ## Cách dùng
 

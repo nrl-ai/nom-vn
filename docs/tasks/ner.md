@@ -18,14 +18,14 @@ Hai bộ thực thể, chọn theo nhu cầu:
 Backend mặc định: regex (nhanh, deterministic, không cần model). Cần
 độ chính xác cao hơn, đổi sang HF model qua plugin doanh nghiệp.
 
-> **Trạng thái thật (2026-05-03):** chỉ regex được ship trong v0. Tests
-> verify đúng các pattern do chính chúng tôi viết — đó là test cấu
-> trúc, không phải chỉ số học từ dữ liệu. Path PhoBERT fine-tune cho
-> `LAW_REF` + `CONTRACT_PARTY` (mục tiêu F1 ≥ 0.85) cần ~70-90 giờ
-> chú thích và là Tier 3 work theo
+> **Trạng thái thật (2026-05-03):** v0 mới chỉ ship phần biểu thức
+> chính quy. Bộ kiểm thử xác minh đúng các mẫu do chính chúng tôi
+> viết — đây là kiểm tra cấu trúc, không phải số đo học từ dữ liệu.
+> Hướng PhoBERT fine-tune cho `LAW_REF` + `CONTRACT_PARTY` (mục tiêu
+> F1 ≥ 0,85) cần ~70-90 giờ chú thích thủ công và xếp lịch sau theo
 > [`docs/sota_vn_2026q2_expansion.md`](../sota_vn_2026q2_expansion.md).
-> Đến khi đó, regex bắt được hầu hết hợp đồng VN hiện đại nhưng sẽ
-> bỏ sót pattern không chuẩn.
+> Đến lúc đó, biểu thức chính quy bắt được hầu hết hợp đồng VN
+> hiện đại nhưng sẽ bỏ sót các mẫu không chuẩn.
 
 ## Cách dùng
 
