@@ -123,8 +123,8 @@ def _audio_input(audio: Path | str | bytes) -> Any:
     PhoWhisper-large in 2026-05-03 STT-via-jobs sweep.
     """
     if isinstance(audio, bytes):
-        import librosa
-        import soundfile as sf
+        import librosa  # type: ignore[import-not-found, unused-ignore]
+        import soundfile as sf  # type: ignore[import-not-found, unused-ignore]
 
         with BytesIO(audio) as buf:
             samples, sr = sf.read(buf, dtype="float32")

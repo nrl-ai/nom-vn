@@ -162,7 +162,7 @@ class BKaiEmbedder:
         # `get_embedding_dimension` in sentence-transformers >=3.x; keep
         # both for forward + backward compat.
         if hasattr(self._model, "get_embedding_dimension"):
-            self._dim = self._model.get_embedding_dimension()
+            self._dim = self._model.get_embedding_dimension()  # type: ignore[operator, unused-ignore]
         else:
             self._dim = self._model.get_sentence_embedding_dimension()
         with contextlib.suppress(Exception):
