@@ -46,6 +46,11 @@ def main() -> int:
         type=Path,
         default=REPO / "benchmarks/results/baseline_paddleocr_v5_vi_finetune.json",
     )
+    parser.add_argument(
+        "--model-name",
+        default="PP-OCRv5_mobile_rec",
+        help="Architecture: PP-OCRv5_mobile_rec or PP-OCRv5_server_rec.",
+    )
     args = parser.parse_args()
 
     # Disable mkldnn — PIR + onednn instruction is broken in our paddle 3.3.x
@@ -58,7 +63,7 @@ def main() -> int:
 
     ocr = PaddleOCR(
         text_recognition_model_dir=str(args.checkpoint),
-        text_recognition_model_name="PP-OCRv5_mobile_rec",  # match arch
+        text_recognition_model_name=args.model_name,  # match arch
         lang="vi",
         use_doc_orientation_classify=False,
         use_doc_unwarping=False,

@@ -1,0 +1,56 @@
+{
+  "engine": "PaddleOCR PP-OCRv5_mobile_rec fine-tuned (Vietnamese), checkpoint=training/paddleocr_vi_rec/checkpoints/vi_server_rec_finetune/inference",
+  "corpus": "vn-ocr-documents-eval v0.4 / config=real (n=9)",
+  "mean_cer_normalized": 0.1583,
+  "median_cer_normalized": 0.1468,
+  "mean_seconds": 115.28,
+  "tesseract_baseline": 0.1262,
+  "paddle_default_baseline": 0.2074,
+  "per_doc": [
+    {
+      "doc_id": "real_qd_729_ttg",
+      "cer": 0.1908,
+      "sec": 125.8
+    },
+    {
+      "doc_id": "real_cv_3722_metro",
+      "cer": 0.1881,
+      "sec": 108.8
+    },
+    {
+      "doc_id": "real_nq_115_ba_vi",
+      "cer": 0.1397,
+      "sec": 109.2
+    },
+    {
+      "doc_id": "real_qd_707_ttg",
+      "cer": 0.1318,
+      "sec": 96.6
+    },
+    {
+      "doc_id": "real_tt_21_bct_fuel",
+      "cer": 0.1239,
+      "sec": 112.9
+    },
+    {
+      "doc_id": "real_hanoi_qd_2280_water",
+      "cer": 0.1553,
+      "sec": 106.1
+    },
+    {
+      "doc_id": "real_hanoi_tb_453_flag",
+      "cer": 0.2206,
+      "sec": 114.7
+    },
+    {
+      "doc_id": "real_hanoi_kh_173_festival",
+      "cer": 0.1277,
+      "sec": 143.1
+    },
+    {
+      "doc_id": "real_tt_37_bca_vehicle",
+      "cer": 0.1468,
+      "sec": 120.3
+    }
+  ]
+}
