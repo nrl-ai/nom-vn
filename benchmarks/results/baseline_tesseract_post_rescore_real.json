@@ -1,0 +1,11 @@
+{
+  "engine": "Tesseract vie+eng + nrl-ai/vn-spell-correction-base post-rescore",
+  "corpus": "vn-ocr-documents-eval v0.4 / config=real (n=9)",
+  "tesseract_alone_mean": 0.1263,
+  "tesseract_alone_median": 0.1199,
+  "with_rescore_mean": 0.1142,
+  "with_rescore_median": 0.1065,
+  "delta_mean_pp": 1.21,
+  "delta_median_pp": 1.35,
+  "rescore_seconds_mean": 4.53
+}
