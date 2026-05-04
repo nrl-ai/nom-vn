@@ -40,19 +40,29 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "benchmarks" / "data" / "vn_documents_ocr_v2"))
+sys.path.insert(0, str(Path(__file__).parent))
 
 from _business_templates import (  # noqa: E402
     CONTRACT_GENERATORS,
     FORM_GENERATORS,
     RECEIPT_GENERATORS,
 )
+from _overlays import maybe_apply_overlay  # noqa: E402
 from _scan_artifacts import ScanProfile  # noqa: E402
 from PIL import Image, ImageDraw, ImageFont  # noqa: E402
 
+# Round-1 fonts (4) — DejaVu family
 DEJAVU_REGULAR = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
 DEJAVU_BOLD = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
 DEJAVU_SERIF = Path("/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf")
 DEJAVU_MONO = Path("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf")
+
+# Round-3 fonts (4) — VN-tuned, OFL-licensed
+_FONT_DIR = Path(__file__).parent / "fonts"
+BE_VN_PRO = _FONT_DIR / "BeVietnamPro-Regular.ttf"
+BITTER = _FONT_DIR / "Bitter[wght].ttf"
+OPEN_SANS = _FONT_DIR / "OpenSans[wdth,wght].ttf"
+ROBOTO = _FONT_DIR / "Roboto-Regular.ttf"
 
 LINE_HEIGHT = 48
 TARGET_FONT_PX = 32
@@ -232,6 +242,17 @@ def main() -> int:
     parser.add_argument("--target-images", type=int, default=30000)
     parser.add_argument("--val-frac", type=float, default=0.05)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--multi-font",
+        action="store_true",
+        help="Use 8-font set (4 DejaVu + 4 VN-tuned). Default: 4 DejaVu only.",
+    )
+    parser.add_argument(
+        "--overlay-prob",
+        type=float,
+        default=0.0,
+        help="Probability of applying one stamp/signature/watermark overlay per crop. 0.0 = off (round-1 default); 0.30 = round-3 default.",
+    )
     args = parser.parse_args()
 
     out_dir = args.output
@@ -259,7 +280,11 @@ def main() -> int:
         return 1
 
     # Build the line specs by cycling through sentences with varied params.
-    fonts = (DEJAVU_REGULAR, DEJAVU_BOLD, DEJAVU_SERIF, DEJAVU_MONO)
+    fonts: tuple[Path, ...] = (DEJAVU_REGULAR, DEJAVU_BOLD, DEJAVU_SERIF, DEJAVU_MONO)
+    if args.multi_font:
+        round3_fonts = tuple(p for p in (BE_VN_PRO, BITTER, OPEN_SANS, ROBOTO) if p.exists())
+        fonts = fonts + round3_fonts
+        print(f"Multi-font mode: {len(fonts)} fonts available", flush=True)
     profiles = list(ScanProfile)
     specs: list[LineSpec] = []
     while len(specs) < args.target_images:
@@ -285,6 +310,8 @@ def main() -> int:
         try:
             img = _render_line(spec.text, spec.font_path)
             img = _augment_line(img, spec.profile, seed=i)
+            if args.overlay_prob > 0:
+                img = maybe_apply_overlay(img, seed=i + 7919, prob=args.overlay_prob)
         except Exception as exc:
             print(f"  skip {i} ({spec.text[:40]!r}): {exc}", file=sys.stderr)
             continue
