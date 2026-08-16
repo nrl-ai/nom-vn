@@ -84,6 +84,13 @@ REAL_SELF_BASELINE: dict[str, str] = {
     "nrl-ai/vn-spell-correction-small": "baseline_real_spell_correction_small.json",
 }
 
+# Same eval, run with `--heading-retry`. Lets the card quote the recovery
+# pass's effect per model instead of reusing one model's numbers everywhere.
+REAL_SELF_BASELINE_HEADING_RETRY: dict[str, str] = {
+    "nrl-ai/vn-spell-correction-base": "baseline_real_spell_correction_base_heading_retry.json",
+    "nrl-ai/vn-spell-correction-small": "baseline_real_spell_correction_small_heading_retry.json",
+}
+
 # Public landscape — every measured row has a JSON baseline.
 COMPARISON_MATRIX: list[dict[str, Any]] = [
     {
@@ -238,9 +245,34 @@ def _load_real_eval(filename: str) -> dict[str, float] | None:
     for key, metrics in eval_data.items():
         if isinstance(metrics, dict) and "word_accuracy" in metrics:
             scores[key] = float(metrics["word_accuracy"])
+            scores[f"{key}_sent"] = float(metrics.get("sentence_exact", 0.0))
             if key == "__all_real__":
                 scores["__n__"] = float(metrics.get("n_sentences", 0))
     return scores or None
+
+
+def _render_heading_retry_paragraph(repo_id: str, base_scores: dict[str, float]) -> str:
+    """Quote this model's own measured gain from the heading recovery pass.
+
+    Returns "" when the `--heading-retry` baseline is missing, so the card
+    omits the claim rather than borrowing another model's number.
+    """
+    filename = REAL_SELF_BASELINE_HEADING_RETRY.get(repo_id)
+    retry = _load_real_eval(filename) if filename else None
+    if not retry or "furniture_50" not in base_scores or "furniture_50" not in retry:
+        return ""
+    off_wa = base_scores["furniture_50"] * 100
+    on_wa = retry["furniture_50"] * 100
+    off_ex = base_scores.get("furniture_50_sent", 0.0) * 100
+    on_ex = retry.get("furniture_50_sent", 0.0) * 100
+    import textwrap
+
+    sentence = (
+        f"On `furniture_50` that moves word accuracy {off_wa:.2f} % to "
+        f"{on_wa:.2f} % and sentence-exact {off_ex:.2f} % to {on_ex:.2f} %, "
+        f"while every other slice stays bit-identical:"
+    )
+    return textwrap.fill(sentence, width=68, initial_indent="  ", subsequent_indent="  ")
 
 
 def _render_real_world_table(repo_id: str) -> tuple[str, str]:
@@ -331,6 +363,7 @@ def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -
     _real_scores = _load_real_eval(REAL_SELF_BASELINE.get(repo_id, "")) or {}
     real_world_n = int(_real_scores.get("__n__", 0))
     real_world_slices = sum(1 for s in REAL_SPLITS if s in _real_scores)
+    retry_paragraph = _render_heading_retry_paragraph(repo_id, _real_scores)
 
     # No explicit `pipeline_tag`. These are seq2seq models, and the Hub infers
     # the correct tag from config.json (T5ForConditionalGeneration ->
@@ -487,10 +520,8 @@ The two averaged columns:
   `nom.text.heading` ships a conservative recovery pass, enabled by
   default on `HFDiacriticModel`. When the first pass makes no edit and
   the input is heading-shaped, it retries on a lowercased copy and
-  keeps only tone-level edits on purely alphabetic tokens. On
-  `furniture_50` that moves word accuracy 84.36 % -> 87.62 % and
-  sentence-exact 36.00 % -> 56.00 %, correcting 10 rows and breaking
-  none:
+  keeps only tone-level edits on purely alphabetic tokens.
+{retry_paragraph}
 
   ```python
   from nom.text.diacritic_models import HFDiacriticModel
