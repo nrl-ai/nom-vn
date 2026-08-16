@@ -2,6 +2,7 @@
   "model_id": "qthuan2604/ViT5_Restore_Diacritics_Vietnamese",
   "device": "cuda",
   "eval_dir": "spell_correction_eval_real",
+  "heading_retry": false,
   "warmup_calls": 3,
   "num_beams": 1,
   "prefix": "",
@@ -22,9 +23,9 @@
         "missing_word": 7,
         "correct": 216
       },
-      "mean_ms_per_sentence": 311.8,
-      "p50_ms": 299.7,
-      "p95_ms": 353.17
+      "mean_ms_per_sentence": 220.97,
+      "p50_ms": 209.65,
+      "p95_ms": 261.42
     },
     "mobile_25": {
       "n_sentences": 25,
@@ -42,29 +43,9 @@
         "missing_word": 1,
         "correct": 325
       },
-      "mean_ms_per_sentence": 270.12,
-      "p50_ms": 267.44,
-      "p95_ms": 314.66
-    },
-    "telex_real_25": {
-      "n_sentences": 25,
-      "word_accuracy": 0.1565,
-      "word_accuracy_ci95": [
-        0.118,
-        0.1967
-      ],
-      "sentence_exact": 0.0,
-      "errors": {
-        "missed_diacritic": 3,
-        "wrong_tone": 5,
-        "base_char": 256,
-        "extra_word": 40,
-        "missing_word": 17,
-        "correct": 49
-      },
-      "mean_ms_per_sentence": 665.32,
-      "p50_ms": 521.47,
-      "p95_ms": 646.67
+      "mean_ms_per_sentence": 183.18,
+      "p50_ms": 182.0,
+      "p95_ms": 221.2
     },
     "ocr_25": {
       "n_sentences": 25,
@@ -82,9 +63,9 @@
         "missing_word": 0,
         "correct": 281
       },
-      "mean_ms_per_sentence": 552.99,
-      "p50_ms": 391.0,
-      "p95_ms": 837.84
+      "mean_ms_per_sentence": 388.29,
+      "p50_ms": 287.91,
+      "p95_ms": 662.99
     },
     "legal_real_25": {
       "n_sentences": 25,
@@ -102,9 +83,9 @@
         "missing_word": 0,
         "correct": 342
       },
-      "mean_ms_per_sentence": 460.14,
-      "p50_ms": 374.18,
-      "p95_ms": 762.32
+      "mean_ms_per_sentence": 327.19,
+      "p50_ms": 277.77,
+      "p95_ms": 523.56
     },
     "news_real_25": {
       "n_sentences": 25,
@@ -122,25 +103,45 @@
         "missing_word": 0,
         "correct": 355
       },
-      "mean_ms_per_sentence": 369.07,
-      "p50_ms": 352.56,
-      "p95_ms": 426.35
+      "mean_ms_per_sentence": 306.73,
+      "p50_ms": 281.79,
+      "p95_ms": 373.19
+    },
+    "furniture_50": {
+      "n_sentences": 50,
+      "word_accuracy": 0.8084,
+      "word_accuracy_ci95": [
+        0.738,
+        0.8615
+      ],
+      "sentence_exact": 0.2,
+      "errors": {
+        "missed_diacritic": 0,
+        "wrong_tone": 37,
+        "base_char": 22,
+        "extra_word": 136,
+        "missing_word": 8,
+        "correct": 249
+      },
+      "mean_ms_per_sentence": 225.92,
+      "p50_ms": 184.33,
+      "p95_ms": 474.21
     },
     "__all_real__": {
-      "n_sentences": 150,
-      "word_accuracy": 0.7242,
+      "n_sentences": 175,
+      "word_accuracy": 0.8185,
       "word_accuracy_ci95": [
-        0.676,
-        0.7701
+        0.785,
+        0.8517
       ],
-      "sentence_exact": 0.02,
+      "sentence_exact": 0.0743,
       "errors": {
-        "missed_diacritic": 15,
-        "wrong_tone": 38,
-        "base_char": 544,
-        "extra_word": 393,
-        "missing_word": 25,
-        "correct": 1568
+        "missed_diacritic": 12,
+        "wrong_tone": 70,
+        "base_char": 310,
+        "extra_word": 489,
+        "missing_word": 16,
+        "correct": 1768
       }
     }
   }

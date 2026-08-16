@@ -503,6 +503,24 @@ class NoiseGenerator:
         """
         decomposed = unicodedata.normalize("NFD", tok)
         out_chars: list[str] = []
+        # Tone marks that must be re-attached at the end of the current
+        # character's combining run rather than written back in place. Nặng
+        # (U+0323) has combining class 220 and sorts before the circumflex
+        # (230), while the other four tones are 230 and must follow it.
+        # Emitting a replacement at the old index yields sequences like
+        # `e + ̀ + ̂`, which NFC cannot compose -- the visible result is a
+        # broken `è̂` that no Vietnamese typist can produce. The trailing
+        # NFC call does not catch this, because reordering never happens
+        # between marks of equal combining class.
+        pending_tone: str | None = None
+        trailing: list[str] = []
+
+        def _flush() -> None:
+            nonlocal pending_tone
+            if pending_tone is not None:
+                out_chars.append(pending_tone)
+                pending_tone = None
+
         for ch in decomposed:
             if ch in _TELEX_TONES:
                 mode = self._rng.randint(0, 2)
@@ -510,19 +528,25 @@ class NoiseGenerator:
                     # drop the tone
                     continue
                 if mode == 1:
-                    # wrong tone letter — emit a different tone-marker mapped
-                    # back via the inverse table
+                    # wrong tone letter — defer, so it lands after any vowel
+                    # modifier already attached to this base character
                     wrong_letter = self._rng.choice(_TELEX_TONE_LETTERS)
                     inv = {v: k for k, v in _TELEX_TONES.items()}
-                    out_chars.append(inv.get(wrong_letter, ch))
+                    pending_tone = inv.get(wrong_letter, ch)
                     continue
-                # doubled — keep the tone AND emit the literal Telex letter
-                # afterwards (visible artifact like "ngas" instead of "ngã")
-                out_chars.append(ch)
-                out_chars.append(_TELEX_TONES[ch])
+                # doubled — keep the tone AND emit the literal Telex letter.
+                # It has to go after the whole token, not inline: Telex tone
+                # keys are pressed at the end of the syllable, and splicing
+                # the letter mid-cluster orphans any modifier that follows
+                # (`cặp` came out as `cạj̆p`, breve stranded after the `j`).
+                pending_tone = ch
+                trailing.append(_TELEX_TONES[ch])
                 continue
+            if not unicodedata.combining(ch):
+                _flush()
             out_chars.append(ch)
-        return unicodedata.normalize("NFC", "".join(out_chars))
+        _flush()
+        return unicodedata.normalize("NFC", "".join(out_chars) + "".join(trailing))
 
     def _segment_pass(self, tokens: list[str], budget_ok: Callable[[], bool]) -> str:
         """Drop or insert spaces at token boundaries — models segmentation slips."""

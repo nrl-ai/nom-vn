@@ -212,21 +212,20 @@ python benchmarks/accuracy/bench_diacritic_hf_udvtb.py \
 
 ### Bench thực tế ngoài-phân-phối — *đo 2026-04-30*
 
-`benchmarks/data/spell_correction_eval_real/` là tập 150 câu hand-curated mà mẫu nhiễu lấy từ nguồn lỗi VN thực (slang forum, autocorrect mobile, keystroke Telex/VNI thực, output engine Tesseract+EasyOCR, văn bản pháp lý register formal đã strip, headline tin tức), KHÔNG từ `nom.text.noise`. Cùng harness áp cho cả mô hình diacritic và spell-correction — sửa chính tả là siêu tập chặt của khôi phục dấu.
+`benchmarks/data/spell_correction_eval_real/` là tập 175 câu mà mẫu nhiễu lấy từ nguồn lỗi VN thực (slang forum, autocorrect mobile, output engine Tesseract+EasyOCR, văn bản pháp lý register formal đã strip, headline tin tức, và văn bản hành chính thật), KHÔNG từ `nom.text.noise`. Lát cắt `telex_real_25` đã bị loại bỏ ngày 2026-08-16 vì mô hình lỗi không thực tế và nhãn gold sai — xem README của thư mục eval. Cùng harness áp cho cả mô hình diacritic và spell-correction — sửa chính tả là siêu tập chặt của khôi phục dấu.
 
-Word accuracy tổng hợp trên n=150 (KTC bootstrap 95 %):
+Word accuracy tổng hợp trên n=175 (KTC bootstrap 95 %):
 
-| Mô hình | Tổng | Telex | Forum | Legal | News |
+| Mô hình | Tổng | Furniture | Forum | Legal | News |
 |---|---:|---:|---:|---:|---:|
-| **`nrl-ai/vn-spell-correction-base`** v0.2.29 | **79.62** [75-85] | **19.15** | **65.84** | **95.87** | **96.54** |
-| `nrl-ai/vn-spell-correction-small` v0.2.29 | 77.55 [73-83] | 16.45 | 64.64 | 93.54 | 91.34 |
-| `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 77.40 [73-82] | 18.54 | 60.11 | 93.80 | 94.07 |
-| `qthuan2604/ViT5_Restore_Diacritics_Vietnamese` | 72.42 [68-77] | 15.65 | 58.38 | 88.14 | 87.65 |
-| `nrl-ai/vn-diacritic-vit5-base` v0.2.29 | 71.15 [66-76] | 14.37 | 43.54 | 93.02 | 96.05 |
-| `nrl-ai/vn-diacritic-small` v0.2.28 | 70.27 [65-76] | 9.33 | 46.28 | 89.15 | 90.35 |
-| `chamdentimem/ViT5_Vietnamese_Correction` | 51.69 [46-57] | 17.14 | 62.19 | 61.76 | 34.81 |
-| `bmd1905/vietnamese-correction-v2` | 49.21 [44-55] | 11.58 | 59.02 | 54.90 | 30.62 |
-| `iAmHieu2012/vit5-vietnamese-spelling-correction` | 45.57 [39-52] | 13.58 | 57.66 | 50.68 | 27.35 |
+| **`nrl-ai/vn-spell-correction-base`** v0.2.29 | **89.54** [86.1-92.6] | 84.36 | **65.84** | **95.87** | **96.54** |
+| `nrl-ai/vn-spell-correction-small` v0.2.29 | 87.99 [84.4-91.6] | **88.89** | 64.64 | 93.54 | 91.34 |
+| `Toshiiiii1/Vietnamese_diacritics_restoration_5th` | 87.29 [83.9-90.3] | 83.77 | 60.11 | 93.80 | 94.07 |
+| `qthuan2604/ViT5_Restore_Diacritics_Vietnamese` | 81.85 [78.5-85.2] | 80.84 | 58.38 | 88.14 | 87.65 |
+| `nrl-ai/vn-diacritic-vit5-base` v0.2.29 | 81.55 [77.5-85.4] | 83.01 | 43.54 | 93.02 | 96.05 |
+| `nrl-ai/vn-diacritic-small` v0.2.28 | 80.11 [76.3-84.1] | 79.55 | 46.28 | 89.15 | 90.35 |
+| `chamdentimem/ViT5_Vietnamese_Correction` | 58.46 [53.8-63.3] | 63.64 | 62.19 | 61.76 | 34.81 |
+| `bmd1905/vietnamese-correction-v2` | 57.86 [53.1-63.4] | 71.43 | 59.02 | 54.90 | 30.62 |
 
 Tái lập:
 ```bash

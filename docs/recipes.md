@@ -71,8 +71,9 @@ restorer("Toi yu Vit Nam, dat nuoc tuyet voi")
 
 Là siêu tập chặt của khôi phục dấu (cùng API), nhưng cộng thêm khả năng
 vá lỗi ký tự, OCR, gõ Telex, viết tắt teen-code. Trên OOD 150-câu thực
-tế: **79.62 %** word accuracy aggregate — vượt Toshiiiii1 (77.40 %) +2.22 pp,
-vượt diacritic-only của chúng tôi +8.47 pp.
+tế (175 câu): **89.54 %** word accuracy tổng hợp, so với Toshiiiii1
+87.29 % và bmd1905 57.86 %. Khoảng tin cậy 95 % của chúng tôi và
+Toshiiiii1 vẫn chồng lấn, nên coi đây là ngang ngửa ở nhóm dẫn đầu.
 
 Với tiêu đề và dòng tiêu ngữ (`Độc lập - Tự do - Hạnh phục`), adapter tự
 chạy thêm một lượt phục hồi vì corpus huấn luyện cắt theo câu nên thiếu
@@ -84,8 +85,8 @@ hẳn loại bố cục này. Bật sẵn; xem
 
 | Tier | Repo | Disk | OOD aggregate | Khi nào chọn |
 |---|---|---:|---:|---|
-| Base PyTorch | `nrl-ai/vn-spell-correction-base` | 900 MB | **79.62 %** | mặc định, có GPU + PyTorch |
-| Small PyTorch | `nrl-ai/vn-spell-correction-small` | 530 MB | 77.55 % | latency quan trọng, vẫn có PyTorch |
+| Base PyTorch | `nrl-ai/vn-spell-correction-base` | 900 MB | **89.54 %** | mặc định, có GPU + PyTorch |
+| Small PyTorch | `nrl-ai/vn-spell-correction-small` | 530 MB | 87.99 % | latency quan trọng, vẫn có PyTorch |
 | **Base ONNX int8** | [`nrl-ai/vn-spell-correction-base-onnx-int8`](https://huggingface.co/nrl-ai/vn-spell-correction-base-onnx-int8) | 438 MB | 78.76 % | CPU-only server, không phụ thuộc PyTorch |
 | **Small ONNX int8** | [`nrl-ai/vn-spell-correction-small-onnx-int8`](https://huggingface.co/nrl-ai/vn-spell-correction-small-onnx-int8) | 307 MB | 77.30 % | edge / browser / mobile |
 

@@ -9,6 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`nom.text.noise` could emit malformed Vietnamese.** The Telex
+  "wrong tone letter" mode wrote the replacement mark back at the old
+  index, but nặng (U+0323) has combining class 220 and sorts before the
+  circumflex (230) while the other four tones are 230 and must follow it,
+  so `ệ` came out as `è̂` — a sequence NFC cannot compose. The
+  "doubled tone letter" mode spliced its literal Telex letter into the
+  middle of a character's combining run, stranding any modifier that
+  followed (`cặp` became `cạj̆p`). Both are now fixed by re-attaching the
+  tone at the end of the combining run and appending doubled letters after
+  the token. The existing `test_output_is_nfc` did not catch either,
+  because `NFC(x) == x` holds for an orphaned mark that has nothing to
+  compose with; `test_no_orphaned_combining_marks` now asserts the
+  stronger property across all seven presets. Impact on shipped models was
+  negligible — a scan of 200,000 published training pairs found malformed
+  Vietnamese in 0.009 %, all of it Cyrillic/Armenian/IPA source text rather
+  than injected noise — but the rates would have mattered had we raised
+  Telex noise in the next round.
+
+
 - **Seven published model cards declared `pipeline_tag: text-generation`
   on seq2seq models.** The Hub rendered a causal-LM snippet and widget,
   and `pipeline("text-generation", model=...)` rejects an encoder-decoder
@@ -43,6 +62,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   so interior capitals survive.
 
 ### Changed
+
+- **Retired the `telex_real_25` eval slice.** Every one of its 25 sentences
+  was a full-sentence raw Telex dump (`Toi yeeu Vieejt Nam vaf daats...`),
+  as if the IME had been off for the whole sentence while the typist kept
+  entering tone letters. People do not produce that: with the IME off the
+  screen shows garbage from the second word, and the realistic fallback is
+  plain unaccented Vietnamese, already covered by the legal and news
+  slices. Several gold labels were also wrong — `coos` decodes to `cố` but
+  was labelled `được`, `chowj` decodes to `chợ` but was labelled `chưa` —
+  so models were being penalised for not reproducing broken targets. The
+  slice was depressing our own reported aggregate by about 8.7 pp on a
+  measurement that meant nothing. Telex slips are real but *local*, so they
+  belong mixed into the other registers as one error mode among many, which
+  is what `nom.text.noise` already does for training data. The OOD eval is
+  now 175 sentences across 6 slices, and all baselines were re-measured.
+
 
 - The out-of-distribution eval table in the spell-correction model card
   is now generated from committed baseline JSONs instead of hard-coded
