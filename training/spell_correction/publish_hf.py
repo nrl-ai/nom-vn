@@ -328,6 +328,9 @@ def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -
     eval_table = "\n".join(rows)
     comparison_table = _render_comparison_section(repo_id, summary)
     real_world_table, real_world_aggregate = _render_real_world_table(repo_id)
+    _real_scores = _load_real_eval(REAL_SELF_BASELINE.get(repo_id, "")) or {}
+    real_world_n = int(_real_scores.get("__n__", 0))
+    real_world_slices = sum(1 for s in REAL_SPLITS if s in _real_scores)
 
     # No explicit `pipeline_tag`. These are seq2seq models, and the Hub infers
     # the correct tag from config.json (T5ForConditionalGeneration ->
@@ -455,7 +458,9 @@ The two averaged columns:
 - **In-distribution metric, real-world is harder — measured.** Training
   and eval both use `nom.text.noise`. The synthetic 8-split numbers
   above measure how well we invert *our* noise generator. We also
-  benchmark on a 150-sentence hand-curated OOD eval ([6 registers](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks/data/spell_correction_eval_real),
+  benchmark on a {real_world_n}-sentence OOD eval whose noise comes from
+  real Vietnamese error sources rather than our generator
+  ([{real_world_slices} slices](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks/data/spell_correction_eval_real),
   bootstrap 95 % CI):
 
 {real_world_table}
@@ -470,16 +475,30 @@ The two averaged columns:
 - **Heading and letterhead layout is a known blind spot.** The training
   corpus is sentence-segmented, so document furniture (letterheads,
   all-caps titles, form labels, signature blocks) was filtered out
-  during construction. On a 15-item battery of Vietnamese
-  administrative headings this model scores 10/15, and it can leave a
-  real-word tone error uncorrected where the same error is fixed in
-  ordinary prose: `Độc lập - Tự do - Hạnh phục` is echoed back
-  unchanged, while `Tôi rất hạnh phục khi gặp lại bạn` is corrected.
-  Two conditions have to coincide, an adverse frequency prior (`phục`
-  outnumbers `phúc` 3,810 to 1,311 in the corpus) and a layout the
-  encoder has not seen corrected. `nom.text.heading` ships a
-  conservative recovery pass for this, enabled by default on
-  `HFDiacriticModel`; see the repository for a standalone version.
+  during construction. That is the `furniture_50` slice above, and it
+  is the weakest non-Telex register. The model can leave a real-word
+  tone error uncorrected where the same error is fixed in ordinary
+  prose: `Độc lập - Tự do - Hạnh phục` is echoed back unchanged, while
+  `Tôi rất hạnh phục khi gặp lại bạn` is corrected. Two conditions have
+  to coincide, an adverse frequency prior (`phục` outnumbers `phúc`
+  3,810 to 1,311 in the corpus) and a layout the encoder has not seen
+  corrected. Neither alone reproduces it.
+
+  `nom.text.heading` ships a conservative recovery pass, enabled by
+  default on `HFDiacriticModel`. When the first pass makes no edit and
+  the input is heading-shaped, it retries on a lowercased copy and
+  keeps only tone-level edits on purely alphabetic tokens. On
+  `furniture_50` that moves word accuracy 84.36 % -> 87.62 % and
+  sentence-exact 36.00 % -> 56.00 %, correcting 10 rows and breaking
+  none:
+
+  ```python
+  from nom.text.diacritic_models import HFDiacriticModel
+
+  speller = HFDiacriticModel(model_id="{repo_id}")
+  speller("Độc lập - Tự do - Hạnh phục")
+  # 'Độc lập - Tự do - Hạnh phúc'
+  ```
 - **Heavy-noise corner cases.** OCR outputs that drop entire words or
   add hallucinated text are out-of-scope; the noise generator we
   trained on caps edits per sentence (max 25 % edit ratio).

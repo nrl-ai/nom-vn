@@ -26,10 +26,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   correction target. `Độc lập - Tự do - Hạnh phục` came back unchanged
   while the same error in ordinary prose was corrected. New
   `nom.text.heading` module plus a `heading_retry` pass on
-  `HFDiacriticModel`, on by default, takes a 10-case furniture battery
-  from 7/10 to 10/10 with no regressions on ordinary sentences. It
-  triggers on 2 of the 150 real-world eval sentences, so the added cost
-  is negligible.
+  `HFDiacriticModel`, on by default. On the new `furniture_50` eval
+  slice it moves word accuracy 84.36 % → 87.62 % and sentence-exact
+  36.00 % → 56.00 %, correcting 10 rows and breaking none. It triggers
+  on 2 of the 150 sentences in the other six slices, so ordinary
+  sentences are untouched.
+- **`merge_tone_only` flattened whitespace and mangled mixed-case
+  acronyms.** Rebuilding the corrected string with `" ".join()`
+  collapsed newlines, tabs and repeated spaces, which matters for
+  letterhead blocks with real line structure; it now splices
+  corrections into the source by token span and leaves every separator
+  intact. Separately, a candidate differing from the source by case
+  alone was routed through case restoration and came back title-cased,
+  turning the real signature-block acronym `PTTgTT` into `Pttgtt`. Such
+  tokens are now left alone, and case restoration copies per character
+  so interior capitals survive.
 
 ### Changed
 

@@ -77,3 +77,34 @@ class TestMergeToneOnly:
 
     def test_preserves_lowercase_tokens(self) -> None:
         assert merge_tone_only("Hà Nội, ngày 15", "hà nội, ngày 15") == "Hà Nội, ngày 15"
+
+    def test_preserves_newlines(self) -> None:
+        # Letterhead blocks carry real line structure; rebuilding with
+        # " ".join() would flatten it.
+        got = merge_tone_only("QUYẾT ĐỊNH\nVề việc bổ nhiêm", "quyết định\nvề việc bổ nhiệm")
+        assert got == "QUYẾT ĐỊNH\nVề việc bổ nhiệm"
+
+    def test_preserves_repeated_spaces_and_tabs(self) -> None:
+        assert (
+            merge_tone_only("Kính  gửi:  Ban Giám đôc", "kính  gửi:  ban giám đốc")
+            == "Kính  gửi:  Ban Giám đốc"
+        )
+        assert merge_tone_only("Số:\t15/QĐ-UBND", "số:\t15/qđ-bnd") == "Số:\t15/QĐ-UBND"
+
+    def test_preserves_leading_and_trailing_space(self) -> None:
+        assert merge_tone_only("  Hạnh phục  ", "  hạnh phúc  ") == "  Hạnh phúc  "
+
+    def test_case_only_difference_is_not_an_edit(self) -> None:
+        # No tone changed, so nothing should be taken from the candidate.
+        assert merge_tone_only("PTTgTT", "pttgtt") == "PTTgTT"
+        assert merge_tone_only("TTĐTCP", "ttđtcp") == "TTĐTCP"
+        assert merge_tone_only("iPhone", "iphone") == "iPhone"
+
+    def test_preserves_interior_capitals_in_mixed_case_tokens(self) -> None:
+        # Real signature-block line from a government scan. The acronym must
+        # survive while the genuine tone fix (Tục -> Túc) still lands.
+        got = merge_tone_only(
+            "- Thủ tướng, PTTgTT Phạm Gia Tục (để b/c);",
+            "- thủ tướng, pttgtt phạm gia túc (để b/c);",
+        )
+        assert got == "- Thủ tướng, PTTgTT Phạm Gia Túc (để b/c);"

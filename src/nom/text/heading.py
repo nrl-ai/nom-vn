@@ -49,6 +49,12 @@ _TONE_MARKS = frozenset("̣̀́̃̉")
 # punctuation. This is what keeps codes like `15/QĐ-UBND` out of the merge.
 _ALPHA_TOKEN = re.compile(r"^[^\W\d_]+$", re.UNICODE)
 
+# Token spans, so the merge can splice corrections back into the source and
+# leave every original separator byte-for-byte intact. Rebuilding with
+# `" ".join(...)` instead would silently flatten newlines, tabs and repeated
+# spaces, which matters for letterhead blocks that carry real line structure.
+_TOKEN_SPAN = re.compile(r"\S+")
+
 _MAX_HEADING_TOKENS = 12
 _MIN_CAPITALIZED_RATIO = 0.5
 
@@ -104,6 +110,9 @@ def merge_tone_only(source: str, candidate: str) -> str:
         candidate: a corrected variant, typically produced by running the
             model over ``source.lower()``.
 
+    Whitespace comes from ``source`` untouched, including newlines, tabs and
+    repeated spaces.
+
     Returns:
         ``source`` with tone-level corrections applied, NFC-normalized.
 
@@ -112,31 +121,54 @@ def merge_tone_only(source: str, candidate: str) -> str:
         'Hạnh phúc'
         >>> merge_tone_only("Toi yu Vit Nam", "tôi yêu việt nam")
         'Toi yu Vit Nam'
+        >>> merge_tone_only("QUYẾT ĐỊNH\\nVề việc bổ nhiêm", "quyết định\\nvề việc bổ nhiệm")
+        'QUYẾT ĐỊNH\\nVề việc bổ nhiệm'
     """
-    src_tokens = source.split()
+    src_spans = list(_TOKEN_SPAN.finditer(source))
     cand_tokens = candidate.split()
-    if len(src_tokens) != len(cand_tokens):
+    if len(src_spans) != len(cand_tokens):
         return source
 
     merged: list[str] = []
-    for src, cand in zip(src_tokens, cand_tokens, strict=True):
+    cursor = 0
+    for span, cand in zip(src_spans, cand_tokens, strict=True):
+        merged.append(source[cursor : span.start()])
+        src = span.group()
+        cursor = span.end()
         if src == cand:
             merged.append(src)
             continue
         if not (_ALPHA_TOKEN.match(src) and _ALPHA_TOKEN.match(cand)):
             merged.append(src)
             continue
+        if src.lower() == cand.lower():
+            # Differs by case alone, so there is no tone edit to take. Round
+            # -tripping through _restore_case here would corrupt mixed-case
+            # acronyms: `PTTgTT` came back as `Pttgtt`.
+            merged.append(src)
+            continue
         if _detone(src.lower()) != _detone(cand.lower()):
             merged.append(src)
             continue
         merged.append(_restore_case(src, cand))
-    return unicodedata.normalize("NFC", " ".join(merged))
+    merged.append(source[cursor:])
+    return unicodedata.normalize("NFC", "".join(merged))
 
 
 def _restore_case(source: str, candidate: str) -> str:
-    """Re-apply ``source``'s casing pattern to ``candidate``."""
+    """Re-apply ``source``'s casing pattern to ``candidate``.
+
+    Prefers a per-character copy, which is exact for Vietnamese tone edits
+    because swapping a tone preserves length in NFC. That keeps interior
+    capitals in mixed-case tokens intact; title-casing the whole token would
+    turn ``PTTgTT`` into ``Pttgtt``.
+    """
     if source.isupper() and len(source) > 1:
         return candidate.upper()
+    if len(source) == len(candidate):
+        return "".join(
+            c.upper() if s.isupper() else c.lower() for s, c in zip(source, candidate, strict=True)
+        )
     if source[:1].isupper():
         return candidate[:1].upper() + candidate[1:]
     return candidate
