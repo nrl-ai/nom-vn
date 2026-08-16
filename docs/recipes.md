@@ -74,6 +74,12 @@ vá lỗi ký tự, OCR, gõ Telex, viết tắt teen-code. Trên OOD 150-câu t
 tế: **79.62 %** word accuracy aggregate — vượt Toshiiiii1 (77.40 %) +2.22 pp,
 vượt diacritic-only của chúng tôi +8.47 pp.
 
+Với tiêu đề và dòng tiêu ngữ (`Độc lập - Tự do - Hạnh phục`), adapter tự
+chạy thêm một lượt phục hồi vì corpus huấn luyện cắt theo câu nên thiếu
+hẳn loại bố cục này. Bật sẵn; xem
+[Sửa chính tả](/tasks/spell-correction) để biết cơ chế và cách tắt qua
+`heading_retry=False`.
+
 #### Tier nhanh / quantize edge
 
 | Tier | Repo | Disk | OOD aggregate | Khi nào chọn |

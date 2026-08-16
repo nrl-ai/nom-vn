@@ -62,6 +62,14 @@ class HFDiacriticModel:
             matches the model's training cap.
         num_beams: Decoding beams. Default 1 (greedy) — measured fastest
             with no quality drop on the 55-sent corpus.
+        heading_retry: Recover heading-shaped inputs the model would
+            otherwise echo back unchanged (letterheads, all-caps titles,
+            form labels). When the first pass makes no edit and the input
+            looks like document furniture, retry on a lowercased copy and
+            keep only tone-level edits on alphabetic tokens. Costs a second
+            generate() call on the small fraction of inputs that trigger it
+            — 2 of the 150 sentences in our real-world eval set. Pass False
+            to restore the previous single-pass behaviour.
 
     Raises:
         ImportError: if ``transformers`` or ``torch`` aren't installed,
@@ -79,6 +87,7 @@ class HFDiacriticModel:
         device: str = "auto",
         max_input_tokens: int = 512,
         num_beams: int = 1,
+        heading_retry: bool = True,
     ) -> None:
         try:
             import torch
@@ -108,6 +117,7 @@ class HFDiacriticModel:
         self.model_id = model_id
         self.max_input_tokens = max_input_tokens
         self.num_beams = num_beams
+        self.heading_retry = heading_retry
         if device == "auto":
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
@@ -126,11 +136,8 @@ class HFDiacriticModel:
             AutoModelForSeq2SeqLM.from_pretrained(self.model_id).to(self.device).eval()  # type: ignore[no-untyped-call,unused-ignore]
         )
 
-    def predict(self, text: str) -> str:
-        """Restore diacritics on ``text``. Pure transformation; no caching."""
-        self._ensure_loaded()
-        if not text.strip():
-            return text
+    def _generate(self, text: str) -> str:
+        """Single forward pass. No heading recovery, no blank-input guard."""
         inputs = self._tok(
             text,
             return_tensors="pt",
@@ -144,6 +151,29 @@ class HFDiacriticModel:
                 num_beams=self.num_beams,
             )
         return str(self._tok.decode(out[0], skip_special_tokens=True))
+
+    def _needs_heading_retry(self, text: str, prediction: str) -> bool:
+        """True when the model echoed a heading-shaped, already-accented input."""
+        if not self.heading_retry:
+            return False
+        from nom.text.heading import is_heading
+        from nom.text.normalize import has_diacritics, normalize
+
+        if normalize(prediction) != normalize(text):
+            return False
+        return is_heading(text) and has_diacritics(text)
+
+    def predict(self, text: str) -> str:
+        """Restore diacritics on ``text``. Pure transformation; no caching."""
+        self._ensure_loaded()
+        if not text.strip():
+            return text
+        prediction = self._generate(text)
+        if not self._needs_heading_retry(text, prediction):
+            return prediction
+        from nom.text.heading import merge_tone_only
+
+        return merge_tone_only(text, self._generate(text.lower()))
 
     def predict_batch(self, texts: list[str], *, batch_size: int = 16) -> list[str]:
         """Restore diacritics on a list of sentences using batched inference.
@@ -200,6 +230,35 @@ class HFDiacriticModel:
             decoded = self._tok.batch_decode(gen, skip_special_tokens=True)
             for j, pred in enumerate(decoded):
                 out[live_idx[chunk_start + j]] = str(pred)
+
+        retry_idx = [i for i in live_idx if self._needs_heading_retry(texts[i], out[i])]
+        if retry_idx:
+            from nom.text.heading import merge_tone_only
+
+            retried = self._generate_batch([texts[i].lower() for i in retry_idx], batch_size)
+            for i, candidate in zip(retry_idx, retried, strict=True):
+                out[i] = merge_tone_only(texts[i], candidate)
+        return out
+
+    def _generate_batch(self, texts: list[str], batch_size: int) -> list[str]:
+        """Batched forward pass over already-filtered, non-blank inputs."""
+        out: list[str] = []
+        for chunk_start in range(0, len(texts), batch_size):
+            chunk = texts[chunk_start : chunk_start + batch_size]
+            inputs = self._tok(
+                chunk,
+                return_tensors="pt",
+                max_length=self.max_input_tokens,
+                truncation=True,
+                padding=True,
+            ).to(self.device)
+            with self._torch.no_grad():
+                gen = self._model.generate(
+                    **inputs,
+                    max_length=self.max_input_tokens,
+                    num_beams=self.num_beams,
+                )
+            out.extend(str(p) for p in self._tok.batch_decode(gen, skip_special_tokens=True))
         return out
 
     # Aliasing for the LLM-style call site so users can drop this in

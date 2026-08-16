@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **`nrl-ai/vn-spell-correction-*` model cards declared
+  `pipeline_tag: text-generation` on seq2seq models.** The Hub rendered a
+  causal-LM snippet and widget, and
+  `pipeline("text-generation", model=...)` rejects an encoder-decoder
+  model and returns the input unchanged for every request. Anyone using
+  the card's copy-paste snippet saw a model that appeared to correct
+  nothing. The field is now omitted so the Hub infers the correct tag
+  from `config.json`, matching what peer seq2seq models do.
+- **Heading and letterhead inputs were echoed back uncorrected.** The
+  training corpus is sentence-segmented, so document furniture
+  (letterheads, all-caps titles, form labels) never appears as a
+  correction target. `Độc lập - Tự do - Hạnh phục` came back unchanged
+  while the same error in ordinary prose was corrected. New
+  `nom.text.heading` module plus a `heading_retry` pass on
+  `HFDiacriticModel`, on by default, takes a 10-case furniture battery
+  from 7/10 to 10/10 with no regressions on ordinary sentences. It
+  triggers on 2 of the 150 real-world eval sentences, so the added cost
+  is negligible.
+
+### Changed
+
+- The out-of-distribution eval table in the spell-correction model card
+  is now generated from committed baseline JSONs instead of hard-coded
+  numbers, which had drifted a training round behind the published
+  weights (77.43 % shown against 79.62 % measured).
+
 ## [0.3.0a1] — 2026-05-03
 
 First alpha of the 0.3 line. Substantial expansion since 0.2.37 — new
