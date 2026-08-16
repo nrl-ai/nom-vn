@@ -9,14 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **`nrl-ai/vn-spell-correction-*` model cards declared
-  `pipeline_tag: text-generation` on seq2seq models.** The Hub rendered a
-  causal-LM snippet and widget, and
-  `pipeline("text-generation", model=...)` rejects an encoder-decoder
+- **Seven published model cards declared `pipeline_tag: text-generation`
+  on seq2seq models.** The Hub rendered a causal-LM snippet and widget,
+  and `pipeline("text-generation", model=...)` rejects an encoder-decoder
   model and returns the input unchanged for every request. Anyone using
-  the card's copy-paste snippet saw a model that appeared to correct
-  nothing. The field is now omitted so the Hub infers the correct tag
-  from `config.json`, matching what peer seq2seq models do.
+  a card's copy-paste snippet saw a model that appeared to correct
+  nothing. Affected `vn-diacritic-vit5-base`, `vn-diacritic-small`,
+  `vn-spell-correction-base`, `vn-spell-correction-small`, and the three
+  `-onnx-int8` variants. The field is now omitted across all three
+  publish scripts so the Hub infers the correct tag from `config.json`,
+  matching what peer seq2seq models do, with a regression test in
+  `tests/test_publish_cards.py`.
 - **Heading and letterhead inputs were echoed back uncorrected.** The
   training corpus is sentence-segmented, so document furniture
   (letterheads, all-caps titles, form labels) never appears as a
