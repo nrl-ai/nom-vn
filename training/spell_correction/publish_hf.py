@@ -62,7 +62,6 @@ RESULTS_DIR = REPO_ROOT / "benchmarks" / "results"
 REAL_SPLITS = (
     "forum_25",
     "mobile_25",
-    "telex_real_25",
     "ocr_25",
     "legal_real_25",
     "news_real_25",
@@ -500,16 +499,17 @@ The two averaged columns:
 
   The synthetic grid above measures how well we invert *our own* noise
   generator; the aggregate here ({real_world_aggregate}) is what to plan
-  around. The gap is the cost of a noise model that captures the
-  *surface* of typos but not real Telex keystroke artefacts (`dduwojc`
-  for `được`) or forum-style abbreviations (`ko bt` for `không biết`).
-  Real Telex input is the weakest slice by a wide margin and is the
-  primary target of the next training round.
+  around. The remaining gap is concentrated in two places: forum and
+  social-media register, where teen-code abbreviations (`ko bt` for
+  `không biết`) are barely represented in a Wiki+news+legal corpus, and
+  document furniture. Those are the targets of the next training round.
+  Treat the ranking with care -- our confidence interval and
+  Toshiiiii1's still overlap on this set.
 - **Heading and letterhead layout is a known blind spot.** The training
   corpus is sentence-segmented, so document furniture (letterheads,
   all-caps titles, form labels, signature blocks) was filtered out
   during construction. That is the `furniture_50` slice above, and it
-  is the weakest non-Telex register. The model can leave a real-word
+  is the second-weakest register. The model can leave a real-word
   tone error uncorrected where the same error is fixed in ordinary
   prose: `Độc lập - Tự do - Hạnh phục` is echoed back unchanged, while
   `Tôi rất hạnh phục khi gặp lại bạn` is corrected. Two conditions have

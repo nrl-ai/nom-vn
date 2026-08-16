@@ -93,8 +93,8 @@ thành `Tội tử Vì Nam`).
 Tính năng này bật sẵn. Trên lát cắt đánh giá `furniture_50` (50 câu lấy
 từ văn bản hành chính thật), độ chính xác theo từ tăng từ 84,36 % lên
 87,62 % và tỉ lệ khớp nguyên câu tăng từ 36,00 % lên 56,00 %: sửa đúng
-thêm 10 câu, không làm hỏng câu nào. Nó chỉ kích hoạt với 2 trong 150 câu
-của sáu lát cắt còn lại, nên câu thường không bị ảnh hưởng.
+thêm 10 câu, không làm hỏng câu nào. Nó chỉ kích hoạt với 2 trong 125 câu
+của năm lát cắt còn lại, nên câu thường không bị ảnh hưởng.
 
 Tái lập: `python benchmarks/accuracy/bench_spell_correction_real.py
 nrl-ai/vn-spell-correction-base`.
@@ -143,75 +143,59 @@ cùng mix lớn).
 > đã ngầm học cách đảo ngược phân phối nhiễu *của chúng tôi*. Lỗi gõ
 > tiếng Việt thực tế tuân theo thống kê khác — xem phần đo OOD bên dưới.
 
-### Bench thực tế ngoài-phân-phối (mở rộng, đo ngày 2026-04-30)
+### Bench thực tế ngoài-phân-phối (đo lại ngày 2026-08-16)
 
-`benchmarks/data/spell_correction_eval_real/` là tập **150 câu** được
-hand-curate mà mẫu nhiễu lấy từ nguồn lỗi VN thực tế, KHÔNG phải
-`nom.text.noise`. Mở rộng từ 4 register lên **6 register** (thêm
-`legal_real_25` và `news_real_25`) để có gradient ổn định hơn. Mọi
-con số đi kèm khoảng tin cậy bootstrap 95 % (n=1000 resample).
+`benchmarks/data/spell_correction_eval_real/` là tập **175 câu** mà mẫu
+nhiễu lấy từ nguồn lỗi VN thực tế, KHÔNG phải `nom.text.noise`. Sáu lát
+cắt. Mọi con số đi kèm khoảng tin cậy bootstrap 95 % (n=1000 resample).
 
-| Slice | Nguồn | **ours base v0.2.29** | ours small v0.2.29 | Toshiiiii1 | qthuan ViT5 | chamdent | bmd1905 | iAmHieu |
-|---|---|---:|---:|---:|---:|---:|---:|---:|
-| `forum_25` | Forum / teen-code | **65.84** | 64.64 | 60.11 | 58.38 | 62.19 | 59.02 | 57.66 |
-| `mobile_25` | Autocorrect điện thoại | 95.84 | 95.29 | **96.95** | 90.28 | 86.15 | 88.09 | 84.72 |
-| `telex_real_25` | Telex/VNI thực | **19.15** | 16.45 | 18.54 | 15.65 | 17.14 | 11.58 | 13.58 |
-| `ocr_25` | Tesseract / EasyOCR | **97.57** | 94.19 | 94.22 | 85.41 | 44.17 | 47.42 | 34.87 |
-| `legal_real_25` | Văn bản pháp lý | **95.87** | 93.54 | 93.80 | 88.14 | 61.76 | 54.90 | 50.68 |
-| `news_real_25` | Tiêu đề + tin tức | **96.54** | 91.34 | 94.07 | 87.65 | 34.81 | 30.62 | 27.35 |
-| **Tổng hợp** | n=150 | **79.62** | **77.55** | 77.40 | 72.42 | 51.69 | 49.21 | 45.57 |
+| Lát cắt | Nguồn | **ours base** | ours small | Toshiiiii1 | chamdent | bmd1905 |
+|---|---|---:|---:|---:|---:|---:|
+| `forum_25` | Forum / teen-code | **65.84** | 64.64 | 60.11 | 62.19 | 59.02 |
+| `mobile_25` | Autocorrect điện thoại | 95.84 | 95.29 | **96.95** | 86.15 | 88.09 |
+| `ocr_25` | Tesseract / EasyOCR | **97.57** | 94.19 | 94.22 | 44.17 | 47.42 |
+| `legal_real_25` | Văn bản pháp lý | **95.87** | 93.54 | 93.80 | 61.76 | 54.90 |
+| `news_real_25` | Tiêu đề + tin tức | **96.54** | 91.34 | 94.07 | 34.81 | 30.62 |
+| `furniture_50` | Văn bản hành chính thật | 84.36 | **88.89** | 83.77 | 63.64 | 71.43 |
+| **Tổng hợp** | n=175 | **89.54** | 87.99 | 87.29 | 58.46 | 57.86 |
 
-Tất cả số là word accuracy (%). Khoảng tin cậy bootstrap 95 % (±~5 pp
-trên tổng hợp 150 câu) là rộng — base của chúng tôi và Toshiiiii1
-đang **ngang nhau trong khoảng nhiễu thống kê** trên OOD. JSON nguồn:
+Tất cả số là word accuracy (%). Khoảng tin cậy bootstrap 95 % trên tổng
+hợp là khoảng ±3,5 pp — base của chúng tôi (89.54 %, CI 86.1–92.6) và
+Toshiiiii1 (87.29 %, CI 83.9–90.3) **vẫn chồng lấn**, nên đừng đọc bảng
+này như một bảng xếp hạng dứt khoát. JSON nguồn:
 [ours-base](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_base.json) /
 [ours-small](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_spell_correction_small.json) /
-[ours-diacritic](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_diacritic_vit5_base.json) /
 [Toshiiiii1](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_toshiiiii1.json) /
 [bmd1905](https://github.com/nrl-ai/nom-vn/blob/main/benchmarks/results/baseline_real_bmd1905.json).
 
-#### Phân tích kiểu lỗi (n=150, tổng hợp)
+#### Lát cắt `telex_real_25` đã bị loại bỏ
 
-| Mô hình | missed_diac | wrong_tone | base_char | extra | missing | correct |
-|---|---:|---:|---:|---:|---:|---:|
-| spell-correction-base | 12 | 63 | 416 | 6 | 15 | 1684 |
-| spell-correction-small | 9 | 71 | 432 | 0 | 64 | 1614 |
-| diacritic-vit5-base | 7 | 61 | 549 | 2 | 25 | 1548 |
+Bảng trước đây có thêm một lát cắt `telex_real_25` mà mô hình nào cũng
+chỉ đạt 11–19 %, và chúng tôi từng mô tả đó là điểm yếu lớn nhất. Đo lại
+cho thấy **chính lát cắt đó mới là vấn đề**: cả 25 câu đều là chuỗi Telex
+thô cho toàn bộ câu, một hành vi người dùng thật không tạo ra, và nhiều
+nhãn gold sai (`coos` giải mã thành `cố` nhưng gán nhãn `được`). Nó kéo
+tổng hợp của chúng tôi xuống khoảng 8,7 pp trên một phép đo vô nghĩa. Chi
+tiết trong `benchmarks/data/spell_correction_eval_real/README.md`.
 
-`base_char` (sai gốc chữ — chọn nhầm từ) là loại lỗi chiếm chủ đạo,
-đặc biệt với teen-code + Telex. Đây cũng là điều `comprehensive_noise()`
-trong corpus v2 nhắm đến.
+Lỗi Telex là có thật nhưng **cục bộ** — một hai âm tiết hỏng giữa một câu
+đúng — nên nó thuộc nhóm lỗi trộn lẫn vào các register khác, đúng như
+`nom.text.noise` làm với dữ liệu huấn luyện, chứ không phải một hạng mục
+riêng nơi mọi từ đều hỏng.
 
 #### Quan sát chính
 
-1. **v0.2.29 (corpus v2) vượt Toshiiiii1 rõ rệt trên OOD.**
-   Tổng hợp 79.62 % (mới) vs 77.40 % (Toshiiiii1) — **+2.22 pp**.
-   Điểm cải thiện lớn nhất: `forum_25` 59.45 → 65.84 (+6.39 pp), nhờ
-   `mobile_noise()` trong corpus v2 đã đưa các viết tắt teen-code
-   (`ko bt`, `mn`, `vs`) vào phân phối huấn luyện. `telex_real_25` cũng
-   tăng từ 17.38 → 19.15 (+1.77 pp), xác nhận `telex_grammar_noise()`
-   thực sự dạy mô hình xử lý lỗi keystroke Telex. Trade-off: synthetic
-   8-split light_avg giảm từ 98.58 → 98.32 (-0.26 pp), heavy_avg từ
-   97.35 → 97.03 (-0.32 pp) — mô hình bớt over-fit lưới synthetic, đổi
-   lại OOD tăng. Đây là tỷ lệ trao đổi đúng hướng.
-2. **bmd1905 thua xa** (49.21 % aggregate). Thua cả mô hình diacritic-only
-   của chúng tôi (71.50 %). Lý do: bmd1905 được huấn luyện chủ yếu trên
-   lỗi cấp ký tự, không gặp đủ pattern strip-dấu — nên nó để lại 459
-   missed_diacritic của 1058 lỗi. Đây là cảnh báo: chỉ vì một mô hình
-   thắng trên synthetic của chính họ không có nghĩa thắng trên thực tế.
-3. **Khoảng cách synthetic vs OOD đã thu hẹp.** v0.2.29 base đạt 98.32 %
-   light avg synthetic và 79.62 % OOD (-19 pp), tốt hơn v0.2.28 (-21 pp).
-   Trên 6 register: legal + news + mobile + ocr ở 95-97 %, forum 65.84,
-   telex 19.15. Telex vẫn là điểm yếu chung của mọi mô hình.
-4. **spell-base vs spell-small** giờ cách nhau 2.07 pp tổng hợp (79.62
-   vs 77.55) — base nhỉnh hơn nhưng cả hai vẫn vượt Toshiiiii1. Khác
-   biệt rõ vẫn là **spell-small drop trên Telex** (-2.70 pp).
-5. **Telex là điểm yếu chung** — 9-19 % trên cả 5 mô hình (kể cả
-   Toshiiiii1 best 18.54 %). Đây chính là gap mà corpus v2 +
-   `comprehensive_noise()` đang khắc phục (thêm `telex_grammar_noise()`
-   cho lỗi keystroke thực + `mobile_noise()` cho teen-code + lỗi phím
-   gần). v0.2.29 retrain đang chạy chuỗi
-   spell-base → spell-small → diacritic-base trên corpus v2.
+1. **Điểm yếu thật là register forum** (65.84 %), không phải Telex. Viết
+   tắt kiểu mạng xã hội (`ko bt`, `mn`, `vs`) gần như không xuất hiện
+   trong corpus Wiki+news+legal. Đây là mục tiêu chính của vòng huấn
+   luyện tiếp theo.
+2. **Văn bản hành chính đứng thứ hai** (84.36 %). Corpus cắt theo câu nên
+   tiêu ngữ, tiêu đề viết hoa và nhãn biểu mẫu bị lọc mất. `nom.text.heading`
+   xử lý phần lớn ở tầng suy luận (84.36 → 87.62 %), nhưng bản thân mô
+   hình vẫn cần dữ liệu này.
+3. **bmd1905 và chamdentimem thua xa** (57.86 % / 58.46 %, và 0 % khớp
+   nguyên câu vì cả hai thường thêm dấu chấm cuối câu). Thắng trên bộ
+   synthetic của chính mình không có nghĩa thắng trên dữ liệu thật.
 
 Tái lập:
 ```bash
@@ -220,9 +204,9 @@ python benchmarks/accuracy/bench_spell_correction_real.py \
     --json benchmarks/results/baseline_real_spell_correction_base.json
 ```
 
-Khoảng tin cậy ±5-10 pp ở 95 % cho từng slice 25 câu, ±5 pp cho tổng
-hợp 150 câu — đủ phân biệt mô hình spell-correction vs diacritic-only,
-chưa đủ phân biệt base vs small trên tổng hợp.
+Khoảng tin cậy ±5-10 pp ở 95 % cho từng lát cắt 25 câu, khoảng ±3,5 pp
+cho tổng hợp 175 câu — đủ phân biệt mô hình spell-correction vs
+diacritic-only, chưa đủ phân biệt base vs small trên tổng hợp.
 
 Re-eval cục bộ tái lập remote trong ±0.03 pp trên mọi split. Huấn luyện
 trên [cùng corpus 500K mixed Wiki+news](https://huggingface.co/datasets/nrl-ai/vn-spell-correction-train)

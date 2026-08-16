@@ -134,10 +134,19 @@ def _categorize_errors(preds: list[str], targets: list[str]) -> dict[str, int]:
 EVAL_SLICES = (
     "forum_25",
     "mobile_25",
-    "telex_real_25",
     "ocr_25",
     "legal_real_25",
     "news_real_25",
+    # `telex_real_25` was retired 2026-08-16. Every sentence in it was a
+    # full-sentence raw Telex dump, as if the IME had been off for the whole
+    # sentence while the typist kept entering tone letters. People do not
+    # produce that: with the IME off the screen shows garbage from the second
+    # word, and the realistic fallback is plain unaccented Vietnamese, which
+    # the legal and news slices already cover. Several gold targets were also
+    # wrong (`coos` decodes to `cố`, labelled `được`). Telex slips are real
+    # but local, so they belong mixed into the other registers as one error
+    # mode among many -- which is what `nom.text.noise` does for training --
+    # not as a category where every word is corrupted.
     # Document furniture: letterheads, all-caps titles, form labels and
     # signature blocks carrying a real-word tone confusion. Added after a
     # user reported `Độc lập - Tự do - Hạnh phục` coming back uncorrected;

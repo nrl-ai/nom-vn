@@ -59,6 +59,35 @@ class TestNFC:
         assert gen.noisify("") == ""
         assert gen.noisify("   ") == "   "
 
+    def test_no_orphaned_combining_marks(self) -> None:
+        """No output may leave a combining mark stranded on a base it can't join.
+
+        Stronger than ``test_output_is_nfc``, which this bug slipped past.
+        ``cạj̆p`` is already in NFC form -- the breve simply has nothing to
+        compose with once a literal Telex letter is spliced in front of it --
+        so ``NFC(x) == x`` holds while the string is still unreachable by any
+        Vietnamese typist. Regression guard for the tone-reattachment and
+        trailing-letter fixes in ``_telex_grammar``.
+        """
+        words = "tuyệt Việt đường được mỗi cặp nghĩa hóa ậm ợt cộng hoà khuỷu nguyễn"
+        presets = [
+            ("light", light_noise()),
+            ("heavy", heavy_noise()),
+            ("telex_typo", telex_typo_noise()),
+            ("telex_grammar", telex_grammar_noise()),
+            ("mobile", mobile_noise()),
+            ("ocr_realistic", ocr_realistic_noise()),
+            ("comprehensive", comprehensive_noise()),
+        ]
+        for name, cfg in presets:
+            for seed in range(200):
+                out = NoiseGenerator(cfg, seed=seed).noisify(words)
+                stray = [c for c in unicodedata.normalize("NFC", out) if unicodedata.combining(c)]
+                assert not stray, (
+                    f"{name} seed={seed} left orphaned combining marks "
+                    f"{[hex(ord(c)) for c in stray]} in {out!r}"
+                )
+
 
 class TestEditBudget:
     def test_max_edit_ratio_capped(self) -> None:
