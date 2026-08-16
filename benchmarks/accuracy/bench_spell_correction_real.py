@@ -26,6 +26,7 @@ import sys
 import time
 import unicodedata
 from pathlib import Path
+from typing import Any
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO))
@@ -147,6 +148,41 @@ EVAL_SLICES = (
 )
 
 
+def _heading_retry(
+    prediction: str,
+    source: str,
+    *,
+    tok: Any,
+    model: Any,
+    device: str,
+    max_input_length: int,
+    max_target_length: int,
+    num_beams: int,
+) -> str:
+    """Mirror ``nom.text.diacritic_models.HFDiacriticModel``'s heading pass.
+
+    Reimplemented here rather than imported so the bench keeps measuring the
+    raw model plus one documented post-step, instead of whatever the library
+    adapter happens to do. Behaviour must stay in lockstep with
+    ``HFDiacriticModel.predict``; ``tests/test_heading.py`` covers the merge.
+    """
+    import torch
+
+    from nom.text.heading import is_heading, merge_tone_only
+    from nom.text.normalize import has_diacritics, normalize
+
+    if normalize(prediction) != normalize(source):
+        return prediction
+    if not (is_heading(source) and has_diacritics(source)):
+        return prediction
+    x = tok(source.lower(), return_tensors="pt", max_length=max_input_length, truncation=True).to(
+        device
+    )
+    with torch.no_grad():
+        out = model.generate(**x, max_length=max_target_length, num_beams=num_beams)
+    return merge_tone_only(source, tok.decode(out[0], skip_special_tokens=True))
+
+
 def _load_jsonl(path: Path) -> list[tuple[str, str]]:
     pairs: list[tuple[str, str]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -176,6 +212,14 @@ def main() -> int:
     p.add_argument("--json", type=Path, default=None)
     p.add_argument("--examples", type=int, default=3)
     p.add_argument("--use-slow-tokenizer", action="store_true")
+    p.add_argument(
+        "--heading-retry",
+        action="store_true",
+        help="Apply the nom.text.heading recovery pass: when the model returns "
+        "a heading-shaped input unchanged, retry on a lowercased copy and keep "
+        "only tone-level edits. Mirrors HFDiacriticModel(heading_retry=True), "
+        "which is the library default.",
+    )
     args = p.parse_args()
 
     import torch
@@ -232,6 +276,17 @@ def main() -> int:
                     **x, max_length=args.max_target_length, num_beams=args.num_beams
                 )
             pred = tok.decode(out[0], skip_special_tokens=True)
+            if args.heading_retry:
+                pred = _heading_retry(
+                    pred,
+                    noisy,
+                    tok=tok,
+                    model=model,
+                    device=device,
+                    max_input_length=args.max_input_length,
+                    max_target_length=args.max_target_length,
+                    num_beams=args.num_beams,
+                )
             latencies.append(time.perf_counter() - t_one)
             preds.append(pred)
             targets.append(target)
@@ -312,6 +367,7 @@ def main() -> int:
                     "model_id": args.model_id,
                     "device": device,
                     "eval_dir": "spell_correction_eval_real",
+                    "heading_retry": args.heading_retry,
                     "warmup_calls": args.warmup,
                     "num_beams": args.num_beams,
                     "prefix": args.prefix,
