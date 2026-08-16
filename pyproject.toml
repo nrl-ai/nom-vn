@@ -198,8 +198,15 @@ all = [
 dev = [
   "pytest>=8",
   "pytest-cov>=5",
-  "ruff>=0.5",
-  "mypy>=1.10",
+  # Pin the linters. These float into CI via `pip install -e ".[dev]"`, so
+  # an unpinned range means an upstream release can turn CI red on an
+  # unrelated PR. That happened twice: ruff 0.16 promoted Markdown code-block
+  # formatting out of preview and wanted to reflow 19 docs (flattening the
+  # aligned comment columns in the Vietnamese examples), and mypy 2.x changed
+  # which `# type: ignore` directives count as used. Keep these in lockstep
+  # with the revs in .pre-commit-config.yaml; bump both together, deliberately.
+  "ruff>=0.15.12,<0.16",
+  "mypy>=1.20,<2",
   "pre-commit>=3.7",
   # Test deps — match the runtime [llm] / [doc] extras so we can exercise
   # the Ollama adapter, Parse stage, and OCR stage with real types

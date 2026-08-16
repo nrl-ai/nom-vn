@@ -39,6 +39,12 @@ repos:
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
+    # Deliberately behind the `mypy` pin in pyproject.toml [dev] (>=1.20,<2),
+    # which is what CI enforces via `mypy src/`. This hook installs its own
+    # env, and at v1.20.2 that env resolves numpy stubs which need a py3.12+
+    # `type` statement while our target-version is py310, so the hook dies
+    # before checking anything. CI is the authority on typing; this hook is a
+    # fast local pre-filter. Revisit when the numpy stub floor moves.
     rev: v1.13.0
     hooks:
       - id: mypy
