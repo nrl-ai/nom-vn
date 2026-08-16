@@ -65,6 +65,45 @@ spell.predict_batch(noisy_sentences, batch_size=16)
 
 Cùng giao diện `predict()` / `predict_batch()` như mô hình diacritic.
 
+## Điểm mù: tiêu đề và phần đầu văn bản hành chính
+
+Corpus huấn luyện được cắt theo câu, nên các thành phần bố cục của tài
+liệu (dòng tiêu ngữ, tiêu đề viết hoa toàn bộ, nhãn biểu mẫu, khối chữ
+ký) gần như không xuất hiện dưới dạng mục tiêu cần sửa. Hệ quả là mô
+hình trả lại nguyên văn những đầu vào đó thay vì sửa.
+
+Lỗi chỉ xảy ra khi hai điều kiện cùng đúng:
+
+1. **Tần suất bất lợi.** Từ sai vẫn là một âm tiết hợp lệ và phổ biến
+   hơn từ đúng trong corpus (`phục` xuất hiện 3.810 lần, `phúc` 1.311
+   lần).
+2. **Bố cục chưa từng thấy.** Dạng tiêu đề mà bộ mã hoá chưa từng gặp ở
+   vai trò cần sửa.
+
+Chỉ một điều kiện thì không đủ. Cùng một lỗi, `Tôi rất hạnh phục khi gặp
+lại bạn` được sửa đúng, còn `Độc lập - Tự do - Hạnh phục` thì không.
+
+`nom.text.heading` xử lý việc này: khi lượt chạy đầu không sửa gì và đầu
+vào có dạng tiêu đề, adapter chạy lại trên bản viết thường rồi chỉ nhận
+các thay đổi ở mức dấu thanh trên những token thuần chữ cái. Bộ lọc đó
+là phần bắt buộc, vì viết thường toàn bộ sẽ phá hỏng từ viết tắt
+(`QĐ-UBND` thành `QĐ-BND`) và văn bản chưa có dấu (`Toi yu Vit Nam`
+thành `Tội tử Vì Nam`).
+
+Tính năng này bật sẵn. Trên bộ 10 câu tiêu đề, kết quả tăng từ 7/10 lên
+10/10 và không gây hồi quy trên câu thường. Nó chỉ kích hoạt với 2 trong
+150 câu của bộ đánh giá thực tế, nên chi phí thêm không đáng kể.
+
+```python
+spell = HFDiacriticModel(model_id="nrl-ai/vn-spell-correction-base")
+spell("Độc lập - Tự do - Hạnh phục")   # 'Độc lập - Tự do - Hạnh phúc'
+
+# Tắt nếu cần hành vi một lượt như trước
+spell = HFDiacriticModel(
+    model_id="nrl-ai/vn-spell-correction-base", heading_retry=False
+)
+```
+
 ## Mô hình đã huấn luyện — `nrl-ai/*`
 
 Quy ước base + small tier từ diacritic được áp dụng nguyên: cùng corpus

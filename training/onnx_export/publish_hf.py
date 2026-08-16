@@ -26,6 +26,12 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 
 
+# No explicit `pipeline_tag`: these wrap seq2seq models and the Hub infers
+# the right tag from config.json. An earlier revision hard-coded
+# `pipeline_tag: text-generation`, which makes the Hub render a causal-LM
+# snippet and widget; `pipeline("text-generation", ...)` rejects an
+# encoder-decoder model and echoes the input unchanged for every request.
+# That reached users as an apparent model-quality bug. Do not re-add it.
 CARD_TEMPLATE = """\
 ---
 license: apache-2.0
@@ -40,7 +46,6 @@ tags:
   - quantization
   - edge
   - cpu
-pipeline_tag: text-generation
 library_name: transformers
 ---
 

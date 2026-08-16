@@ -55,6 +55,35 @@ HEAVY_SPLITS = (
 )
 ALL_SPLITS = LIGHT_SPLITS + HEAVY_SPLITS
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+RESULTS_DIR = REPO_ROOT / "benchmarks" / "results"
+
+# Out-of-distribution eval slices, in card display order.
+REAL_SPLITS = (
+    "forum_25",
+    "mobile_25",
+    "telex_real_25",
+    "ocr_25",
+    "legal_real_25",
+    "news_real_25",
+    "furniture_50",
+)
+
+# Public comparison columns for the OOD table. Each maps to a committed
+# baseline JSON produced by benchmarks/accuracy/bench_spell_correction_real.py,
+# so the rendered numbers can never drift from a measurement.
+REAL_COMPARISON: tuple[tuple[str, str], ...] = (
+    ("Toshiiiii1 (public)", "baseline_real_toshiiiii1.json"),
+    ("bmd1905 (public)", "baseline_real_bmd1905.json"),
+    ("chamdentimem (public)", "baseline_real_chamdentimem.json"),
+)
+
+# Our own OOD numbers, keyed by the repo being published. Same provenance.
+REAL_SELF_BASELINE: dict[str, str] = {
+    "nrl-ai/vn-spell-correction-base": "baseline_real_spell_correction_base.json",
+    "nrl-ai/vn-spell-correction-small": "baseline_real_spell_correction_small.json",
+}
+
 # Public landscape — every measured row has a JSON baseline.
 COMPARISON_MATRIX: list[dict[str, Any]] = [
     {
@@ -198,6 +227,69 @@ def _render_comparison_section(
     return "\n".join(lines)
 
 
+def _load_real_eval(filename: str) -> dict[str, float] | None:
+    """Read per-slice OOD word accuracy from a committed baseline JSON."""
+    path = RESULTS_DIR / filename
+    if not path.exists():
+        return None
+    data = json.loads(path.read_text(encoding="utf-8"))
+    eval_data = data.get("eval", {})
+    scores: dict[str, float] = {}
+    for key, metrics in eval_data.items():
+        if isinstance(metrics, dict) and "word_accuracy" in metrics:
+            scores[key] = float(metrics["word_accuracy"])
+            if key == "__all_real__":
+                scores["__n__"] = float(metrics.get("n_sentences", 0))
+    return scores or None
+
+
+def _render_real_world_table(repo_id: str) -> tuple[str, str]:
+    """Render the OOD comparison table plus a one-line aggregate summary.
+
+    Returns ``("", "")`` when this model has no committed OOD baseline, so
+    the card omits the section rather than printing an unmeasured claim.
+    """
+    self_file = REAL_SELF_BASELINE.get(repo_id)
+    self_scores = _load_real_eval(self_file) if self_file else None
+    if not self_scores:
+        return "", ""
+
+    columns: list[tuple[str, dict[str, float]]] = []
+    for label, filename in REAL_COMPARISON:
+        scores = _load_real_eval(filename)
+        if scores:
+            columns.append((label, scores))
+
+    header = "| Slice | this model | " + " | ".join(label for label, _ in columns) + " |"
+    align = "|---|---:|" + "".join("---:|" for _ in columns)
+    lines = [header, align]
+
+    def _fmt(value: float | None, best: float) -> str:
+        if value is None:
+            return "—"
+        text = f"{value * 100:.2f} %"
+        return f"**{text}**" if abs(value - best) < 1e-9 else text
+
+    for split in (*REAL_SPLITS, "__all_real__"):
+        row_values = [self_scores.get(split)] + [s.get(split) for _, s in columns]
+        present = [v for v in row_values if v is not None]
+        if not present:
+            continue
+        best = max(present)
+        if split == "__all_real__":
+            n_sentences = int(self_scores.get("__n__", 0))
+            name = f"**Aggregate (n={n_sentences})**"
+        else:
+            name = split
+        lines.append(f"| {name} | " + " | ".join(_fmt(v, best) for v in row_values) + " |")
+
+    aggregate = self_scores.get("__all_real__")
+    summary_line = f"{aggregate * 100:.2f} %" if aggregate is not None else "—"
+    # Indented to two spaces so the table stays inside the surrounding
+    # bullet rather than terminating the list.
+    return "\n".join(f"  {line}" for line in lines), summary_line
+
+
 def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -> str:
     base = summary["model_id"]
     eval_data = summary.get("eval", {})
@@ -235,7 +327,17 @@ def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -
         )
     eval_table = "\n".join(rows)
     comparison_table = _render_comparison_section(repo_id, summary)
+    real_world_table, real_world_aggregate = _render_real_world_table(repo_id)
 
+    # No explicit `pipeline_tag`. These are seq2seq models, and the Hub infers
+    # the correct tag from config.json (T5ForConditionalGeneration ->
+    # text2text-generation). An earlier revision hard-coded
+    # `pipeline_tag: text-generation`, which made the Hub render a causal-LM
+    # snippet and widget; both echo the input unchanged for every request,
+    # because `pipeline("text-generation", ...)` rejects an encoder-decoder
+    # model. That was reported as a model-quality bug. Peer seq2seq models
+    # (google/flan-t5-base, bmd1905/vietnamese-correction-v2) also leave this
+    # field unset. Do not re-add it.
     return f"""---
 license: apache-2.0
 base_model: {base}
@@ -246,7 +348,6 @@ tags:
   - spell-correction
   - seq2seq
   - {arch_tag}
-pipeline_tag: text-generation
 datasets:
   - nrl-ai/vn-spell-correction-train
 metrics:
@@ -357,25 +458,28 @@ The two averaged columns:
   benchmark on a 150-sentence hand-curated OOD eval ([6 registers](https://github.com/nrl-ai/nom-vn/tree/main/benchmarks/data/spell_correction_eval_real),
   bootstrap 95 % CI):
 
-  | Slice | this model | Toshiiiii1 (public) | bmd1905 (public) |
-  |---|---:|---:|---:|
-  | forum_25 | 59.45 % | 60.11 % | 59.02 % |
-  | mobile_25 | 95.01 % | 96.95 % | 88.09 % |
-  | telex_real_25 | 17.38 % | 18.54 % | 11.58 % |
-  | ocr_25 | 93.62 % | 94.22 % | 47.42 % |
-  | legal_real_25 | 95.09 % | 93.80 % | 54.90 % |
-  | news_real_25 | 96.54 % | 94.07 % | 30.62 % |
-  | **Aggregate (n=150)** | **77.43 %** | 77.40 % | 49.21 % |
+{real_world_table}
 
-  Synthetic light_avg is 98.58 %, real-world aggregate is 77.43 %. The
-  21 pp gap is the cost of training only on `light/telex_typo/heavy`
-  noise — those capture the *surface* of typos but not real Telex
-  keystroke artefacts (`dduwojc` for `được`) or forum-style
-  abbreviations (`ko bt` for `không biết`). On OOD this model **ties**
-  with `Toshiiiii1` (77.43 vs 77.40, within bootstrap CI). v0.2.29
-  retraining on the v2 multi-source corpus + `comprehensive_noise()`
-  (which adds `telex_grammar_noise()` + `mobile_noise()`) is queued
-  and targets a clear OOD lead, not just a synthetic one.
+  The synthetic grid above measures how well we invert *our own* noise
+  generator; the aggregate here ({real_world_aggregate}) is what to plan
+  around. The gap is the cost of a noise model that captures the
+  *surface* of typos but not real Telex keystroke artefacts (`dduwojc`
+  for `được`) or forum-style abbreviations (`ko bt` for `không biết`).
+  Real Telex input is the weakest slice by a wide margin and is the
+  primary target of the next training round.
+- **Heading and letterhead layout is a known blind spot.** The training
+  corpus is sentence-segmented, so document furniture (letterheads,
+  all-caps titles, form labels, signature blocks) was filtered out
+  during construction. On a 15-item battery of Vietnamese
+  administrative headings this model scores 10/15, and it can leave a
+  real-word tone error uncorrected where the same error is fixed in
+  ordinary prose: `Độc lập - Tự do - Hạnh phục` is echoed back
+  unchanged, while `Tôi rất hạnh phục khi gặp lại bạn` is corrected.
+  Two conditions have to coincide, an adverse frequency prior (`phục`
+  outnumbers `phúc` 3,810 to 1,311 in the corpus) and a layout the
+  encoder has not seen corrected. `nom.text.heading` ships a
+  conservative recovery pass for this, enabled by default on
+  `HFDiacriticModel`; see the repository for a standalone version.
 - **Heavy-noise corner cases.** OCR outputs that drop entire words or
   add hallucinated text are out-of-scope; the noise generator we
   trained on caps edits per sentence (max 25 % edit ratio).

@@ -115,7 +115,9 @@ class VinternHandwritingOcr:
 
         # Vintern uses `trust_remote_code=True` — its model class lives in
         # the repo, not in transformers core. This matches their HF card.
-        tokenizer = AutoTokenizer.from_pretrained(self.model_id, trust_remote_code=True)
+        tokenizer = AutoTokenizer.from_pretrained(  # type: ignore[no-untyped-call,unused-ignore]
+            self.model_id, trust_remote_code=True
+        )
         model = AutoModel.from_pretrained(
             self.model_id,
             trust_remote_code=True,

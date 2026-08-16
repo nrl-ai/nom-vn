@@ -193,9 +193,19 @@ section at end. Uncitable claim → write **"no published source"** /
      each config parses.
    - Open `https://huggingface.co/<repo_id>` and look for the yellow
      YAML warning banner.
-   - Known traps: `pipeline_tag: text2text-generation` is **invalid**
-     (caught 2026-04-30) — use `text-generation` for seq2seq diacritic
-     models. Per-config license overrides don't exist; repo-level only.
+   - **Don't set `pipeline_tag` on a seq2seq model at all.** The Hub
+     infers it from `config.json`, and every peer model
+     (`google/flan-t5-base`, `bmd1905/vietnamese-correction-v2`) leaves
+     it unset. The 2026-04-30 note here claimed
+     `text2text-generation` was invalid and told us to use
+     `text-generation` instead; that was wrong and shipped a real bug.
+     `pipeline("text-generation", ...)` rejects an encoder-decoder model
+     and echoes the input unchanged, so the card's own snippet and the
+     Hub widget appeared to correct nothing on every input. Reported by
+     a user 2026-08-15, fixed same day. If a yellow YAML banner ever
+     names a field, read the banner's own valid list rather than
+     guessing a replacement.
+   - Per-config license overrides don't exist; repo-level only.
    - **Fix-only push:** `upload_file(path_in_repo="README.md", ...)` —
      don't re-upload weights.
 3. **Every model card carries a "How we compare" matrix:** this model

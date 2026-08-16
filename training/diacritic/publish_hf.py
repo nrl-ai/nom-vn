@@ -296,6 +296,12 @@ def render_model_card(summary: dict[str, Any], repo_id: str, gate_status: str) -
     eval_table = "\n".join(rows)
     comparison_table = _render_comparison_section(repo_id, summary)
 
+    # No explicit `pipeline_tag`. These are seq2seq models and the Hub infers
+    # the right tag from config.json. An earlier revision hard-coded
+    # `pipeline_tag: text-generation`, which makes the Hub render a causal-LM
+    # snippet and widget; `pipeline("text-generation", ...)` rejects an
+    # encoder-decoder model and echoes the input unchanged for every request.
+    # That reached users as an apparent model-quality bug. Do not re-add it.
     return f"""---
 license: apache-2.0
 base_model: {base}
@@ -306,7 +312,6 @@ tags:
   - diacritic-restoration
   - seq2seq
   - {arch_tag}
-pipeline_tag: text-generation
 datasets:
 {datasets_yaml}
 metrics:

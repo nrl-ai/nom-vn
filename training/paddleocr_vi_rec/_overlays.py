@@ -42,11 +42,11 @@ def stamp_red(img: Image.Image, rng: random.Random) -> Image.Image:
     ~60 % alpha. We approximate with a circle drawn in red + faint
     text "ĐÃ KÝ" or similar in the centre.
     """
-    W, H = img.size
-    diameter = rng.randint(int(H * 1.1), int(H * 1.6))
+    width, height = img.size
+    diameter = rng.randint(int(height * 1.1), int(height * 1.6))
     # Place near the right edge, partially overlapping the text
-    cx = rng.randint(W - int(diameter * 0.7), W - int(diameter * 0.3))
-    cy = H // 2
+    cx = rng.randint(width - int(diameter * 0.7), width - int(diameter * 0.3))
+    cy = height // 2
 
     overlay = Image.new("RGBA", img.size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(overlay)
@@ -72,18 +72,18 @@ def stamp_red(img: Image.Image, rng: random.Random) -> Image.Image:
 
 def signature_blue(img: Image.Image, rng: random.Random) -> Image.Image:
     """Scribble-style signature crossing the line."""
-    W, H = img.size
+    width, height = img.size
     overlay = Image.new("RGBA", img.size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(overlay)
 
     # Random bezier-like polyline
     blue = (40, 40, 160, rng.randint(120, 200))
     n_pts = rng.randint(6, 12)
-    x_start = rng.randint(int(W * 0.3), int(W * 0.6))
+    x_start = rng.randint(int(width * 0.3), int(width * 0.6))
     points = []
     for i in range(n_pts):
         x = x_start + i * rng.randint(8, 22)
-        y = H // 2 + rng.randint(-int(H * 0.4), int(H * 0.4))
+        y = height // 2 + rng.randint(-int(height * 0.4), int(height * 0.4))
         points.append((x, y))
     if len(points) > 1:
         draw.line(points, fill=blue, width=rng.randint(2, 4))
@@ -156,6 +156,6 @@ def maybe_apply_overlay(img: Image.Image, *, seed: int, prob: float = 0.30) -> I
     fn = _OVERLAY_FNS[rng.randrange(len(_OVERLAY_FNS))]
     try:
         return fn(img, rng)
-    except Exception:  # noqa: BLE001
+    except Exception:
         # Don't fail training over a bad overlay
         return img
