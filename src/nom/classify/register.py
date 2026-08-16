@@ -426,7 +426,7 @@ class PhoBertRegisterClassifier:
                 "Install with: pip install 'transformers>=4.45' 'torch>=2.0'"
             ) from exc
 
-        tok: Any = AutoTokenizer.from_pretrained(model_id)
+        tok: Any = AutoTokenizer.from_pretrained(model_id)  # type: ignore[no-untyped-call,unused-ignore]
         mdl: Any = AutoModelForSequenceClassification.from_pretrained(model_id)
         device = self.device
         if device is None:

@@ -82,7 +82,7 @@ def main() -> int:
             lines[key].append(i)
 
         line_texts = []
-        for key, idx_list in sorted(lines.items()):
+        for _key, idx_list in sorted(lines.items()):
             if not idx_list:
                 continue
             xs = [data["left"][i] for i in idx_list]

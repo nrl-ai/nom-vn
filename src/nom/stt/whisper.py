@@ -124,7 +124,7 @@ def _audio_input(audio: Path | str | bytes) -> Any:
     """
     if isinstance(audio, bytes):
         import librosa  # type: ignore[import-not-found, unused-ignore]
-        import soundfile as sf  # type: ignore[import-not-found, unused-ignore]
+        import soundfile as sf  # type: ignore[import-not-found, import-untyped, unused-ignore]
 
         with BytesIO(audio) as buf:
             samples, sr = sf.read(buf, dtype="float32")

@@ -66,6 +66,7 @@ REAL_SPLITS = (
     "ocr_25",
     "legal_real_25",
     "news_real_25",
+    "furniture_50",
 )
 
 # Public comparison columns for the OOD table. Each maps to a committed
@@ -237,6 +238,8 @@ def _load_real_eval(filename: str) -> dict[str, float] | None:
     for key, metrics in eval_data.items():
         if isinstance(metrics, dict) and "word_accuracy" in metrics:
             scores[key] = float(metrics["word_accuracy"])
+            if key == "__all_real__":
+                scores["__n__"] = float(metrics.get("n_sentences", 0))
     return scores or None
 
 
@@ -273,7 +276,11 @@ def _render_real_world_table(repo_id: str) -> tuple[str, str]:
         if not present:
             continue
         best = max(present)
-        name = "**Aggregate (n=150)**" if split == "__all_real__" else split
+        if split == "__all_real__":
+            n_sentences = int(self_scores.get("__n__", 0))
+            name = f"**Aggregate (n={n_sentences})**"
+        else:
+            name = split
         lines.append(f"| {name} | " + " | ".join(_fmt(v, best) for v in row_values) + " |")
 
     aggregate = self_scores.get("__all_real__")

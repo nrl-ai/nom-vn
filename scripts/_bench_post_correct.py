@@ -50,17 +50,23 @@ def cer(hyp: str, ref: str) -> float:
 
 
 def main() -> int:
+    import tempfile
+
+    from docx import Document
+
     from nom.convert import convert_to_docx
     from nom.text.diacritic_models import HFDiacriticModel
-    from docx import Document
-    import tempfile
 
     print("init spell-correction model…", flush=True)
     rescorer = HFDiacriticModel(model_id="nrl-ai/vn-spell-correction-base")
     rescorer._ensure_loaded()  # warm
     print(f"  device: {rescorer.device}", flush=True)
 
-    meta = (REPO / "benchmarks/data/vn_documents_ocr_v2/metadata.jsonl").read_text(encoding="utf-8").splitlines()
+    meta = (
+        (REPO / "benchmarks/data/vn_documents_ocr_v2/metadata.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    )
     real_docs = [json.loads(line) for line in meta if json.loads(line)["config"] == "real"]
     print(f"\nbench on {len(real_docs)} real-scan documents", flush=True)
     print(f"\n{'doc_id':>32} | {'tess CER':>8} | {'+rescore':>8} | {'Δ pp':>6}")
@@ -87,7 +93,7 @@ def main() -> int:
                 else:
                     try:
                         rescored.append(rescorer.predict(line))
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         print(f"  rescore failed: {exc}", file=sys.stderr)
                         rescored.append(line)
             rescore_t = time.perf_counter() - t0
@@ -104,12 +110,16 @@ def main() -> int:
                 flush=True,
             )
 
-    print(f'\n  raw Tesseract        mean {statistics.mean(raw_cers) * 100:.2f}%  median {statistics.median(raw_cers) * 100:.2f}%')
-    print(f'  + rescore            mean {statistics.mean(rescored_cers) * 100:.2f}%  median {statistics.median(rescored_cers) * 100:.2f}%')
+    print(
+        f"\n  raw Tesseract        mean {statistics.mean(raw_cers) * 100:.2f}%  median {statistics.median(raw_cers) * 100:.2f}%"
+    )
+    print(
+        f"  + rescore            mean {statistics.mean(rescored_cers) * 100:.2f}%  median {statistics.median(rescored_cers) * 100:.2f}%"
+    )
     delta_mean = (statistics.mean(raw_cers) - statistics.mean(rescored_cers)) * 100
     delta_median = (statistics.median(raw_cers) - statistics.median(rescored_cers)) * 100
-    print(f'  Δ (improvement)      mean {delta_mean:+.2f} pp  median {delta_median:+.2f} pp')
-    print(f'  rescore latency      mean {statistics.mean(rescore_seconds):.1f} s/doc')
+    print(f"  Δ (improvement)      mean {delta_mean:+.2f} pp  median {delta_median:+.2f} pp")
+    print(f"  rescore latency      mean {statistics.mean(rescore_seconds):.1f} s/doc")
 
     out = REPO / "benchmarks/results/baseline_tesseract_post_rescore_real.json"
     out.write_text(
@@ -129,7 +139,7 @@ def main() -> int:
             indent=2,
         )
     )
-    print(f'\nSaved → {out}')
+    print(f"\nSaved → {out}")
     return 0
 
 

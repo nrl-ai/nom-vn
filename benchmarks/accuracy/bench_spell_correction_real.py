@@ -137,6 +137,13 @@ EVAL_SLICES = (
     "ocr_25",
     "legal_real_25",
     "news_real_25",
+    # Document furniture: letterheads, all-caps titles, form labels and
+    # signature blocks carrying a real-word tone confusion. Added after a
+    # user reported `Độc lập - Tự do - Hạnh phục` coming back uncorrected;
+    # the previous six slices contained only 2 heading-shaped sentences, so
+    # the category was invisible. Regenerate with
+    # `python benchmarks/data/furniture_vi/_generate.py`.
+    "furniture_50",
 )
 
 
