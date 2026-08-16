@@ -207,6 +207,15 @@ dev = [
   # with the revs in .pre-commit-config.yaml; bump both together, deliberately.
   "ruff>=0.15.12,<0.16",
   "mypy>=1.20,<2",
+  # Type-check only. numpy >= 2.5 ships stubs written with the py3.12 `type`
+  # statement, which mypy refuses to parse while we target
+  # python_version = "3.10". The failure is fatal ("errors prevented further
+  # checking"), so it takes the whole type check down rather than producing
+  # one skippable error, and a per-module `follow_imports = "skip"` override
+  # does not help because the stub dies at parse time. Runtime extras keep
+  # the open `numpy>=1.26` range; this bound only shapes the CI lint env.
+  # Drop it when requires-python moves past 3.11.
+  "numpy<2.5",
   "pre-commit>=3.7",
   # Test deps — match the runtime [llm] / [doc] extras so we can exercise
   # the Ollama adapter, Parse stage, and OCR stage with real types
