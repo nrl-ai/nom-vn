@@ -90,9 +90,14 @@ là phần bắt buộc, vì viết thường toàn bộ sẽ phá hỏng từ v
 (`QĐ-UBND` thành `QĐ-BND`) và văn bản chưa có dấu (`Toi yu Vit Nam`
 thành `Tội tử Vì Nam`).
 
-Tính năng này bật sẵn. Trên bộ 10 câu tiêu đề, kết quả tăng từ 7/10 lên
-10/10 và không gây hồi quy trên câu thường. Nó chỉ kích hoạt với 2 trong
-150 câu của bộ đánh giá thực tế, nên chi phí thêm không đáng kể.
+Tính năng này bật sẵn. Trên lát cắt đánh giá `furniture_50` (50 câu lấy
+từ văn bản hành chính thật), độ chính xác theo từ tăng từ 84,36 % lên
+87,62 % và tỉ lệ khớp nguyên câu tăng từ 36,00 % lên 56,00 %: sửa đúng
+thêm 10 câu, không làm hỏng câu nào. Nó chỉ kích hoạt với 2 trong 150 câu
+của sáu lát cắt còn lại, nên câu thường không bị ảnh hưởng.
+
+Tái lập: `python benchmarks/accuracy/bench_spell_correction_real.py
+nrl-ai/vn-spell-correction-base`.
 
 ```python
 spell = HFDiacriticModel(model_id="nrl-ai/vn-spell-correction-base")
