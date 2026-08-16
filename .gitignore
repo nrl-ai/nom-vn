@@ -132,3 +132,8 @@ training/paddleocr_vi_rec/data/
 training/paddleocr_vi_rec/checkpoints/
 training/paddleocr_vi_rec/pretrained/
 training/paddleocr_vi_rec/train.log
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
